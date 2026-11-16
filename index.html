@@ -3389,6 +3389,12 @@ function makeSoldier3(un){
     head.add(box3(0.1,0.05,0.14,'#ffffff',0,0.19,0,0.5));
     head.add(box3(0.03,0.035,0.05,'#d92c2c',0,0.225,0,0.5));
   }
+  if(un.role==='Ingeniero'){
+    head.add(box3(0.4,0.025,0.42,'#e8c84e',0.01,0.085,0,0.7));
+  }
+  if(un.role==='Comando'){
+    head.add(box3(0.34,0.06,0.34,shadeHex(c.role,-18),0,0.075,0,0.7));
+  }
   /* ojos que miran al frente (hacia donde apunta el arma) */
   [-0.065,0.065].forEach(z=>{
     const eye=new THREE.Mesh(new THREE.SphereGeometry(0.02,8,8),new THREE.MeshBasicMaterial({color:0x1c1a17}));
