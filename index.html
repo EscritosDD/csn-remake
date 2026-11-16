@@ -3295,7 +3295,31 @@ function drawSoldier(un,S){
 let VIEW_MODE='3d';
 let T3=null;
 function w2cx(x){return x-5.5;}
-function mat3(color,rough,flat){return new THREE.MeshStandardMaterial({color:color,roughness:rough==null?0.85:rough,metalness:0.04,flatShading:flat!==false});}
+let _toonGrad=null;
+function toonGrad3(){
+  if(!_toonGrad&&typeof THREE!=='undefined'){
+    try{
+      const gc=document.createElement('canvas');gc.width=8;gc.height=1;
+      const gx=gc.getContext('2d');
+      gx.fillStyle='#5f6468';gx.fillRect(0,0,2,1);
+      gx.fillStyle='#9aa0a3';gx.fillRect(2,0,2,1);
+      gx.fillStyle='#cbcfce';gx.fillRect(4,0,2,1);
+      gx.fillStyle='#ffffff';gx.fillRect(6,0,2,1);
+      _toonGrad=new THREE.CanvasTexture(gc);
+      _toonGrad.minFilter=THREE.NearestFilter;_toonGrad.magFilter=THREE.NearestFilter;
+    }catch(e){}
+  }
+  return _toonGrad;
+}
+function mat3(color,rough,flat){
+  const g=toonGrad3();
+  if(g&&THREE.MeshToonMaterial){
+    const m=new THREE.MeshToonMaterial({color:color,gradientMap:g});
+    if(flat!==false)m.flatShading=true;
+    return m;
+  }
+  return new THREE.MeshStandardMaterial({color:color,roughness:rough==null?0.85:rough,metalness:0.04,flatShading:flat!==false});
+}
 function box3(w,h,d,color,x,y,z,rough){
   const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat3(color,rough));
   m.position.set(x||0,y||0,z||0);m.castShadow=true;m.receiveShadow=true;return m;
