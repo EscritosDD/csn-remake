@@ -50,7 +50,7 @@ Las constantes SÍ están en el código (lo que la auditoría llamó «correctas
 
 Pero **no existe banco ejecutable en el repo** que las ejercite; la calificación «SIN VERIFICAR por banco» es correcta. La ausencia de `autoplay`/`simulate` confirma también que «ninguna partida completa registrada» y «arma en reposo SIN VERIFICAR» son coherentes.
 
-### Conclusión 3 — «Los 13 tableros cuadran por cómputo manual; tabla medida» → **NO VERIFICABLE, y con discrepancia interna**
+### Conclusión 3 — «Los 13 tableros cuadran por cómputo manual; tabla medida» → **REFUTADA en 3 celdas (la auditoría erró; la página tenía razón)**
 
 La tabla «medida» **no es consistente entre los propios artefactos del proyecto**:
 
@@ -64,7 +64,7 @@ La tabla «medida» **no es consistente entre los propios artefactos del proyect
 | S04 | **7** / 13 / 116 | **6** / 13 / 116 | ❌ baliza 7 vs 6 |
 | S05–S11 | … | … | ✅ |
 
-Además `Desarrollo_continuo.md` es internamente inconsistente: la ronda de las ~18:24 dice «Almacén 22 pasos», mientras la auditoría profunda (~20:20) dice «el Almacén da 21, no 22». No hay banco ejecutable que dirima cuál es la correcta. Conclusión: **no se puede dar por cerrada** la tabla sin un banco que compute la BFS sobre el mapa real.
+**Resuelto con banco ejecutable** (`bench/boards.js`, subido al repo): replica `pathDist` (BFS, `L1426`) sobre los `MAP_DEFS` reales y mide los 13 tableros. Resultado: **la página (`L464`) es correcta en los 13; la auditoría del 16/11 erró en 3 celdas** — Almacén dron **22** (no 21), Skirmish_03 dron **15** (no 19), Skirmish_04 baliza **6** (no 7). Además `Desarrollo_continuo.md` es internamente inconsistente (a las ~18:24 dice «Almacén 22», la auditoría profunda dice «21, no 22»). La afirmación de que la tabla quedaba «cerrada por cómputo manual» queda refutada: el cómputo manual se equivocó, y solo un banco ejecutable lo destapa. Los 13 tableros sí pasan simetría 180° y 0 solapes (confirmado por el banco).
 
 ### Conclusión 4 — «Conteo cerrado: 8 originales (03,04,05,06,08,09,10,11); 01,02,07 invención; la geometría de S05,S06,S08,S09,S10,S11 SÍ existe» → **CONFIRMADA**
 
@@ -100,7 +100,7 @@ No existen `autoplay`, `simulate`, ni ningún harness de IA-contra-IA en el cód
 | Reanimar | «vuelve con 60 de vida» | 80 PV (`L1893`) |
 | Orden de mando del Capitán | «recupera 4 de energía» | +3 (`L1904`) |
 
-**B. La tabla de los 13 tableros discrepa entre la auditoría y la página** (detalle en Conclusión 3): 3 celdas distintas (Almacén dron, S03 dron, S04 baliza).
+**B. La tabla de los 13 tableros discrepa entre la auditoría y la página, y la equivocada es la auditoría** (resuelto con `bench/boards.js`): Almacén dron 22 (no 21), Skirmish_03 dron 15 (no 19), Skirmish_04 baliza 6 (no 7).
 
 **C. Higiene del repo:** `README.md` dice literalmente «**Repositorio privado**: el juego incluye modelos, texturas y animaciones extraídos del original» cuando el repo es **público**; y no hay `LICENSE`. Detalle en sección 4.
 
