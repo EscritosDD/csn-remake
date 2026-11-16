@@ -2086,6 +2086,52 @@ function aiUnitAct(u){
       const w=WEAPONS[u.weapon];
       const drone=(effMode(G)==='escolta'&&G.drone&&G.drone.alive)?G.drone:null;
       const hardAI=(G.difficulty==='veterano'||G.difficulty==='elite');
+      /* ESCOLTA (bando A): guiar y proteger el dron hacia la extracción */
+      if(u.team==='A'&&drone){
+        const d=drone;
+        /* 1) guiar si estoy pegado y hay guiados y energía */
+        if(dist(u,d)<=1&&d.movesLeft>0&&u.energy>=2){
+          const ext=ESCORT_EXT.slice().sort((a,b)=>pathDist(a,d)-pathDist(b,d))[0];
+          let bx=null,by=null,bd=99;
+          for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){
+            const nx=d.x+dx,ny=d.y+dy;
+            if(nx<0||ny<0||nx>=W||ny>=H||blocked(nx,ny))continue;
+            const pd=pathDist({x:nx,y:ny},ext);
+            if(pd<bd){bd=pd;bx=nx;by=ny;}
+          }
+          if(bx!=null){guideDrone(u,bx,by);return res();}
+        }
+        /* 1b) pegado pero sin casilla libre: apartarse para dejar paso */
+        if(dist(u,d)<=1){
+          for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){
+            const nx=u.x+dx,ny=u.y+dy;
+            if(nx<0||ny<0||nx>=W||ny>=H)continue;
+            if(obAt(nx,ny)||unitAt(nx,ny)||droneAt(nx,ny)||deployedAt(nx,ny))continue;
+            const mc=moveCostOf(u);if(u.energy<mc)break;
+            const ff=angleToFacing(nx-u.x,ny-u.y);if(ff!=null)u.facing=ff;
+            u.x=nx;u.y=ny;u.energy-=mc;u.movedThisTurn=true;checkMines(u);checkOverwatch(u);pickupLoot(u);
+            log('IA: '+u.role+' se aparta para dejar paso al dron.');
+            break;
+          }
+        }
+        /* 2) acercarse al dron para poder guiarlo (reservando 2 ⚡) */
+        if(dist(u,d)>1){
+          const reach=reachable(u,Math.max(0,u.energy-2));
+          let best=null,bestS=1e9;
+          reach.forEach((dd,k)=>{const [x,y]=k.split(',').map(Number);const s=dist({x,y},d)*3+dd;if(s<bestS){bestS=s;best={x,y,d:dd};}});
+          if(best&&(best.x!==u.x||best.y!==u.y)){
+            const fx=u.x,fy=u.y,ff=angleToFacing(best.x-fx,best.y-fy);if(ff!=null)u.facing=ff;
+            u.x=best.x;u.y=best.y;u.energy-=best.d;u.movedThisTurn=true;checkMines(u);checkOverwatch(u);pickupLoot(u);
+            log('IA: '+u.role+' escolta avanza junto al dron.');
+          }
+        }
+        /* 3) defender: disparar al enemigo más cercano al dron */
+        const foes=G.units.filter(e=>e.alive&&e.team!==u.team&&!e.invisible).sort((a,b)=>dist(a,d)-dist(b,d));
+        let tgt=null;
+        for(const e of foes){if(cheb(u,e)<=w.rng&&hasLOS(u,e)&&hitChance(u,e,w)>0){tgt=e;break;}}
+        if(tgt){let shots=0;while(tgt&&tgt.alive&&u.energy>=w.cost&&shots<3){if(!tryShoot(u,tgt,u.weapon,null))break;shots++;}}
+        return res();
+      }
       /* Médico Veterano/Élite: cura, y en Élite también revive a un caído adyacente */
       if(u.role==='Médico'){
         if(hardAI){const deadAlly=G.units.find(a=>!a.alive&&a.team===u.team&&dist(u,a)<=1);if(deadAlly&&G.difficulty==='elite'&&u.revives>0&&u.energy>=4){useSpecial(u,deadAlly);return res();}}

@@ -129,6 +129,9 @@ async function oneGame(mode, map, fmt) {
     hpA: G.units.filter(u => u.team === 'A' && u.alive).reduce((s, u) => s + u.hp, 0),
     hpB: G.units.filter(u => u.team === 'B' && u.alive).reduce((s, u) => s + u.hp, 0),
     domA: G.dom ? G.dom.A : null, domB: G.dom ? G.dom.B : null,
+    dronePos: G.drone ? (G.drone.x + ',' + G.drone.y) : null,
+    droneDelivered: G.drone ? G.drone.delivered : null,
+    droneAlive: G.drone ? G.drone.alive : null,
   };
 }
 
@@ -145,7 +148,7 @@ async function main() {
     const w = r.over ? (r.winner || 'draw') : 'guard';
     wins[w] = (wins[w] || 0) + 1;
     totalRounds += r.rounds;
-    console.log(`  #${String(n).padStart(3)} ${String(w).padEnd(6)} rondas=${String(r.rounds).padEnd(3)} hpA=${String(r.hpA).padEnd(4)} hpB=${String(r.hpB).padEnd(4)}${r.domA != null ? ` domA=${r.domA} domB=${r.domB}` : ''}`);
+    console.log(`  #${String(n).padStart(3)} ${String(w).padEnd(6)} rondas=${String(r.rounds).padEnd(3)} hpA=${String(r.hpA).padEnd(4)} hpB=${String(r.hpB).padEnd(4)}${r.domA != null ? ` domA=${r.domA} domB=${r.domB}` : ''}${r.dronePos != null ? ` dron=${r.dronePos} entregado=${r.droneDelivered} vivo=${r.droneAlive}` : ''}`);
   }
   console.log('---');
   console.log(`  Victorias A: ${wins.A} · B: ${wins.B} · empates: ${wins.draw} · sin resolver: ${wins.guard || 0}`);
