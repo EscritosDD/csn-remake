@@ -2101,17 +2101,17 @@ function aiUnitAct(u){
       /* Capitán Veterano/Élite: da su orden al aliado con más arma y menos energía */
       if(hardAI&&u.role==='Capitán'&&!u.captainUsed){const ally=G.units.filter(a=>a.alive&&a.team===u.team&&a!==u).sort((a,b)=>a.energy-b.energy)[0];if(ally&&ally.energy<=ally.maxEnergy-3)useSpecial(u,ally);}
       /* move toward target, beacon or the nearest unheld domination zone */
-      let goal=target;
+      let goal=target,goalZone=null;
       if(effMode(G)==='dominacion'){
-        const unheld=DOM_ZONES.filter(z=>domControl(z)!=='B');
-        if(unheld.length){const zt=unheld.map(z=>z.tiles[0]).sort((a,b)=>dist(u,a)-dist(u,b))[0];const inOwn=DOM_ZONES.some(z=>domControl(z)==='B'&&inDomZone(u.x,u.y,z));if(!inOwn||hardAI&&Math.random()<0.4)goal=zt;}
+        const unheld=DOM_ZONES.filter(z=>domControl(z)!==u.team);
+        if(unheld.length){const zone=unheld.sort((a,b)=>dist(u,a.tiles[0])-dist(u,b.tiles[0]))[0];const zt=zone.tiles[0];const inOwn=DOM_ZONES.some(z=>domControl(z)===u.team&&inDomZone(u.x,u.y,z));if(!inOwn||hardAI&&Math.random()<0.4){goal=zt;goalZone=zone;}}
       } else if(drone){
         /* Escolta: la defensa juega el objetivo, no solo a eliminar:
            marcha a interceptar al dron y se planta en su ruta; quien ya
            lo tiene a tiro y con visión no se mueve y le dispara. */
         goal=drone;
       } else if(effMode(G)==='baliza'&&!inBeacon(u.x,u.y)&&(hardAI||Math.random()<0.6))goal={x:5,y:5};
-      if(cheb(u,goal)>w.rng||!hasLOS(u,goal)){
+      if(goalZone?!inDomZone(u.x,u.y,goalZone):(cheb(u,goal)>w.rng||!hasLOS(u,goal))){
         const reach=reachable(u,u.energy- (u.energy>w.cost? w.cost:0));
         let best=null,bestScore=1e9;
         reach.forEach((d,k)=>{const [x,y]=k.split(',').map(Number);let s=pathDist({x,y},goal)*2+d;if(hardAI){/* Veterano/Élite: premia acabar en zona de Dominación/baliza y con cobertura */if(effMode(G)==='dominacion'&&DOM_ZONES.some(z=>inDomZone(x,y,z)))s-=6;if(inBeacon(x,y))s-=3;const nearCov=[[1,0],[-1,0],[0,1],[0,-1]].some(dd=>obAt(x+dd[0],y+dd[1]));if(nearCov)s-=2;}if(s<bestScore){bestScore=s;best={x,y,d};}});
