@@ -170,3 +170,25 @@ Descargué `rad-soldiers-assembly-csharp-decompiled.zip` de archive.org (2.476.5
 - Los **valores** de vida/energía por cuerpo (200/12/1, 250/14/2, 300/18/3) **no están en el `.cs`** (viven en los assets Unity `sharedassets0.assets`). El repo ya lo marcaba como «leído de los assets», así que es NO VERIFICABLE desde el código descompilado, correctamente señalado.
 
 **Pendiente de Fase 2 (parte 2):** el IPA iOS (`RAD_Soldiers_v1_0_9.ipa`, 73,6 MB) para verificar mallas, texturas, mapas Skirmish y clips (la parte de arte, que no se puede comprobar con el código).
+
+---
+
+## 7. Fase 2 (parte 2, hecha): verificación del IPA (arte)
+
+Descargué `RAD_Soldiers_v1_0_9.ipa` (77.161.300 B, coincide con archive.org y con el «73,6 MB» de los docs) y lo extraje. Resultado:
+
+- **`Data/Raw` contiene 72 assetbundles** (los docs decían «60»; discrepancia menor de conteo).
+- **Conteo de mapas CONFIRMADO por disco**: hay 8 `Theme_01_Skirmish_XX` — 03, 04, 05, 06, 08, 09, 10, 11 — y **NO hay 01, 02 ni 07**. La conclusión 4 de la auditoría del 16/11 (8 números originales; 01/02/07 invención del remake) queda **CONFIRMADA**.
+- **La geometría real de S05, S06, S08, S09, S10 y S11 SÍ existe** (assetbundles de 6,2–8,4 MB con mallas y texturas). La afirmación de la página de que «su paquete no está entre los extraídos» era falsa, como ya señaló la auditoría.
+- **Vértices medidos con UnityPy** (confirman las cifras de la auditoría):
+
+| Paquete | Mallas | Vértices medidos | Auditoría 16/11 | |
+|---|---|---|---|---|
+| S05 | 32 | 61.593 | 61.617 | ✅ |
+| S06 | 31 | 69.512 | 69.570 | ✅ |
+| S03 | 45 | 85.777 | 85.818 (OBJ) | ✅ |
+| S04 | 42 | 81.660 | 81.701 (OBJ) | ✅ |
+
+- `Characters.assetbundle` trae 48 texturas (los retratos `char-*`) y 0 mallas: la malla con skinning del soldado no vive en `Characters` sino en otro paquete (los docs la sitúan en `mallas_soldado/`).
+
+Con esto, **la Fase 2 queda completa**: las reglas/cámara/cobertura (código descompilado) y el arte/mapas (IPA) del repo están verificados contra el original real, y las 6 conclusiones del 16/11 tienen veredicto con prueba.
