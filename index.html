@@ -4576,6 +4576,9 @@ window.__render3D=function(){
   const wrap=document.getElementById('glWrap');
   const w=wrap.clientWidth,h=wrap.clientHeight;
   if(!w||!h)return;
+  /* Diagnóstico interno de render (verificación automática): tema, geometría
+     real cargada, unidades y triángulos del último fotograma. */
+  try{const _s=skState(G.map.theme);window.__csn3d={theme:G.map.theme,geo:!!(_s&&_s.ready),units:T3.units?T3.units.size:0,tris:T3.renderer.info.render.triangles,calls:T3.renderer.info.render.calls,frame:((window.__csn3d&&window.__csn3d.frame)||0)+1};}catch(e){}
   if(w!==T3.lastW||h!==T3.lastH){T3.lastW=w;T3.lastH=h;T3.renderer.setSize(w,h,false);T3.camera.aspect=w/h;T3.camera.updateProjectionMatrix();}
   const t=FX.t;
   /* cámara del original: inclinación de ~50°, con balanceo leve y sacudida */
