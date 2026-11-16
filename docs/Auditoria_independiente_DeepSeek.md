@@ -1,0 +1,126 @@
+# Auditoría independiente de CSN — DeepSeek Harness
+
+**Fecha:** 17/11/2026 · **Alcance:** Fase 1 (repo contra docs y contra el código real). La Fase 2 (comparación contra el original descargado de archive.org) queda pendiente y se marca en su sección.
+
+> Papel de este informe: es la auditoría independiente que pedía `Prompt_Hermes_CSN.md` — comparar lo que afirma el repositorio con lo que dice su propio código, y someter a prueba la auditoría del 16/11. No cambia ningún número del juego.
+
+## Método
+
+- Repo clonado: `github.com/EscritosDD/csn-remake` (rama `main`, commit `63266d6`).
+- `index.html` (4.711 líneas, 19,2 MB) inspeccionado directamente; las citas `L####` son líneas reales de ese fichero.
+- `docs/` cotejado contra los PDF de la carpeta de trabajo (mismo contenido, texto fuente de verdad).
+- No se ha descargado aún el original (build Chrome ni IPA): ver sección 5.
+
+---
+
+## 1. Veredicto sobre la auditoría del 16/11 (sección 3 del prompt)
+
+### Conclusión 1 — «No hay banco ejecutable; la auditoría de 113 comprobaciones existe solo como texto» → **CONFIRMADA**
+
+- El repo solo contiene: `README.md`, `index.html`, `assets/soldier_clips.json` y `docs/*.md`. **No hay ningún fichero de banco ejecutable** (ni `package.json`, ni `test/`, ni script de `node --check`, ni `report.json`).
+- En `index.html` no existen `autoplay` ni `simulate` (búsqueda exhaustiva: 0 coincidencias).
+- La entrada de la página que dice «113 comprobaciones, 0 fallos … ejecutando el motor del juego fuera del navegador» (`L464`) es **prosa**, sin artefacto que la respalde. La palabra «verificado con banco» no tiene banco detrás en el repo.
+
+### Conclusión 2 — «Dominación/Escolta/campaña/dificultades SIN VERIFICAR por banco; humo/Claymore/M84/sonido en código, no en vivo» → **CONFIRMADA** (constantes presentes en código, banco ausente)
+
+Las constantes SÍ están en el código (lo que la auditoría llamó «correctas por lectura»):
+
+| Sistema | Código | Cita |
+|---|---|---|
+| Escolta | `ESCORT_MAX_ROUNDS=15, ESCORT_DRONE_MAXHP=180, ESCORT_DRONE_HP=120, ESCORT_GUIDES_PER_ROUND=2` | `L773` |
+| Dificultad Veterano | `maxEnergy+=1` | `L1503` |
+| Dificultad Élite | `maxEnergy+=2; maxHp+=25` | `L1503` |
+| Daño Recluta / Élite | `dmg*0.85` / `dmg*1.15` | `L1611` |
+| M84 | `FLASH_COST=2, FLASH_RANGE=4, STUN_ENERGY_PEN=6, STUN_AIM_PEN=25` | `L1804` |
+
+Pero **no existe banco ejecutable en el repo** que las ejercite; la calificación «SIN VERIFICAR por banco» es correcta. La ausencia de `autoplay`/`simulate` confirma también que «ninguna partida completa registrada» y «arma en reposo SIN VERIFICAR» son coherentes.
+
+### Conclusión 3 — «Los 13 tableros cuadran por cómputo manual; tabla medida» → **NO VERIFICABLE, y con discrepancia interna**
+
+La tabla «medida» **no es consistente entre los propios artefactos del proyecto**:
+
+| Tablero (baliza / dron / libres) | Auditoría 16/11 (`Desarrollo_continuo.md`) | Página del juego (`L464`) | ¿Coinciden? |
+|---|---|---|---|
+| Almacén | 11 / **21** / 114 | 11 / **22** / 114 | ❌ dron 21 vs 22 |
+| Patio | 8 / 17 / 118 | 8 / 17 / 118 | ✅ |
+| S01 | 6 / 11 / 114 | 6 / 11 / 114 | ✅ |
+| S02 | 6 / 11 / 114 | 6 / 11 / 114 | ✅ |
+| S03 | 7 / **19** / 116 | 7 / **15** / 116 | ❌ dron 19 vs 15 |
+| S04 | **7** / 13 / 116 | **6** / 13 / 116 | ❌ baliza 7 vs 6 |
+| S05–S11 | … | … | ✅ |
+
+Además `Desarrollo_continuo.md` es internamente inconsistente: la ronda de las ~18:24 dice «Almacén 22 pasos», mientras la auditoría profunda (~20:20) dice «el Almacén da 21, no 22». No hay banco ejecutable que dirima cuál es la correcta. Conclusión: **no se puede dar por cerrada** la tabla sin un banco que compute la BFS sobre el mapa real.
+
+### Conclusión 4 — «Conteo cerrado: 8 originales (03,04,05,06,08,09,10,11); 01,02,07 invención; la geometría de S05,S06,S08,S09,S10,S11 SÍ existe» → **CONFIRMADA**
+
+- El conteo de 8 originales y de `01/02/07` como invención está en `L458` y `L460`.
+- La página **se contradice a sí misma**: `L424–427` dicen «su paquete *no está* entre los extraídos», pero `L458` dice «el IPA guardaba los ocho … **cada uno con su geometría, su layout y sus texturas**». La segunda es la correcta; la frase «cuando su paquete se extraiga algún día» (en `L426` S07, `L428` S01, `L429` S02) es obsoleta/falsa.
+- Solo `Skirmish_03` (84.939 vértices) y `Skirmish_04` (80.571) están incrustados (`L3500`, `L3501`, `L3519`, `L3520`). Los otros seis no están integrados.
+
+### Conclusión 5 — Fallos nuevos detectados en código → **CONFIRMADA** (con citas)
+
+| Fallo | Código | Veredicto |
+|---|---|---|
+| Espía fuma hacia el dron en Escolta (bloquea a su bando) | `L2129–2135`: `const foe=drone||target` → lanza humo hacia el dron al que la defensa debe destruir | ✅ |
+| Espía quema el humo sin condiciones | `L2129–2134`: fuma si `cheb(u,foe)<=6 && hasLOS`, sin mirar dificultad ni calidad de tiro | ✅ |
+| Veteranía farmeable sin límite | `L2010–2014`: `vet[s]=(vet[s]||0)+1` en **cada** victoria, sin tope ni chequeo de misión ya superada | ✅ |
+| Reanimación solo Élite (página la da en Veterano y Élite) | `L2091`: `if(deadAlly && G.difficulty==='elite' ...)` vs página `L329`/`L443` «Veterano y Élite … revive» | ✅ |
+| Fuego concentrado también en Normal y Veterano (página solo Élite) | `L2182–2183`: sort por `a.hp-b.hp` para **todo** salvo Recluta vs página `L505`/`L631` | ✅ |
+| Impacto directo 0,79 (página) vs 0,90 (código) | página `L465` «0,79 entrando directo» vs código `L3838` «0,90 dejándolo entrar directo» | ✅ |
+| `hitChance` resta 25 fijo, no `STUN_AIM_PEN` | `L1474`: `if(shooter.stunned)p-=25` (literal) vs constante `STUN_AIM_PEN=25` en `L1804` | ✅ |
+
+### Conclusión 6 — «Medición de equilibrio bloqueada: no hay harness IA contra IA ni simulate» → **CONFIRMADA**
+
+No existen `autoplay`, `simulate`, ni ningún harness de IA-contra-IA en el código ni en el repo. La tabla de equilibrio está vacía por ese motivo, tal como afirma la auditoría.
+
+---
+
+## 2. Hallazgos nuevos (sección 4 del prompt)
+
+**A. `Diseno_del_juego.md` está desactualizado frente al código** (la auditoría del 16/11 no lo lista):
+
+| Regla | `Diseno_del_juego.md` | Código (`index.html`) |
+|---|---|---|
+| Curar del Médico | «curar 125 de vida» | 80 PV (`L1898`) |
+| Reanimar | «vuelve con 60 de vida» | 80 PV (`L1893`) |
+| Orden de mando del Capitán | «recupera 4 de energía» | +3 (`L1904`) |
+
+**B. La tabla de los 13 tableros discrepa entre la auditoría y la página** (detalle en Conclusión 3): 3 celdas distintas (Almacén dron, S03 dron, S04 baliza).
+
+**C. Higiene del repo:** `README.md` dice literalmente «**Repositorio privado**: el juego incluye modelos, texturas y animaciones extraídos del original» cuando el repo es **público**; y no hay `LICENSE`. Detalle en sección 4.
+
+---
+
+## 3. Comparación repo ↔ docs (sección 2 del prompt, parcial)
+
+Verificación de consistencia interna (repo contra sus propios documentos), sin el original:
+
+| Afirmación del proyecto | Estado | Prueba |
+|---|---|---|
+| 7 roles, vida/energía por cuerpo (200/12, 250/14, 300/18) | ✅ coherente | `L1498–1508` |
+| 13 tableros (Almacén + Patio + S01–S11) | ✅ coherente | `L286`, `L329`, `L479–489` |
+| Solo S03/S04 con geometría real; el resto en código | ✅ coherente | `L458`, `L3500–3520` |
+| Three.js vendorizado (sin CDN) | ✅ coherente | `L11`, `L4560` (`data:application/javascript`) |
+| Malla `Soldier_Light` (1.211 vértices, 18 huesos) | ✅ coherente | `L3471`, `L437`, `L448` |
+| 22 clips de animación (soldier_clips.json + copia incrustada) | ✅ coherente | `assets/soldier_clips.json`, `L3807` |
+| «verificado con banco» | ❌ sin banco ejecutable en el repo | ausencia de artefacto |
+
+> La comparación **contra el original** (cobertura direccional de 4 niveles, cámara 50°/8,5/37,5°, rig Bip001, clips, geometría/layout Skirmish, turnos y energía) exige descargar el original y queda en Fase 2 (sección 5).
+
+---
+
+## 4. Higiene del repo (urgente)
+
+1. **Visibilidad.** El repo está público pero su README lo declara privado y admite por escrito que incrusta assets del original. Decisión de Dani (la deploy key no puede cambiar la visibilidad): volver a privado, o público sin assets derivados del IPA.
+2. **Assets del original.** `index.html` incrusta malla + textura del soldado y geometría/texturas de `Skirmish_03`/`04`; `assets/soldier_clips.json` son 22 clips derivados del IPA. Son assets de Splash Damage/WarChest y **no deben redistribuirse**.
+3. **LICENSE.** No hay licencia. No se puede licenciar lo que no es propio (los assets del original); la decisión sobre el código propio es de Dani.
+
+---
+
+## 5. Pendiente de Fase 2 (secciones 1 y 5 del prompt)
+
+Queda por hacer, descargando el original de archive.org:
+
+1. **Fuentes descargadas** — `archive.org/details/rad-soldiers` (Chrome descompilado) y `archive.org/details/virtually-extinct-ipas` (IPA iOS, `Data/Raw`, 60 assetbundles): URL exacta, fecha, tamaño y contenido.
+2. **Comparación repo ↔ original** — turnos/energía por cuerpo, victoria por baliza en 5 turnos, cobertura direccional, cámara, proporciones soldado/arma, rig Bip001, clips, geometría/layout Skirmish y conteo de mapas, marcando COINCIDE / NO COINCIDE / NO VERIFICABLE con el archivo concreto.
+3. **Riesgos del 3D** — qué le falta al 3D del remake frente a lo que el original trae (mallas, clips, mapas, texturas), en piezas concretas, sin proponer copiar assets.

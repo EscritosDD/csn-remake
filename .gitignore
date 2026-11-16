@@ -1,0 +1,20 @@
+# Claves y credenciales (nunca versionar)
+*.key
+*.pem
+hermes_deploy_key
+id_ed25519
+id_rsa
+
+# Dependencias y entorno
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+
+# Archivos de trabajo local (no van al repo)
+_extract/
+*.log
+
+# Sistema
+.DS_Store
+Thumbs.db
