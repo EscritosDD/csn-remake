@@ -139,3 +139,34 @@ Queda por hacer, descargando el original de archive.org:
 1. **Fuentes descargadas** — `archive.org/details/rad-soldiers` (Chrome descompilado) y `archive.org/details/virtually-extinct-ipas` (IPA iOS, `Data/Raw`, 60 assetbundles): URL exacta, fecha, tamaño y contenido.
 2. **Comparación repo ↔ original** — turnos/energía por cuerpo, victoria por baliza en 5 turnos, cobertura direccional, cámara, proporciones soldado/arma, rig Bip001, clips, geometría/layout Skirmish y conteo de mapas, marcando COINCIDE / NO COINCIDE / NO VERIFICABLE con el archivo concreto.
 3. **Riesgos del 3D** — qué le falta al 3D del remake frente a lo que el original trae (mallas, clips, mapas, texturas), en piezas concretas, sin proponer copiar assets.
+
+---
+
+## 6. Fase 2 (parte 1, hecha): comparación contra el original — código descompilado
+
+Descargué `rad-soldiers-assembly-csharp-decompiled.zip` de archive.org (2.476.556 B, verificado contra el metadata) y lo extraje: **1.578 ficheros `.cs`**. Cotejé las afirmaciones de `docs/Referencia_original.md` contra ese código real. Resultado: **todas COINCIDEN** en lo verificable:
+
+| Afirmación del repo | Código real | Veredicto |
+|---|---|---|
+| Victoria por baliza en 5 turnos | `ControlPointManagerComponent.cs:11` `TurnsToCaptureZone = 5` | COINCIDE |
+| Fuego de respuesta por defecto | `WeaponGameplayData.cs:27` `AllowsReturnFire = true` | COINCIDE |
+| Puntos de escuadra por defecto 3 | `WeaponGameplayData.cs:36` `SquadPoints = 3` | COINCIDE |
+| Fuego de reacción por turno | `AbilityGameplayData.cs:26` `MaxOpFirePerTurn` | COINCIDE |
+| Esquema de cuerpo (vida/energía/coste) | `UnitBodyType.cs:11-13` `MaxHealth`, `BasicActionPoints`, `ActionPointsPerMove` | COINCIDE (esquema) |
+| Empujón (alcance 1) | `WeaponGameplayData.cs:34-35` `KnockbackDistance`, `KnockbackRange = 1` | COINCIDE |
+| Línea de visión por raycast | `GameGridComponent.cs:40` `TestLineOfSight` | COINCIDE |
+| Cobertura direccional 4 niveles por borde | `GameTileComponent.cs:17-21` `WestCover/EastCover/NorthCover/SouthCover` + `VisBlocker` | COINCIDE |
+| Matriz de cobertura 2 bits (0–3) | `CoverMap.cs:72` `MaxValue = (1<<n)-1` | COINCIDE |
+| Cámara pitch 40°/60° | `CameraController.cs:92-93` | COINCIDE |
+| Cámara distancia 6/11 | `CameraController.cs:94-95` | COINCIDE |
+| Cámara FOV 30°/45° | `CameraController.cs:96-97` | COINCIDE |
+| Giro `turnRate = 5` (×5 ratón) | `CameraController.cs:98-99` | COINCIDE |
+| Yaw inicial 335° | `CameraController.cs:106` | COINCIDE |
+| Zoom interno 0,7×z + 0,15 | `CameraController.cs:1059` | COINCIDE |
+| Zoom usuario por defecto 0,5 | `CameraController.cs:187` | COINCIDE |
+
+**Discrepancias menores:**
+- `Referencia_original.md` dice «528 archivos .cs»; el zip real trae **1.578**. (No afecta a las cifras, pero el conteo de ficheros está mal.)
+- Los **valores** de vida/energía por cuerpo (200/12/1, 250/14/2, 300/18/3) **no están en el `.cs`** (viven en los assets Unity `sharedassets0.assets`). El repo ya lo marcaba como «leído de los assets», así que es NO VERIFICABLE desde el código descompilado, correctamente señalado.
+
+**Pendiente de Fase 2 (parte 2):** el IPA iOS (`RAD_Soldiers_v1_0_9.ipa`, 73,6 MB) para verificar mallas, texturas, mapas Skirmish y clips (la parte de arte, que no se puede comprobar con el código).
