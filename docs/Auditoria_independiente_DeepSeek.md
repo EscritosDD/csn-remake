@@ -13,6 +13,21 @@
 
 ---
 
+## 0. Fuentes del original — metadatos verificados (Fase 2, sección 1)
+
+Verificado contra `archive.org/metadata/...` (metadatos; descarga de binarios aún pendiente):
+
+| Fuente | Fichero | Tamaño | Contenido |
+|---|---|---|---|
+| `archive.org/details/rad-soldiers` | `rad-soldiers-assembly-csharp-decompiled.zip` | 2.476.556 B · 1.583 ficheros | Assembly-CSharp descompilado |
+| ídem | `rad-soldiers-unity3d-unpacked-quickbms.zip` | 94.471.362 B · 17 ficheros | assets Unity (level0-3, mainData, resources.assets, sharedassets0-4) |
+| ídem | `rad-soldiers.zip` | 165.286.837 B · 85 ficheros | build Chrome (NaCl) |
+| `archive.org/details/virtually-extinct-ipas` | `RAD_Soldiers_v1_0_9.ipa` | 77.161.300 B · 128 ficheros · md5 `f5ce3ca7…` · sha1 `32f9be62…` | IPA iOS con `Data/Raw` |
+
+Coincide con lo que afirman los documentos (`RAD_Soldiers_v1_0_9.ipa`, 73,6 MB; build Chrome descompilada y `.assets`). Nota menor: `Referencia_original.md` dice que el zip desempaquetado pesa «113 MB»; archive.org lo lista en 94,47 MB. La descarga y extracción del contenido (los 60 assetbundles de `Data/Raw`, mallas, mapas, clips) queda para la Fase 2 completa.
+
+---
+
 ## 1. Veredicto sobre la auditoría del 16/11 (sección 3 del prompt)
 
 ### Conclusión 1 — «No hay banco ejecutable; la auditoría de 113 comprobaciones existe solo como texto» → **CONFIRMADA**
