@@ -3731,20 +3731,20 @@ function makeRealSoldier3(un){
   const headBone=bones[byName['Bip001 Head']];
   if(headBone){
     const gear=new THREE.Group();
-    gear.rotation.x=Math.PI/2;
+    gear.rotation.z=Math.PI/2; /* el +Y del grupo sigue al -X local del hueso, que es el arriba renderizado */
     headBone.add(gear);
     let gearCol=c.helm;
     if(un.role==='Espía')gearCol='#353144';
     else if(un.role==='Médico')gearCol='#eef0e6';
     else if(un.role==='Ingeniero')gearCol='#f2b234';
     const helm=new THREE.Mesh(new THREE.SphereGeometry(un.role==='Artillero'?0.125:0.112,22,14,0,Math.PI*2,0,Math.PI*(un.role==='Espía'?0.62:0.55)),mat3(gearCol,0.72));
-    helm.position.y=0.09;helm.castShadow=true;gear.add(helm);
+    helm.position.y=0.05;helm.castShadow=true;gear.add(helm);
     if(un.role==='Capitán'){
       const brim=new THREE.Mesh(new THREE.CylinderGeometry(0.15,0.15,0.02,14),mat3(gearCol,0.72));
-      brim.position.y=0.055;brim.castShadow=true;gear.add(brim);
+      brim.position.y=0;brim.castShadow=true;gear.add(brim);
     } else if(un.role==='Ingeniero'){
       const brim=new THREE.Mesh(new THREE.CylinderGeometry(0.145,0.145,0.025,14),mat3('#e8c84e',0.72));
-      brim.position.y=0.04;brim.castShadow=true;gear.add(brim);
+      brim.position.y=0;brim.castShadow=true;gear.add(brim);
     }
   }
   g.userData={real:true,body:null,segs:segs,selRing:selRing,baseMesh:base,bones:bones,mesh3:mesh,gun:gun,bindLocal:bindLocal,bindWorldQ:bindWorldQ,byName:byName,curQ:bindLocal.map(q=>q.clone()),curRootP:new THREE.Vector3(),walkPh:Math.random()*6.28,bindPos:data.bones.map(b=>new THREE.Vector3(b.pos[0],b.pos[1],b.pos[2])),curDelta:new THREE.Vector3(),clipPhase:Math.random()*10};
