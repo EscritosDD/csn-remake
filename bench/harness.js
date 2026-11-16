@@ -1,0 +1,155 @@
+// bench/harness.js — Harness IA contra IA sobre el motor real del juego.
+//
+// Carga el <script> inline de index.html en un contexto sin navegador (stubs),
+// y juega partidas automáticas llamando a las funciones reales startGame /
+// aiUnitAct / endTurn / checkWin. No reimplementa la lógica: usa el motor.
+//
+// Uso:
+//   node bench/harness.js <modo> <mapa> <partidas> <formato>
+//   modo: eliminacion | baliza | dominacion   (escolta aún no, IA asimétrica)
+//   mapa: almacen | patio | skirmish | skirmish04 | ... (claves de MAP_DEFS)
+//   partidas: número de simulaciones (def. 10)
+//   formato: 2 | 4 | 5 (def. 4)
+'use strict';
+const fs = require('fs');
+const path = require('path');
+const vm = require('vm');
+
+const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+let code = (html.match(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/i) || [])[1];
+if (!code) { console.error('No se encontró el <script> inline de index.html'); process.exit(1); }
+// Cortar el INIT final (construcción de DOM/red): no hace falta para la lógica.
+const mark = '/* ================= INIT ================= */';
+const i = code.indexOf(mark);
+if (i >= 0) code = code.slice(0, i);
+
+// Exportar la API del motor al sandbox (mismo ámbito léxico).
+code += '\n;globalThis.__g={startGame,runAI,endTurn,aiUnitAct,checkWin,endGame,'
+  + 'get G(){return G;},get setup(){return setup;},set myNation(v){myNation=v;},get myNation(){return myNation;},'
+  + 'ROLES,BODIES,WEAPONS,DEFAULT_SQUADS,NATIONS,'
+  + 'mkSquad(n){return DEFAULT_SQUADS[n].map(r=>({role:r,weapon:ROLES[r].weapons[0]}));}};';
+
+// ---- Stub universal: objeto invocable que absorbe todo, coercible a 0/'' ----
+function magic() {
+  const fn = function () {};
+  return new Proxy(fn, {
+    get(t, p) {
+      if (p === Symbol.toPrimitive) return (h) => (h === 'string' ? '' : 0);
+      if (p === 'then' || p === Symbol.iterator || p === 'catch' || p === 'finally') return undefined;
+      if (p === 'length') return 0;
+      if (p === 'name') return 'stub';
+      return magic();
+    },
+    set() { return true; },
+    apply() { return magic(); },
+    construct() { return magic(); },
+    has() { return true; },
+    ownKeys() { return []; },
+    getOwnPropertyDescriptor() { return { configurable: true, enumerable: false }; },
+  });
+}
+function fakeDoc() {
+  const d = magic();
+  return d;
+}
+function makeStore() {
+  const s = Object.create(null);
+  return { getItem: k => (k in s ? s[k] : null), setItem: (k, v) => { s[k] = String(v); }, removeItem: k => { delete s[k]; }, clear() { for (const k in s) delete s[k]; } };
+}
+
+const sandbox = {};
+sandbox.window = sandbox;
+sandbox.self = sandbox;
+sandbox.globalThis = sandbox;
+sandbox.console = console;
+sandbox.Math = Math; sandbox.JSON = JSON; sandbox.Object = Object; sandbox.Array = Array;
+sandbox.String = String; sandbox.Number = Number; sandbox.Boolean = Boolean; sandbox.Function = Function;
+sandbox.parseInt = parseInt; sandbox.parseFloat = parseFloat; sandbox.isNaN = isNaN;
+sandbox.Date = Date; sandbox.RegExp = RegExp; sandbox.Error = Error; sandbox.TypeError = TypeError;
+sandbox.Promise = Promise; sandbox.Symbol = Symbol; sandbox.Map = Map; sandbox.Set = Set; sandbox.WeakMap = WeakMap;
+sandbox.Reflect = Reflect; sandbox.Proxy = Proxy;
+sandbox.encodeURIComponent = encodeURIComponent; sandbox.decodeURIComponent = decodeURIComponent;
+sandbox.Infinity = Infinity; sandbox.NaN = NaN; sandbox.undefined = undefined;
+sandbox.document = fakeDoc();
+sandbox.localStorage = makeStore();
+sandbox.sessionStorage = makeStore();
+sandbox.navigator = { userAgent: 'node-harness', platform: 'node' };
+sandbox.location = { href: '', search: '', hash: '', host: '', hostname: '', pathname: '/' };
+sandbox.history = { pushState() {}, replaceState() {} };
+sandbox.screen = { width: 1200, height: 1200 };
+sandbox.innerWidth = 1200; sandbox.innerHeight = 1200;
+sandbox.matchMedia = () => ({ matches: false, addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {} });
+sandbox.requestAnimationFrame = () => 0;
+sandbox.cancelAnimationFrame = () => {};
+sandbox.setTimeout = (fn, ms) => setTimeout(fn, 0);          // el retardo de la IA es cosmético
+sandbox.clearTimeout = clearTimeout;
+sandbox.setInterval = (fn, ms) => setInterval(fn, 1000000); // no debe usarse en lógica
+sandbox.clearInterval = clearInterval;
+sandbox.performance = { now: () => Date.now() };
+sandbox.fetch = () => Promise.resolve({ ok: true, text: async () => '', json: async () => ({}), arrayBuffer: async () => new ArrayBuffer(0) });
+sandbox.Image = function () { return magic(); };
+sandbox.AudioContext = undefined; sandbox.webkitAudioContext = undefined;
+// Métodos de window que el motor puede llamar en caliente
+sandbox.scrollTo = () => {}; sandbox.scrollBy = () => {}; sandbox.scroll = () => {};
+sandbox.getComputedStyle = () => magic(); sandbox.getSelection = () => magic();
+sandbox.alert = () => {}; sandbox.confirm = () => true; sandbox.prompt = () => null;
+sandbox.open = () => magic(); sandbox.close = () => {}; sandbox.focus = () => {};
+sandbox.blur = () => {}; sandbox.print = () => {}; sandbox.stop = () => {};
+sandbox.addEventListener = () => {}; sandbox.removeEventListener = () => {};
+sandbox.dispatchEvent = () => true; sandbox.requestIdleCallback = () => 0;
+sandbox.cancelIdleCallback = () => {}; sandbox.btoa = (s) => ''; sandbox.atob = (s) => '';
+
+vm.createContext(sandbox);
+vm.runInContext(code, sandbox, { filename: 'index.html' });
+const g = sandbox.__g;
+
+// ---- Driver de partida (ambos bandos por IA, dificultad simétrica) ----
+async function playTeam(team) {
+  const units = g.G.units.filter(u => u.alive && u.team === team);
+  for (const u of units) {
+    if (g.G.over) break;
+    g.G.selected = u;
+    await g.aiUnitAct(u);
+  }
+}
+async function oneGame(mode, map, fmt) {
+  g.myNation = g.NATIONS[0];
+  Object.assign(g.setup, { mode, fmt, opp: 'local', rivalNation: null, skinA: 'nacion', skinB: 'nacion', map, difficulty: 'normal', campaignMission: 0 });
+  g.startGame(g.mkSquad(fmt), g.mkSquad(fmt));
+  let guard = 0;
+  while (!g.G.over && guard++ < 400) {
+    const team = g.G.turn;
+    await playTeam(team);
+    if (g.G.over) break;
+    g.endTurn();
+  }
+  const G = g.G;
+  return {
+    winner: G.winner, rounds: G.round, over: G.over,
+    hpA: G.units.filter(u => u.team === 'A' && u.alive).reduce((s, u) => s + u.hp, 0),
+    hpB: G.units.filter(u => u.team === 'B' && u.alive).reduce((s, u) => s + u.hp, 0),
+    domA: G.dom ? G.dom.A : null, domB: G.dom ? G.dom.B : null,
+  };
+}
+
+async function main() {
+  const mode = process.argv[2] || 'eliminacion';
+  const map = process.argv[3] || 'almacen';
+  const games = Math.max(1, +(process.argv[4] || 10));
+  const fmt = [2, 4, 5].includes(+(process.argv[5])) ? +(process.argv[5]) : 4;
+  const wins = { A: 0, B: 0, draw: 0, guard: 0 };
+  let totalRounds = 0;
+  console.log(`Harness IA-vs-IA · modo=${mode} mapa=${map} formato=${fmt}v${fmt} partidas=${games}`);
+  for (let n = 1; n <= games; n++) {
+    const r = await oneGame(mode, map, fmt);
+    const w = r.over ? (r.winner || 'draw') : 'guard';
+    wins[w] = (wins[w] || 0) + 1;
+    totalRounds += r.rounds;
+    console.log(`  #${String(n).padStart(3)} ${String(w).padEnd(6)} rondas=${String(r.rounds).padEnd(3)} hpA=${String(r.hpA).padEnd(4)} hpB=${String(r.hpB).padEnd(4)}${r.domA != null ? ` domA=${r.domA} domB=${r.domB}` : ''}`);
+  }
+  console.log('---');
+  console.log(`  Victorias A: ${wins.A} · B: ${wins.B} · empates: ${wins.draw} · sin resolver: ${wins.guard || 0}`);
+  console.log(`  Rondas medias por partida: ${(totalRounds / games).toFixed(1)}`);
+}
+
+main().then(() => process.exit(0)).catch(e => { console.error('ERROR:', e); process.exit(1); });
