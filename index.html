@@ -3570,7 +3570,7 @@ function buildSkirmishGeo3(theme){
     g.computeVertexNormals();
     st.geo=g;
   }
-  const mats=st.tex.map(t=>new THREE.MeshStandardMaterial({map:t,roughness:0.95,metalness:0.02}));
+  const mats=st.tex.map(t=>{let m;try{const gc=document.createElement('canvas');gc.width=8;gc.height=1;const gx=gc.getContext('2d');gx.fillStyle='#5f6468';gx.fillRect(0,0,2,1);gx.fillStyle='#9aa0a3';gx.fillRect(2,0,2,1);gx.fillStyle='#cbcfce';gx.fillRect(4,0,2,1);gx.fillStyle='#ffffff';gx.fillRect(6,0,2,1);const gt=new THREE.CanvasTexture(gc);gt.minFilter=THREE.NearestFilter;gt.magFilter=THREE.NearestFilter;m=new THREE.MeshToonMaterial({map:t,gradientMap:gt});}catch(e){m=new THREE.MeshStandardMaterial({map:t,roughness:0.95,metalness:0.02});}return m;});
   const mesh=new THREE.Mesh(st.geo,mats);
   mesh.scale.setScalar(st.scale);
   mesh.position.y=0.02;
@@ -3719,7 +3719,21 @@ function makeRealSoldier3(un){
   const skeleton=new THREE.Skeleton(skinBones,inverses);
   const tint=un.skin==='nacion'?new THREE.Color(c.uni).lerp(new THREE.Color(0xffffff),0.62):new THREE.Color(0xffffff);
   tint.lerp(new THREE.Color(c.role),0.15);
-  const mat=new THREE.MeshStandardMaterial({map:REAL.tex,roughness:0.85,metalness:0.02});
+  /* Material cartoon: rampa de 4 pasos en el canal de luz (MeshToonMaterial)
+     para el look cel del original, con la textura real del IPA. Si algo
+     fallara, se queda el material estándar de siempre. */
+  let gradTex=null;
+  try{
+    const gc=document.createElement('canvas');gc.width=8;gc.height=1;
+    const gx=gc.getContext('2d');
+    gx.fillStyle='#5f6468';gx.fillRect(0,0,2,1);
+    gx.fillStyle='#9aa0a3';gx.fillRect(2,0,2,1);
+    gx.fillStyle='#cbcfce';gx.fillRect(4,0,2,1);
+    gx.fillStyle='#ffffff';gx.fillRect(6,0,2,1);
+    gradTex=new THREE.CanvasTexture(gc);
+    gradTex.minFilter=THREE.NearestFilter;gradTex.magFilter=THREE.NearestFilter;
+  }catch(e){}
+  const mat=gradTex?new THREE.MeshToonMaterial({map:REAL.tex,gradientMap:gradTex}):new THREE.MeshStandardMaterial({map:REAL.tex,roughness:0.85,metalness:0.02});
   mat.color.copy(tint);
   const mesh=new THREE.SkinnedMesh(REAL.geo,mat);
   mesh.castShadow=true;mesh.frustumCulled=false;
