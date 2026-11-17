@@ -4998,6 +4998,16 @@ function makeRealSoldier3(un){
   g.add(box3(0.035,0.30,0.30,c.role,0.145,0.74,0,0.75));
   g.add(box3(0.04,0.055,0.312,((un.skin==='nacion'&&un.nation)?un.nation.colors[1]:'#2e3226'),0.148,0.915,0,0.6));
   [-1,1].forEach(sd=>{g.add(box3(0.17,0.075,0.13,c.team,0,0.90,0.185*sd,0.8));});
+  /* Acentos de silueta por clase sobre la mochila: se distinguen de
+     espaldas y a distancia sin tocar los modelos del IPA. */
+  const acc=(w,h,d,col,x,y,z,rough)=>{try{g.add(box3(w,h,d,col,x,y,z,rough));}catch(e){}};
+  if(un.role==='Francotirador'){acc(0.012,0.24,0.012,'#2f3a2a',-0.26,0.97,0.05,0.5);acc(0.05,0.05,0.05,'#11170f',-0.26,1.10,0.05,0.4);}
+  else if(un.role==='Artillero'){acc(0.14,0.11,0.17,'#4a4f38',-0.27,0.85,0,0.8);}
+  else if(un.role==='Médico'){acc(0.022,0.10,0.03,'#eceee8',-0.255,0.90,0,0.6);acc(0.062,0.03,0.03,'#eceee8',-0.255,0.90,0,0.6);}
+  else if(un.role==='Ingeniero'){acc(0.03,0.16,0.03,'#8a7a3a',-0.26,0.90,0.05,0.6);}
+  else if(un.role==='Comando'){acc(0.012,0.20,0.012,'#2a2f38',-0.25,0.95,-0.06,0.5);}
+  else if(un.role==='Espía'){acc(0.05,0.07,0.12,'#26222e',-0.24,0.86,0,0.7);}
+  else if(un.role==='Capitán'){acc(0.10,0.03,0.14,'#d9a521',-0.25,0.92,0,0.5);}
   /* Emblema de la nacion en el pecho cuando la skin es Nacion. */
   if(un.skin==='nacion'&&un.nation){
     const et=emblemTexture(un.nation);
