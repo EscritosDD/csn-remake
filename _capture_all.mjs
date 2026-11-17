@@ -20,14 +20,29 @@ const ev = async (e, t = 20000) => { const p = send("Runtime.evaluate", { expres
 const shot = async (name) => { const r = await send("Page.captureScreenshot", { format: "png" }); if (r.result?.data) { const f = `${CAP}\\${name}.png`; fs.writeFileSync(f, Buffer.from(r.result.data, "base64")); return fs.statSync(f).size; } return 0; };
 await send("Page.enable"); await send("Runtime.enable");
 await send("Page.navigate", { url: "http://127.0.0.1:8000/" }); await sleep(3000);
+try { await send("Page.bringToFront"); } catch (e) {}
 await ev("localStorage.setItem('radsoldiers_nation','es');location.reload();"); await sleep(10000);
+try { await send("Page.bringToFront"); } catch (e) {}
 await ev(`window.quickStart('${mapId}')`); await sleep(waitMs);
-const state = await ev("JSON.stringify(window.__csn3d)");
+let state = await ev("JSON.stringify(window.__csn3d)");
+/* Reintento: si la 3D no arranco por rAF estrangulado, traer la ventana al
+   frente y esperar otro par de segundos antes de rendirse. */
+let tries = 0;
+while (tries < 3) {
+  let ok = false;
+  try { const st = JSON.parse(state); ok = !!(st && st.units > 0); } catch (e) { ok = false; }
+  if (ok) break;
+  tries++;
+  try { await send("Page.bringToFront"); } catch (e) {}
+  await ev("(function(){try{window.dispatchEvent(new Event('focus'));}catch(e){}try{window.__render3D&&window.__render3D();}catch(e){}return 1})()");
+  await sleep(2500);
+  state = await ev("JSON.stringify(window.__csn3d)");
+}
 const s3d = await shot(prefix + "_3d");
 /* La vista 2D queda como alternativa: solo se captura si se pide con
    --2d o si la 3D no arranco (ventana tapada). */
 let s3ok = false;
-try { const st = JSON.parse(state); s3ok = !!(st && st.geo); } catch (e) { s3ok = false; }
+try { const st = JSON.parse(state); s3ok = !!(st && st.units > 0); } catch (e) { s3ok = false; }
 const want2d = process.argv.includes("--2d") || !s3ok;
 let toClassic = "skip";
 let s2d = 0;
