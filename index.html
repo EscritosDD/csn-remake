@@ -336,6 +336,12 @@ canvas#board{border-radius:10px;box-shadow:0 0 0 2px rgba(0,0,0,.45), inset 0 0 
 .endWrap.win .endBanner{background:linear-gradient(90deg,#2f6b3f,#4fdc6e)}
 .endWrap.lose .endBanner{background:linear-gradient(90deg,#6b2f2f,#ff6b5a)}
 .endArt{width:100%;max-width:340px;border-radius:12px;margin:6px auto 10px;display:block;box-shadow:0 6px 20px rgba(0,0,0,.35)}
+/* F9: interfaz compacta */
+.mode-card p{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.mode-card:hover p{-webkit-line-clamp:unset}
+details.more{margin-top:8px}
+details.more summary{cursor:pointer;font-weight:700;font-size:13px;color:var(--ink);padding:6px 0}
+details.more summary:hover{color:var(--amber)}
 </style>
 </head>
 <body>
@@ -395,6 +401,7 @@ canvas#board{border-radius:10px;box-shadow:0 0 0 2px rgba(0,0,0,.45), inset 0 0 
           <button class="btn" id="mnuOnline">🌐 Play online<small class="sub">Sin servidor: IA o dos jugadores en local</small></button>
           <button class="btn" id="mnuChallenges">🏆 Challenges<small class="sub">Operación Londres · 5 misiones</small></button>
           <button class="btn" id="mnuExpansions">📦 Expansions<small class="sub">Contenido futuro</small></button>
+          <button class="btn" id="mnuBarracks">🏰 Cuartel<small class="sub">Tropas, skins, arsenal y monedas</small></button>
         </div>
         <p class="sub" style="margin:10px 0 0"><span class="tag amber" id="coinsTag">🪙 0</span> Monedas de CSN: se ganan al vencer a la IA (25 por victoria).</p>
       </div>
@@ -495,6 +502,7 @@ canvas#board{border-radius:10px;box-shadow:0 0 0 2px rgba(0,0,0,.45), inset 0 0 
       <div class="panel" style="margin-top:14px">
         <h2>Los mapas: Almacén industrial, Patio de contenedores y los Skirmish de Londres</h2>
         <p class="sub" style="max-width:78ch">Los trece tableros son de 12×12 casillas con simetría de 180°, para que ningún bando nazca con ventaja: estanterías y muros que no se rompen, cajas destructibles que dan cobertura, <b>barriles explosivos</b> (70 de daño en las casillas adyacentes si les disparas), dos <b>botiquines</b> de un solo uso (+50 de vida al pasar por encima) y una <b>torreta capturable</b> en el centro: el primer soldado que se plante en su casilla y gaste 2 de energía la pone a disparar para su bando al final de cada turno. En las rondas 3 y 6 cae una <b>caja de botín</b> cerca del centro con cura, energía o una granada extra para quien la recoja. La vista del tablero sigue la cámara del original como referencia de encuadre: inclinación de 50°, distancia de 8,5 casillas y campo de visión de 37,5°.</p>
+<details class="more"><summary>Ver los 13 tableros</summary>
 <ul class="reg-list" style="columns:2;column-gap:28px;margin-top:8px">
   <li><b>Almacén industrial</b> — el tablero de siempre: estanterías, barriles y torreta central.</li>
   <li><b>Patio de contenedores</b> — contenedores cruzados en pasillos.</li>
@@ -509,7 +517,7 @@ canvas#board{border-radius:10px;box-shadow:0 0 0 2px rgba(0,0,0,.45), inset 0 0 
   <li><b>Skirmish_09 · La rotonda</b> — anillo de contenedores, geometría real del IPA.</li>
   <li><b>Skirmish_10 · El cruce</b> — cruce de avenidas, geometría real del IPA.</li>
   <li><b>Skirmish_11 · El astillero</b> — dique seco central, geometría real del IPA.</li>
-</ul>
+</ul></details>
       </div>
 
     </div>
@@ -635,6 +643,15 @@ canvas#board{border-radius:10px;box-shadow:0 0 0 2px rgba(0,0,0,.45), inset 0 0 
   </section>
 
   <!-- ============ ARSENAL ============ -->
+  <section class="screen" id="scr-barracks">
+    <div class="panel">
+      <h2>Cuartel</h2>
+      <p class="sub" id="barrNation"></p>
+      <button class="btn secondary" id="barrBack" style="margin-top:8px">← Volver</button>
+    </div>
+    <div id="barrContent"></div>
+  </section>
+
   <section class="screen" id="scr-arsenal">
     <div class="hero">
       <h1>Arsenal <em>real</em></h1>
@@ -6469,6 +6486,25 @@ function quickStart(mapId){
 }
 document.getElementById('quickStartBtn').onclick=()=>quickStart('almacen');
 document.getElementById('quickSkirmishBtn').onclick=()=>quickStart('skirmish');
+/* ---- Cuartel (F9): tropas, skins, arsenal y desbloqueos ---- */
+function renderBarracks(){
+  const el=document.getElementById('barrContent'),nt=document.getElementById('barrNation');
+  if(!el)return;
+  if(nt)nt.innerHTML=myNation?('<b>'+myNation.name+'</b>'+(myNation.pers?' · '+myNation.pers.name+' — '+myNation.pers.desc:'')+' · 🪙 '+coinsGet()+' · skins: Estándar y Nación'):('Sin nación elegida · 🪙 '+coinsGet());
+  const roles=Object.keys(ROLES);
+  const catOrder=[];const byCat={};
+  Object.entries(WEAPONS).forEach(([name,w])=>{if(!byCat[w.cat]){byCat[w.cat]=[];catOrder.push(w.cat);}byCat[w.cat].push(name+' ('+w.dmg+'/'+w.rng+')');});
+  el.innerHTML=
+    '<div class="panel" style="margin-top:12px"><h2>Tropas · '+roles.length+' roles</h2><div class="grid3" style="margin-top:8px">'+
+    roles.map(r=>{const ch=CHARACTERS.find(c=>c.role===r);const body=BODIES[ROLES[r].body];
+      return '<div class="panel"><img class="roster-portrait" style="width:64px;height:64px" src="'+(rolePortraitURL(r)||'assets/ui/retrato_capitan.png')+'" alt=""/><h3 style="margin:6px 0 2px">'+r+'</h3><p class="sub" style="margin:0">'+(ch?ch.name:'—')+' · '+body.name+'</p><p class="sub" style="margin:4px 0 0">'+ROLES[r].weapons.length+' armas · '+ROLES[r].special+'</p></div>';}).join('')+
+    '</div></div>'+
+    '<div class="panel" style="margin-top:12px"><h2>Arsenal · '+Object.keys(WEAPONS).length+' armas</h2>'+
+    catOrder.map(c=>'<p class="sub" style="margin:6px 0 0"><b>'+c+'</b>: '+byCat[c].join(' · ')+'</p>').join('')+
+    '</div>'+
+    '<div class="panel" style="margin-top:12px"><h2>Desbloqueos</h2><p class="sub" style="margin:0">Skins: <b>Estándar</b> y <b>Nación</b> (ambas sin pasivas). Monedas: <b>🪙 '+coinsGet()+'</b> (25 por victoria contra la IA). Armas: todas disponibles en la configuración de partida.</p></div>';
+}
+function openBarracks(){renderBarracks();showScreen('scr-barracks');}
 /* ---- Menu estilo original (F6): entradas directas y monedas ---- */
 const COINS_KEY='radsoldiers_coins';
 function coinsGet(){return Math.max(0,parseInt(lsGet(COINS_KEY)||'500',10)||0);}
@@ -6493,6 +6529,8 @@ function tutHide(){const b=document.getElementById('tutBubble');if(b)b.style.dis
   const o=document.getElementById('mnuOnline');if(o)o.onclick=()=>toast('Sin servidor de partidas: el online del original no está disponible. Juega contra la IA o a dos jugadores en local.');
   const c=document.getElementById('mnuChallenges');if(c)c.onclick=()=>{const b=document.querySelector('[data-start="campana"]');if(b)b.click();else toast('La campaña está en la portada, más abajo.');};
   const e=document.getElementById('mnuExpansions');if(e)e.onclick=()=>toast('Expansiones: aún no hay contenido descargable. El arte propio y las skins llegan por fases.');
+  const bk=document.getElementById('mnuBarracks');if(bk)bk.onclick=openBarracks;
+  const bb=document.getElementById('barrBack');if(bb)bb.onclick=()=>showScreen('scr-play');
   coinsSet(coinsGet());
 })();
 /* Pantalla de carga: se cierra cuando el soldado real está listo (o a los 9 s). */
