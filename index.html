@@ -4532,10 +4532,12 @@ function parseOBJ3(txt,skin){
 /* Modelos del original por CLASE: cada rol carga su malla, su rig de
    huesos y su textura de uniforme del IPA (Soldier_Light/Heavy, Agent_Light/
    Heavy, Medic, Engineer, Commander). Si un rol falla, cae al modelo base. */
+let ROLE_SCALES={};
 const ROLE_MODEL_FILES={'Francotirador':'Francotirador','Artillero':'Artillero','Espía':'Espia','Médico':'Medico','Ingeniero':'Ingeniero','Comando':'Comando','Capitán':'Capitan'};
 function loadRealSoldier(){
   if(typeof THREE==='undefined')return;
   REAL.byRole=REAL.byRole||{};
+  fetch('assets/soldier_scales.json').then(r=>r.json()).then(sc=>{ROLE_SCALES=sc||{};}).catch(()=>{});
   fetch('assets/soldier_clips.json').then(r=>{if(!r.ok)throw new Error('clips');return r.json();}).then(pack=>{CLIPLIB.pack=pack;CLIPLIB.ready=true;}).catch(()=>{});
   const loadOne=(role,file)=>Promise.all([
     fetch('assets/soldier/'+file+'.obj').then(r=>{if(!r.ok)throw new Error('obj');return r.text();}),
@@ -4889,7 +4891,7 @@ function makeRealSoldier3(un){
      estrecho y bajo, francotirador alto y fino, capitan erguido. */
   /* La complexion ya la trae cada modelo del original (Soldier_Light,
      Soldier_Heavy, Agent, Medic, Engineer, Commander): no se escala nada. */
-  mesh.scale.setScalar(0.95);
+  mesh.scale.setScalar(0.95*((ROLE_SCALES&&ROLE_SCALES[un.role])||1));
 
   /* Tocados por rol sobre la malla real, colgados del hueso Head: su Z
      local es el arriba del IPA, así que el grupo gira para que su +Y
