@@ -4405,6 +4405,20 @@ function skyTheme3(theme){
   if(theme==='rotonda')return {bg:0x272a25,fog:0x272a25};
   return {bg:0x212922,fog:0x212922};
 }
+let EMBLEM_TEX={};
+function emblemTexture(nation){
+  if(!nation)return null;
+  if(EMBLEM_TEX[nation.id])return EMBLEM_TEX[nation.id];
+  try{
+    const cv=document.createElement('canvas');cv.width=cv.height=64;
+    const cx=cv.getContext('2d');
+    cx.clearRect(0,0,64,64);
+    cx.fillStyle='#f7df9a';cx.font='bold 46px serif';cx.textAlign='center';cx.textBaseline='middle';
+    cx.fillText(nation.emblem||'★',32,35);
+    const t=new THREE.CanvasTexture(cv);t.colorSpace=THREE.SRGBColorSpace;
+    EMBLEM_TEX[nation.id]=t;return t;
+  }catch(e){return null;}
+}
 function soldierColors3(un){
   const isNat=un.skin==='nacion';
   const nc=un.nation?un.nation.colors:['#66704f','#3e4630','#59613f'];
@@ -4944,6 +4958,14 @@ function makeRealSoldier3(un){
   g.add(box3(0.035,0.30,0.30,c.role,0.145,0.74,0,0.75));
   g.add(box3(0.04,0.055,0.312,((un.skin==='nacion'&&un.nation)?un.nation.colors[1]:'#2e3226'),0.148,0.915,0,0.6));
   [-1,1].forEach(sd=>{g.add(box3(0.17,0.075,0.13,c.team,0,0.90,0.185*sd,0.8));});
+  /* Emblema de la nacion en el pecho cuando la skin es Nacion. */
+  if(un.skin==='nacion'&&un.nation){
+    const et=emblemTexture(un.nation);
+    if(et){
+      const em=new THREE.Mesh(new THREE.PlaneGeometry(0.12,0.12),new THREE.MeshBasicMaterial({map:et,transparent:true,depthWrite:false}));
+      em.position.set(0.171,0.76,0);em.rotation.y=Math.PI/2;g.add(em);
+    }
+  }
   const bindLocal=data.bones.map(b=>new THREE.Quaternion(b.quat[0],b.quat[1],b.quat[2],b.quat[3]));
   const bindWorldQ=[];
   data.bones.forEach((b,i)=>{bindWorldQ[i]=b.parent>=0?bindWorldQ[b.parent].clone().multiply(bindLocal[i]):bindLocal[i].clone();});
@@ -6614,8 +6636,18 @@ const LS_CHARS='csn_chars_v1';
 let CHAR_PREFS={};
 function loadChars(){try{const r=lsGet(LS_CHARS);return r?JSON.parse(r):{};}catch(e){return {};}}
 function saveChars(v){try{lsSet(LS_CHARS,JSON.stringify(v));}catch(e){}}
+/* Personajes nuevos propios de CSN: nombre, clase (cuerpo del IPA) y rol. */
+const OWN_CAST=[
+ {name:'Lobo',body:'Soldier_Light',outfit:'Veterano de CSN',role:'Francotirador',play:true,own:true},
+ {name:'Mula',body:'Soldier_Heavy',outfit:'Porteador de asalto',role:'Artillero',play:true,own:true},
+ {name:'Sombra',body:'Agent_Light',outfit:'Infiltración CSN',role:'Espía',play:true,own:true},
+ {name:'Alfiler',body:'Medic',outfit:'Sanitario de trinchera',role:'Médico',play:true,own:true},
+ {name:'Tuerca',body:'Engineer',outfit:'Manitas de campaña',role:'Ingeniero',play:true,own:true},
+ {name:'Faro',body:'Agent_Heavy',outfit:'Punta de lanza',role:'Comando',play:true,own:true},
+ {name:'Brújula',body:'Commander',outfit:'Mando de campo',role:'Capitán',play:true,own:true}
+];
 const ROLE_BODY={'Francotirador':'Soldier_Light','Artillero':'Soldier_Heavy','Espía':'Agent_Light','Médico':'Medic','Ingeniero':'Engineer','Comando':'Agent_Heavy','Capitán':'Commander'};
-function charsForRole(role){const b=ROLE_BODY[role];return ORIG_CAST.filter(c=>c.body===b);}
+function charsForRole(role){const b=ROLE_BODY[role];return OWN_CAST.filter(c=>c.body===b).concat(ORIG_CAST.filter(c=>c.body===b));}
 const ORIG_CAST=[
  {name:'Hipster Dave',body:'Soldier_Light',outfit:'Soldier_Light_d / DeltaForce / Veteran',role:'Francotirador',play:true},
  {name:'Archie Fletcher',body:'Soldier_Light',outfit:'Rambo / DeerHunter',role:'',play:false},
