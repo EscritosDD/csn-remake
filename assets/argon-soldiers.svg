@@ -1,0 +1,795 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 240" width="100%" height="100%">
+  <defs>
+    <!-- ESTILOS BASE Y CLASES TINTABLES POR NACIÓN -->
+    <style>
+      .contorno { stroke: #181412; stroke-width: 3.8; stroke-linecap: round; stroke-linejoin: round; }
+      .contorno-fino { stroke: #181412; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+      .uniforme { fill: url(#grad-uniforme); }
+      .casco { fill: url(#grad-casco); }
+      .piel { fill: #E0A080; }
+      .piel-sombra { fill: #C27B5A; }
+      .piel-luz { fill: #F4BE9E; }
+      .botas { fill: #2E2B29; }
+      .bando-azul { fill: #387EC9; }
+      .bando-rojo { fill: #C95338; }
+      .metal-oscuro { fill: #363C42; }
+      .metal-medio { fill: #5A646E; }
+      .metal-luz { fill: #8C98A4; }
+      .sombra-suelo { fill: rgba(15, 18, 22, 0.38); }
+    </style>
+
+    <!-- DEGRADADOS OBLIGATORIOS DE VOLUMEN 2D -->
+    <linearGradient id="grad-uniforme" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#6E7F48" />
+      <stop offset="65%" stop-color="#536234" />
+      <stop offset="100%" stop-color="#3B4723" />
+    </linearGradient>
+
+    <linearGradient id="grad-casco" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#7B8864" />
+      <stop offset="60%" stop-color="#556143" />
+      <stop offset="100%" stop-color="#38412B" />
+    </linearGradient>
+
+    <!-- ===================================================================== -->
+    <!-- 1. FRANCOTIRADOR (Alto y flaco, acento verde oscuro, rifle 160 px)    -->
+    <!-- ===================================================================== -->
+    <symbol id="francotirador" viewBox="0 0 200 200">
+      <!-- Sombra proyectada en tres cuartos -->
+      <ellipse cx="102" cy="191" rx="48" ry="8" class="sombra-suelo" />
+
+      <!-- Mochila táctica y manto de camuflaje trasero (plano superior visible) -->
+      <path d="M62,28 L132,26 L138,72 L58,72 Z" fill="#1F4729" class="contorno" />
+      <path d="M66,28 L128,26 L124,38 L64,39 Z" fill="#2E663C" />
+      <!-- Antena y tubo de visor azul de bando -->
+      <rect x="122" y="8" width="7" height="24" rx="3" class="bando-azul contorno-fino" />
+
+      <!-- Piernas cortas pero delgadas en postura 3/4 (Pelvis Y=130 a Suelo Y=198) -->
+      <!-- Pierna izquierda (atrás/izquierda) -->
+      <path d="M74,128 L66,172 L84,174 L92,130 Z" class="uniforme contorno" />
+      <!-- Rodillera verde oscuro -->
+      <path d="M67,152 L85,154 L84,166 L66,164 Z" fill="#1A3D22" class="contorno-fino" />
+      <!-- Bota izquierda (apuntando en 3/4 hacia abajo-izquierda) -->
+      <path d="M64,170 L85,172 L86,190 L52,192 C48,186 54,176 64,170 Z" class="botas contorno" />
+      <path d="M55,184 L84,183" class="contorno-fino" stroke="#4D4845" />
+
+      <!-- Pierna derecha (adelante/derecha, más baja por perspectiva) -->
+      <path d="M104,130 L112,176 L130,175 L122,128 Z" class="uniforme contorno" />
+      <path d="M109,154 L127,153 L129,165 L111,166 Z" fill="#1A3D22" class="contorno-fino" />
+      <!-- Bota derecha (en 3/4 hacia el espectador, llega a Y=198) -->
+      <path d="M110,174 L131,173 L144,193 C142,199 118,199 110,195 Z" class="botas contorno" />
+
+      <!-- Torso largo y flaco (Hombros Y=35 a Pelvis Y=130) -->
+      <path d="M58,36 C82,29 118,29 140,37 L126,132 C108,138 86,138 70,131 Z" class="uniforme contorno" />
+      <!-- Poncho / Chaleco civil de cazador verde oscuro abierto -->
+      <path d="M56,36 L88,42 L84,128 L66,126 L52,65 Z" fill="#1B4325" class="contorno" />
+      <path d="M140,37 L112,43 L115,128 L130,125 L144,66 Z" fill="#1B4325" class="contorno" />
+      <!-- Textura de hojas/costuras y camiseta interior gris -->
+      <path d="M88,42 L112,43 L109,124 L86,124 Z" fill="#495259" class="contorno-fino" />
+      <!-- Hombrera de bando azul -->
+      <path d="M50,38 C58,30 74,31 78,42 L62,56 L46,48 Z" class="bando-azul contorno" />
+      <!-- Cinturón táctico en la pelvis (Y=124..134) con cartuchos rojos -->
+      <path d="M68,122 C92,128 112,128 128,121 L127,134 C110,140 88,140 69,133 Z" fill="#2B2E29" class="contorno" />
+      <rect x="93" y="123" width="16" height="12" rx="2" fill="#8C98A4" class="contorno-fino" />
+      <rect x="74" y="119" width="7" height="14" rx="2" class="bando-rojo contorno-fino" />
+      <rect x="83" y="120" width="7" height="14" rx="2" class="bando-rojo contorno-fino" />
+
+      <!-- Brazo izquierdo (atrás, bajando desde Y=38 hasta la mano en Y=102) -->
+      <path d="M54,42 L34,78 L48,104 L68,88 L66,54 Z" fill="#1F4729" class="contorno" />
+      <path d="M36,76 L50,104 L64,94 L52,70 Z" class="piel contorno" />
+
+      <!-- Brazo derecho (adelante, bajando hasta el guardamanos en Y=96) -->
+      <path d="M138,42 L156,74 L138,98 L122,86 L126,54 Z" fill="#1F4729" class="contorno" />
+      <path d="M152,72 L136,98 L122,88 L134,66 Z" class="piel contorno" />
+
+      <!-- CABEZA CABEZONA 40 px de alto (Y=12 a Y=52), girada en 3/4 -->
+      <!-- Cuello -->
+      <path d="M88,44 L112,44 L110,56 L88,56 Z" class="piel-sombra contorno-fino" />
+      <!-- Cara alargada y angulosa de francotirador -->
+      <path d="M78,20 C78,12 122,12 122,22 L120,42 C118,49 108,53 101,53 C91,53 81,48 79,41 Z" class="piel contorno" />
+      <!-- Sombra lateral de la cara para volumen 2D -->
+      <path d="M79,24 C83,38 86,48 100,52 C88,52 80,46 79,40 Z" class="piel-sombra" />
+      <!-- Oreja izquierda grande -->
+      <path d="M78,30 C71,29 71,41 79,41 Z" class="piel contorno-fino" />
+      <!-- Gorro/Capucha de francotirador con plano cenital visible (Y=10 a Y=30) -->
+      <path d="M75,26 C74,13 88,9 102,9 C116,9 126,14 125,27 C114,22 88,22 75,26 Z" class="casco contorno" />
+      <ellipse cx="101" cy="15" rx="18" ry="6" fill="#2A5C36" />
+      <!-- Banda verde oscuro con hojas en el gorro -->
+      <path d="M75,23 C92,19 112,19 125,24 L124,29 C110,25 90,25 76,28 Z" fill="#183B20" class="contorno-fino" />
+      <!-- Ojo derecho bien abierto y expresivo + Ceja arqueada -->
+      <ellipse cx="93" cy="33" rx="5.5" ry="4.5" fill="#FFFFFF" class="contorno-fino" />
+      <circle cx="94" cy="33" r="2.5" fill="#181412" />
+      <circle cx="95" cy="32" r="1" fill="#FFFFFF" />
+      <path d="M85,27 L100,29" stroke="#181412" stroke-width="3.5" stroke-linecap="round" />
+      <!-- Monóculo / Mira óptica abatible sobre el ojo izquierdo (lente roja/azul) -->
+      <path d="M110,20 L112,28" class="contorno-fino" />
+      <circle cx="112" cy="33" r="6.5" fill="#C95338" class="contorno-fino" />
+      <circle cx="110" cy="31" r="2" fill="#FF9E8A" />
+      <path d="M104,26 L120,25" stroke="#181412" stroke-width="3.5" stroke-linecap="round" />
+      <!-- Nariz grande y afilada en 3/4 -->
+      <path d="M102,31 L107,40 L99,41" fill="#D18B68" class="contorno-fino" />
+      <!-- Sonrisa confiada de medio lado con palillo -->
+      <path d="M91,45 C97,48 107,47 112,43" fill="none" stroke="#181412" stroke-width="2.6" stroke-linecap="round" />
+      <path d="M94,45 L108,44 L106,47 L95,47 Z" fill="#FFFFFF" />
+      <line x1="110" y1="44" x2="123" y2="41" stroke="#F3E5AB" stroke-width="2.5" stroke-linecap="round" />
+
+      <!-- ARMA ENORME: Rifle Antimaterial de Francotirador (158 px de largo: de X=22,Y=128 a X=178,Y=74) -->
+      <g>
+        <!-- Culata táctica pesada con carrillera verde oscuro -->
+        <path d="M20,116 L58,104 L62,122 L26,136 L18,128 Z" fill="#1E4628" class="contorno" />
+        <path d="M22,116 L56,105 L57,111 L24,122 Z" fill="#2F6B3E" />
+        <!-- Cuerpo central del rifle (plano superior e inferior en 3/4) -->
+        <path d="M56,102 L124,80 L128,96 L60,118 Z" class="metal-oscuro contorno" />
+        <path d="M56,102 L124,80 L126,86 L58,108 Z" class="metal-luz" />
+        <!-- Cargador pesado de calibre .50 con detalle rojo -->
+        <path d="M78,112 L98,106 L104,128 L82,135 Z" class="metal-medio contorno" />
+        <path d="M81,124 L101,118 L103,124 L83,130 Z" class="bando-rojo" />
+        <!-- Cañón largo estriado y freno de boca gigante (hasta X=180) -->
+        <path d="M124,82 L170,67 L173,76 L127,91 Z" class="metal-medio contorno" />
+        <path d="M166,63 L184,57 L188,71 L170,77 Z" class="metal-oscuro contorno" />
+        <!-- Bípode plegado bajo el cañón -->
+        <path d="M132,90 L148,106 L152,102 L138,88 Z" class="metal-oscuro contorno-fino" />
+        <!-- Mira telescópica gigante arriba del rifle (lentes azules de bando) -->
+        <path d="M68,86 L122,68 L126,80 L72,98 Z" fill="#1F4729" class="contorno" />
+        <ellipse cx="124" cy="74" rx="4" ry="6.5" class="bando-azul contorno-fino" />
+        <ellipse cx="70" cy="92" rx="3.5" ry="5.5" class="bando-azul contorno-fino" />
+      </g>
+
+      <!-- MANOS AGARRANDO EL ARMA CON DEDOS CERRADOS (Y ≈ 95..112) -->
+      <!-- Mano izquierda agarrando empuñadura y guardamonte (X=52, Y=110) -->
+      <g class="contorno-fino">
+        <path d="M44,100 C48,96 58,98 60,106 L58,118 C52,120 44,116 42,108 Z" class="piel" />
+        <!-- 4 dedos cerrados sobre el arma -->
+        <rect x="52" y="102" width="10" height="5" rx="2.2" transform="rotate(-18 52 102)" class="piel" />
+        <rect x="53" y="107" width="10" height="5" rx="2.2" transform="rotate(-18 53 107)" class="piel" />
+        <rect x="54" y="112" width="9" height="5" rx="2.2" transform="rotate(-18 54 112)" class="piel" />
+        <!-- Pulgar por arriba -->
+        <path d="M46,100 L58,97 L59,102 L48,105 Z" class="piel-luz" />
+      </g>
+
+      <!-- Mano derecha agarrando el guardamanos delantero (X=122, Y=88) -->
+      <g class="contorno-fino">
+        <path d="M114,82 C120,78 132,82 132,92 L126,100 C118,102 112,96 112,88 Z" class="piel" />
+        <!-- Dedos cerrados rodeando el cañón/guardamanos -->
+        <rect x="114" y="80" width="6" height="11" rx="2.5" transform="rotate(-18 114 80)" class="piel" />
+        <rect x="120" y="78" width="6" height="11" rx="2.5" transform="rotate(-18 120 78)" class="piel" />
+        <rect x="126" y="77" width="6" height="11" rx="2.5" transform="rotate(-18 126 77)" class="piel" />
+        <rect x="131" y="76" width="5.5" height="10" rx="2.5" transform="rotate(-18 131 76)" class="piel" />
+      </g>
+    </symbol>
+
+    <!-- ===================================================================== -->
+    <!-- 2. ARTILLERO (Gordo y ancho con barriga, naranja, minigun 154 px)     -->
+    <!-- ===================================================================== -->
+    <symbol id="artillero" viewBox="0 0 200 200">
+      <!-- Sombra proyectada ancha -->
+      <ellipse cx="100" cy="191" rx="60" ry="9" class="sombra-suelo" />
+
+      <!-- Mochila de munición pesada naranja y gris detrás de los hombros -->
+      <path d="M44,24 L156,24 L162,76 L38,76 Z" fill="#D95B16" class="contorno" />
+      <path d="M48,24 L152,24 L148,38 L46,38 Z" fill="#FF8533" />
+      <rect x="56" y="14" width="22" height="14" rx="3" class="bando-azul contorno" />
+      <rect x="122" y="14" width="22" height="14" rx="3" class="bando-rojo contorno" />
+
+      <!-- Piernas gruesas y cortas muy separadas (Pelvis Y=132 a Suelo Y=198) -->
+      <!-- Pierna izquierda -->
+      <path d="M52,128 L46,172 L78,174 L86,132 Z" class="uniforme contorno" />
+      <path d="M44,170 L80,172 L82,191 L36,193 C32,185 36,174 44,170 Z" class="botas contorno" />
+      <!-- Pierna derecha (adelante en 3/4) -->
+      <path d="M114,132 L120,175 L152,173 L146,128 Z" class="uniforme contorno" />
+      <path d="M118,173 L154,171 L166,193 C162,199 124,199 116,194 Z" class="botas contorno" />
+
+      <!-- TORSO GORDO Y ANCHO CON GRAN BARRIGA (Hombros Y=34 a Pelvis Y=136) -->
+      <path d="M40,36 C70,26 130,26 160,36 C174,68 176,112 152,134 C124,146 76,146 48,134 C24,112 26,68 40,36 Z" class="uniforme contorno" />
+      <!-- Chaleco antibalas acolchado NARANJA abierto sobre la barriga -->
+      <path d="M38,36 L82,42 C72,74 70,108 78,134 L46,130 C24,106 26,66 38,36 Z" fill="#E86518" class="contorno" />
+      <path d="M160,36 L118,42 C128,74 130,108 122,134 L152,130 C174,106 172,66 160,36 Z" fill="#E86518" class="contorno" />
+      <!-- Brillos naranjas del chaleco en el plano cenital -->
+      <path d="M42,38 L78,43 L74,56 L36,52 Z" fill="#FF8C3B" />
+      <path d="M156,38 L122,43 L126,56 L162,52 Z" fill="#FF8C3B" />
+      <!-- Camiseta interior gris ajustada marcando la barriga redonda -->
+      <ellipse cx="101" cy="94" rx="34" ry="38" fill="#525B63" class="contorno-fino" />
+      <path d="M74,106 C88,124 116,124 128,106" fill="none" stroke="#394046" stroke-width="3" />
+      <!-- Canana de obuses cruzada en el pecho (detalles rojos y dorados) -->
+      <path d="M58,42 L138,118 L126,128 L46,52 Z" fill="#2E2A27" class="contorno-fino" />
+      <rect x="66" y="54" width="14" height="7" rx="2" transform="rotate(-42 66 54)" fill="#F2B718" class="contorno-fino" />
+      <rect x="78" y="66" width="14" height="7" rx="2" transform="rotate(-42 78 66)" class="bando-rojo contorno-fino" />
+      <rect x="90" y="78" width="14" height="7" rx="2" transform="rotate(-42 90 78)" fill="#F2B718" class="contorno-fino" />
+      <rect x="102" y="90" width="14" height="7" rx="2" transform="rotate(-42 102 90)" class="bando-rojo contorno-fino" />
+      <!-- Cinturón ancho bajo la barriga -->
+      <path d="M50,126 C84,140 120,140 150,126 L146,138 C116,148 84,148 54,138 Z" fill="#292624" class="contorno" />
+      <rect x="92" y="130" width="20" height="13" rx="3" class="bando-azul contorno-fino" />
+
+      <!-- Brazos enormes y musculosos descubiertos (Hombros Y=38 a Manos Y=102) -->
+      <!-- Brazo izquierdo -->
+      <path d="M38,42 C18,56 14,82 26,104 L52,106 L56,76 Z" class="piel contorno" />
+      <path d="M36,40 L58,48 L52,66 L26,56 Z" class="bando-azul contorno" />
+      <!-- Brazo derecho -->
+      <path d="M160,42 C180,56 184,82 168,102 L142,102 L142,74 Z" class="piel contorno" />
+      <path d="M162,40 L140,48 L146,66 L172,56 Z" fill="#E86518" class="contorno" />
+
+      <!-- CABEZA ANCHA Y EXPRESIVA 40 px de alto (Y=12 a Y=52) -->
+      <path d="M72,22 C72,12 130,12 130,22 L134,40 C134,50 116,53 102,53 C86,53 70,49 70,39 Z" class="piel contorno" />
+      <!-- Barba de tres días / mandíbula cuadrada enorme -->
+      <path d="M71,35 C86,38 118,38 133,35 C133,48 118,53 102,53 C84,53 71,48 71,35 Z" fill="#5E493E" />
+      <!-- Casco blindado pesado con franja naranja (Y=10 a Y=28) -->
+      <path d="M68,26 C68,11 86,8 102,8 C118,8 134,11 134,26 C116,21 86,21 68,26 Z" class="casco contorno" />
+      <path d="M88,9 L116,9 L118,22 L86,22 Z" fill="#FF7A24" class="contorno-fino" />
+      <!-- Ojos grandes y feroces + Cejas pobladas negras -->
+      <ellipse cx="90" cy="31" rx="6" ry="4.5" fill="#FFFFFF" class="contorno-fino" />
+      <circle cx="92" cy="31" r="2.5" fill="#181412" />
+      <ellipse cx="113" cy="31" rx="6" ry="4.5" fill="#FFFFFF" class="contorno-fino" />
+      <circle cx="114" cy="31" r="2.5" fill="#181412" />
+      <path d="M80,25 L98,28" stroke="#181412" stroke-width="4.5" stroke-linecap="round" />
+      <path d="M122,25 L105,28" stroke="#181412" stroke-width="4.5" stroke-linecap="round" />
+      <!-- Nariz chata y grande -->
+      <ellipse cx="102" cy="36" rx="6.5" ry="4.5" fill="#C97E5B" class="contorno-fino" />
+      <!-- Boca grande sonriendo con dientes apretados y PURO humeante -->
+      <path d="M84,41 C94,40 112,40 120,41 L117,48 C108,50 94,50 86,48 Z" fill="#FFFFFF" class="contorno-fino" />
+      <line x1="86" y1="45" x2="118" y2="45" stroke="#181412" stroke-width="1.8" />
+      <!-- Puro habano -->
+      <path d="M114,42 L138,37 L140,44 L115,47 Z" fill="#7A4424" class="contorno-fino" />
+      <circle cx="139" cy="40.5" r="3" fill="#FF5522" />
+
+      <!-- ARMA ENORME: Minigun Rotativa de 6 Cañones (154 px de largo: de X=22,Y=116 a X=176,Y=88) -->
+      <g>
+        <!-- Tambor de munición naranja y acero colgado debajo -->
+        <rect x="58" y="110" width="46" height="34" rx="8" fill="#E86518" class="contorno" />
+        <rect x="64" y="116" width="34" height="10" rx="3" fill="#FF944D" />
+        <!-- Motor principal blindado -->
+        <path d="M24,96 L98,84 L104,122 L30,132 Z" class="metal-oscuro contorno" />
+        <path d="M26,96 L96,84 L98,95 L28,107 Z" class="metal-luz" />
+        <!-- Detalle azul de bando en la carcasa -->
+        <polygon points="44,104 78,98 80,112 46,118" class="bando-azul contorno-fino" />
+        <!-- Bloque de 6 cañones rotativos gigantes (hasta X=178) -->
+        <path d="M98,86 L174,74 L178,104 L102,116 Z" class="metal-medio contorno" />
+        <line x1="100" y1="92" x2="175" y2="80" stroke="#181412" stroke-width="3" />
+        <line x1="101" y1="99" x2="176" y2="87" stroke="#8C98A4" stroke-width="3.5" />
+        <line x1="102" y1="106" x2="177" y2="94" stroke="#181412" stroke-width="3" />
+        <!-- Abrazaderas circulares de los cañones y bocacha roja caliente -->
+        <rect x="132" y="78" width="9" height="33" rx="2" transform="rotate(-9 132 78)" fill="#E86518" class="contorno-fino" />
+        <rect x="164" y="73" width="12" height="33" rx="3" transform="rotate(-9 164 73)" class="bando-rojo contorno" />
+        <!-- Asa superior tipo motosierra para mano derecha -->
+        <path d="M108,85 L106,68 L136,64 L138,80" fill="none" stroke="#181412" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+      </g>
+
+      <!-- MANOS ENORMES CON DEDOS CERRADOS AGARRANDO LA MINIGUN (Y ≈ 95..108) -->
+      <!-- Mano izquierda agarrando el manillar trasero (X=40, Y=104) -->
+      <g class="contorno-fino">
+        <rect x="26" y="92" width="24" height="18" rx="6" class="piel" />
+        <!-- Nudillos y 4 dedos cerrados con guantelete sin dedos -->
+        <rect x="26" y="92" width="16" height="16" rx="4" fill="#2E2B29" />
+        <rect x="38" y="92" width="11" height="5.5" rx="2.5" class="piel" />
+        <rect x="39" y="97" width="11" height="5.5" rx="2.5" class="piel" />
+        <rect x="39" y="102" width="11" height="5.5" rx="2.5" class="piel" />
+        <rect x="38" y="107" width="10" height="5" rx="2.5" class="piel" />
+      </g>
+      <!-- Mano derecha cerrada sobre el asa superior delantera (X=122, Y=72) -->
+      <g class="contorno-fino">
+        <rect x="110" y="60" width="26" height="18" rx="6" class="piel" />
+        <rect x="112" y="60" width="22" height="9" rx="3" fill="#2E2B29" />
+        <!-- 4 dedos gordos cerrados alrededor de la barra -->
+        <rect x="111" y="68" width="6.5" height="12" rx="2.8" class="piel" />
+        <rect x="117" y="68" width="6.5" height="12" rx="2.8" class="piel" />
+        <rect x="123" y="68" width="6.5" height="12" rx="2.8" class="piel" />
+        <rect x="129" y="67" width="6.5" height="11" rx="2.8" class="piel" />
+      </g>
+    </symbol>
+
+    <!-- ===================================================================== -->
+    <!-- 3. ESPÍA (Ágil, negro y gris, gafas de sol, arma 146 px en UNA mano)  -->
+    <!-- ===================================================================== -->
+    <symbol id="espia" viewBox="0 0 200 200">
+      <!-- Sombra proyectada dinámica -->
+      <ellipse cx="98" cy="191" rx="46" ry="8" class="sombra-suelo" />
+
+      <!-- Cuello alto de gabardina negra y antena de infiltración (Y=18..48) -->
+      <path d="M58,22 L134,20 L142,56 L50,58 Z" fill="#1E2228" class="contorno" />
+      <path d="M62,24 L130,22 L126,34 L64,36 Z" fill="#323842" />
+      <line x1="66" y1="8" x2="72" y2="26" stroke="#181412" stroke-width="3.5" stroke-linecap="round" />
+      <circle cx="65" cy="8" r="3.5" class="bando-rojo" />
+
+      <!-- Piernas ágiles flexionadas en postura sigilosa 3/4 (Pelvis Y=130 a Suelo Y=198) -->
+      <!-- Pierna izquierda -->
+      <path d="M70,128 L56,170 L76,173 L88,132 Z" fill="#252A30" class="contorno" />
+      <path d="M52,168 L77,171 L78,191 L42,193 C40,185 45,174 52,168 Z" class="botas contorno" />
+      <!-- Pierna derecha adelantada -->
+      <path d="M104,130 L116,174 L136,172 L122,128 Z" fill="#252A30" class="contorno" />
+      <path d="M114,172 L138,170 L150,192 C146,199 120,199 112,194 Z" class="botas contorno" />
+
+      <!-- Faldones de la gabardina negra abiertos en movimiento -->
+      <path d="M58,116 L44,162 L68,160 L78,126 Z" fill="#1C2026" class="contorno" />
+      <path d="M128,116 L144,160 L120,162 L112,126 Z" fill="#1C2026" class="contorno" />
+
+      <!-- Torso compacto y ágil con chaqueta negra/gris y bufanda azul (Hombros Y=35 a Pelvis Y=130) -->
+      <path d="M56,36 C82,30 116,30 138,36 L124,130 C106,136 84,136 68,130 Z" class="uniforme contorno" />
+      <!-- Gabardina táctica negra/gris encima -->
+      <path d="M54,36 L90,44 L84,128 L64,126 L48,68 Z" fill="#20242B" class="contorno" />
+      <path d="M138,36 L104,44 L110,128 L128,126 L144,68 Z" fill="#20242B" class="contorno" />
+      <!-- Solapas grises claras y pañuelo azul de bando al cuello -->
+      <polygon points="68,38 92,46 82,78 60,56" fill="#49515C" class="contorno-fino" />
+      <polygon points="126,38 102,46 112,78 134,56" fill="#49515C" class="contorno-fino" />
+      <path d="M82,42 L112,42 L98,74 Z" class="bando-azul contorno-fino" />
+      <!-- Cinturón de gadgets con hebilla roja -->
+      <path d="M66,122 L126,122 L124,133 L68,133 Z" fill="#16181C" class="contorno" />
+      <rect x="90" y="121" width="14" height="13" rx="2" class="bando-rojo contorno-fino" />
+
+      <!-- Brazo izquierdo doblado tocándose el comunicador/solapa (Mano libre con dedos articulados) -->
+      <path d="M54,42 L34,72 L56,88 L70,68 Z" fill="#20242B" class="contorno" />
+      <!-- Mano izquierda con dedos visibles ajustando el reloj/emisor holográfico -->
+      <g class="contorno-fino">
+        <path d="M52,66 L68,58 L74,70 L58,78 Z" class="piel" />
+        <rect x="64" y="54" width="10" height="4.5" rx="2" transform="rotate(-20 64 54)" class="piel" />
+        <rect x="66" y="59" width="11" height="4.5" rx="2" transform="rotate(-15 66 59)" class="piel" />
+        <rect x="67" y="64" width="10" height="4.5" rx="2" transform="rotate(-10 67 64)" class="piel" />
+        <circle cx="54" cy="74" r="4" class="bando-azul" />
+      </g>
+
+      <!-- Brazo derecho extendido sujetando el arma pesada con UNA sola mano (Y=100) -->
+      <path d="M136,42 L154,78 L132,106 L116,94 L126,58 Z" fill="#20242B" class="contorno" />
+
+      <!-- CABEZA EXPRESIVA 40 px de alto (Y=14 a Y=54) con gafas de sol y bigote fino -->
+      <path d="M78,22 C78,14 118,14 118,22 L116,43 C114,50 106,54 98,54 C89,54 81,49 79,42 Z" class="piel contorno" />
+      <path d="M79,28 C82,42 86,50 98,53 C88,53 80,48 79,41 Z" class="piel-sombra" />
+      <!-- Boina / Pasamontañas táctico negro en plano cenital (Y=12 a Y=28) -->
+      <path d="M74,26 C73,13 88,10 100,10 C114,10 124,15 122,27 C110,22 86,22 74,26 Z" class="casco contorno" />
+      <ellipse cx="99" cy="16" rx="16" ry="5" fill="#373F4A" />
+      <circle cx="110" cy="19" r="3.5" class="bando-azul contorno-fino" />
+      <!-- Cejas arqueadas visibles por encima de las gafas de sol -->
+      <path d="M82,25 C87,22 93,23 96,26" fill="none" stroke="#181412" stroke-width="3.2" stroke-linecap="round" />
+      <path d="M102,26 C106,22 112,22 116,25" fill="none" stroke="#181412" stroke-width="3.2" stroke-linecap="round" />
+      <!-- Gafas de sol negras grandes con reflejos blancos -->
+      <path d="M78,28 L119,28 L116,38 L102,38 L99,33 L95,38 L81,38 Z" fill="#111317" class="contorno-fino" />
+      <line x1="84" y1="30" x2="91" y2="36" stroke="#8C98A4" stroke-width="2.2" stroke-linecap="round" />
+      <line x1="105" y1="30" x2="112" y2="36" stroke="#8C98A4" stroke-width="2.2" stroke-linecap="round" />
+      <!-- Nariz afilada -->
+      <path d="M99,33 L103,42 L96,42" fill="#C97E5B" class="contorno-fino" />
+      <!-- Bigote fino elegante y sonrisa pícara -->
+      <path d="M88,45 C94,43 104,43 110,45" fill="none" stroke="#181412" stroke-width="2.8" stroke-linecap="round" />
+      <path d="M91,48 C97,50 105,49 109,46" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" />
+
+      <!-- ARMA ENORME SUJETADA CON UNA MANO: Carabina Silenciada de Infiltración (148 px: de X=38,Y=142 a X=174,Y=64) -->
+      <g>
+        <!-- Culata plegable esquelética detrás del antebrazo -->
+        <path d="M132,88 L172,62 L176,72 L136,98 Z" class="metal-medio contorno" />
+        <!-- Cuerpo del subfusil/carabina negra con mira láser roja -->
+        <path d="M92,102 L140,74 L148,90 L100,118 Z" fill="#1E2228" class="contorno" />
+        <path d="M94,102 L138,75 L141,81 L97,108 Z" class="metal-luz" />
+        <!-- Cargador largo curvado -->
+        <path d="M104,114 L118,106 L128,132 L112,140 Z" class="metal-oscuro contorno" />
+        <rect x="111" y="124" width="13" height="6" transform="rotate(-28 111 124)" class="bando-azul" />
+        <!-- Mira telescópica nocturna arriba -->
+        <path d="M102,88 L132,70 L136,78 L106,96 Z" class="bando-azul contorno" />
+        <circle cx="104" cy="92" r="4" class="bando-rojo contorno-fino" />
+        <!-- Silenciador cilíndrico GIGANTE en primer plano (llega hasta X=34, Y=146) -->
+        <path d="M32,134 L94,98 L104,114 L42,150 Z" class="metal-oscuro contorno" />
+        <path d="M34,134 L94,99 L97,105 L37,140 Z" class="metal-medio" />
+        <!-- Ranuras térmicas y anillos del silenciador -->
+        <line x1="48" y1="126" x2="56" y2="140" stroke="#181412" stroke-width="3" />
+        <line x1="62" y1="118" x2="70" y2="132" stroke="#181412" stroke-width="3" />
+        <line x1="76" y1="110" x2="84" y2="124" stroke="#C95338" stroke-width="3.5" />
+      </g>
+
+      <!-- MANO DERECHA AGARRANDO LA EMPUÑADURA CON DEDOS CERRADOS (X=126, Y=98) -->
+      <g class="contorno-fino">
+        <path d="M118,88 C124,84 136,88 136,98 L130,108 C122,110 116,104 116,96 Z" class="piel" />
+        <!-- 4 dedos cerrados firmemente sobre el pistolete del arma -->
+        <rect x="115" y="92" width="11" height="5" rx="2.2" transform="rotate(-28 115 92)" class="piel" />
+        <rect x="117" y="97" width="11" height="5" rx="2.2" transform="rotate(-28 117 97)" class="piel" />
+        <rect x="119" y="102" width="10" height="5" rx="2.2" transform="rotate(-28 119 102)" class="piel" />
+        <rect x="121" y="106" width="9" height="4.5" rx="2" transform="rotate(-28 121 106)" class="piel" />
+      </g>
+    </symbol>
+
+    <!-- ===================================================================== -->
+    <!-- 4. MÉDICO (Bata blanca con cruz roja visible, gafas, cañón 148 px)    -->
+    <!-- ===================================================================== -->
+    <symbol id="medico" viewBox="0 0 200 200">
+      <!-- Sombra proyectada -->
+      <ellipse cx="100" cy="191" rx="48" ry="8" class="sombra-suelo" />
+
+      <!-- Mochila médica blanca y tanques de suero detrás de los hombros -->
+      <rect x="52" y="22" width="96" height="54" rx="8" fill="#E8EEF2" class="contorno" />
+      <rect x="56" y="24" width="88" height="14" rx="4" fill="#FFFFFF" />
+      <!-- Tanque presurizado azul a la derecha -->
+      <rect x="138" y="14" width="18" height="46" rx="7" class="bando-azul contorno" />
+      <rect x="44" y="14" width="18" height="46" rx="7" class="bando-rojo contorno" />
+
+      <!-- Piernas en postura 3/4 (Pelvis Y=130 a Suelo Y=198) -->
+      <path d="M70,130 L64,172 L84,174 L90,132 Z" class="uniforme contorno" />
+      <path d="M60,170 L85,172 L86,191 L50,193 C48,185 52,175 60,170 Z" class="botas contorno" />
+      <path d="M108,132 L114,174 L134,172 L128,130 Z" class="uniforme contorno" />
+      <path d="M112,172 L136,170 L148,192 C144,199 118,199 110,194 Z" class="botas contorno" />
+
+      <!-- BATA MÉDICA BLANCA Y DELANTAL CON GRAN CRUZ ROJA (Hombros Y=35 a Y=154) -->
+      <path d="M56,36 C82,28 118,28 144,36 L138,150 C114,158 84,158 60,150 Z" fill="#EDF2F7" class="contorno" />
+      <!-- Sombra lateral de la bata blanca -->
+      <path d="M56,36 L76,40 L72,152 L60,150 Z" fill="#CBD6E2" />
+      <!-- Peto interior verde oliva -->
+      <path d="M84,38 L116,38 L112,78 L88,78 Z" class="uniforme contorno-fino" />
+      <!-- GRAN CRUZ ROJA VISIBLE en el delantal inferior (entre el arma y las botas) -->
+      <g class="contorno-fino">
+        <circle cx="101" cy="134" r="17" fill="#FFFFFF" />
+        <path d="M96,122 L106,122 L106,129 L113,129 L113,139 L106,139 L106,146 L96,146 L96,139 L89,139 L89,129 L96,129 Z" fill="#D93226" />
+      </g>
+      <!-- Cruz roja en la hombrera izquierda -->
+      <path d="M48,38 L76,42 L70,64 L44,56 Z" fill="#FFFFFF" class="contorno" />
+      <path d="M58,44 L64,44 L64,49 L69,49 L69,55 L64,55 L64,60 L58,60 L58,55 L53,55 L53,49 L58,49 Z" fill="#D93226" />
+
+      <!-- Brazos con mangas blancas arremangadas y guantes médicos azules -->
+      <path d="M52,44 L34,78 L50,104 L68,90 L64,58 Z" fill="#EDF2F7" class="contorno" />
+      <path d="M144,44 L162,76 L142,100 L126,88 L132,58 Z" fill="#EDF2F7" class="contorno" />
+
+      <!-- CABEZA EXPRESIVA 40 px de alto (Y=12 a Y=52) con gafas y casco médico -->
+      <path d="M78,20 C78,12 122,12 122,20 L120,42 C118,49 109,53 100,53 C90,53 81,49 79,41 Z" class="piel contorno" />
+      <!-- Casco blanco/oliva con emblema de CRUZ ROJA arriba en perspectiva cenital -->
+      <path d="M73,26 C72,11 86,8 100,8 C114,8 128,11 127,26 C112,21 88,21 73,26 Z" class="casco contorno" />
+      <ellipse cx="100" cy="16" rx="14" ry="7" fill="#FFFFFF" class="contorno-fino" />
+      <path d="M97,11 L103,11 L103,14 L107,14 L107,18 L103,18 L103,21 L97,21 L97,18 L93,18 L93,14 L97,14 Z" fill="#D93226" />
+      <!-- Gafas de montura cuadrada dejando ver ojos grandes y expresivos -->
+      <rect x="81" y="28" width="16" height="11" rx="2.5" fill="#E6F4FF" class="contorno-fino" />
+      <rect x="103" y="28" width="16" height="11" rx="2.5" fill="#E6F4FF" class="contorno-fino" />
+      <line x1="97" y1="32" x2="103" y2="32" stroke="#181412" stroke-width="2.5" />
+      <circle cx="90" cy="33.5" r="2.8" fill="#181412" />
+      <circle cx="91" cy="32.5" r="1" fill="#FFFFFF" />
+      <circle cx="111" cy="33.5" r="2.8" fill="#181412" />
+      <circle cx="112" cy="32.5" r="1" fill="#FFFFFF" />
+      <!-- Cejas expresivas arriba de las gafas -->
+      <path d="M82,25 L96,26" stroke="#4A3222" stroke-width="3.2" stroke-linecap="round" />
+      <path d="M104,26 L118,25" stroke="#4A3222" stroke-width="3.2" stroke-linecap="round" />
+      <!-- Nariz pronunciada y sonrisa amable -->
+      <path d="M100,33 L104,41 L97,41" fill="#C97E5B" class="contorno-fino" />
+      <path d="M89,44 C95,49 106,49 112,44 Z" fill="#FFFFFF" class="contorno-fino" />
+
+      <!-- ARMA ENORME: Cañón Neumático de Bio-Suero / Jeringa Pesada (148 px: de X=26,Y=118 a X=174,Y=74) -->
+      <g>
+        <!-- Culata blanca y roja con manómetro -->
+        <path d="M24,104 L62,92 L68,112 L28,124 Z" fill="#FFFFFF" class="contorno" />
+        <path d="M26,112 L64,100 L67,110 L29,122 Z" fill="#D93226" />
+        <!-- Tanque central cilíndrico de cristal con líquido curativo rojo/azul brillante -->
+        <rect x="62" y="80" width="60" height="28" rx="10" transform="rotate(-16 62 80)" fill="#E6F4FF" class="contorno" />
+        <rect x="66" y="86" width="52" height="16" rx="6" transform="rotate(-16 66 86)" fill="#FF4733" />
+        <path d="M70,84 L112,72" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round" />
+        <!-- Cruz blanca sobre el cañón delantero -->
+        <path d="M118,74 L156,63 L162,82 L124,93 Z" class="bando-azul contorno" />
+        <!-- Inyector / Bocacha triple pesada en la punta (hasta X=176) -->
+        <path d="M154,60 L174,54 L180,76 L160,82 Z" class="metal-medio contorno" />
+        <line x1="175" y1="62" x2="188" y2="58" stroke="#8C98A4" stroke-width="4" stroke-linecap="round" />
+      </g>
+
+      <!-- MANOS CON GUANTES Y DEDOS CERRADOS SOBRE EL ARMA (Y ≈ 94..108) -->
+      <!-- Mano izquierda en la empuñadura trasera (X=52, Y=106) -->
+      <g class="contorno-fino">
+        <path d="M42,96 C48,92 58,95 60,104 L56,114 C48,116 42,110 42,102 Z" class="piel" />
+        <rect x="50" y="98" width="10" height="5" rx="2.2" transform="rotate(-16 50 98)" class="piel" />
+        <rect x="51" y="103" width="10" height="5" rx="2.2" transform="rotate(-16 51 103)" class="piel" />
+        <rect x="52" y="108" width="9" height="5" rx="2.2" transform="rotate(-16 52 108)" class="piel" />
+      </g>
+      <!-- Mano derecha agarrando el bombeo delantero (X=128, Y=86) -->
+      <g class="contorno-fino">
+        <path d="M120,76 C126,72 138,76 138,86 L132,96 C124,98 118,92 118,84 Z" class="piel" />
+        <rect x="120" y="74" width="6" height="11" rx="2.5" transform="rotate(-16 120 74)" class="piel" />
+        <rect x="126" y="72" width="6" height="11" rx="2.5" transform="rotate(-16 126 72)" class="piel" />
+        <rect x="132" y="71" width="6" height="11" rx="2.5" transform="rotate(-16 132 71)" class="piel" />
+        <rect x="137" y="70" width="5.5" height="10" rx="2.5" transform="rotate(-16 137 70)" class="piel" />
+      </g>
+    </symbol>
+
+    <!-- ===================================================================== -->
+    <!-- 5. INGENIERO (Casco de obra amarillo, herramientas, bigote, 148 px)   -->
+    <!-- ===================================================================== -->
+    <symbol id="ingeniero" viewBox="0 0 200 200">
+      <!-- Sombra proyectada -->
+      <ellipse cx="100" cy="191" rx="52" ry="8.5" class="sombra-suelo" />
+
+      <!-- Mochila generador industrial amarilla + Llave inglesa gigante asomando -->
+      <rect x="48" y="24" width="98" height="52" rx="6" fill="#D99B14" class="contorno" />
+      <rect x="52" y="26" width="90" height="12" rx="3" fill="#FFD23F" />
+      <!-- Cabeza de llave inglesa gigante asomando por el hombro izquierdo -->
+      <path d="M36,12 L54,8 L58,24 L46,28 L52,38 L40,42 L32,22 C28,18 30,14 36,12 Z" class="metal-luz contorno" />
+      <!-- Soplete rojo/azul asomando por la derecha -->
+      <rect x="138" y="10" width="14" height="28" rx="4" class="bando-rojo contorno" />
+
+      <!-- Piernas robustas con peto de trabajo (Pelvis Y=130 a Suelo Y=198) -->
+      <path d="M64,128 L58,172 L82,174 L88,130 Z" class="uniforme contorno" />
+      <rect x="58" y="150" width="24" height="14" rx="2" fill="#F2B718" class="contorno-fino" />
+      <path d="M54,170 L84,172 L85,191 L46,193 C44,185 48,175 54,170 Z" class="botas contorno" />
+
+      <path d="M110,130 L116,174 L140,172 L134,128 Z" class="uniforme contorno" />
+      <rect x="114" y="150" width="24" height="14" rx="2" fill="#F2B718" class="contorno-fino" />
+      <path d="M114,172 L142,170 L154,192 C150,199 120,199 112,194 Z" class="botas contorno" />
+
+      <!-- Torso robusto con chaleco reflectante amarillo y peto azul/oliva (Hombros Y=35 a Pelvis Y=130) -->
+      <path d="M48,36 C78,28 122,28 150,36 L136,130 C112,138 86,138 62,130 Z" class="uniforme contorno" />
+      <!-- Chaleco de obra AMARILLO abierto -->
+      <path d="M48,36 L86,42 L82,126 L60,124 L42,66 Z" fill="#F2B718" class="contorno" />
+      <path d="M150,36 L114,42 L118,126 L138,124 L156,66 Z" fill="#F2B718" class="contorno" />
+      <!-- Bandas reflectantes grises/blancas -->
+      <path d="M52,68 L84,72 L83,82 L50,78 Z" fill="#E6EDF2" class="contorno-fino" />
+      <path d="M146,68 L116,72 L117,82 L148,78 Z" fill="#E6EDF2" class="contorno-fino" />
+      <!-- Camisa azul de mecánico al centro -->
+      <path d="M86,42 L114,42 L112,124 L86,124 Z" class="bando-azul contorno-fino" />
+      <!-- Cinturón portaherramientas con martillo y alicates -->
+      <path d="M58,120 L140,120 L138,134 L60,134 Z" fill="#3B2818" class="contorno" />
+      <rect x="66" y="116" width="16" height="20" rx="3" fill="#D99B14" class="contorno-fino" />
+      <rect x="92" y="120" width="16" height="13" rx="2" class="metal-luz contorno-fino" />
+
+      <!-- Brazos fuertes con camisa amarilla remangada -->
+      <path d="M46,42 L26,76 L44,104 L64,90 L58,56 Z" class="piel contorno" />
+      <path d="M46,40 L64,48 L56,68 L32,58 Z" fill="#F2B718" class="contorno" />
+      <path d="M150,42 L170,76 L148,100 L130,88 L138,56 Z" class="piel contorno" />
+      <path d="M150,40 L134,48 L142,68 L164,58 Z" fill="#F2B718" class="contorno" />
+
+      <!-- CABEZA EXPRESIVA 40 px de alto (Y=11 a Y=51) con CASCO DE OBRA AMARILLO y GRAN BIGOTE -->
+      <!-- Orejeras de protección acústica naranjas/rojas a los lados -->
+      <ellipse cx="73" cy="34" rx="6" ry="9" class="bando-rojo contorno-fino" />
+      <ellipse cx="127" cy="34" rx="6" ry="9" class="bando-rojo contorno-fino" />
+      <!-- Cara ancha -->
+      <path d="M76,20 C76,12 124,12 124,20 L122,42 C120,49 110,52 100,52 C89,52 79,48 77,41 Z" class="piel contorno" />
+      <!-- Casco de obra AMARILLO con nervadura superior visible en 50° (Y=9 a Y=28) -->
+      <path d="M70,25 C70,10 85,7 100,7 C115,7 130,10 130,25 C115,20 85,20 70,25 Z" class="casco contorno" />
+      <path d="M71,24 C71,10 85,7 100,7 C115,7 129,10 129,24 C114,19 86,19 71,24 Z" fill="#FFD026" class="contorno" />
+      <!-- Cresta central del casco de obra y visera -->
+      <path d="M94,7 L106,7 L108,21 L92,21 Z" fill="#FFF078" class="contorno-fino" />
+      <path d="M68,24 C88,19 114,19 132,24 L128,28 C112,24 88,24 72,28 Z" fill="#D99B14" class="contorno-fino" />
+      <!-- Ojos grandes y alegres + Cejas gruesas -->
+      <ellipse cx="90" cy="32" rx="5.5" ry="4.5" fill="#FFFFFF" class="contorno-fino" />
+      <circle cx="91" cy="32" r="2.5" fill="#181412" />
+      <ellipse cx="111" cy="32" rx="5.5" ry="4.5" fill="#FFFFFF" class="contorno-fino" />
+      <circle cx="112" cy="32" r="2.5" fill="#181412" />
+      <path d="M82,27 L96,28" stroke="#4A2E1B" stroke-width="3.8" stroke-linecap="round" />
+      <path d="M105,28 L119,27" stroke="#4A2E1B" stroke-width="3.8" stroke-linecap="round" />
+      <!-- Nariz redonda grande -->
+      <ellipse cx="101" cy="36" rx="6" ry="4.5" fill="#C97E5B" class="contorno-fino" />
+      <!-- Bigotazo frondoso de morsa y sonrisa -->
+      <path d="M80,43 C86,36 116,36 122,43 C118,47 110,46 101,43 C92,46 84,47 80,43 Z" fill="#593822" class="contorno-fino" />
+      <path d="M92,44 L110,44 L108,48 L94,48 Z" fill="#FFFFFF" class="contorno-fino" />
+
+      <!-- ARMA ENORME: Cañón Remachador / Escopeta Neumática Industrial (150 px: de X=24,Y=120 a X=174,Y=72) -->
+      <g>
+        <!-- Bombona trasera de presión roja y amarilla -->
+        <rect x="22" y="102" width="42" height="24" rx="8" transform="rotate(-16 22 102)" class="bando-rojo contorno" />
+        <!-- Chasis industrial amarillo tipo excavadora con franjas de peligro -->
+        <path d="M56,92 L134,68 L142,94 L64,118 Z" fill="#F2B718" class="contorno" />
+        <path d="M58,92 L132,69 L135,77 L61,100 Z" fill="#FFE169" />
+        <!-- Franjas negras de peligro industrial -->
+        <polygon points="78,86 88,83 82,110 72,113" fill="#181412" />
+        <polygon points="98,80 108,77 102,104 92,107" fill="#181412" />
+        <!-- Manómetro circular azul arriba -->
+        <circle cx="88" cy="78" r="8" fill="#FFFFFF" class="contorno-fino" />
+        <line x1="88" y1="78" x2="92" y2="73" stroke="#D93226" stroke-width="2.5" />
+        <!-- Doble cañón pesado con mordaza hidráulica en la punta (hasta X=176) -->
+        <path d="M134,68 L174,56 L180,78 L140,90 Z" class="metal-oscuro contorno" />
+        <path d="M164,50 L182,48 L178,60 L166,62 Z" class="metal-luz contorno-fino" />
+        <path d="M168,84 L186,80 L180,70 L168,74 Z" class="metal-luz contorno-fino" />
+      </g>
+
+      <!-- MANOS CON GUANTES DE OBRA Y DEDOS CERRADOS SOBRE EL ARMA (Y ≈ 92..108) -->
+      <g class="contorno-fino">
+        <path d="M40,96 C46,92 58,95 60,104 L56,114 C48,116 40,110 40,102 Z" class="piel" />
+        <rect x="49" y="98" width="11" height="5" rx="2.2" transform="rotate(-16 49 98)" class="piel" />
+        <rect x="50" y="103" width="11" height="5" rx="2.2" transform="rotate(-16 50 103)" class="piel" />
+        <rect x="51" y="108" width="10" height="5" rx="2.2" transform="rotate(-16 51 108)" class="piel" />
+      </g>
+      <g class="contorno-fino">
+        <path d="M122,74 C128,70 140,74 140,84 L134,94 C126,96 120,90 120,82 Z" class="piel" />
+        <rect x="122" y="72" width="6.5" height="11" rx="2.5" transform="rotate(-16 122 72)" class="piel" />
+        <rect x="128" y="70" width="6.5" height="11" rx="2.5" transform="rotate(-16 128 70)" class="piel" />
+        <rect x="134" y="69" width="6.5" height="11" rx="2.5" transform="rotate(-16 134 69)" class="piel" />
+        <rect x="140" y="68" width="6" height="10" rx="2.5" transform="rotate(-16 140 68)" class="piel" />
+      </g>
+    </symbol>
+
+    <!-- ===================================================================== -->
+    <!-- 6. COMANDO (Atlético y estándar, acento azul, fusil+lanzagranadas)    -->
+    <!-- ===================================================================== -->
+    <symbol id="comando" viewBox="0 0 200 200">
+      <!-- Sombra proyectada -->
+      <ellipse cx="100" cy="191" rx="50" ry="8.5" class="sombra-suelo" />
+
+      <!-- Mochila de asalto azul de bando y saco enrollado a los lados (plano superior visible) -->
+      <rect x="46" y="22" width="108" height="48" rx="8" class="bando-azul contorno" />
+      <rect x="52" y="24" width="96" height="12" rx="4" fill="#63A4EB" />
+      <ellipse cx="46" cy="44" rx="10" ry="18" fill="#A69F88" class="contorno" />
+      <ellipse cx="154" cy="44" rx="10" ry="18" fill="#A69F88" class="contorno" />
+
+      <!-- Piernas atléticas en postura 3/4 (Pelvis Y=130 a Suelo Y=198) -->
+      <path d="M68,128 L60,172 L82,174 L90,130 Z" class="uniforme contorno" />
+      <path d="M60,150 L83,152 L82,164 L59,162 Z" class="bando-azul contorno-fino" />
+      <path d="M56,170 L84,172 L85,191 L48,193 C45,185 49,175 56,170 Z" class="botas contorno" />
+
+      <path d="M108,130 L116,174 L138,172 L130,128 Z" class="uniforme contorno" />
+      <path d="M113,150 L136,148 L138,160 L115,162 Z" class="bando-azul contorno-fino" />
+      <path d="M114,172 L140,170 L152,192 C148,199 120,199 112,194 Z" class="botas contorno" />
+
+      <!-- Torso atlético en V con chaleco táctico AZUL y bolsas de munición (Hombros Y=35 a Pelvis Y=130) -->
+      <path d="M50,36 C80,28 120,28 150,36 L132,130 C110,137 88,137 66,130 Z" class="uniforme contorno" />
+      <!-- Peto blindado azul brillante con hombreras -->
+      <path d="M48,36 L88,42 L84,124 L64,122 L46,64 Z" class="bando-azul contorno" />
+      <path d="M150,36 L112,42 L116,124 L134,122 L152,64 Z" class="bando-azul contorno" />
+      <path d="M52,38 L84,43 L82,54 L48,50 Z" fill="#63A4EB" />
+      <path d="M146,38 L116,43 L118,54 L150,50 Z" fill="#63A4EB" />
+      <!-- Tres portacargadores en el pecho y granadas rojas -->
+      <rect x="68" y="68" width="16" height="24" rx="3" fill="#2B3036" class="contorno-fino" />
+      <rect x="92" y="68" width="16" height="24" rx="3" fill="#2B3036" class="contorno-fino" />
+      <rect x="116" y="68" width="16" height="24" rx="3" fill="#2B3036" class="contorno-fino" />
+      <circle cx="72" cy="54" r="6" class="bando-rojo contorno-fino" />
+      <circle cx="128" cy="54" r="6" class="bando-rojo contorno-fino" />
+      <!-- Cinturón táctico -->
+      <path d="M64,120 L134,120 L132,133 L66,133 Z" fill="#23272B" class="contorno" />
+      <rect x="92" y="119" width="16" height="14" rx="2" fill="#F2B718" class="contorno-fino" />
+
+      <!-- Brazos atléticos desnudos con muñequeras azules -->
+      <path d="M48,42 L28,76 L46,104 L64,90 L60,56 Z" class="piel contorno" />
+      <path d="M150,42 L168,76 L146,100 L128,88 L136,56 Z" class="piel contorno" />
+
+      <!-- CABEZA HEROICA 40 px de alto (Y=12 a Y=52) con casco, gafas arriba y pintura facial -->
+      <path d="M77,20 C77,12 123,12 123,20 L121,42 C119,50 110,53 100,53 C90,53 80,49 78,41 Z" class="piel contorno" />
+      <!-- Pintura de guerra negra en los pómulos y tirita -->
+      <path d="M80,36 L92,38 L91,42 L79,40 Z" fill="#2B3036" />
+      <path d="M110,38 L120,36 L120,40 L111,42 Z" fill="#2B3036" />
+      <!-- Casco militar con gafas tácticas subidas en la frente (Y=10 a Y=28) -->
+      <path d="M72,26 C72,11 86,8 100,8 C114,8 128,11 128,26 C114,21 86,21 72,26 Z" class="casco contorno" />
+      <!-- Gafas tácticas azules sobre el casco -->
+      <rect x="76" y="14" width="21" height="11" rx="4" class="bando-azul contorno-fino" />
+      <rect x="103" y="14" width="21" height="11" rx="4" class="bando-azul contorno-fino" />
+      <path d="M80,16 L91,16" stroke="#A3D1FF" stroke-width="2.5" stroke-linecap="round" />
+      <path d="M107,16 L118,16" stroke="#A3D1FF" stroke-width="2.5" stroke-linecap="round" />
+      <!-- Ojos grandes decididos y cejas marcadas -->
+      <ellipse cx="90" cy="33" rx="5.5" ry="4.2" fill="#FFFFFF" class="contorno-fino" />
+      <circle cx="91" cy="33" r="2.5" fill="#181412" />
+      <ellipse cx="111" cy="33" rx="5.5" ry="4.2" fill="#FFFFFF" class="contorno-fino" />
+      <circle cx="112" cy="33" r="2.5" fill="#181412" />
+      <path d="M81,28 L97,30" stroke="#181412" stroke-width="3.6" stroke-linecap="round" />
+      <path d="M119,28 L104,30" stroke="#181412" stroke-width="3.6" stroke-linecap="round" />
+      <!-- Nariz fuerte y sonrisa confiada con hoyuelo en la barbilla -->
+      <path d="M100,32 L105,40 L97,40" fill="#C97E5B" class="contorno-fino" />
+      <path d="M88,43 L113,42 L110,48 L90,48 Z" fill="#FFFFFF" class="contorno-fino" />
+      <path d="M100,50 L100,52" stroke="#A86242" stroke-width="2" />
+
+      <!-- ARMA ENORME: Fusil de Asalto Pesado con Lanzagranadas y Tambor (156 px: de X=22,Y=120 a X=176,Y=70) -->
+      <g>
+        <!-- Culata táctica ajustable azul y negra -->
+        <path d="M20,106 L58,94 L64,114 L26,126 Z" class="metal-oscuro contorno" />
+        <path d="M24,108 L54,98 L57,106 L27,116 Z" class="bando-azul" />
+        <!-- Receptor del fusil y riel superior -->
+        <path d="M56,92 L136,66 L142,86 L62,112 Z" class="metal-medio contorno" />
+        <path d="M58,92 L134,67 L136,74 L60,99 Z" class="metal-luz" />
+        <!-- Cargador de tambor doble y lanzagranadas inferior con boca roja -->
+        <circle cx="94" cy="112" r="15" class="metal-oscuro contorno" />
+        <circle cx="94" cy="112" r="7" class="bando-rojo contorno-fino" />
+        <path d="M106,88 L152,73 L156,87 L110,102 Z" class="bando-azul contorno" />
+        <!-- Mira holográfica arriba y bocacha pesada (hasta X=178) -->
+        <rect x="78" y="72" width="22" height="12" rx="2" transform="rotate(-18 78 72)" class="metal-oscuro contorno-fino" />
+        <path d="M136,68 L176,55 L181,69 L141,82 Z" class="metal-oscuro contorno" />
+      </g>
+
+      <!-- MANOS CON DEDOS CERRADOS AGARRANDO EL FUSIL Y EL LANZAGRANADAS (Y ≈ 92..108) -->
+      <g class="contorno-fino">
+        <path d="M42,96 C48,92 58,95 60,104 L56,114 C48,116 42,110 42,102 Z" class="piel" />
+        <rect x="50" y="98" width="11" height="5" rx="2.2" transform="rotate(-18 50 98)" class="piel" />
+        <rect x="51" y="103" width="11" height="5" rx="2.2" transform="rotate(-18 51 103)" class="piel" />
+        <rect x="52" y="108" width="10" height="5" rx="2.2" transform="rotate(-18 52 108)" class="piel" />
+      </g>
+      <g class="contorno-fino">
+        <path d="M122,76 C128,72 140,76 140,86 L134,96 C126,98 120,92 120,84 Z" class="piel" />
+        <rect x="122" y="74" width="6.5" height="11" rx="2.5" transform="rotate(-18 122 74)" class="piel" />
+        <rect x="128" y="72" width="6.5" height="11" rx="2.5" transform="rotate(-18 128 72)" class="piel" />
+        <rect x="134" y="70" width="6.5" height="11" rx="2.5" transform="rotate(-18 134 70)" class="piel" />
+        <rect x="140" y="69" width="6" height="10" rx="2.5" transform="rotate(-18 140 69)" class="piel" />
+      </g>
+    </symbol>
+
+    <!-- ===================================================================== -->
+    <!-- 7. CAPITÁN (Gorra de mando roja, medallas, patillas, cañón 152 px)    -->
+    <!-- ===================================================================== -->
+    <symbol id="capitan" viewBox="0 0 200 200">
+      <!-- Sombra proyectada -->
+      <ellipse cx="100" cy="191" rx="52" ry="8.5" class="sombra-suelo" />
+
+      <!-- Mochila de mando y radio táctica con megáfono/antena (Y=6 a Y=72) -->
+      <rect x="48" y="24" width="104" height="50" rx="6" class="bando-azul contorno" />
+      <rect x="54" y="26" width="92" height="12" rx="3" fill="#63A4EB" />
+      <!-- Antena de radio alta con altavoz en el lado izquierdo -->
+      <line x1="60" y1="6" x2="64" y2="26" stroke="#181412" stroke-width="4" stroke-linecap="round" />
+      <polygon points="46,6 64,12 62,22 44,18" class="metal-luz contorno-fino" />
+
+      <!-- Piernas firmes con faldón de casaca militar (Pelvis Y=130 a Suelo Y=198) -->
+      <path d="M66,128 L60,172 L84,174 L90,130 Z" class="uniforme contorno" />
+      <path d="M56,170 L85,172 L86,191 L48,193 C45,185 49,175 56,170 Z" class="botas contorno" />
+
+      <path d="M108,130 L114,174 L138,172 L132,128 Z" class="uniforme contorno" />
+      <path d="M112,172 L140,170 L152,192 C148,199 120,199 110,194 Z" class="botas contorno" />
+
+      <!-- Torso imponente con casaca de mando, solapas ROJAS, charreteras doradas y medallas -->
+      <path d="M46,36 C78,28 122,28 154,36 L138,142 C112,150 88,150 62,142 Z" class="uniforme contorno" />
+      <!-- Solapas rojas de capitán y banda cruzada -->
+      <polygon points="56,38 94,44 86,138 60,136" fill="#C93B2B" class="contorno" />
+      <polygon points="144,38 106,44 114,138 140,136" fill="#C93B2B" class="contorno" />
+      <!-- Camisa interior a rayas azules y blancas como en la referencia -->
+      <path d="M88,42 L112,42 L108,120 L92,120 Z" class="bando-azul contorno-fino" />
+      <!-- Charreteras doradas en los hombros (Y=32..48) -->
+      <path d="M38,38 C46,28 66,30 72,40 L64,52 L36,48 Z" fill="#F2B718" class="contorno" />
+      <path d="M162,38 C154,28 134,30 128,40 L136,52 L164,48 Z" fill="#F2B718" class="contorno" />
+      <!-- Dos medallas doradas brillando en el pecho -->
+      <circle cx="76" cy="64" r="6" fill="#FFD026" class="contorno-fino" />
+      <circle cx="90" cy="66" r="6" fill="#FFD026" class="contorno-fino" />
+      <!-- Cinturón de oficial rojo y dorado -->
+      <path d="M60,122 L140,122 L138,135 L62,135 Z" fill="#292320" class="contorno" />
+      <rect x="90" y="120" width="20" height="16" rx="3" fill="#FFD026" class="contorno-fino" />
+
+      <!-- Brazos musculosos con puños rojos y guantes azules -->
+      <path d="M46,44 L26,78 L46,104 L64,90 L58,56 Z" class="piel contorno" />
+      <path d="M154,44 L172,76 L150,100 L132,88 L140,56 Z" class="piel contorno" />
+
+      <!-- CABEZA DE MANDO 40 px de alto (Y=10 a Y=50) con GORRA DE PLATO ROJA y parche/monóculo -->
+      <path d="M77,20 C77,12 123,12 123,20 L122,42 C120,50 110,52 100,52 C89,52 79,49 78,41 Z" class="piel contorno" />
+      <!-- Patillas blancas/grises de veterano unidas al bigote imperial -->
+      <path d="M78,28 L85,28 L86,44 L78,41 Z" fill="#D9E0E6" class="contorno-fino" />
+      <path d="M122,28 L115,28 L114,44 L122,41 Z" fill="#D9E0E6" class="contorno-fino" />
+      <!-- GORRA DE MANDO ROJA (plato superior inclinado a 50° muy visible, Y=6 a Y=27) -->
+      <path d="M64,18 C64,7 84,4 100,4 C116,4 136,7 136,18 C132,25 116,26 100,26 C84,26 68,25 64,18 Z" class="casco contorno" />
+      <ellipse cx="100" cy="14" rx="32" ry="9" fill="#D93829" class="contorno" />
+      <ellipse cx="100" cy="12" rx="24" ry="5" fill="#FF5C4D" />
+      <!-- Visera negra acharolada e insignia de águila dorada -->
+      <path d="M72,23 C88,19 112,19 128,23 L124,29 C110,25 90,25 76,29 Z" fill="#181412" class="contorno-fino" />
+      <polygon points="100,11 108,16 104,23 96,23 92,16" fill="#FFD026" class="contorno-fino" />
+      <!-- Ojo derecho feroz + Parche táctico en el ojo izquierdo -->
+      <ellipse cx="90" cy="33" rx="5.5" ry="4.5" fill="#FFFFFF" class="contorno-fino" />
+      <circle cx="91" cy="33" r="2.5" fill="#181412" />
+      <path d="M81,27 L97,30" stroke="#181412" stroke-width="3.8" stroke-linecap="round" />
+      <!-- Parche negro de veterano con cicatriz -->
+      <path d="M104,28 L120,28 L118,38 L106,38 Z" fill="#181412" class="contorno-fino" />
+      <line x1="98" y1="26" x2="122" y2="33" stroke="#181412" stroke-width="2.2" />
+      <!-- Nariz cuadrada y boca autoritaria con mostacho blanco -->
+      <path d="M100,32 L105,40 L97,40" fill="#C97E5B" class="contorno-fino" />
+      <path d="M84,43 C92,38 108,38 116,43 C112,46 106,45 100,43 C94,45 88,46 84,43 Z" fill="#D9E0E6" class="contorno-fino" />
+      <path d="M90,45 L110,45 L108,49 L92,49 Z" fill="#FFFFFF" class="contorno-fino" />
+
+      <!-- ARMA ENORME: Cañón Escopeta Doble de Mando con Insignia Dorada (152 px: de X=24,Y=118 a X=176,Y=70) -->
+      <g>
+        <!-- Culata noble roja y dorada -->
+        <path d="M22,104 L62,92 L68,112 L28,124 Z" fill="#9E2A1E" class="contorno" />
+        <path d="M24,104 L60,93 L62,100 L26,111 Z" fill="#D93829" />
+        <!-- Cuerpo blindado con ala dorada de capitán y cartuchos rojos visibles -->
+        <path d="M60,90 L132,66 L140,92 L68,116 Z" class="metal-oscuro contorno" />
+        <polygon points="72,92 118,77 114,90 76,102" fill="#FFD026" class="contorno-fino" />
+        <!-- Cañones dobles superpuestos de gran calibre (hasta X=178) -->
+        <path d="M130,64 L176,50 L182,74 L136,88 Z" class="metal-medio contorno" />
+        <path d="M132,65 L174,51 L176,59 L134,73 Z" class="metal-luz" />
+        <line x1="133" y1="76" x2="179" y2="62" stroke="#181412" stroke-width="3.5" />
+        <!-- Bocacha dorada y punto de mira rojo -->
+        <rect x="166" y="49" width="10" height="26" rx="2" transform="rotate(-17 166 49)" fill="#FFD026" class="contorno-fino" />
+      </g>
+
+      <!-- MANOS CON GUANTES TÁCTICOS Y DEDOS CERRADOS SOBRE EL ARMA (Y ≈ 92..108) -->
+      <g class="contorno-fino">
+        <path d="M42,96 C48,92 58,95 60,104 L56,114 C48,116 42,110 42,102 Z" class="piel" />
+        <rect x="50" y="98" width="11" height="5" rx="2.2" transform="rotate(-17 50 98)" class="piel" />
+        <rect x="51" y="103" width="11" height="5" rx="2.2" transform="rotate(-17 51 103)" class="piel" />
+        <rect x="52" y="108" width="10" height="5" rx="2.2" transform="rotate(-17 52 108)" class="piel" />
+      </g>
+      <g class="contorno-fino">
+        <path d="M122,74 C128,70 140,74 140,84 L134,94 C126,96 120,90 120,82 Z" class="piel" />
+        <rect x="122" y="72" width="6.5" height="11" rx="2.5" transform="rotate(-17 122 72)" class="piel" />
+        <rect x="128" y="70" width="6.5" height="11" rx="2.5" transform="rotate(-17 128 70)" class="piel" />
+        <rect x="134" y="69" width="6.5" height="11" rx="2.5" transform="rotate(-17 134 69)" class="piel" />
+        <rect x="140" y="68" width="6" height="10" rx="2.5" transform="rotate(-17 140 68)" class="piel" />
+      </g>
+    </symbol>
+  </defs>
+
+  <!-- ======================================================================= -->
+  <!-- MUESTRARIO VISUAL EN FILA DE LOS 7 SÍMBOLOS (200x200 px cada uno)       -->
+  <!-- ======================================================================= -->
+  <rect width="1400" height="240" fill="#23282E" />
+  <g transform="translate(0, 10)">
+    <use href="#francotirador" x="0" y="0" width="200" height="200" />
+    <use href="#artillero" x="200" y="0" width="200" height="200" />
+    <use href="#espia" x="400" y="0" width="200" height="200" />
+    <use href="#medico" x="600" y="0" width="200" height="200" />
+    <use href="#ingeniero" x="800" y="0" width="200" height="200" />
+    <use href="#comando" x="1000" y="0" width="200" height="200" />
+    <use href="#capitan" x="1200" y="0" width="200" height="200" />
+  </g>
+</svg>
