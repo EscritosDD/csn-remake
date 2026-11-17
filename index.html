@@ -5368,6 +5368,59 @@ function getRealSpriteURL(un){
   const e=renderRealSprite(un);
   return e?e.url:null;
 }
+/* ================= PROPS DECORATIVOS POR MAPA (F5) =================
+   Cada tema recibe su propio juego de props construidos en código (formas
+   simples + textura procedural), colocados en el anillo exterior: fuera de
+   la cuadrícula jugable de 12x12, así que no tapan casillas ni tocan una
+   sola regla. Sirven para que cada mapa se lea como un lugar distinto y no
+   como el mismo tablero con otro cielo. */
+function buildThemedProps3(world,theme){
+  if(!world||typeof THREE==='undefined')return;
+  let seed=(theme||'x').split('').reduce((a,c)=>a+c.charCodeAt(0),11);
+  const rand=()=>{seed=(seed*1103515245+12345)&0x7fffffff;return seed/0x7fffffff;};
+  const spots=[];
+  for(let a=0;a<30;a++){const ang=a/30*Math.PI*2+rand()*0.1;const rad=6.7+rand()*0.6;spots.push({x:Math.cos(ang)*rad,z:Math.sin(ang)*rad});}
+  const take=()=>spots.splice(Math.floor(rand()*spots.length),1)[0];
+  const boxp=(w,h,d,col,tex)=>{const sp=take();if(!sp)return null;let m;
+    if(tex){m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),texMat3(tex,col));m.position.set(sp.x,h/2+0.02,sp.z);m.castShadow=true;m.receiveShadow=true;}
+    else m=box3(w,h,d,col,sp.x,h/2+0.02,sp.z,0.85);
+    m.rotation.y=rand()*Math.PI;world.add(m);return m;};
+  const cylp=(r,h,col)=>{const sp=take();if(!sp)return null;const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,12),mat3(col,0.8));m.position.set(sp.x,h/2+0.02,sp.z);m.castShadow=true;world.add(m);return m;};
+  const lamp=()=>{const sp=take();if(!sp)return null;const g=new THREE.Group();g.position.set(sp.x,0,sp.z);
+    const post=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.07,2.3,8),mat3('#3b4046',0.6));post.position.y=1.15;post.castShadow=true;g.add(post);
+    const head=new THREE.Mesh(new THREE.BoxGeometry(0.3,0.08,0.3),mat3('#f2b234',0.5));head.position.y=2.34;g.add(head);
+    world.add(g);return g;};
+  if(theme==='terminal'||theme==='depot'||theme==='yard'||theme==='astillero'){
+    const cols=['#3f6f8f','#a4432f','#c9a227','#3f7a52'];
+    for(let i=0;i<5;i++)boxp(2.2,1.1,1.0,cols[i%4],null);
+    for(let i=0;i<3;i++)boxp(0.7,0.12,0.9,'#8d6436','crate');
+    if(theme==='astillero'){for(let i=0;i<2;i++){const sp=take();if(!sp)continue;const g=new THREE.Group();g.position.set(sp.x,0,sp.z);
+      const a=new THREE.Mesh(new THREE.BoxGeometry(0.22,3.2,0.22),mat3('#c9a227',0.6));a.position.set(-0.45,1.6,0);a.castShadow=true;g.add(a);
+      const b=new THREE.Mesh(new THREE.BoxGeometry(0.22,3.2,0.22),mat3('#c9a227',0.6));b.position.set(0.45,1.6,0);b.castShadow=true;g.add(b);
+      const c=new THREE.Mesh(new THREE.BoxGeometry(1.5,0.18,0.18),mat3('#8a6f1c',0.6));c.position.set(0,3.1,0);g.add(c);world.add(g);}}
+    for(let i=0;i<2;i++)lamp();
+  } else if(theme==='platform'||theme==='rotonda'||theme==='cruce'){
+    for(let i=0;i<4;i++){const sp=take();if(!sp)continue;const bench=box3(1.1,0.16,0.34,'#7d5a34',sp.x,0.42,sp.z,0.9);const back=box3(1.1,0.3,0.08,'#8d6436',sp.x,0.62,sp.z+0.13,0.9);world.add(bench);world.add(back);}
+    for(let i=0;i<3;i++)lamp();
+    for(let i=0;i<2;i++)cylp(0.3,0.5,'#5c5346');
+  } else if(theme==='market'||theme==='plaza'){
+    for(let i=0;i<3;i++){const sp=take();if(!sp)continue;const g=new THREE.Group();g.position.set(sp.x,0,sp.z);
+      g.add(box3(1.2,0.5,0.6,'#8d6436',0,0.27,0,0.9));
+      const canopy=box3(1.4,0.06,0.8,i%2?'#c9503a':'#3f7a8f',0,1.55,0,0.8);canopy.rotation.z=0.06;g.add(canopy);
+      [[-0.6,-0.3],[0.6,-0.3],[-0.6,0.3],[0.6,0.3]].forEach(p=>{const post=new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,1.5,6),mat3('#5c5346',0.7));post.position.set(p[0],0.75,p[1]);g.add(post);});
+      world.add(g);}
+    for(let i=0;i<3;i++)cylp(0.28,0.44,'#6b7a5a');
+    for(let i=0;i<2;i++)lamp();
+  } else if(theme==='dock'){
+    for(let i=0;i<4;i++)cylp(0.12,0.55,'#4a4f55');
+    for(let i=0;i<3;i++)boxp(0.8,0.7,0.8,'#8d6436','crate');
+    for(let i=0;i<2;i++)lamp();
+  } else { /* skirmish03/04 y demas calles: farolas, papeleras y una parada */
+    for(let i=0;i<3;i++)lamp();
+    for(let i=0;i<3;i++)cylp(0.14,0.5,'#3f444a');
+    boxp(1.6,0.5,0.5,'#5c5346','wall');
+  }
+}
 function build3DWorld(){
   if(!T3||!G)return;
   const sc=T3.scene;
@@ -5454,6 +5507,8 @@ function build3DWorld(){
     const geoMesh=buildSkirmishGeo3(G.map.theme);
     if(geoMesh)world.add(geoMesh);
   }
+  /* props decorativos del tema, fuera de la cuadricula jugable */
+  try{buildThemedProps3(world,G.map.theme);}catch(e){}
   /* zonas de despliegue */
   const zoneDisc=(list,col)=>{list.forEach(s=>{
     const p=new THREE.Mesh(new THREE.PlaneGeometry(0.94,0.94),new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:0.13,depthWrite:false}));
