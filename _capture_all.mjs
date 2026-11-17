@@ -24,13 +24,20 @@ await ev("localStorage.setItem('radsoldiers_nation','es');location.reload();"); 
 await ev(`window.quickStart('${mapId}')`); await sleep(waitMs);
 const state = await ev("JSON.stringify(window.__csn3d)");
 const s3d = await shot(prefix + "_3d");
-// vista clasica para el tablero 2D
-const toClassic = await ev(`(function(){const b=document.querySelector('#viewSeg button[data-view="2d"]');if(!b)return 'no btn';b.click();return 'ok'})()`);
-await sleep(1500);
-await ev("try{window.draw&&window.draw()}catch(e){}"); await sleep(800);
-const d2d = await ev("(function(){const b=document.querySelector('#board');if(!b)return '';try{return b.toDataURL('image/png')}catch(e){return ''}})()");
+/* La vista 2D queda como alternativa: solo se captura si se pide con
+   --2d o si la 3D no arranco (ventana tapada). */
+let s3ok = false;
+try { const st = JSON.parse(state); s3ok = !!(st && st.geo); } catch (e) { s3ok = false; }
+const want2d = process.argv.includes("--2d") || !s3ok;
+let toClassic = "skip";
 let s2d = 0;
-if (typeof d2d === "string" && d2d.startsWith("data:image/png;base64,")) { const f = `${CAP}\\${prefix}_2d.png`; fs.writeFileSync(f, Buffer.from(d2d.split(",")[1], "base64")); s2d = fs.statSync(f).size; }
+if (want2d) {
+  toClassic = await ev(`(function(){const b=document.querySelector('#viewSeg button[data-view="2d"]');if(!b)return 'no btn';b.click();return 'ok'})()`);
+  await sleep(1500);
+  await ev("try{window.draw&&window.draw()}catch(e){}"); await sleep(800);
+  const d2d = await ev("(function(){const b=document.querySelector('#board');if(!b)return '';try{return b.toDataURL('image/png')}catch(e){return ''}})()");
+  if (typeof d2d === "string" && d2d.startsWith("data:image/png;base64,")) { const f = `${CAP}\\${prefix}_2d.png`; fs.writeFileSync(f, Buffer.from(d2d.split(",")[1], "base64")); s2d = fs.statSync(f).size; }
+}
 console.log(JSON.stringify({ map: mapId, csn3d: state, vistaClasica: toClassic, png3d: s3d, png2d: s2d, errores: errs.slice(0, 5) }));
 chrome.kill(); process.exit(0);
 

@@ -141,13 +141,33 @@ headless con `__csn3d.geo` y captura 2D. Commit y push por fase.
 | F5 audio | **hecho** | 77 clips (armas, voces, ambientes) conectados |
 | F6 calidad | **en curso** | batería completa por ronda (sintaxis, tableros, tests, harness, headless) |
 
+## 3.ter Decisión de vista (ronda 8)
+
+**La vista 3D es la principal**, como el original. La vista 2D queda como
+alternativa accesible (botón pequeño «Vista 2D (alternativa)») y solo se
+usa para capturas si el 3D no arranca. `_capture_all.mjs` captura 3D por
+defecto y la 2D únicamente con `--2d` o como respaldo; la verificación de
+cada fase se hace con `__csn3d.geo` y capturas 3D.
+
 ## 4. Criterio de «base reconocible» (checklist final)
 
-- [ ] Título con las 4 entradas del original y monedas.
-- [ ] Campaña por capítulos con iconos y progreso.
-- [ ] Barracas/Cuartel con personajes con nombre y trajes.
-- [ ] 8 mapas Skirmish + campaña jugable.
-- [ ] 44 habilidades catalogadas (las que CSN tenga, con su icono).
-- [ ] HUD con retratos, vida/energía, daño previsto y arco de vida.
-- [ ] Audio por personaje y arma.
-- [ ] Estética compacta cartoon en todas las pantallas.
+- [x] Título con las 4 entradas del original, monedas en el chip y accesos
+  directos (Quick, Online, Challenges, Expansions, Cuartel, Armería).
+- [x] Campaña por capítulos con arte de icono, progreso x/y y candados
+  (3 capítulos, 6 misiones).
+- [x] Barracas/Cuartel con los 24 personajes (17 del original + 7 propios),
+  su clase, su traje y selector de personaje por rol.
+- [x] 8 mapas Skirmish reales + 6 misiones de campaña jugables, con capturas
+  2D y 3D de todos.
+- [x] 44 habilidades catalogadas con su icono del IPA en la Armería
+  (42 iconos extraídos; 19 con equivalente en juego).
+- [x] HUD con retratos, vida/energía, daño previsto, arco de vida y tabla de
+  resultados (vivos/daño/derribos).
+- [x] Audio del IPA: armas por categoría, voces por rol, ambiente por mapa
+  y sonidos de habilidad.
+- [x] Estética compacta cartoon en todas las pantallas (tarjetas a 2 líneas,
+  mapas plegados, títulos cortos).
+
+Pendiente para las siguientes rondas: campaña reconstruida con los prefabs
+del original (los niveles del IPA son prefabs de gameplay, la geometría de
+campaña venía del servidor), más variantes de skin y capturas de campaña.
