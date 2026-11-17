@@ -1574,7 +1574,7 @@ function makeUnit(team,def,i,nation,skin){
   if(team==='B'&&setup.opp==='ia'){if(setup.difficulty==='veterano'){maxEnergy+=1;energy=maxEnergy;}else if(setup.difficulty==='elite'){maxEnergy+=2;energy=maxEnergy;maxHp+=25;hp=maxHp;}}
   return {id:++uid,team,role:def.role,name:ch?ch.name:def.role,charBio:ch?ch.bio:'',weapon:def.weapon,skin:skin||'nacion',x:sp.x,y:sp.y,dx:sp.x,dy:sp.y,hp:hp,maxHp:maxHp,
     energy:energy,maxEnergy:maxEnergy,alive:true,invisible:false,invisTurns:0,suppressed:false,stunned:false,stunFresh:false,vetLevel:vetLevel,slotIndex:i,
-    grenades:def.role==='Comando'?2:1,flashes:def.role==='Comando'?2:0,smokes:def.role==='Espía'?2:0,mines:def.role==='Ingeniero'?2:0,covers:def.role==='Ingeniero'?2:0,gases:def.role==='Artillero'?2:0,sweeps:def.role==='Espía'?1:0,molotovs:def.role==='Artillero'?2:0,crates:def.role==='Médico'?2:0,teleports:def.role==='Espía'?1:0,shields:def.role==='Comando'?1:0,arty:def.role==='Artillero'?2:0,bees:def.role==='Espía'?1:0,heals:2,revives:1,captainUsed:false,movedThisTurn:false,
+    grenades:def.role==='Comando'?2:1,flashes:def.role==='Comando'?2:0,smokes:def.role==='Espía'?2:0,mines:def.role==='Ingeniero'?2:0,covers:def.role==='Ingeniero'?2:0,gases:def.role==='Artillero'?2:0,sweeps:def.role==='Espía'?1:0,molotovs:def.role==='Artillero'?2:0,crates:def.role==='Médico'?2:0,teleports:def.role==='Espía'?1:0,shields:def.role==='Comando'?1:0,arty:def.role==='Artillero'?2:0,bees:def.role==='Espía'?1:0,tranqs:def.role==='Espía'?1:0,water:def.role==='Comando'?2:0,toolkits:def.role==='Ingeniero'?2:0,heals:2,revives:1,captainUsed:false,movedThisTurn:false,
     specialUsedTurn:false,onceUsed:false,nation,hasShot:false,
     facing:team==='A'?0:2,overwatch:false,returnKey:'',body:role.body,moveCost:body.moveCost};
 }
@@ -1874,6 +1874,51 @@ function sweepDetect(u,x,y){
   playOnce(u,'interact');sfx('place');
   log('📡 '+u.role+' barre la zona de ('+(x+1)+','+(y+1)+'): '+(found?('revela '+found+' enemigo(s) invisible(s).'):'no hay invisibles en el radio.'));
   G.actionMode='move';updateUI();draw();
+}
+/* ===== LOTE 5 (F4): tranquilizante, cañón de agua y kit de herramientas ===== */
+const TRANQ_COST=2, TRANQ_RANGE=3, WATER_COST=3, WATER_RANGE=3, WATER_PUSH=2, TOOL_COST=3, TOOL_RANGE=2, TOOL_HEAL=80;
+function throwTranq(u,target){
+  if(u.role!=='Espía'){toast('El tranquilizante es del Espía.');return;}
+  if((u.tranqs||0)<=0){toast('Sin tranquilizantes: el Espía lleva 1 por partida.');return;}
+  if(u.energy<TRANQ_COST){toast('El tranquilizante cuesta '+TRANQ_COST+' ⚡.');return;}
+  if(!target||target.team===u.team){toast('Elige un enemigo a '+TRANQ_RANGE+' casillas o menos.');return;}
+  if(cheb(u,target)>TRANQ_RANGE){toast('El tranquilizante alcanza '+TRANQ_RANGE+' casillas.');return;}
+  G.lastMoveUndo=null;spendEnergy(u,TRANQ_COST);u.tranqs--;playOnce(u,'throw');sfx('flash');
+  applyStun(target);
+  log('💉 '+u.role+' dispara el tranquilizante a '+target.role+': queda aturdido su siguiente turno (sin daño).');
+  G.actionMode='move';checkWin();updateUI();draw();
+}
+function waterCannon(u,target){
+  if(u.role!=='Comando'){toast('El cañón de agua es del Comando.');return;}
+  if((u.water||0)<=0){toast('Sin cargas de cañón de agua: el Comando lleva 2 por partida.');return;}
+  if(u.energy<WATER_COST){toast('El cañón de agua cuesta '+WATER_COST+' ⚡.');return;}
+  if(!target||target.team===u.team){toast('Elige un enemigo a '+WATER_RANGE+' casillas o menos.');return;}
+  if(cheb(u,target)>WATER_RANGE){toast('El cañón de agua alcanza '+WATER_RANGE+' casillas.');return;}
+  G.lastMoveUndo=null;spendEnergy(u,WATER_COST);u.water--;playOnce(u,'throw');sfx('place');
+  const ax=target.x-u.x,ay=target.y-u.y;
+  const sx=Math.sign(ax),sy=Math.sign(ay);
+  let px=target.x,py=target.y;
+  for(let k=0;k<WATER_PUSH;k++){
+    const nx=px+sx,ny=py+sy;
+    if(nx<0||ny<0||nx>=W||ny>=H)break;
+    if(blocked(nx,ny)||G.units.some(o=>o!==target&&o.alive&&o.x===nx&&o.y===ny))break;
+    px=nx;py=ny;
+  }
+  if(px!==target.x||py!==target.y){target.x=px;target.y=py;target.dx=px;target.dy=py;checkMines(target);}
+  log('💦 '+u.role+' ('+u.team+') dispara el cañón de agua: empuja a '+target.role+' hasta ('+(target.x+1)+','+(target.y+1)+') sin daño.');
+  G.actionMode='move';updateUI();draw();
+}
+function useToolkit(u){
+  if(u.role!=='Ingeniero'){toast('El kit de herramientas es del Ingeniero.');return;}
+  if((u.toolkits||0)<=0){toast('Sin kits: el Ingeniero lleva 2 por partida.');return;}
+  if(u.energy<TOOL_COST){toast('El kit cuesta '+TOOL_COST+' ⚡.');return;}
+  const t=G.deployed.filter(d=>d.alive&&d.team===u.team&&d.hp<d.maxHp).sort((a,b)=>cheb(u,a)-cheb(u,b))[0];
+  if(!t){toast('No hay torretas propias dañadas: el kit repara desplegables.');return;}
+  if(cheb(u,t)>TOOL_RANGE){toast('El kit alcanza '+TOOL_RANGE+' casillas.');return;}
+  G.lastMoveUndo=null;spendEnergy(u,TOOL_COST);u.toolkits--;
+  t.hp=Math.min(t.maxHp,t.hp+TOOL_HEAL);playOnce(u,'interact');sfx('place');
+  log('🔧 '+u.role+' repara la torreta de ('+(t.x+1)+','+(t.y+1)+'): +'+TOOL_HEAL+' PV (ahora '+t.hp+'/'+t.maxHp+').');
+  updateUI();draw();
 }
 /* ===== LOTE 4 (F4): escudo antidisturbios, artillería y bomba de abejas ===== */
 const SHIELD_COST=3, SHIELD_TURNS=1, SHIELD_MULT=0.55, ARTY_COST=4, ARTY_DMG=60, ARTY_RANGE=3, BEES_COST=2, BEES_DMG=8, BEES_TURNS=2, BEES_RANGE=4;
@@ -2827,6 +2872,18 @@ function aiUnitAct(u){
         }
         if(bestG){throwGrenade(u,bestG.x,bestG.y);return res();}
       }
+      if(u.role==='Espía'&&(u.tranqs||0)>0&&u.energy>=TRANQ_COST){
+        const tgt=enemies.filter(e=>e.alive&&!e.stunned&&cheb(u,e)<=TRANQ_RANGE).sort((a,b)=>b.hp-a.hp)[0];
+        if(tgt){throwTranq(u,tgt);return res();}
+      }
+      if(u.role==='Comando'&&(u.water||0)>0&&u.energy>=WATER_COST){
+        const tgt=enemies.filter(e=>e.alive&&cheb(u,e)<=WATER_RANGE).sort((a,b)=>cheb(u,a)-cheb(u,b))[0];
+        if(tgt){waterCannon(u,tgt);return res();}
+      }
+      if(u.role==='Ingeniero'&&(u.toolkits||0)>0&&u.energy>=TOOL_COST){
+        const tur=G.deployed.filter(d=>d.alive&&d.team===u.team&&d.hp<d.maxHp&&cheb(u,d)<=TOOL_RANGE)[0];
+        if(tur){useToolkit(u);}
+      }
       if(u.role==='Comando'&&(u.shields||0)>0&&u.energy>=SHIELD_COST&&u.hp<=u.maxHp*0.6&&enemies.some(e=>cheb(u,e)<=6)){useShield(u);}
       if(u.role==='Artillero'&&(u.arty||0)>0&&u.energy>=ARTY_COST){
         let bestA=null,bestAN=0;
@@ -3007,6 +3064,8 @@ function boardTileClick(t){
     guideDrone(u,t.x,t.y);return;
   }
   if(G.actionMode==='bees'&&u){if(clickedUnit&&clickedUnit.team!==u.team)throwBees(u,clickedUnit);return;}
+  if(G.actionMode==='tranq'&&u){if(clickedUnit&&clickedUnit.team!==u.team)throwTranq(u,clickedUnit);return;}
+  if(G.actionMode==='water'&&u){if(clickedUnit&&clickedUnit.team!==u.team)waterCannon(u,clickedUnit);return;}
   if(clickedUnit){
     if(clickedUnit.team===G.turn){
       if(G.actionMode==='special'&&u&&(u.role==='Médico'||u.role==='Capitán')){useSpecial(u,clickedUnit);G.actionMode='move';updateUI();draw();return;}
@@ -3153,6 +3212,9 @@ function updateUI(){
    (u.role==='Comando'?'<button data-act="shield" class="'+(G.actionMode==='shield'?'on':'')+'" '+(isTurn&&(u.shields||0)>0?'':'disabled')+'>🛡 Escudo antidisturbios<small>'+SHIELD_COST+' ⚡ · quedan '+(u.shields||0)+' · recibe un 55 % del daño el próximo turno</small></button>':'')+
    (u.role==='Artillero'?'<button data-act="arty" class="'+(G.actionMode==='arty'?'on':'')+'" '+(isTurn&&(u.arty||0)>0?'':'disabled')+'>💥 Artillería<small>'+ARTY_COST+' ⚡ · lanza a '+ARTY_RANGE+' · quedan '+(u.arty||0)+' · '+ARTY_DMG+' en el centro y 35 en radio 1</small></button>':'')+
    (u.role==='Espía'?'<button data-act="bees" class="'+(G.actionMode==='bees'?'on':'')+'" '+(isTurn&&(u.bees||0)>0?'':'disabled')+'>🐝 Bomba de abejas<small>'+BEES_COST+' ⚡ · un enemigo a '+BEES_RANGE+' · quedan '+(u.bees||0)+' · '+BEES_DMG+' por turno durante '+BEES_TURNS+'</small></button>':'')+
+   (u.role==='Espía'?'<button data-act="tranq" class="'+(G.actionMode==='tranq'?'on':'')+'" '+(isTurn&&(u.tranqs||0)>0?'':'disabled')+'>💉 Tranquilizante<small>'+TRANQ_COST+' ⚡ · un enemigo a '+TRANQ_RANGE+' · quedan '+(u.tranqs||0)+' · lo aturde su siguiente turno sin daño</small></button>':'')+
+   (u.role==='Comando'?'<button data-act="water" class="'+(G.actionMode==='water'?'on':'')+'" '+(isTurn&&(u.water||0)>0?'':'disabled')+'>💦 Cañón de agua<small>'+WATER_COST+' ⚡ · un enemigo a '+WATER_RANGE+' · quedan '+(u.water||0)+' · lo empuja hasta '+WATER_PUSH+' casillas sin daño</small></button>':'')+
+   (u.role==='Ingeniero'?'<button data-act="toolkit" '+(isTurn&&(u.toolkits||0)>0?'':'disabled')+'>🔧 Kit de herramientas<small>'+TOOL_COST+' ⚡ · repara '+TOOL_HEAL+' PV a tu torreta desplegada (a '+TOOL_RANGE+' casillas) · quedan '+(u.toolkits||0)+'</small></button>':'')+
    (u.role==='Espía'?'<button data-act="sweep" class="'+(G.actionMode==='sweep'?'on':'')+'" '+(isTurn&&(u.sweeps||0)>0?'':'disabled')+'>📡 Barrido detector<small>'+SWEEP_COST+' ⚡ · radio '+SWEEP_RANGE+' · quedan '+(u.sweeps||0)+' · revela invisibles</small></button>':'')+
    (effMode(G)==='escolta'&&G.drone&&G.drone.alive&&u.team==='A'?'<button data-act="guide" class="'+(G.actionMode==='drone'?'on':'')+'" '+(isTurn&&dist(u,G.drone)<=1&&u.energy>=2&&G.drone.movesLeft>0?'':'disabled')+'>🤖 Guiar dron · 2 ⚡<small>Mueve el dron 1 casilla · quedan '+G.drone.movesLeft+' guiados esta ronda · tienes que estar pegado a él — luego toca la casilla destino junto al dron</small></button>':'')+
    '</div>'+(u.team!==G.turn?'<p class="sub" style="margin-top:8px">Este soldado es del bando rival: podrás actuar con él en su turno'+(G.opp==='ia'?' (lo mueve la IA)':'')+'.</p>':'');
@@ -3173,6 +3235,9 @@ function updateUI(){
     if(act==='shield'){useShield(u);}
     if(act==='arty'){G.actionMode='arty';toast('Toca la casilla del bombardeo (máx. '+ARTY_RANGE+' casillas).');}
     if(act==='bees'){G.actionMode='bees';toast('Toca a un enemigo a '+BEES_RANGE+' casillas o menos.');}
+    if(act==='tranq'){G.actionMode='tranq';toast('Toca a un enemigo a '+TRANQ_RANGE+' casillas o menos: queda aturdido su siguiente turno.');}
+    if(act==='water'){G.actionMode='water';toast('Toca a un enemigo a '+WATER_RANGE+' casillas o menos: lo empuja sin daño.');}
+    if(act==='toolkit'){useToolkit(u);}
     if(act==='overwatch'){setOverwatch(u);}
     if(act==='special'){useSpecial(u,null);}
     if(act==='capture'){captureTurret(u);}
