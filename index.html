@@ -356,6 +356,7 @@ button img.ab-ico{width:18px;height:18px;vertical-align:-3px;margin-right:6px;bo
 .res-row{display:grid;grid-template-columns:1.2fr .8fr .8fr .8fr;gap:4px;padding:6px 10px;border-top:1px solid var(--line)}
 .res-row.head{background:var(--panel2);font-weight:700;border-top:none}
 .res-row span{text-align:center}
+.squad-row .sq-ico{width:34px;height:34px;border-radius:8px;background:#1d221c;object-fit:cover}
 </style>
 </head>
 <body>
@@ -1120,11 +1121,13 @@ function squadRows(containerId,team){
     const row=document.createElement('div');row.className='squad-row';
     const role=def[i];
     row.innerHTML='<div class="slot-num">'+(i+1)+'</div>'+
+      '<img class="sq-ico" src="'+(rolePortraitURL(role)||'assets/ui/retrato_capitan.png')+'" alt=""/>'+
       '<select data-team="'+team+'" data-slot="'+i+'" data-kind="role">'+ROLE_NAMES.map(r=>'<option '+(r===role?'selected':'')+'>'+r+'</option>').join('')+'</select>'+
       '<select data-team="'+team+'" data-slot="'+i+'" data-kind="weapon"></select>';
     el.appendChild(row);
     const wsel=row.querySelector('[data-kind="weapon"]');
-    const fill=()=>{const r=row.querySelector('[data-kind="role"]').value;wsel.innerHTML=ROLES[r].weapons.map(w=>'<option>'+w+'</option>').join('');};
+    const fill=()=>{const r=row.querySelector('[data-kind="role"]').value;wsel.innerHTML=ROLES[r].weapons.map(w=>'<option>'+w+'</option>').join('');
+      const ico=row.querySelector('.sq-ico');if(ico)ico.src=(rolePortraitURL(r)||'assets/ui/retrato_capitan.png');};
     row.querySelector('[data-kind="role"]').onchange=fill;fill();
   }
 }
