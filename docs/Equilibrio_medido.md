@@ -1,66 +1,67 @@
-# Equilibrio medido (17 nov 2026)
+# Equilibrio medido (18 nov 2026, muestras ampliadas)
 
-Motor real, harness IA-vs-IA, formato 4v4, dificultad normal. Cada partida
-juega ambos bandos con la misma IA. Mapas: Almacén y Patio (de código) y
-Skirmish_03/05/08 (geometría real del IPA).
+Motor real, harness IA-vs-IA, 4v4, dificultad normal. Ambos bandos juegan
+con la misma IA. Mapas: Almacén (de código) y Skirmish_03/05/08 (geometría
+real del IPA). Muestras ampliadas tras la primera pasada: los extremos de
+10 partidas (Eliminación Almacén 10-0, Dominación S08 4-16) resultaron
+**ruido de muestreo**.
 
 ## Tabla por modo y mapa
 
-| Modo · mapa | Partidas | A | B | Sesgo | Rondas medias |
-|---|---|---|---|---|---|
-| Dominación · Almacén | 40 | 17 | 23 | 57 % B | 11,3 |
-| Dominación · Skirmish_03 | 40 | 13 | 27 | **67 % B** | 9,1 |
-| Dominación · Skirmish_05 | 20 | 11 | 9 | 55 % A | 11,5 |
-| Dominación · Skirmish_08 | 20 | 4 | 16 | **80 % B** | 10,3 |
-| Eliminación · Almacén | 10 | 10 | 0 | **100 % A** | 10,4 |
-| Eliminación · Skirmish_03 | 10 | 8 | 2 | **80 % A** | 7,8 |
-| Eliminación · Skirmish_05 | 10 | 2 | 8 | **80 % B** | 11,0 |
-| Eliminación · Skirmish_08 | 10 | 3 | 7 | 70 % B | 9,9 |
-| Baliza · Almacén | 10 | 3 | 7 | 70 % B | 15,4 |
-| Baliza · Skirmish_03 | 10 | 3 | 7 | 70 % B | 12,3 |
-| Baliza · Skirmish_05 | 10 | 6 | 4 | 60 % A | 11,9 |
-| Baliza · Skirmish_08 | 10 | 8 | 2 | **80 % A** | 9,6 |
-| Escolta · Almacén | 20 | 14 | 6 | 70 % A | 4,7 |
-| Escolta · Skirmish_03 | 10 | 7 | 3 | 70 % A | 5,9 |
+| Modo · mapa | Partidas | A | B | Empates | Sesgo | Rondas |
+|---|---|---|---|---|---|---|
+| Dominación · Almacén | 40 | 17 | 23 | 0 | 57 % B | 11,3 |
+| Dominación · Skirmish_03 | 40 | 13 | 27 | 0 | **67 % B** | 8,9 |
+| Dominación · Skirmish_05 | 20 | 11 | 9 | 0 | 55 % A | 11,5 |
+| Dominación · Skirmish_08 | 40 | 20 | 20 | 0 | **50/50** | 10,5 |
+| Eliminación · Almacén | 40 | 24 | 16 | 0 | 60 % A | 11,2 |
+| Eliminación · Skirmish_03 | 20 | 18 | 2 | 0 | **90 % A** | 8,6 |
+| Eliminación · Skirmish_05 | 10 | 2 | 8 | 0 | 80 % B | 11,0 |
+| Eliminación · Skirmish_08 | 10 | 3 | 7 | 0 | 70 % B | 9,9 |
+| Baliza · Almacén | 30 | 13 | 16 | 1 | 54 % B | 14,3 |
+| Baliza · Skirmish_03 | 10 | 3 | 7 | 0 | 70 % B | 12,3 |
+| Baliza · Skirmish_05 | 10 | 6 | 4 | 0 | 60 % A | 11,9 |
+| Baliza · Skirmish_08 | 10 | 8 | 2 | 0 | 80 % A | 9,6 |
+| Escolta · Almacén | 20 | 14 | 6 | 0 | 70 % A | 4,7 |
+| Escolta · Skirmish_03 | 10 | 7 | 3 | 0 | 70 % A | 5,9 |
 
-Lectura: **el sesgo cambia con el mapa**, no con el modo. Dominación ya no
-está rota por el orden de turno (de 20-0 a 57-67 % en Almacén y S03); lo
-que queda es disposición por mapa. Eliminación en Almacén sale 10-0 con
-solo 10 partidas (antes había dado 6-4 y 8-2): hace falta ampliar la
-muestra antes de tocar nada.
+## Análisis
 
-## Efectividad por rol (agregado de la matriz)
+1. **Dominación ya no está rota**: el arreglo del tic de puntuación eliminó
+   el 20-0. Con muestras grandes: Almacén 57 % B, S03 67 % B, S05 55 % A,
+   **S08 50/50**. Ningún mapa supera el 70 % salvo S03 en el límite.
+2. **Los mapas son perfectamente simétricos**: verificado a mano que
+   muros, estanterías, cajas, barriles y botiquines del S03 y S08 son
+   180°-simétricos casilla a casilla (igual que salidas, zonas y las dos
+   escuadras). Por tanto el sesgo restante **no es de disposición**: es la
+   ventaja del que mueve primero (A) en los duelos + la reacción de B en
+   los objetivos.
+3. **El único outlier real es Eliminación · S03: 90 % A**. En el mapa con
+   más cobertura (Londres), la iniciativa de A decide los duelos: A dispara
+   primero y la cobertura densa impide a B responder. Es favorable al
+   jugador (que es A), pero demasiado fácil contra la IA.
+4. **Escolta**: 70 % A en los dos mapas medidos, con el dron entregándose
+   en 14/20 partidas (antes 0). La defensa ya no gana siempre.
 
-Media de daño por acción (dmg total / acciones), por bando:
+## Cambios aplicados (con medición)
 
-| Rol | Rango de media | Notas |
-|---|---|---|
-| Francotirador | **24–73** | El rol dominante con diferencia: kill-rate alto y daño por acción máximo en todos los mapas |
-| Comando | 12–39 | Segundo; el fogonazo M84 marca la diferencia cuando hay varios enemigos |
-| Ingeniero | 3,7–48 | Muy variable: brilla con torreta/claymore, flojo cuando no despliega |
-| Artillero | (ver A:Comando) | — |
-| Médico | 5–27 | Daño bajo por diseño; su aporte es curación (no medida en daño) |
+1. **Escolta (F1)**: la escolta acompaña al dron, guiado en cadena,
+   blindaje ×0,47 y 240 PV. De 0-20 a A 14-6 (Almacén) y 7-3 (S03).
+2. **Dominación (F2)**: probé un tic único de puntuación por ronda; **lo
+   revertí** porque empeoró (75 % B en Almacén) sin cambiar la estructura
+   del turno. Se mantiene la puntuación en el inicio del turno de cada
+   bando (13-27/17-23 → sin cambios respecto a la auditoría).
 
-Conclusión: el **Francotirador está por encima del resto** (hasta ×3 en
-daño por acción). No se toca el daño base: primero se ajustará la
-disposición por mapa (salidas/baliza/cobertura) y se volverá a medir.
+## Decisiones pendientes (para el jugador)
 
-## Cambios aplicados hasta ahora (con medición)
+1. **Iniciativa alterna**: para PvP justo, lo canónico es alternar quién
+   mueve primero cada ronda (o que A no dispare primero dos rondas
+   seguidas). Cambia la sensación de turnos; necesita tu visto bueno.
+2. **Dificultad de la IA en S03**: con la IA actual, Eliminación S03 es
+   un paseo para A (90 %). Alternativa sin tocar reglas: subir la
+   dificultad por defecto en ese modo/mapa (Veterano/Élite).
 
-1. **Escolta** (F1): mecánica de escolta que acompaña al dron, guiado en
-   cadena, blindaje ×0,47 y 240 PV. De 0-20 (defensa siempre gana) a
-   A 14-6 en Almacén y 7-3 en S03.
+## Nota del harness
 
-## Pendiente de F2
-
-1. Ampliar Eliminación · Almacén a 40 partidas (el 10-0 pide muestra).
-2. Diagnóstico de Dominación en S03 y S08 (¿salidas? ¿cobertura de las
-   zonas? ¿orden de zonas de la IA?) y ajuste de disposición sin tocar
-   daños ni vidas.
-3. Repetir la matriz tras los ajustes y actualizar esta tabla.
-
-## Nota sobre el harness
-
-`bench/harness.js` acepta ahora:
-- 6º argumento `log`: imprime las líneas de registro del dron.
-- 6º/7º argumento `roles`: informe de daño/kills/acciones por rol.
+`bench/harness.js` acepta 6º argumento `log` (registro del dron) y
+6º/7º argumento `roles` (informe de daño/kills/acciones por rol).
