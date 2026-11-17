@@ -1574,7 +1574,7 @@ function makeUnit(team,def,i,nation,skin){
   if(team==='B'&&setup.opp==='ia'){if(setup.difficulty==='veterano'){maxEnergy+=1;energy=maxEnergy;}else if(setup.difficulty==='elite'){maxEnergy+=2;energy=maxEnergy;maxHp+=25;hp=maxHp;}}
   return {id:++uid,team,role:def.role,name:ch?ch.name:def.role,charBio:ch?ch.bio:'',weapon:def.weapon,skin:skin||'nacion',x:sp.x,y:sp.y,dx:sp.x,dy:sp.y,hp:hp,maxHp:maxHp,
     energy:energy,maxEnergy:maxEnergy,alive:true,invisible:false,invisTurns:0,suppressed:false,stunned:false,stunFresh:false,vetLevel:vetLevel,slotIndex:i,
-    grenades:def.role==='Comando'?2:1,flashes:def.role==='Comando'?2:0,smokes:def.role==='Espía'?2:0,mines:def.role==='Ingeniero'?2:0,covers:def.role==='Ingeniero'?2:0,gases:def.role==='Artillero'?2:0,sweeps:def.role==='Espía'?1:0,molotovs:def.role==='Artillero'?2:0,crates:def.role==='Médico'?2:0,teleports:def.role==='Espía'?1:0,heals:2,revives:1,captainUsed:false,movedThisTurn:false,
+    grenades:def.role==='Comando'?2:1,flashes:def.role==='Comando'?2:0,smokes:def.role==='Espía'?2:0,mines:def.role==='Ingeniero'?2:0,covers:def.role==='Ingeniero'?2:0,gases:def.role==='Artillero'?2:0,sweeps:def.role==='Espía'?1:0,molotovs:def.role==='Artillero'?2:0,crates:def.role==='Médico'?2:0,teleports:def.role==='Espía'?1:0,shields:def.role==='Comando'?1:0,arty:def.role==='Artillero'?2:0,bees:def.role==='Espía'?1:0,heals:2,revives:1,captainUsed:false,movedThisTurn:false,
     specialUsedTurn:false,onceUsed:false,nation,hasShot:false,
     facing:team==='A'?0:2,overwatch:false,returnKey:'',body:role.body,moveCost:body.moveCost};
 }
@@ -1634,6 +1634,7 @@ function damage(target,dmg,srcLabel){
     dmg=Math.max(1,Math.round(dmg*0.47));
   }
   if(target.buffArmor&&!target.isDrone)dmg=Math.max(1,Math.round(dmg*target.buffArmor));
+  if(target.shieldT>0&&!target.isDrone)dmg=Math.max(1,Math.round(dmg*SHIELD_MULT));
   target.hp-=dmg;
   target._hitT=FX.t;target._hitAmt=Math.min(1,dmg/70);
   /* Tipo de impacto, para elegir el clip del original en la vista 3D:
@@ -1872,6 +1873,45 @@ function sweepDetect(u,x,y){
   G.units.filter(e=>e.alive&&e.team!==u.team&&e.invisible&&cheb(e,{x,y})<=1).forEach(e=>{e.invisible=false;e.invisTurns=0;found++;});
   playOnce(u,'interact');sfx('place');
   log('📡 '+u.role+' barre la zona de ('+(x+1)+','+(y+1)+'): '+(found?('revela '+found+' enemigo(s) invisible(s).'):'no hay invisibles en el radio.'));
+  G.actionMode='move';updateUI();draw();
+}
+/* ===== LOTE 4 (F4): escudo antidisturbios, artillería y bomba de abejas ===== */
+const SHIELD_COST=3, SHIELD_TURNS=1, SHIELD_MULT=0.55, ARTY_COST=4, ARTY_DMG=60, ARTY_RANGE=3, BEES_COST=2, BEES_DMG=8, BEES_TURNS=2, BEES_RANGE=4;
+function useShield(u){
+  if(u.role!=='Comando'){toast('El escudo antidisturbios es del Comando.');return;}
+  if((u.shields||0)<=0){toast('Sin escudo: el Comando lleva 1 por partida.');return;}
+  if(u.energy<SHIELD_COST){toast('El escudo cuesta '+SHIELD_COST+' ⚡.');return;}
+  G.lastMoveUndo=null;spendEnergy(u,SHIELD_COST);u.shields--;u.shieldT=SHIELD_TURNS;
+  playOnce(u,'interact');sfx('place');
+  log('🛡 '+u.role+' levanta el escudo antidisturbios: recibe un 55 % del daño durante '+SHIELD_TURNS+' turno.');
+  updateUI();draw();
+}
+function fireArtillery(u,x,y){
+  if(u.role!=='Artillero'){toast('La artillería es del Artillero.');return;}
+  if((u.arty||0)<=0){toast('Sin cargas de artillería: el Artillero lleva 2 por partida.');return;}
+  if(u.energy<ARTY_COST){toast('La artillería cuesta '+ARTY_COST+' ⚡.');return;}
+  if(cheb(u,{x,y})>ARTY_RANGE){toast('La artillería alcanza '+ARTY_RANGE+' casillas.');return;}
+  if(cheb(u,{x,y})===0){toast('La artillería no cae sobre tus propios pies.');return;}
+  G.lastMoveUndo=null;spendEnergy(u,ARTY_COST);u.arty--;playOnce(u,'throw');sfx('boom');FX.shake=Math.max(FX.shake,13);
+  if(typeof fx3Explosion==='function')fx3Explosion(x,y,'expl');
+  fxBurst(x,y,26,'#ff9640');
+  log('💥 '+u.role+' ('+u.team+') pide artillería sobre ('+(x+1)+','+(y+1)+'): '+ARTY_DMG+' de daño en el centro y 35 alrededor.');
+  G.units.filter(t=>t.alive&&cheb(t,{x,y})<=1).forEach(t=>damage(t,t.x===x&&t.y===y?ARTY_DMG:35,'La artillería'));
+  if(G.drone&&G.drone.alive&&cheb(G.drone,{x,y})<=1)damage(G.drone,G.drone.x===x&&G.drone.y===y?ARTY_DMG:35,'La artillería');
+  G.map.obstacles.filter(o=>cheb(o,{x,y})<=1).forEach(o=>{if(o.type==='crate')o.hp-=ARTY_DMG;});
+  G.map.obstacles=G.map.obstacles.filter(o=>!(o.type==='crate'&&o.hp<=0));
+  const b=barrelAt(x,y)||G.map.barrels.find(bb=>bb.alive&&cheb(bb,{x,y})<=1);if(b)explodeBarrel(b,'la artillería');
+  G.actionMode='move';checkWin();updateUI();draw();
+}
+function throwBees(u,target){
+  if(u.role!=='Espía'){toast('La bomba de abejas es del Espía.');return;}
+  if((u.bees||0)<=0){toast('Sin bombas de abejas: el Espía lleva 1 por partida.');return;}
+  if(u.energy<BEES_COST){toast('La bomba de abejas cuesta '+BEES_COST+' ⚡.');return;}
+  if(!target||target.team===u.team){toast('Elige un enemigo a '+BEES_RANGE+' casillas o menos.');return;}
+  if(cheb(u,target)>BEES_RANGE){toast('La bomba de abejas alcanza '+BEES_RANGE+' casillas.');return;}
+  G.lastMoveUndo=null;spendEnergy(u,BEES_COST);u.bees--;playOnce(u,'throw');
+  target.beesT=BEES_TURNS;
+  log('🐝 '+u.role+' lanza la bomba de abejas a '+target.role+': '+BEES_DMG+' de daño por turno durante '+BEES_TURNS+' turnos.');
   G.actionMode='move';updateUI();draw();
 }
 /* ===== LOTE 3 (F4): molotov, caja de salud y teletransporte ===== */
@@ -2293,6 +2333,11 @@ function endTurn(){
   if(G.smoke&&G.smoke.some(s=>s.kind==='fuego')){
     G.units.filter(x=>x.alive&&G.smoke.some(f=>f.kind==='fuego'&&cheb(x,f)<=1)).forEach(x=>damage(x,MOLOTOV_DMG,'El fuego del molotov'));
   }
+  /* Escudo (duración) y abejas (daño por turno) al empezar el turno de su dueño. */
+  G.units.filter(x=>x.alive&&x.team===next).forEach(x=>{
+    if(x.shieldT>0){x.shieldT--;if(x.shieldT<=0)log('· '+x.role+' baja el escudo antidisturbios.');}
+    if(x.beesT>0){x.beesT--;damage(x,BEES_DMG,'La bomba de abejas');}
+  });
   /* Aturdidos por la M84: quien cierra su turno ya servido (la bandera
      puesta y el turno aturdido ya empezado, stunFresh en falso) se
      despeja aquí, al acabar ESE turno suyo y no antes: así un aliado
@@ -2782,6 +2827,20 @@ function aiUnitAct(u){
         }
         if(bestG){throwGrenade(u,bestG.x,bestG.y);return res();}
       }
+      if(u.role==='Comando'&&(u.shields||0)>0&&u.energy>=SHIELD_COST&&u.hp<=u.maxHp*0.6&&enemies.some(e=>cheb(u,e)<=6)){useShield(u);}
+      if(u.role==='Artillero'&&(u.arty||0)>0&&u.energy>=ARTY_COST){
+        let bestA=null,bestAN=0;
+        for(let gy=0;gy<H;gy++)for(let gx=0;gx<W;gx++){
+          if(cheb(u,{x:gx,y:gy})>ARTY_RANGE||cheb(u,{x:gx,y:gy})===0)continue;
+          let e=0,f=0;G.units.forEach(x=>{if(!x.alive||cheb(x,{x:gx,y:gy})>1)return;if(x.team!==u.team)e++;else f++;});
+          if(e>f&&e>bestAN){bestAN=e;bestA={x:gx,y:gy};}
+        }
+        if(bestA&&bestAN>=1){fireArtillery(u,bestA.x,bestA.y);return res();}
+      }
+      if(u.role==='Espía'&&(u.bees||0)>0&&u.energy>=BEES_COST){
+        const fat=enemies.filter(e=>e.alive&&cheb(u,e)<=BEES_RANGE).sort((a,b)=>b.hp-a.hp)[0];
+        if(fat&&fat.beesT==null){throwBees(u,fat);return res();}
+      }
       if(u.role==='Artillero'&&(u.molotovs||0)>0&&u.energy>=MOLOTOV_COST){
         let bestF=null,bestFN=0;
         for(let gy=0;gy<H;gy++)for(let gx=0;gx<W;gx++){
@@ -2941,11 +3000,13 @@ function boardTileClick(t){
   if(G.actionMode==='molotov'&&u){throwMolotov(u,t.x,t.y);return;}
   if(G.actionMode==='crate'&&u){placeHealthCrate(u,t.x,t.y);return;}
   if(G.actionMode==='teleport'&&u){teleportUnit(u,t.x,t.y);return;}
+  if(G.actionMode==='arty'&&u){fireArtillery(u,t.x,t.y);return;}
   if(G.actionMode==='drone'&&u){
     const cu0=unitAt(t.x,t.y);
     if(cu0&&cu0.team===G.turn){selectUnit(cu0);return;}
     guideDrone(u,t.x,t.y);return;
   }
+  if(G.actionMode==='bees'&&u){if(clickedUnit&&clickedUnit.team!==u.team)throwBees(u,clickedUnit);return;}
   if(clickedUnit){
     if(clickedUnit.team===G.turn){
       if(G.actionMode==='special'&&u&&(u.role==='Médico'||u.role==='Capitán')){useSpecial(u,clickedUnit);G.actionMode='move';updateUI();draw();return;}
@@ -3089,6 +3150,9 @@ function updateUI(){
    (u.role==='Artillero'?'<button data-act="molotov" class="'+(G.actionMode==='molotov'?'on':'')+'" '+(isTurn&&(u.molotovs||0)>0?'':'disabled')+'>🔥 Cóctel molotov<small>'+MOLOTOV_COST+' ⚡ · lanza a 3 · quedan '+(u.molotovs||0)+' · fuego '+MOLOTOV_TURNS+' rondas: '+MOLOTOV_DMG+' por turno en radio 1</small></button>':'')+
    (u.role==='Médico'?'<button data-act="crate" class="'+(G.actionMode==='crate'?'on':'')+'" '+(isTurn&&(u.crates||0)>0?'':'disabled')+'>✚ Caja de salud<small>'+CRATE_COST+' ⚡ · casilla adyacente · quedan '+(u.crates||0)+' · +75 PV a quien la recoja</small></button>':'')+
    (u.role==='Espía'?'<button data-act="teleport" class="'+(G.actionMode==='teleport'?'on':'')+'" '+(isTurn&&(u.teleports||0)>0?'':'disabled')+'>🌀 Teletransporte<small>'+TELE_COST+' ⚡ · salto a '+TELE_RANGE+' casillas · quedan '+(u.teleports||0)+'</small></button>':'')+
+   (u.role==='Comando'?'<button data-act="shield" class="'+(G.actionMode==='shield'?'on':'')+'" '+(isTurn&&(u.shields||0)>0?'':'disabled')+'>🛡 Escudo antidisturbios<small>'+SHIELD_COST+' ⚡ · quedan '+(u.shields||0)+' · recibe un 55 % del daño el próximo turno</small></button>':'')+
+   (u.role==='Artillero'?'<button data-act="arty" class="'+(G.actionMode==='arty'?'on':'')+'" '+(isTurn&&(u.arty||0)>0?'':'disabled')+'>💥 Artillería<small>'+ARTY_COST+' ⚡ · lanza a '+ARTY_RANGE+' · quedan '+(u.arty||0)+' · '+ARTY_DMG+' en el centro y 35 en radio 1</small></button>':'')+
+   (u.role==='Espía'?'<button data-act="bees" class="'+(G.actionMode==='bees'?'on':'')+'" '+(isTurn&&(u.bees||0)>0?'':'disabled')+'>🐝 Bomba de abejas<small>'+BEES_COST+' ⚡ · un enemigo a '+BEES_RANGE+' · quedan '+(u.bees||0)+' · '+BEES_DMG+' por turno durante '+BEES_TURNS+'</small></button>':'')+
    (u.role==='Espía'?'<button data-act="sweep" class="'+(G.actionMode==='sweep'?'on':'')+'" '+(isTurn&&(u.sweeps||0)>0?'':'disabled')+'>📡 Barrido detector<small>'+SWEEP_COST+' ⚡ · radio '+SWEEP_RANGE+' · quedan '+(u.sweeps||0)+' · revela invisibles</small></button>':'')+
    (effMode(G)==='escolta'&&G.drone&&G.drone.alive&&u.team==='A'?'<button data-act="guide" class="'+(G.actionMode==='drone'?'on':'')+'" '+(isTurn&&dist(u,G.drone)<=1&&u.energy>=2&&G.drone.movesLeft>0?'':'disabled')+'>🤖 Guiar dron · 2 ⚡<small>Mueve el dron 1 casilla · quedan '+G.drone.movesLeft+' guiados esta ronda · tienes que estar pegado a él — luego toca la casilla destino junto al dron</small></button>':'')+
    '</div>'+(u.team!==G.turn?'<p class="sub" style="margin-top:8px">Este soldado es del bando rival: podrás actuar con él en su turno'+(G.opp==='ia'?' (lo mueve la IA)':'')+'.</p>':'');
@@ -3106,6 +3170,9 @@ function updateUI(){
     if(act==='molotov'){G.actionMode='molotov';toast('Toca la casilla central del fuego (máx. 3 casillas).');}
     if(act==='crate'){G.actionMode='crate';toast('Toca una casilla adyacente libre para dejar la caja de Salud.');}
     if(act==='teleport'){G.actionMode='teleport';toast('Toca una casilla libre a '+TELE_RANGE+' o menos: el Espía se teletransporta.');}
+    if(act==='shield'){useShield(u);}
+    if(act==='arty'){G.actionMode='arty';toast('Toca la casilla del bombardeo (máx. '+ARTY_RANGE+' casillas).');}
+    if(act==='bees'){G.actionMode='bees';toast('Toca a un enemigo a '+BEES_RANGE+' casillas o menos.');}
     if(act==='overwatch'){setOverwatch(u);}
     if(act==='special'){useSpecial(u,null);}
     if(act==='capture'){captureTurret(u);}
