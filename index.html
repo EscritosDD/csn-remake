@@ -346,6 +346,12 @@ button img.ab-ico{width:18px;height:18px;vertical-align:-3px;margin-right:6px;bo
 .chapter-head{display:flex;align-items:center;gap:10px;margin:12px 0 6px;padding:8px 10px;border-radius:10px;background:var(--panel2);border:1.5px solid var(--line)}
 .ch-ico{width:34px;height:34px;border-radius:8px;background:#1d221c;object-fit:contain}
 .ch-lock{width:20px;height:20px;opacity:.8}
+.ab-catalog{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
+.ab-card{display:flex;flex-direction:column;gap:4px;align-items:center;text-align:center;padding:8px;border-radius:10px;background:var(--panel2);border:1.5px solid var(--line);opacity:.55}
+.ab-card.on{opacity:1;border-color:var(--amber)}
+.ab-card img{width:44px;height:44px;border-radius:8px;background:#1d221c}
+.ab-card b{font-size:11px;line-height:1.1}
+.ab-card small{font-size:10px;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -406,6 +412,7 @@ button img.ab-ico{width:18px;height:18px;vertical-align:-3px;margin-right:6px;bo
           <button class="btn" id="mnuChallenges">🏆 Challenges<small class="sub">Operación Londres · 5 misiones</small></button>
           <button class="btn" id="mnuExpansions">📦 Expansions<small class="sub">Contenido futuro</small></button>
           <button class="btn" id="mnuBarracks">🏰 Cuartel<small class="sub">Tropas, skins, arsenal y monedas</small></button>
+          <button class="btn" id="mnuArmory">🛠 Armería<small class="sub">Armas y catálogo de habilidades del original</small></button>
         </div>
         <p class="sub" style="margin:10px 0 0"><span class="tag amber" id="coinsTag">🪙 0</span> Monedas de CSN: se ganan al vencer a la IA (25 por victoria).</p>
       </div>
@@ -663,6 +670,11 @@ button img.ab-ico{width:18px;height:18px;vertical-align:-3px;margin-right:6px;bo
     </div>
     <div class="filters" id="arsFilters"></div>
     <div class="arsenal-grid" id="arsenalGrid"></div>
+    <div class="panel" style="margin-top:14px">
+      <h2>Catálogo del original · 44 habilidades</h2>
+      <p class="sub" style="margin:0 0 8px">Iconos reales del IPA. Las marcadas «en juego» tienen equivalente en CSN; las demás son huecos a cubrir.</p>
+      <div id="abilityCatalog" class="ab-catalog"></div>
+    </div>
     <div class="panel" style="margin-top:16px">
       <h2>Granadas, torretas y equipo</h2>
       <div class="howto" style="margin-top:8px">
@@ -6580,6 +6592,78 @@ function quickStart(mapId){
 }
 document.getElementById('quickStartBtn').onclick=()=>quickStart('almacen');
 document.getElementById('quickSkirmishBtn').onclick=()=>quickStart('skirmish');
+
+/* ---- Catalogo de las 44 habilidades del original (F1/F3) ---- */
+const ABILITY_CATALOG=[
+  {f:'CharAbility_00_walkshoot_alpha',n:'walkshoot'},
+  {f:'CharAbility_01_Adrenaline_alpha',n:'Adrenaline'},
+  {f:'CharAbility_03_AR_Specialization_alpha',n:'AR Specialization'},
+  {f:'CharAbility_04_Armour_Piercing_alpha',n:'Armour Piercing'},
+  {f:'CharAbility_06_Backstab_alpha',n:'Backstab'},
+  {f:'CharAbility_07_Caltrops_alpha',n:'Caltrops'},
+  {f:'CharAbility_08_Charm_alpha',n:'Charm'},
+  {f:'CharAbility_09_Concussion_Grenade_alpha',n:'Concussion Grenade'},
+  {f:'CharAbility_10_Da_Boot_alpha',n:'Da Boot'},
+  {f:'CharAbility_11_Dead_Eye_Aura_alpha',n:'Dead Eye Aura'},
+  {f:'CharAbility_13_Detection_Aura_alpha',n:'Detection Aura'},
+  {f:'CharAbility_14_Frag_Grenade_alpha',n:'Frag Grenade'},
+  {f:'CharAbility_15_Gas_Grenade_alpha',n:'Gas Grenade'},
+  {f:'CharAbility_17_Ghost_alpha',n:'Ghost'},
+  {f:'CharAbility_18_Hack_alpha',n:'Hack'},
+  {f:'CharAbility_21_Healing_Grenade_alpha',n:'Healing Grenade'},
+  {f:'CharAbility_22_Health_Buff_Aura_alpha',n:'Health Buff Aura'},
+  {f:'CharAbility_23_HMG_Specialization_alpha',n:'HMG Specialization'},
+  {f:'CharAbility_24_Juggernaut_alpha',n:'Juggernaut'},
+  {f:'CharAbility_25_Juggernaut_Passive_alpha',n:'Juggernaut Passive'},
+  {f:'CharAbility_26_Kinetic_Animal_alpha',n:'Kinetic Animal'},
+  {f:'CharAbility_28_Last_Stand_alpha',n:'Last Stand'},
+  {f:'CharAbility_29_Last_Stand_Aura_alpha',n:'Last Stand Aura'},
+  {f:'CharAbility_30_Medkit_alpha',n:'Medkit'},
+  {f:'CharAbility_31_Melee_Specialization_alpha',n:'Melee Specialization'},
+  {f:'CharAbility_32_Metabolism_alpha',n:'Metabolism'},
+  {f:'CharAbility_33_Nail_Mines_alpha',n:'Nail Mines'},
+  {f:'CharAbility_34_Pistol_Specialization_alpha',n:'Pistol Specialization'},
+  {f:'CharAbility_36_Revive_alpha',n:'Revive'},
+  {f:'CharAbility_38_Rush_Aura_alpha',n:'Rush Aura'},
+  {f:'CharAbility_39_Shotgun_Specialization_alpha',n:'Shotgun Specialization'},
+  {f:'CharAbility_40_Slayer_alpha',n:'Slayer'},
+  {f:'CharAbility_41_SMG_Specialization_alpha',n:'SMG Specialization'},
+  {f:'CharAbility_42_Sniper_Rifle_Specialization_alpha',n:'Sniper Rifle Specialization'},
+  {f:'CharAbility_43_Support_Fire_alpha',n:'Support Fire'},
+  {f:'CharAbility_44_Swarm_Aura_alpha',n:'Swarm Aura'},
+  {f:'CharAbility_45_Toolkit_alpha',n:'Toolkit'},
+  {f:'CharAbility_47_Vampire_alpha',n:'Vampire'},
+  {f:'CharAbility_48_bazooka_alpha',n:'bazooka'},
+  {f:'CharAbility_49_crossbow_alpha',n:'crossbow'},
+  {f:'CharAbility_50_Molotov_alpha',n:'Molotov'},
+  {f:'CharAbility_52_WaterCannon_alpha',n:'WaterCannon'}
+];
+const ABILITY_IMPL={
+  'CharAbility_14_Frag_Grenade_alpha':'Granada M67',
+  'CharAbility_15_Gas_Grenade_alpha':'Granada de gas',
+  'CharAbility_09_Concussion_Grenade_alpha':'Aturdidora M84',
+  'CharAbility_50_Molotov_alpha':'Molotov',
+  'CharAbility_45_Toolkit_alpha':'Kit',
+  'CharAbility_52_WaterCannon_alpha':'Cañón de agua',
+  'CharAbility_13_Detection_Aura_alpha':'Barrido',
+  'CharAbility_43_Support_Fire_alpha':'Artillería',
+  'CharAbility_24_Juggernaut_alpha':'Escudo',
+  'CharAbility_17_Ghost_alpha':'Invisibilidad',
+  'CharAbility_30_Medkit_alpha':'Curación',
+  'CharAbility_36_Revive_alpha':'Reanimar',
+  'CharAbility_42_Sniper_Rifle_Specialization_alpha':'Tiro certero',
+  'CharAbility_23_HMG_Specialization_alpha':'Supresión',
+  'CharAbility_07_Caltrops_alpha':'Minas',
+  'CharAbility_33_Nail_Mines_alpha':'Claymore'
+};
+function renderAbilityCatalog(){
+  const el=document.getElementById('abilityCatalog');if(!el)return;
+  el.innerHTML=ABILITY_CATALOG.map(a=>{
+    const imp=ABILITY_IMPL[a.f];
+    return '<div class="ab-card'+(imp?' on':'')+'"><img src="assets/ui/ability/'+a.f+'.png" alt=""/><b>'+a.n+'</b><small>'+(imp?('en juego · '+imp):'pendiente')+'</small></div>';
+  }).join('');
+}
+
 /* ---- Cuartel (F9): tropas, skins, arsenal y desbloqueos ---- */
 function renderBarracks(){
   const el=document.getElementById('barrContent'),nt=document.getElementById('barrNation');
@@ -6624,8 +6708,10 @@ function tutHide(){const b=document.getElementById('tutBubble');if(b)b.style.dis
   const c=document.getElementById('mnuChallenges');if(c)c.onclick=()=>{const b=document.querySelector('[data-start="campana"]');if(b)b.click();else toast('La campaña está en la portada, más abajo.');};
   const e=document.getElementById('mnuExpansions');if(e)e.onclick=()=>toast('Expansiones: aún no hay contenido descargable. El arte propio y las skins llegan por fases.');
   const bk=document.getElementById('mnuBarracks');if(bk)bk.onclick=openBarracks;
+  const ar=document.getElementById('mnuArmory');if(ar)ar.onclick=()=>showScreen('scr-arsenal');
   const bb=document.getElementById('barrBack');if(bb)bb.onclick=()=>showScreen('scr-play');
   coinsSet(coinsGet());
+  renderAbilityCatalog();
 })();
 /* Pantalla de carga: se cierra cuando el soldado real está listo (o a los 9 s). */
 (function bootScreen(){
