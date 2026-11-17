@@ -1636,7 +1636,7 @@ function makeUnit(team,def,i,nation,skin){
   if(team==='B'&&setup.opp==='ia'){if(setup.difficulty==='veterano'){maxEnergy+=1;energy=maxEnergy;}else if(setup.difficulty==='elite'){maxEnergy+=2;energy=maxEnergy;maxHp+=25;hp=maxHp;}}
   return {id:++uid,team,role:def.role,name:ch?ch.name:def.role,charBio:ch?ch.bio:'',weapon:def.weapon,skin:skin||'nacion',x:sp.x,y:sp.y,dx:sp.x,dy:sp.y,hp:hp,maxHp:maxHp,
     energy:energy,maxEnergy:maxEnergy,alive:true,invisible:false,invisTurns:0,suppressed:false,stunned:false,stunFresh:false,vetLevel:vetLevel,slotIndex:i,
-    grenades:def.role==='Comando'?2:1,flashes:def.role==='Comando'?2:0,smokes:def.role==='Espía'?2:0,mines:def.role==='Ingeniero'?2:0,covers:def.role==='Ingeniero'?2:0,gases:def.role==='Artillero'?2:0,sweeps:def.role==='Espía'?1:0,molotovs:def.role==='Artillero'?2:0,crates:def.role==='Médico'?2:0,teleports:def.role==='Espía'?1:0,shields:def.role==='Comando'?1:0,arty:def.role==='Artillero'?2:0,bees:def.role==='Espía'?1:0,tranqs:def.role==='Espía'?1:0,water:def.role==='Comando'?2:0,toolkits:def.role==='Ingeniero'?2:0,heals:2,revives:1,captainUsed:false,movedThisTurn:false,
+    grenades:def.role==='Comando'?2:1,flashes:def.role==='Comando'?2:0,smokes:def.role==='Espía'?2:0,mines:def.role==='Ingeniero'?2:0,covers:def.role==='Ingeniero'?2:0,gases:def.role==='Artillero'?2:0,sweeps:def.role==='Espía'?1:0,molotovs:def.role==='Artillero'?2:0,crates:def.role==='Médico'?2:0,teleports:def.role==='Espía'?1:0,shields:def.role==='Comando'?1:0,arty:def.role==='Artillero'?2:0,bees:def.role==='Espía'?1:0,tranqs:def.role==='Espía'?1:0,water:def.role==='Comando'?2:0,toolkits:def.role==='Ingeniero'?2:0,orbitals:def.role==='Artillero'?1:0,heals:2,revives:1,captainUsed:false,movedThisTurn:false,
     specialUsedTurn:false,onceUsed:false,nation,hasShot:false,
     facing:team==='A'?0:2,overwatch:false,returnKey:'',body:role.body,moveCost:body.moveCost};
 }
@@ -1937,7 +1937,22 @@ function sweepDetect(u,x,y){
   log('📡 '+u.role+' barre la zona de ('+(x+1)+','+(y+1)+'): '+(found?('revela '+found+' enemigo(s) invisible(s).'):'no hay invisibles en el radio.'));
   G.actionMode='move';updateUI();draw();
 }
-/* ===== LOTE 5 (F4): tranquilizante, cañón de agua y kit de herramientas ===== */
+/* Orbital laser: un solo disparo de precision desde arriba. */
+const ORB_COST=4, ORB_DMG=80, ORB_RANGE=6;
+function fireOrbital(u,x,y){
+  if(u.role!=='Artillero'){toast('El láser orbital es del Artillero.');return;}
+  if((u.orbitals||0)<=0){toast('Sin cargas orbitales: el Artillero lleva 1 por partida.');return;}
+  if(u.energy<ORB_COST){toast('El láser orbital cuesta '+ORB_COST+' ⚡.');return;}
+  if(cheb(u,{x,y})>ORB_RANGE){toast('El láser orbital alcanza '+ORB_RANGE+' casillas.');return;}
+  G.lastMoveUndo=null;spendEnergy(u,ORB_COST);u.orbitals--;playOnce(u,'throw');sfx('boom');FX.shake=Math.max(FX.shake,10);
+  if(typeof fx3Explosion==='function')fx3Explosion(x,y,'expl');
+  fxBurst(x,y,18,'#8fd8ff');
+  log('🛰 '+u.role+' ('+u.team+') pide el láser orbital sobre ('+(x+1)+','+(y+1)+'): '+ORB_DMG+' de daño en esa casilla (no hay salpicadura).');
+  G.units.filter(t=>t.alive&&t.x===x&&t.y===y).forEach(t=>damage(t,ORB_DMG,'El láser orbital'));
+  if(G.drone&&G.drone.alive&&G.drone.x===x&&G.drone.y===y)damage(G.drone,ORB_DMG,'El láser orbital');
+  G.actionMode='move';checkWin();updateUI();draw();
+}
+/* ===== LOTE 5 (F4): tranquilizante, canon de agua y kit de herramientas ===== */
 const TRANQ_COST=2, TRANQ_RANGE=3, WATER_COST=3, WATER_RANGE=3, WATER_PUSH=2, TOOL_COST=3, TOOL_RANGE=2, TOOL_HEAL=80;
 function throwTranq(u,target){
   if(u.role!=='Espía'){toast('El tranquilizante es del Espía.');return;}
@@ -2269,11 +2284,14 @@ function useSpecial(u,target){
   if(role==='Artillero'){toast('La supresión va con sus ametralladoras: cada impacto resta 2 de energía al enemigo en su siguiente turno. Con lanzacohetes, daño en área.');return;}
   if(role==='Comando'){toast('El Comando lleva una M67 extra (botón Granada) y 2 aturdidoras M84 (botón Aturdidora): sin daño, pero dejan al enemigo viendo estrellas durante un turno.');return;}
 }
-function deployTurret(u,x,y){
+function deployTurret(u,x,y,type){
+  type=type||'m2';
   if(u.energy<5){toast('Desplegar la torreta cuesta 5 ⚡ (un turno casi entero).');return;}
   if(dist(u,{x,y})!==1||blocked(x,y)){toast('La torreta va en una casilla adyacente libre.');return;}
-  G.lastMoveUndo=null;spendEnergy(u,5);playOnce(u,'deploy');sfx('place');G.deployed.push({x,y,hp:120,maxHp:120,team:u.team,alive:true});
-  log(u.role+' ('+u.team+') despliega una torreta M2 Browning en ('+(x+1)+','+(y+1)+').');
+  G.lastMoveUndo=null;spendEnergy(u,5);playOnce(u,'deploy');sfx('place');
+  const hpT=type==='rocket'?100:120;
+  G.deployed.push({x,y,hp:hpT,maxHp:hpT,team:u.team,alive:true,type:type});
+  log(u.role+' ('+u.team+') despliega una torreta '+(type==='rocket'?'de cohetes':'M2 Browning')+' en ('+(x+1)+','+(y+1)+').');
   G.actionMode='move';updateUI();draw();
 }
 function captureTurret(u){
@@ -2304,7 +2322,14 @@ function turretFire(ownerTeam){
     }
   };
   if(effMode(G)!=='dominacion'&&G.map.turret.owner===ownerTeam)fire(TURRET_POS,30,6,'La torreta central');
-  G.deployed.filter(t=>t.alive&&t.team===ownerTeam).forEach(t=>fire(t,45,6,'La torreta M2 desplegada'));
+  G.deployed.filter(t=>t.alive&&t.team===ownerTeam).forEach(t=>{
+    if(t.type==='rocket'){
+      const inR=targets.filter(x=>cheb(t,x)<=6&&hasLOS(t,x)&&!smokeBlocksLOS(t,x)).sort((a,b)=>cheb(t,a)-cheb(t,b));
+      if(inR.length){const tg=inR[0];fxTracer(t,tg);if(typeof fx3Shot==='function')fx3Shot(t,tg,'Lanzacohetes');sfx('boom');
+        damage(tg,60,'La torreta de cohetes');
+        G.units.filter(u=>u.alive&&u.team!==ownerTeam&&u!==tg&&cheb(u,tg)<=1).forEach(u=>damage(u,30,'La torreta de cohetes'));}
+    } else fire(t,45,6,'La torreta M2 desplegada');
+  });
 }
 
 /* ---- turn flow ---- */
@@ -3123,6 +3148,8 @@ function boardTileClick(t){
   if(G.actionMode==='crate'&&u){placeHealthCrate(u,t.x,t.y);return;}
   if(G.actionMode==='teleport'&&u){teleportUnit(u,t.x,t.y);return;}
   if(G.actionMode==='arty'&&u){fireArtillery(u,t.x,t.y);return;}
+  if(G.actionMode==='deployRocket'&&u){deployTurret(u,t.x,t.y,'rocket');return;}
+  if(G.actionMode==='orbital'&&u){fireOrbital(u,t.x,t.y);return;}
   if(G.actionMode==='drone'&&u){
     const cu0=unitAt(t.x,t.y);
     if(cu0&&cu0.team===G.turn){selectUnit(cu0);return;}
@@ -3280,6 +3307,8 @@ function updateUI(){
    (u.role==='Espía'?'<button data-act="tranq" class="'+(G.actionMode==='tranq'?'on':'')+'" '+(isTurn&&(u.tranqs||0)>0?'':'disabled')+'>💉 Tranquilizante<small>'+TRANQ_COST+' ⚡ · un enemigo a '+TRANQ_RANGE+' · quedan '+(u.tranqs||0)+' · lo aturde su siguiente turno sin daño</small></button>':'')+
    (u.role==='Comando'?'<button data-act="water" class="'+(G.actionMode==='water'?'on':'')+'" '+(isTurn&&(u.water||0)>0?'':'disabled')+'>💦 Cañón de agua<small>'+WATER_COST+' ⚡ · un enemigo a '+WATER_RANGE+' · quedan '+(u.water||0)+' · lo empuja hasta '+WATER_PUSH+' casillas sin daño</small></button>':'')+
    (u.role==='Ingeniero'?'<button data-act="toolkit" '+(isTurn&&(u.toolkits||0)>0?'':'disabled')+'>🔧 Kit de herramientas<small>'+TOOL_COST+' ⚡ · repara '+TOOL_HEAL+' PV a tu torreta desplegada (a '+TOOL_RANGE+' casillas) · quedan '+(u.toolkits||0)+'</small></button>':'')+
+   (u.role==='Ingeniero'?'<button data-act="deployRocket" class="'+(G.actionMode==='deployRocket'?'on':'')+'" '+(isTurn?'':'disabled')+'>🚀 Torreta de cohetes (desplegar)<small>5 ⚡ · casilla adyacente · 100 PV · dispara 60 en el objetivo y 30 en radio 1</small></button>':'')+
+   (u.role==='Artillero'?'<button data-act="orbital" class="'+(G.actionMode==='orbital'?'on':'')+'" '+(isTurn&&(u.orbitals||0)>0?'':'disabled')+'>🛰 Láser orbital<small>'+ORB_COST+' ⚡ · lanza a '+ORB_RANGE+' · quedan '+(u.orbitals||0)+' · '+ORB_DMG+' en una sola casilla, sin salpicadura</small></button>':'')+
    (u.role==='Espía'?'<button data-act="sweep" class="'+(G.actionMode==='sweep'?'on':'')+'" '+(isTurn&&(u.sweeps||0)>0?'':'disabled')+'>📡 Barrido detector<small>'+SWEEP_COST+' ⚡ · radio '+SWEEP_RANGE+' · quedan '+(u.sweeps||0)+' · revela invisibles</small></button>':'')+
    (effMode(G)==='escolta'&&G.drone&&G.drone.alive&&u.team==='A'?'<button data-act="guide" class="'+(G.actionMode==='drone'?'on':'')+'" '+(isTurn&&dist(u,G.drone)<=1&&u.energy>=2&&G.drone.movesLeft>0?'':'disabled')+'>🤖 Guiar dron · 2 ⚡<small>Mueve el dron 1 casilla · quedan '+G.drone.movesLeft+' guiados esta ronda · tienes que estar pegado a él — luego toca la casilla destino junto al dron</small></button>':'')+
    '</div>'+(u.team!==G.turn?'<p class="sub" style="margin-top:8px">Este soldado es del bando rival: podrás actuar con él en su turno'+(G.opp==='ia'?' (lo mueve la IA)':'')+'.</p>':'');
@@ -3303,6 +3332,8 @@ function updateUI(){
     if(act==='tranq'){G.actionMode='tranq';toast('Toca a un enemigo a '+TRANQ_RANGE+' casillas o menos: queda aturdido su siguiente turno.');}
     if(act==='water'){G.actionMode='water';toast('Toca a un enemigo a '+WATER_RANGE+' casillas o menos: lo empuja sin daño.');}
     if(act==='toolkit'){useToolkit(u);}
+    if(act==='deployRocket'){G.actionMode='deployRocket';toast('Toca una casilla adyacente libre: la torreta de cohetes dispara a 6 casillas con salpicadura.');}
+    if(act==='orbital'){G.actionMode='orbital';toast('Toca la casilla del láser orbital (máx. '+ORB_RANGE+' casillas): 80 de daño exacto en esa casilla.');}
     if(act==='overwatch'){setOverwatch(u);}
     if(act==='special'){useSpecial(u,null);}
     if(act==='capture'){captureTurret(u);}
