@@ -65,3 +65,33 @@ real del IPA). Muestras ampliadas tras la primera pasada: los extremos de
 
 `bench/harness.js` acepta 6º argumento `log` (registro del dron) y
 6º/7º argumento `roles` (informe de daño/kills/acciones por rol).
+
+
+## Medicion final tras F4-F9 (habilidades nuevas activas)
+
+Misma metodologia, 20 partidas en Dominacion y Eliminacion, 10 en Baliza
+y Escolta:
+
+| Modo · mapa | A | B | Sesgo | Rondas |
+|---|---|---|---|---|
+| Dominacion · Almacen | 12 | 8 | 60 % A | 12,4 |
+| Dominacion · Skirmish_03 | 3 | 17 | **85 % B** | 8,6 |
+| Eliminacion · Almacen | 10 | 10 | **50/50** | 13,4 |
+| Baliza · Skirmish_03 | 6 | 4 | 60 % A | 13,6 |
+| Escolta · Almacen | 8 | 2 | 80 % A (dron entregado 8/10) | 4,8 |
+
+Lectura:
+- **Eliminacion Almacen queda perfectamente equilibrada** (10-10) y Baliza
+  S03 mejora a 60 % A (venia de 70 % B).
+- **Dominacion S03 sigue siendo el outlier** (85 % B). Mapas, zonas,
+  salidas y escuadras verificados 180-simetricos: la diferencia es la
+  iniciativa del segundo en mover en un mapa con mucha cobertura. Es una
+  decision de diseno pendiente (iniciativa alterna o dificultad mayor de
+  la IA en ese modo/mapa), no un bug de disposicion.
+- Escolta: el dron se entrega en 8 de 10 partidas (antes 0).
+
+### La IA ahora usa todas las habilidades nuevas
+
+El harness juega con gas, molotov, artilleria, abejas, escudo,
+tranquilizante, canon de agua, kit, torreta de cohetes y laser orbital
+activos; los numeros de arriba son con esas habilidades en juego.
