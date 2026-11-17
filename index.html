@@ -4900,6 +4900,14 @@ function makeRealSoldier3(un){
     gradTex.minFilter=THREE.NearestFilter;gradTex.magFilter=THREE.NearestFilter;
   }catch(e){}
   const mat=gradTex?new THREE.MeshToonMaterial({map:RD.tex,gradientMap:gradTex}):new THREE.MeshStandardMaterial({map:RD.tex,roughness:0.85,metalness:0.02});
+  /* Skin de NACION: el uniforme se tine con el color de la bandera
+     (multiplicado sobre la textura del original, sin taparla). */
+  if(un.skin==='nacion'&&un.nation&&un.nation.colors){
+    mat.color.copy(new THREE.Color(un.nation.colors[0])).lerp(new THREE.Color('#ffffff'),0.42);
+  }
+  /* Equipo enemigo: el uniforme se tine calido para que no se confunda con
+     el tuyo ni de espaldas. El bando A conserva el color natural. */
+  if(un.team==='B'){mat.color.lerp(new THREE.Color('#c95338'),0.22);}
   mat.color.copy(tint);
   const mesh=new THREE.SkinnedMesh(RD.geo,mat);
   mesh.castShadow=true;mesh.frustumCulled=false;
