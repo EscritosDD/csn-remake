@@ -640,7 +640,7 @@ canvas#board{border-radius:10px;box-shadow:0 0 0 2px rgba(0,0,0,.45), inset 0 0 
       <div><b>15 · Campaña · Operación Londres</b><p>Cinco misiones en orden, cada una con mapa, objetivo, formato y dificultad propios. La escuadra arrastra veterania entre misiones: sobrevivir a una misión da +25 PV y +1 de energía máxima en las siguientes, acumulable. Perder una misión no borra la veterania ni el progreso: solo repites esa misión. Completar las cinco cierra la operación.</p></div>
       <div><b>16 · Dificultad de la IA</b><p>Recluta: la IA hace un 15 % menos de daño. Normal: la IA de siempre. Veterano: +1 de energía por soldado rival, cura con el Médico, despliega la torreta del Ingeniero y prioriza baliza y zonas de Dominación. Élite: todo lo de Veterano y además +2 de energía, +25 PV, +15 % de daño y revive con el Médico. Normal, Veterano y Élite concentran el fuego sobre tu soldado más herido (Recluta dispara al más cercano). A dos jugadores la dificultad no se aplica.</p></div>
       <div><b>17 · El arma, agarrada también en 3D en vivo</b><p>El arreglo de los sprites llega a la vista 3D en directo: cada fotograma, el arma de utilería se recoloca sobre las manos reales del esqueleto (empuñadura en la mano derecha y guardamanos en la de apoyo; con pistola, sobre el eje del antebrazo), así que ya no flota delante del pecho ni en reposo ni al andar, disparar o encajar un tiro.</p></div>
-      <div><b>18 · Escolta del dron</b><p>Modo asimétrico: la escuadra del Jugador 1 escolta y la rival defiende. El dron averiado (240 PV, entra ya dañado con 180) sale de la casilla (2,6) contando desde la esquina superior izquierda, y la extracción es la zona 2×2 de las columnas 11–12 y filas 6–7, en el este. Guiarlo cuesta pegarse a él: un soldado adyacente pulsa «Guiar dron» (2 ⚡) y toca la casilla destino junto al dron, y entre toda la escuadra hay 2 guiados por ronda, así que el dron avanza como mucho 2 casillas por ronda y siempre con escolta al lado. Además, <b>blindaje de escolta</b>: mientras el dron tenga al menos un soldado aliado adyacente, todo daño que reciba se reduce a la mitad (−50 %). El Médico lo repara con su especial (+80 PV, del mismo cupo de 2 curaciones) estando adyacente. El dron no dispara, no devuelve fuego y no provoca vigilancia, pero los disparos, las granadas, la salpicadura y los barriles sí le dañan, y su cobertura direccional cuenta como la de un soldado. Gana la escolta si el dron pisa la extracción o si elimina al rival; gana la defensa si destruye el dron, elimina a la escolta o aguanta las 15 rondas. Contra la IA, la defensa juega el objetivo: intercepta, dispara primero al dron y lo granadea.</p></div>
+      <div><b>18 · Escolta del dron</b><p>Modo asimétrico: la escuadra del Jugador 1 escolta y la rival defiende. El dron averiado (240 PV, entra entero) sale de la casilla (2,6) contando desde la esquina superior izquierda, y la extracción es la zona 2×2 de las columnas 11–12 y filas 6–7, en el este. Guiarlo cuesta pegarse a él: un soldado adyacente pulsa «Guiar dron» (2 ⚡) y toca la casilla destino junto al dron, y entre toda la escuadra hay 2 guiados por ronda, así que el dron avanza como mucho 2 casillas por ronda y siempre con escolta al lado. Además, <b>blindaje de escolta</b>: mientras el dron tenga al menos un soldado aliado adyacente, todo daño que reciba se reduce a ~la mitad (−53 % medido). El Médico lo repara con su especial (+80 PV, del mismo cupo de 2 curaciones) estando adyacente. El dron no dispara, no devuelve fuego y no provoca vigilancia, pero los disparos, las granadas, la salpicadura y los barriles sí le dañan, y su cobertura direccional cuenta como la de un soldado. Gana la escolta si el dron pisa la extracción o si elimina al rival; gana la defensa si destruye el dron, elimina a la escolta o aguanta las 15 rondas. Contra la IA, la defensa juega el objetivo: intercepta, dispara primero al dron y lo granadea.</p></div>
       <div><b>19 · Humo M18 del Espía</b><p>El Espía lleva <b>2 granadas de humo M18</b> por partida (botón «Humo M18», 2 ⚡, lanzamiento a 4 casillas). La cortina tapa la casilla destino y las 4 adyacentes en cruz, y <b>bloquea la visión a través de ella durante 2 rondas completas</b>: nadie dispara, devuelve fuego, vigila ni acierta con torreta a través del humo, y tampoco se acierta a quien está <b>dentro</b> del humo ni se dispara desde dentro a más de 1 casilla; el indicador de puntería lo marca como <b>«Sin tiro · humo M18»</b> y el aviso al intentarlo nombra el humo. Lo mismo vale para disparar contra una torreta desplegada, un barril o una caja que queden tras la cortina. Las <b>granadas M67 no se ven afectadas</b>: se lanzan en arco, por encima de la cortina. El humo <b>no bloquea el movimiento</b> (se entra y se cruza libremente) y a 1 casilla el tiro se resuelve igual, porque entre dos casillas pegadas no hay humo de por medio. Tapa a los dos bandos por igual, se disipa sola al empezar el turno de quien la lanzó en la segunda ronda siguiente, y la IA del Espía la usa para taparse cuando tiene al enemigo a tiro y con visión. En Escolta, una cortina entre la defensa y el dron le compra al dron dos rondas de avance sin recibir fuego. Para verlo en juego sin configurar nada: el botón <b>«Probar el humo M18»</b> de la pantalla de inicio despliega un 5 contra 5 con un Espía por escuadra y el tuyo ya seleccionado.</p></div>
       <div><b>20 · El giro</b><p>Cada soldado mira hacia su <b>dirección de mira</b> (hacia donde se movió o disparó por última vez), y esa dirección es la que decide su cobertura y si le atacan por la espalda. Al cambiar de mira, el soldado <b>gira sobre el terreno</b> por el camino más corto, en unos 300 ms por cuarto de vuelta, con su pasito de ajuste: ya no rota de golpe ni mira hacia otro sitio distinto del que calculan las reglas. En la vista clásica el giro se lee en el volteo del sprite y en que se estrecha un instante mientras rota. Las torretas y el dron giran igual. Es un giro construido en código: entre los clips del original convertidos no hay ninguno de giro. Si tu sistema pide reducir el movimiento, el giro es instantáneo.</p></div>
       <div><b>21 · Minas Claymore M18A1 del Ingeniero</b><p>El Ingeniero lleva <b>2 minas Claymore</b> por partida (botón «Claymore M18A1», 3 ⚡) y las coloca en una <b>casilla adyacente libre</b>. La mina queda <b>oculta para el enemigo</b> en las dos vistas: solo la ve quien la colocó, a ras de suelo y con un LED rojo, y ni el registro de partida revela dónde la puso la IA. No bloquea el movimiento, ni la visión, ni da cobertura. Cuando un soldado enemigo <b>acaba su movimiento sobre su casilla</b>, la mina estalla: <b>60 de daño</b> explosivo a ese soldado y la mina se consume. Bajo los pies de su propio bando no estalla nunca, y el dron de Escolta no las dispara, porque no presiona el suelo. La IA del Ingeniero las siembra en la baliza, en las zonas de Dominación y de cara al enemigo.</p></div>
@@ -818,7 +818,7 @@ const DOM_TARGET=10, DOM_MAX_ROUNDS=15;
    aguantando ESCORT_MAX_ROUNDS rondas. */
 const ESCORT_START={x:1,y:5};
 const ESCORT_EXT=[{x:10,y:5},{x:11,y:5},{x:10,y:6},{x:11,y:6}];
-const ESCORT_MAX_ROUNDS=15, ESCORT_DRONE_MAXHP=240, ESCORT_DRONE_HP=180, ESCORT_GUIDES_PER_ROUND=2;
+const ESCORT_MAX_ROUNDS=15, ESCORT_DRONE_MAXHP=240, ESCORT_DRONE_HP=240, ESCORT_GUIDES_PER_ROUND=2;
 function isExtraction(x,y){return ESCORT_EXT.some(t=>t.x===x&&t.y===y);}
 /* ===== CAMPAÑA · OPERACIÓN LONDRES ===== */
 const CAMPAIGN_MISSIONS=[
@@ -1581,7 +1581,7 @@ function startGame(squadA,squadB){
   $('#log').innerHTML='';
   log('Despliegue en el mapa '+G.map.name+'. Modo: '+(effMode(G)==='eliminacion'?'Eliminación':effMode(G)==='dominacion'?'Dominación':effMode(G)==='escolta'?'Escolta del dron':G.mode==='guerra'?'Guerra de Naciones · Captura de baliza':'Captura de baliza')+(G.mode==='campana'?(' · Campaña Misión '+(G.campaignMission+1)+' · '+CAMPAIGN_MISSIONS[G.campaignMission].title):'')+' · Dificultad IA: '+G.difficulty+' · '+setup.fmt+' contra '+setup.fmt+'.');
   if(effMode(G)==='dominacion')log('⬢ Dominación: mantén las zonas (Depósito, Centro, Muelle) hasta el inicio de tu siguiente turno (desde la ronda 2): +1 punto por zona y +1 extra si dominas las tres. Gana quien llegue a '+DOM_TARGET+' puntos.');
-  if(effMode(G)==='escolta')log('🤖 Escolta: el dron averiado ('+ESCORT_DRONE_HP+'/'+ESCORT_DRONE_MAXHP+' PV) espera en (2,6). Pega un soldado a él (−50 % de daño mientras tenga escolta pegado), pulsa «Guiar dron» (2 ⚡) y toca la casilla destino: máximo '+ESCORT_GUIDES_PER_ROUND+' guiados por ronda. Si pisa la extracción del este (columnas 11–12, filas 6–7), gana la escolta; si el dron cae o pasan '+ESCORT_MAX_ROUNDS+' rondas, gana la defensa.');
+  if(effMode(G)==='escolta')log('🤖 Escolta: el dron averiado ('+ESCORT_DRONE_HP+'/'+ESCORT_DRONE_MAXHP+' PV) espera en (2,6). Pega un soldado a él (daño reducido a ~la mitad mientras tenga escolta pegado), pulsa «Guiar dron» (2 ⚡) y toca la casilla destino: máximo '+ESCORT_GUIDES_PER_ROUND+' guiados por ronda. Si pisa la extracción del este (columnas 11–12, filas 6–7), gana la escolta; si el dron cae o pasan '+ESCORT_MAX_ROUNDS+' rondas, gana la defensa.');
   G.units.filter(u=>u.team==='A'&&u.vetLevel>0).forEach(u=>log('★ '+u.role+' entra con veterania nivel '+u.vetLevel+': +'+(u.vetLevel*25)+' PV y +'+u.vetLevel+' ⚡ por las misiones que ya sobrevivió.'));
   if(G.mode==='guerra')log('⚑ '+myNation.name+' contra '+rivalNation.name+'. Que gane tu nación.');
   log('Turno de '+G.names.A+'. Toca un soldado para seleccionarlo, toca una casilla iluminada para mover y a un enemigo para disparar.');
@@ -1613,8 +1613,8 @@ function fireClipFor(weaponName){
 function playOnce(u,key){if(u){u._onceKey=key;u._onceT=FX.t;}}
 function damage(target,dmg,srcLabel){
   if(!target.alive)return;
-  if(target.isDrone&&G&&G.units&&G.units.some(u=>u.alive&&u.team==='A'&&dist(u,target)<=1)){
-    dmg=Math.max(1,Math.round(dmg*0.5));
+  if(target.isDrone&&G&&G.units&&G.units.some(u=>u.alive&&u.team==='A'&&cheb(u,target)<=1)){
+    dmg=Math.max(1,Math.round(dmg*0.47));
   }
   target.hp-=dmg;
   target._hitT=FX.t;target._hitAmt=Math.min(1,dmg/70);
@@ -1925,6 +1925,14 @@ function guideDrone(u,x,y){
   spendEnergy(u,2);d.movesLeft--;d.movedThisTurn=true;
   const fx=d.x,fy=d.y,f=angleToFacing(x-fx,y-fy);if(f!=null)d.facing=f;
   d.x=x;d.y=y;
+  /* La escolta camina CON el dron: si al empujarlo deja de quedarle
+     pegado, se recoloca en la casilla que el dron acaba de dejar libre
+     (siempre hay una adyacente y era la regla del modo: el dron avanza
+     "siempre con escolta al lado", manteniendo el −50 % de blindaje). */
+  if(dist(u,d)>1&&!blocked(fx,fy)&&!(u.x===fx&&u.y===fy)){
+    const ff2=angleToFacing(fx-u.x,fy-u.y);if(ff2!=null)u.facing=ff2;
+    u.x=fx;u.y=fy;u.movedThisTurn=true;checkMines(u);checkOverwatch(u);pickupLoot(u);
+  }
   log('🤖 '+u.role+' guía el dron de ('+(fx+1)+','+(fy+1)+') a ('+(x+1)+','+(y+1)+') · −2 ⚡. Al dron le quedan '+d.hp+' PV y '+d.movesLeft+' guiados esta ronda.');
   if(isExtraction(x,y)){d.delivered=true;log('⇪ ¡El dron pisa la zona de extracción!');}
   G.actionMode='move';checkWin();updateUI();draw();
@@ -2289,7 +2297,7 @@ function aiUnitAct(u){
         /* 0) Médico: si el dron tiene daño serio (<=155 PV, o <=maxHp-40 desde R3) o un aliado está herido, curarlo */
         if(u.role==='Médico'&&u.heals>0&&u.energy>=3){
           const hurtAlly=G.units.filter(a=>a.alive&&a.team==='A'&&a.hp<=a.maxHp*0.65&&dist(u,a)<=1).sort((a,b)=>a.hp-b.hp)[0];
-          const droneNeedsHeal=(d.hp<=155)||(G.round>=3&&d.hp<=d.maxHp-40);
+          const droneNeedsHeal=(d.hp<=170)||(G.round>=3&&d.hp<=d.maxHp-40);
           const healTgt=droneNeedsHeal?d:hurtAlly;
           if(healTgt){
             if(dist(u,healTgt)<=1){useSpecial(u,healTgt);if(!G||G.over)return res();}
@@ -2312,11 +2320,24 @@ function aiUnitAct(u){
         }
         /* 1) guiar si está pegado y mejora ruta directa al este (garantizando escolta adyacente activa) */
         const tryGuideFwd=(maxGuides, allowUnmovedSelf)=>{
-          if(dist(u,d)>1||d.movesLeft<=0||u.energy<2)return false;
+          if(d.movesLeft<=0||u.energy<2)return false;
           const lim=maxGuides||2;
           let guided=0;
           for(let step=0;step<lim;step++){
-            if(dist(u,d)>1||d.movesLeft<=0||u.energy<2)break;
+            if(d.movesLeft<=0||u.energy<2)break;
+            /* Si el dron ya se ha ido de su lado, la escolta lo sigue: se
+               recoloca pegado (gastando movimiento) y vuelve a empujar. Así
+               una sola escolta puede completar los 2 guiados de la ronda. */
+            if(dist(u,d)>1){
+              if(u.energy<2+moveCostOf(u))break;
+              const reachW=reachable(u,u.energy-2);
+              let near=null,nearS=1e9;
+              reachW.forEach((dd,k)=>{const [x,y]=k.split(',').map(Number);if(dist({x,y},d)>1)return;const s=dd*2;if(s<nearS){nearS=s;near={x,y,d:dd};}});
+              if(!near)break;
+              const ffw=angleToFacing(near.x-u.x,near.y-u.y);if(ffw!=null)u.facing=ffw;
+              u.x=near.x;u.y=near.y;u.energy-=near.d;u.movedThisTurn=true;checkMines(u);checkOverwatch(u);pickupLoot(u);
+              if(!u.alive||!G||G.over)return guided>0;
+            }
             let bx=null,by=null,bestSc=1e9;
             const curPd=pathDistBrk(d,ext);
             for(const [dx,dy] of [[1,0],[0,1],[0,-1],[-1,0]]){
@@ -2325,7 +2346,7 @@ function aiUnitAct(u){
               const pd=pathDistBrk({x:nx,y:ny},ext);
               const allyNext=G.units.some(a=>a.alive&&a.team==='A'&&a!==u&&dist(a,{x:nx,y:ny})<=1);
               const canReachAdj=!u.movedThisTurn&&(()=>{const r=reachable(u,u.energy-2);for(const [k] of r){const [px,py]=k.split(',').map(Number);if(dist({x:px,y:py},{x:nx,y:ny})===1)return true;}return false;})();
-              const keepGuard=isExtraction(nx,ny)||allyNext||canReachAdj||(allowUnmovedSelf&&enemies.filter(e=>cheb(e,{x:nx,y:ny})<=WEAPONS[e.weapon].rng&&hasLOS(e,{x:nx,y:ny})&&!smokeBlocksLOS(e,{x:nx,y:ny})).length===0);
+              const keepGuard=true; /* la escolta camina con el dron (guideDrone la recoloca), así que el blindaje no se pierde al empujar */
               if(!keepGuard)continue;
               if(pd>curPd&&!isExtraction(nx,ny))continue;
               const nearBarrel=G.map.barrels.some(b=>b.alive&&cheb({x:nx,y:ny},b)<=1)?3.5:0;
@@ -2347,9 +2368,10 @@ function aiUnitAct(u){
         const canExtractNow=ESCORT_EXT.some(e=>!blocked(e.x,e.y)&&dist(d,e)<=d.movesLeft);
         if(canExtractNow){
           if(tryGuideFwd(2,true)&&(!G||G.over))return res();
-        } else if(!u.movedThisTurn&&dist(u,d)<=1&&d.movesLeft>0&&u.energy>=2+moveCostOf(u)){
-          /* Empuja 1 casilla ANTES de mover, luego acompaña para mantener el -50% de blindaje */
-          tryGuideFwd(1,false);
+        } else if(!u.movedThisTurn&&d.movesLeft>0&&u.energy>=2+moveCostOf(u)){
+          /* Cualquier escolta con energía guía (no solo el Médico): si no
+             está pegado, el guiado en cadena lo acerca primero. */
+          tryGuideFwd(2,false);
           if(!G||G.over)return res();
         }
         /* 1b) si está bloqueando la casilla delantera directa del dron hacia la extracción, apartarse */
@@ -2377,7 +2399,7 @@ function aiUnitAct(u){
           const reserveE=(needGuards<1)?0:(d.movesLeft>0?2:Math.min(w.cost,3));
           const reach=reachable(u,Math.max(0,u.energy-reserveE));
           let best=null,bestS=1e9;
-          reach.forEach((dd,k)=>{const [x,y]=k.split(',').map(Number);const dToD=dist({x,y},d);const isBlock=(pathDistBrk({x,y},ext)<curExtDist&&dToD===1)?5:0;const covBonus=coverLevel({x,y},enemies[0])>0?-4:0;const guardBonus=(dToD===1)?(needGuards<1?-28:-11):0;const bPen=G.map.barrels.some(b=>b.alive&&cheb({x,y},b)<=1)?14:0;const adjAllies=G.units.filter(a=>a.alive&&a.team===u.team&&a!==u&&cheb({x,y},a)<=1).length;const s=dToD*3.2+dd*0.5+isBlock+covBonus+guardBonus+bPen+adjAllies*2.0;if(s<bestS){bestS=s;best={x,y,d:dd};}});
+          reach.forEach((dd,k)=>{const [x,y]=k.split(',').map(Number);const dToD=dist({x,y},d);const isBlock=(pathDistBrk({x,y},ext)<curExtDist&&dToD===1)?5:0;const covBonus=coverLevel({x,y},enemies[0])>0?-4:0;const guardBonus=(dToD===1)?(needGuards<1?-28:-11):0;const frontGuard=(x>d.x&&Math.abs(y-d.y)===1)?-10:0;const bPen=G.map.barrels.some(b=>b.alive&&cheb({x,y},b)<=1)?14:0;const adjAllies=G.units.filter(a=>a.alive&&a.team===u.team&&a!==u&&cheb({x,y},a)<=1).length;const s=dToD*3.2+dd*0.5+isBlock+covBonus+guardBonus+frontGuard+bPen+adjAllies*2.0;if(s<bestS){bestS=s;best={x,y,d:dd};}});
           if(best&&(best.x!==u.x||best.y!==u.y)){
             const ff=angleToFacing(best.x-u.x,best.y-u.y);if(ff!=null)u.facing=ff;
             u.x=best.x;u.y=best.y;u.energy-=best.d;u.movedThisTurn=true;checkMines(u);checkOverwatch(u);pickupLoot(u);

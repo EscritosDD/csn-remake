@@ -132,6 +132,7 @@ async function oneGame(mode, map, fmt) {
     dronePos: G.drone ? (G.drone.x + ',' + G.drone.y) : null,
     droneDelivered: G.drone ? G.drone.delivered : null,
     droneAlive: G.drone ? G.drone.alive : null,
+    log: G.log ? G.log.slice(-80) : null,
   };
 }
 
@@ -148,6 +149,10 @@ async function main() {
     const w = r.over ? (r.winner || 'draw') : 'guard';
     wins[w] = (wins[w] || 0) + 1;
     totalRounds += r.rounds;
+    if (process.argv[6] === 'log' && r.log) {
+      const drones = r.log.filter(l => /dron|escolta|Dron|Escolta/i.test(l));
+      if (drones.length) console.log('   LOG DRON:\n    ' + drones.join('\n    '));
+    }
     console.log(`  #${String(n).padStart(3)} ${String(w).padEnd(6)} rondas=${String(r.rounds).padEnd(3)} hpA=${String(r.hpA).padEnd(4)} hpB=${String(r.hpB).padEnd(4)}${r.domA != null ? ` domA=${r.domA} domB=${r.domB}` : ''}${r.dronePos != null ? ` dron=${r.dronePos} entregado=${r.droneDelivered} vivo=${r.droneAlive}` : ''}`);
   }
   console.log('---');
