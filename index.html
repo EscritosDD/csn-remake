@@ -4,7 +4,8 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
 <meta name="color-scheme" content="dark light"/>
-<link rel="icon" href="data:,"/>
+<link rel="icon" href="assets/ui/favicon.ico" sizes="any"/>
+<link rel="icon" type="image/png" href="assets/ui/favicon.png"/>
 <title>CSN — Chess Soldier Nation · Táctica por turnos</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
@@ -219,7 +220,6 @@ canvas#board{border-radius:10px;box-shadow:0 0 0 2px rgba(0,0,0,.45), inset 0 0 
 .roster button{border-width:1.5px}
 .log{border-width:2px;border-radius:12px}
 .filters button{box-shadow:0 2px 0 rgba(0,0,0,.18)}
-
 .topbar{background:rgba(24,29,34,.96);border-bottom:3px solid #0f1113;color:#eef2e4}
 .topbar .brand small{color:#a9b39a}
 .topbar nav.tabs button{border-color:#4a545c;color:#eef2e4}
@@ -230,9 +230,12 @@ canvas#board{border-radius:10px;box-shadow:0 0 0 2px rgba(0,0,0,.45), inset 0 0 
 @media(max-width:900px){.sprite-strip{grid-template-columns:repeat(4,1fr)}}
 @media(max-width:520px){.sprite-strip{grid-template-columns:repeat(3,1fr)}}
 .sprite-cell{margin:0;text-align:center;background:var(--panel2);border:1.5px solid var(--line);border-radius:10px;padding:6px 4px 8px}
-.sprite-cell img{width:100%;height:auto;display:block}
+.sprite-cell img{width:100%;height:auto;display:block;border-radius:8px;background:radial-gradient(circle at 50% 28%,#3a4433,#20261a 80%)}
 .sprite-cell figcaption{font-weight:700;font-size:13px;font-family:'Barlow Condensed';letter-spacing:.03em;text-transform:uppercase}
-.unit-sprite{width:88px;height:88px;float:right;margin:0 0 6px 12px;background:radial-gradient(circle at 50% 78%,rgba(0,0,0,.18),rgba(0,0,0,0) 62%);border-radius:10px}
+.sprite-cell figcaption small{display:block;font-family:'Barlow';font-weight:600;font-size:11px;letter-spacing:.02em;text-transform:none;color:var(--muted);margin-top:1px}
+.unit-sprite{width:112px;height:112px;object-fit:cover;object-position:50% 0%;float:right;margin:0 0 8px 12px;background:radial-gradient(circle at 50% 28%,#3a4433,#20261a 80%);border:2px solid var(--line);border-radius:12px;box-shadow:0 3px 0 rgba(0,0,0,.20)}
+.roster-portrait{width:46px;height:46px;flex:none;object-fit:cover;object-position:50% 0%;border-radius:9px;border:1.5px solid var(--line);background:radial-gradient(circle at 50% 28%,#3a4433,#20261a 80%)}
+.role-thumb{width:54px;height:54px;flex:none;object-fit:cover;object-position:50% 0%;border-radius:9px;border:1.5px solid var(--line);background:radial-gradient(circle at 50% 28%,#3a4433,#20261a 80%)}
 /* Tablero vivo: el marco respira con una luz cálida muy leve */
 .board-wrap{position:relative}
 .board-wrap::after{content:"";position:absolute;inset:0;border-radius:16px;pointer-events:none;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06), inset 0 -18px 34px rgba(0,0,0,.28)}
@@ -275,11 +278,41 @@ canvas#board{border-radius:10px;box-shadow:0 0 0 2px rgba(0,0,0,.45), inset 0 0 
 .campaign-mission.current .mission-num{border-color:var(--amber);color:var(--amber)}
 .vet-badge{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--amber);color:var(--amber);border-radius:999px;padding:1px 8px;margin-left:6px;vertical-align:2px}
 @media (prefers-reduced-motion: reduce){.mode-card,.nation-card,.btn,.seg button{transition:none}}
+
+/* ===== Arte de interfaz de las Fases 0 y 1 (archivos en assets/ui/) =====
+   Botones: placa primaria (ámbar), secundaria (crema) y de peligro (roja),
+   estiradas al tamaño de cada botón; el texto va en oscuro o crema según la
+   placa, en los dos esquemas de color. Paneles y tarjetas: la placa de papel
+   cosido de ui_panel.png bajo un velo del color del panel, para que el texto
+   siga leyéndose igual que antes en oscuro y en claro. */
+:root{--panelveil:rgba(24,30,20,.85)}
+@media (prefers-color-scheme: light){:root{--panelveil:rgba(247,246,238,.45)}}
+.brand-logo{height:46px;width:auto;display:block;flex:none}
+.btn{background-color:transparent;background-image:url("assets/ui/ui_boton_secundario.png");background-size:100% 100%;background-repeat:no-repeat;border-color:transparent;color:#262b1e}
+.btn.primary{background-image:url("assets/ui/ui_boton_primario.png");color:#241703}
+.btn.primary:hover{background-image:url("assets/ui/ui_boton_primario.png");filter:brightness(1.06)}
+.btn.olive{background-image:url("assets/ui/ui_boton_secundario.png");color:#2e4a1a}
+.btn.ghost{background-image:url("assets/ui/ui_boton_secundario.png");color:#262b1e}
+.btn.danger{background-image:url("assets/ui/ui_boton_peligro.png");color:#fff6ea;border-color:transparent}
+.btn.danger:hover{background-image:url("assets/ui/ui_boton_peligro.png");filter:brightness(1.07)}
+.seg button{background-color:transparent;background-image:url("assets/ui/ui_boton_secundario.png");background-size:100% 100%;background-repeat:no-repeat;border-color:transparent;color:#262b1e;border-radius:9px}
+.seg button.on{background-image:url("assets/ui/ui_boton_primario.png");color:#241703;border-color:transparent}
+.actions button{background-color:transparent;background-image:url("assets/ui/ui_boton_secundario.png");background-size:100% 100%;background-repeat:no-repeat;border-color:transparent;color:#262b1e}
+.actions button small{color:#57604c}
+.actions button.on{background-image:url("assets/ui/ui_boton_primario.png");color:#241703}
+.actions button.on small{color:#5c4a12}
+.filters button{background-color:transparent;background-image:url("assets/ui/ui_boton_secundario.png");background-size:100% 100%;background-repeat:no-repeat;border-color:transparent;color:#262b1e;border-radius:9px}
+.filters button.on{background-image:url("assets/ui/ui_boton_primario.png");color:#241703}
+.topbar nav.tabs button{background-color:transparent;background-image:url("assets/ui/ui_boton_secundario.png");background-size:100% 100%;background-repeat:no-repeat;border-color:transparent;color:#262b1e;border-radius:9px}
+.topbar nav.tabs button.on{background-image:url("assets/ui/ui_boton_primario.png");color:#191304}
+.panel,.mode-card,.weapon,.unit-card,.skin-card,.modal-box,.howto>div,.nation-card{background-image:linear-gradient(var(--panelveil),var(--panelveil)),url("assets/ui/ui_panel.png");background-size:100% 100%,100% 100%;background-repeat:no-repeat}
+.mode-art{width:100%;height:auto;display:block;border-radius:10px}
+.nation-art{width:100%;max-width:148px;height:auto;display:block;align-self:center}
 </style>
 </head>
 <body>
 <div class="topbar"><div class="topbar-in">
-  <div class="brand"><div class="brand-mark" style="font-size:16px">CSN</div><div><b>CSN · CHESS SOLDIER NATION</b><small>Táctica por turnos en cuadrícula · Trece tableros 12×12</small></div></div>
+  <div class="brand"><img class="brand-logo" src="assets/ui/logo_csn.png" alt="CSN — Chess Soldier Nation"/><div><b>CSN · CHESS SOLDIER NATION</b><small>Táctica por turnos en cuadrícula · Trece tableros 12×12</small></div></div>
   <div class="nation-chip" id="nationChip" style="display:none"></div>
   <nav class="tabs" id="mainTabs" style="display:none">
     <button data-tab="play" class="on">Jugar</button>
@@ -328,12 +361,14 @@ canvas#board{border-radius:10px;box-shadow:0 0 0 2px rgba(0,0,0,.45), inset 0 0 
       <div id="demoSlotPlay"></div>
       <div class="grid3" style="margin-top:18px">
         <div class="mode-card" data-modecard="eliminacion">
+          <img class="mode-art" src="assets/ui/modo_eliminacion.png" alt="Dos escuadras de soldados frente a frente"/>
           <span class="tag amber">Modo clásico</span>
           <h3>Eliminación</h3>
           <p>Gana quien elimine a toda la escuadra enemiga. Sin baliza y sin atajos: el modo directo del original.</p>
           <button class="btn primary" data-start="eliminacion">Configurar partida</button>
         </div>
         <div class="mode-card" data-modecard="baliza">
+          <img class="mode-art" src="assets/ui/modo_baliza.png" alt="Una baliza de señal en el centro del tablero"/>
           <span class="tag amber">Modo del original</span>
           <h3>Captura de baliza</h3>
           <p>Aguanta <b>5 turnos</b> con tu escuadra dentro de la zona central y sin enemigos dentro, o elimina al rival. La zona del cohete de RAD Soldiers, reconstruida.</p>
@@ -354,6 +389,7 @@ canvas#board{border-radius:10px;box-shadow:0 0 0 2px rgba(0,0,0,.45), inset 0 0 
 
       <div class="grid3" style="margin-top:14px">
         <div class="mode-card" data-modecard="dominacion">
+          <img class="mode-art" src="assets/ui/modo_dominacion.png" alt="Soldados tomando posiciones en varias zonas del tablero"/>
           <span class="tag amber">Nuevo · Control de zonas</span>
           <h3>Dominación</h3>
           <p>Tres zonas a la vez: <b>Depósito</b> (flanco oeste), <b>Centro</b> (la baliza) y <b>Muelle</b> (flanco este). Al cerrar cada ronda, quien controle más zonas suma puntos: 1 punto por zona, 2 si controlas las tres. Gana quien llegue a <b>10 puntos</b> o elimine al rival. Ya no basta con aguantar un punto: hay que repartir la escuadra y decidir dónde pelear.</p>
@@ -372,6 +408,7 @@ canvas#board{border-radius:10px;box-shadow:0 0 0 2px rgba(0,0,0,.45), inset 0 0 
       </div>
       <div class="grid3" style="margin-top:14px">
         <div class="mode-card" data-modecard="escolta" style="grid-column:span 3">
+          <img class="mode-art" src="assets/ui/modo_escolta.png" alt="Una escuadra escoltando a un dron averiado" style="max-width:340px"/>
           <span class="tag amber">Nuevo · Escolta asimétrica</span>
           <h3>Escolta del dron</h3>
           <p>Un <b>dron averiado</b> (180 PV, pero entra ya dañado con 120) espera en tu flanco oeste y la <b>extracción</b> está en el este, tras las líneas rivales. Pega a tus soldados a él y <b>guíalo casilla a casilla</b> (máximo 2 guiados por ronda, 2 ⚡ del guía cada uno) mientras el rival intenta destruirlo: si el dron llega a la extracción, gana la escolta; si el dron cae, o si la defensa aguanta <b>15 rondas</b>, gana la defensa. Eliminar a la escuadra rival también vale, y tu Médico puede reparar el dron sobre la marcha. La IA rival juega el objetivo: intercepta al dron, le dispara primero a él y lo granadea en cuanto lo tiene a tiro.</p>
@@ -572,7 +609,7 @@ canvas#board{border-radius:10px;box-shadow:0 0 0 2px rgba(0,0,0,.45), inset 0 0 
       <div><b>1 · Turnos alternos</b><p>Juega un bando entero y luego el otro, como en el ajedrez. Cada soldado tiene su propia reserva de energía por turno.</p></div>
       <div><b>2 · Cuerpo, vida y energía</b><p>La vida y la energía van por tipo de cuerpo, no por rol: ligero 200 PV y 12 ⚡ moviendo a 1 ⚡ por casilla, medio 250 PV y 14 ⚡ a 2 ⚡ por casilla, y pesado 300 PV y 18 ⚡ a 3 ⚡ por casilla. Disparar cuesta lo que diga el arma. El pesado aguanta y dispara mucho, pero cada paso le cuesta triple que al ligero.</p></div>
       <div><b>3 · Puntería, azar y cobertura</b><p>Al pasar el cursor sobre un enemigo verás la probabilidad de impacto. El azar es el del original, con semilla por turno para que la partida sea reproducible: hay críticos (×1,5), dispersión de daño (±15 %) y caída de daño por distancia. La cobertura es direccional y de cuatro niveles: sin cobertura, ligera (caja dañada, −12), media (caja, −25) y pesada (muro o estantería, −40), y solo protege desde la dirección de la que viene el tiro. Atacar por la espalda, contra la dirección de mira del objetivo, da +12 de puntería.</p></div>
-      <div><b>4 · Los roles</b><p>El Espía y el Francotirador son ligeros: se mueven lejos y barato, pero aguantan 200 PV. El Artillero es el único pesado: 300 PV y 18 ⚡ para sostener ametralladoras y lanzacohetes, a cambio de pagar 3 ⚡ por casilla. Médico, Ingeniero, Comando y Capitán son medios, el equilibrio del original.</p></div>
+      <div><b>4 · Los roles</b><p>El Espía y el Francotirador son ligeros: se mueven lejos y barato, pero aguantan 200 PV. El Artillero es el único pesado: 300 PV y 18 ⚡ para sostener ametralladoras y lanzacohetes, a cambio de pagar 3 ⚡ por casilla. Médico, Ingeniero, Comando y Capitán son medios, el equilibrio del original. Y cada rol tiene su propio cuerpo, no solo su tipo: el Artillero es enorme y ancho, el Francotirador flaco y alto, el Espía pequeño y oscuro, el Ingeniero bajito y rechoncho y el Capitán el más alto de la escuadra, cada uno con su tocado, su color y su arma, para reconocerlos de un vistazo como en el original.</p></div>
       <div><b>5 · Especiales</b><p>Invisibilidad del Espía, curación y reanimación del Médico, torreta del Ingeniero, orden de mando del Capitán (+3 de energía a un aliado), tiro certero del Francotirador y supresión del Artillero. El equipo lanzable y colocable de cada rol va aparte: el humo M18 del Espía en el punto 19, la Claymore del Ingeniero en el 21 y la aturdidora M84 del Comando en el 23.</p></div>
       <div><b>10 · Fuego de respuesta</b><p>Todas las armas lo llevan activado: si un soldado sobrevive a un disparo y tiene al atacante en alcance y línea de visión, responde una vez por turno con su arma, sin coste de energía, con −20 de puntería y daño ×0,6. Disparar ya no es gratis.</p></div>
       <div><b>11 · Vigilancia</b><p>Por 3 ⚡ un soldado se queda en vigilancia: disparará gratis (con −10 de puntería) al primer enemigo que se mueva dentro de su alcance y su línea de visión durante el turno rival. Se gasta al disparar o al empezar su siguiente turno.</p></div>
@@ -595,6 +632,8 @@ canvas#board{border-radius:10px;box-shadow:0 0 0 2px rgba(0,0,0,.45), inset 0 0 
     </div>
     <div class="panel" style="margin-top:14px">
       <h2>Los 7 roles</h2>
+      <p class="sub" style="margin:0">Cada rol tiene su propio cuerpo, como en el original: no es el mismo soldado con otra mochila. El Artillero es un armario, el Francotirador un flaco alto, el Espía un retaco oscuro, el Ingeniero un bajito rechoncho y el Capitán el más alto de la escuadra; el tocado, el color y el arma acaban de decir quién es quién. Y cada uno tiene ya su retrato propio, el mismo que verás en su ficha durante la partida: la capucha ghillie del Francotirador, el casco de comunicaciones del Artillero, la capucha oscura del Espía, el casco blanco con cruz del Médico, el casco amarillo del Ingeniero, la gorra táctica del Comando y la gorra de plato con galón dorado del Capitán.</p>
+      <div class="sprite-strip" id="spriteStrip"><p class="sub" style="grid-column:1/-1;margin:4px 0">Cargando los retratos de los roles…</p></div>
       <div id="rolesTable"></div>
     </div>
   </section>
@@ -629,6 +668,8 @@ const NATIONS=[
  {id:'au',name:'Australia',colors:['#00247D','#FFCD00','#FF0000'],dir:'h',emblem:'✸',emblemName:'Sol naciente del Ejército australiano'}
 ];
 function nationById(id){return NATIONS.find(n=>n.id===id)||null;}
+/* Escudos de nación de la Fase 1 (assets/ui/nacion_*.png), por id de nación. */
+const NATION_ART={es:'espana',us:'eeuu',gb:'reinounido',fr:'francia',de:'alemania',ru:'rusia',cn:'china',jp:'japon',it:'italia',br:'brasil',ca:'canada',au:'australia'};
 function flagHTML(n,cls){return '<span class="flag '+(n.dir==='v'?'vert':'horiz')+' '+(cls||'')+'">'+n.colors.map(c=>'<i style="background:'+c+'"></i>').join('')+'</span>';}
 function emblemHTML(n){return '<span class="emblem" title="'+n.emblemName+'">'+n.emblem+'</span>';}
 const LEAF_SVG='<svg viewBox="0 0 24 24" style="position:absolute;left:50%;top:50%;width:46%;transform:translate(-50%,-50%)" aria-hidden="true"><path d="M12 1 L14.5 6 L18 4 L16.8 8.5 L21 8 L17.5 11.5 L20 14 L15.5 14.5 L16.5 19 L13 16.5 L13 22 L11 22 L11 16.5 L7.5 19 L8.5 14.5 L4 14 L6.5 11.5 L3 8 L7.2 8.5 L6 4 L9.5 6 Z" fill="#FF0000"/></svg>';
@@ -695,6 +736,40 @@ const ROLES={
 };
 const ROLE_NAMES=Object.keys(ROLES);
 const DEFAULT_SQUADS={2:['Comando','Francotirador'],4:['Comando','Francotirador','Médico','Ingeniero'],5:['Comando','Francotirador','Médico','Ingeniero','Espía']};
+/* ============ SILUETA Y PERSONALIDAD DE CADA ROL ============
+   En el original cada clase se reconocía de un vistazo por el CUERPO
+   antes que por el equipo: el pesado era un armario, el francotirador
+   un espagueti con fusil, el espía un retaco oscuro. Aquí cada rol
+   lleva su propia escala [ancho, alto, fondo] sobre la misma malla
+   (aplicada en el grupo spin de makeRealSoldier3, así que vale igual
+   para la vista 3D, para el sprite de la vista clásica, para la
+   ficha y para las tarjetas de rol, que salen de ese mismo modelo),
+   un descriptor de silueta para las tarjetas y, en tres roles, una
+   pose de tarjeta distinta del apunte genérico: el Médico en su
+   gesto de interactuar, el Ingeniero agachado desplegando y el
+   Capitán dando la orden. Los tiradores conservan el fotograma de
+   apunte de su familia de arma, que ya difiere por arma. */
+const ROLE_LOOK={
+ 'Francotirador':{s:[0.84,1.07,0.88],silueta:'Flaco y alto',pose:null},
+ 'Artillero':{s:[1.30,1.04,1.22],silueta:'Enorme y ancho',pose:null},
+ 'Espía':{s:[0.86,0.90,0.88],silueta:'Pequeño y flaco',pose:null},
+ 'Médico':{s:[0.95,1.00,0.94],silueta:'Esbelto',pose:{clip:'interact',ct:0.95}},
+ 'Ingeniero':{s:[1.14,0.90,1.08],silueta:'Bajito y rechoncho',pose:{clip:'deploy',ct:0.32}},
+ 'Comando':{s:[1.07,1.02,1.03],silueta:'Atlético',pose:null},
+ 'Capitán':{s:[1.00,1.10,1.00],silueta:'Alto y erguido',pose:{clip:'interact',ct:0.45}}
+};
+function roleLook(role){return ROLE_LOOK[role]||{s:[1,1,1],silueta:'',pose:null};}
+/* ============ RETRATOS DE ROL (assets/ui/retrato_*.png) ============
+   Los siete retratos de busto aprobados por Dani (generados fuera, en
+   Gemini Studio, y descargados como PNG transparentes de 512×512):
+   son la imagen de cada rol en el HUD —la ficha de la unidad
+   seleccionada, la lista de escuadras, las tarjetas de «Los 7 roles»
+   y su tabla— en lugar del retrato fotografiado desde el modelo 3D.
+   El sprite del tablero no cambia: en la vista clásica y en la 3D el
+   soldado sigue saliendo del modelo, porque ahí es un cuerpo entero
+   en su pose, no un busto. */
+const ROLE_PORTRAIT={'Francotirador':'retrato_francotirador.png','Artillero':'retrato_artillero.png','Espía':'retrato_espia.png','Médico':'retrato_medico.png','Ingeniero':'retrato_ingeniero.png','Comando':'retrato_comando.png','Capitán':'retrato_capitan.png'};
+function rolePortraitURL(role){const f=ROLE_PORTRAIT[role];return f?('assets/ui/'+f):null;}
 
 /* ================= STATE ================= */
 const $=s=>document.querySelector(s);
@@ -765,7 +840,7 @@ function buildNationGrid(){
   const grid=$('#nationGrid');grid.innerHTML='';
   NATIONS.forEach(n=>{
     const b=document.createElement('button');b.className='nation-card';b.dataset.id=n.id;
-    b.innerHTML='<span style="display:flex;gap:8px;align-items:center">'+flagArtHTML(n)+emblemHTML(n)+'</span><span>'+n.name+'</span><small style="color:var(--muted);font-weight:500;font-size:12px">'+n.emblemName+'</small>';
+    b.innerHTML='<img class="nation-art" src="assets/ui/nacion_'+NATION_ART[n.id]+'.png" alt="Escudo de '+n.name+'"/><span style="display:flex;gap:8px;align-items:center">'+flagArtHTML(n)+emblemHTML(n)+'</span><span>'+n.name+'</span><small style="color:var(--muted);font-weight:500;font-size:12px">'+n.emblemName+'</small>';
     b.onclick=()=>{pickedNation=n;document.querySelectorAll('.nation-card').forEach(c=>c.classList.toggle('sel',c.dataset.id===n.id));$('#confirmNation').disabled=false;$('#nationPickLabel').innerHTML='Has elegido <b>'+n.name+'</b>. Si confirmas, será tu nación para siempre en este dispositivo.';};
     grid.appendChild(b);
   });
@@ -2381,7 +2456,7 @@ function updateUI(){
   G.units.forEach(u=>{
     const b=document.createElement('button');
     b.className=(G.selected===u?'sel':'')+(u.alive?'':' dead');
-    b.innerHTML='<span class="role-dot" style="background:'+ROLES[u.role].color+'"></span><span style="flex:none"><b>'+u.role+'</b>'+(u.vetLevel?'<span class="vet-badge">Vet. '+u.vetLevel+'</span>':'')+' <span style="color:'+(u.team==='A'?'var(--teamA)':'var(--teamB)')+'">●'+u.team+'</span><br><small style="color:var(--muted)">'+u.weapon+' · ⚡'+(u.alive?u.energy:0)+'</small></span><span class="mini-hp"><i style="width:'+Math.round(u.hp/u.maxHp*100)+'%"></i></span><b class="mono" style="font-size:13px">'+(u.alive?u.hp+' PV':'K.O.')+'</b>';
+    b.innerHTML=(rolePortraitURL(u.role)?'<img class="roster-portrait" src="'+rolePortraitURL(u.role)+'" alt=""/>':'')+'<span class="role-dot" style="background:'+ROLES[u.role].color+'"></span><span style="flex:none"><b>'+u.role+'</b>'+(u.vetLevel?'<span class="vet-badge">Vet. '+u.vetLevel+'</span>':'')+' <span style="color:'+(u.team==='A'?'var(--teamA)':'var(--teamB)')+'">●'+u.team+'</span><br><small style="color:var(--muted)">'+u.weapon+' · ⚡'+(u.alive?u.energy:0)+'</small></span><span class="mini-hp"><i style="width:'+Math.round(u.hp/u.maxHp*100)+'%"></i></span><b class="mono" style="font-size:13px">'+(u.alive?u.hp+' PV':'K.O.')+'</b>';
     b.onclick=()=>{if(u.alive&&u.team===G.turn&&!G.aiBusy)selectUnit(u);};
     r.appendChild(b);
   });
@@ -2391,7 +2466,7 @@ function updateUI(){
   const w=WEAPONS[u.weapon];
   const isTurn=u.team===G.turn&&u.alive&&!G.aiBusy&&!G.over;
   const onTurret=u.x===TURRET_POS.x&&u.y===TURRET_POS.y;
-  card.innerHTML=(()=>{const rsUrl=getRealSpriteURL(u);if(rsUrl)return '<img class="unit-sprite" src="'+rsUrl+'" alt="Sprite del '+u.role+' renderizado desde el modelo real, en el tablero"/>';return (ARGON_READY&&ROLE_SVG_ID[u.role]?'<img class="unit-sprite" src="'+spriteDataURI(ROLE_SVG_ID[u.role],u.skin,u.nation)+'" alt="Sprite del '+u.role+' en el tablero"/>':'');})()+'<h3><span class="role-dot" style="background:'+ROLES[u.role].color+';width:14px;height:14px"></span>'+u.role+' <span style="color:'+(u.team==='A'?'var(--teamA)':'var(--teamB)')+';font-size:15px">'+teamName(u.team)+'</span></h3>'+
+  card.innerHTML=(()=>{const pUrl=rolePortraitURL(u.role);if(pUrl)return '<img class="unit-sprite" src="'+pUrl+'" alt="Retrato del '+u.role+'"/>';const rsUrl=getRealSpriteURL(u);if(rsUrl)return '<img class="unit-sprite" src="'+rsUrl+'" alt="Sprite del '+u.role+' renderizado desde el modelo real, en el tablero"/>';return (ARGON_READY&&ROLE_SVG_ID[u.role]?'<img class="unit-sprite" src="'+spriteDataURI(ROLE_SVG_ID[u.role],u.skin,u.nation)+'" alt="Sprite del '+u.role+' en el tablero"/>':'');})()+'<h3><span class="role-dot" style="background:'+ROLES[u.role].color+';width:14px;height:14px"></span>'+u.role+' <span style="color:'+(u.team==='A'?'var(--teamA)':'var(--teamB)')+';font-size:15px">'+teamName(u.team)+'</span></h3>'+
    '<div style="display:flex;align-items:center;gap:8px">'+(u.skin==='nacion'?flagHTML(u.nation)+emblemHTML(u.nation)+'<span class="sub">Skin Nación · '+u.nation.name+' · '+u.nation.emblemName+'</span>':'<span class="sub">Skin Estándar · soldado genérico, sin nación ni emblema</span>')+(u.invisible?'<span class="sub">· 👁 invisible este turno</span>':'')+(u.stunned?'<span class="sub" style="color:#e8c84e">· 💫 aturdido por la M84</span>':'')+'</div>'+
    '<div class="hpbar"><i class="'+(u.hp<=u.maxHp*0.3?'low':'')+'" style="width:'+Math.round(u.hp/u.maxHp*100)+'%"></i></div><div class="statline">Vida <b class="mono">'+u.hp+'/'+u.maxHp+'</b> · Cuerpo '+(BODIES[u.body]?BODIES[u.body].name:u.body)+' · Posición ('+(u.x+1)+','+(u.y+1)+')'+(inBeacon(u.x,u.y)?' · <b style="color:var(--amber)">en la baliza</b>':'')+(u.overwatch?' · <b style="color:var(--amber)">en vigilancia</b>':'')+'</div>'+
    '<div class="epips">'+Array.from({length:u.maxEnergy},(_,i)=>'<i class="'+(i<u.energy?'':'off')+'"></i>').join('')+'</div><div class="statline">Energía <b class="mono">'+u.energy+'/'+u.maxEnergy+'</b> · Mover: '+u.moveCost+' ⚡/casilla · Granadas M67: '+u.grenades+(u.role==='Médico'?' · Curaciones: '+u.heals+' · Reanimación: '+u.revives:'')+(u.role==='Ingeniero'?' · Claymores M18A1: '+(u.mines||0):'')+(u.role==='Comando'?' · Aturdidoras M84: '+(u.flashes||0):'')+'</div>'+
@@ -2909,7 +2984,7 @@ function drawDeployed(t,S){
   rr(t.x*S+10,t.y*S+5,(S-20)*t.hp/t.maxHp,4,2);ctx.fillStyle='#57c46a';ctx.fill();
 }
 /* ================= SPRITES SVG (código de Argon) DENTRO DEL JUEGO =================
-   Los 7 soldados viven en assets/argon-soldiers.svg como <symbol> con clases
+   Los 7 soldados viven en [la hoja SVG de Argon viaja como archivo: assets/argon-soldiers.svg] como <symbol> con clases
    .uniforme/.casco/.piel/.botas y degradados de volumen. Aquí se cargan una
    vez, se convierten en imágenes y el tablero los dibuja con drawImage en
    cada casilla: son el soldado real de la partida, no una ilustración.
@@ -2960,20 +3035,13 @@ function getSpriteImage(un){
 }
 function buildSpriteStrip(){
   const strip=document.getElementById('spriteStrip');if(!strip)return;
-  /* Los sprites de la tira son los del tablero: primero los renderizados
-     desde el modelo real (con la skin de Nación de tu nación); si el
-     modelo no ha cargado o el renderizado no es posible aquí, los SVG de
-     Argon que ya estaban. Si ninguno está listo todavía, se queda el
-     aviso de carga y la tira se reconstruye cuando la malla llegue. */
-  const cells=ROLE_NAMES.map(r=>{
-    const fu=realSpriteUnit(r,null,'nacion',myNation);
-    const realUrl=fu?getRealSpriteURL(fu):null;
-    if(realUrl)return '<figure class="sprite-cell"><img src="'+realUrl+'" alt="Sprite del '+r+' renderizado desde el modelo real del IPA, tal y como se dibuja en el tablero clásico"/><figcaption>'+r+'</figcaption></figure>';
-    if(ARGON_READY)return '<figure class="sprite-cell"><img src="'+spriteDataURI(ROLE_SVG_ID[r],'nacion',myNation)+'" alt="Sprite del '+r+' tal y como se dibuja en el tablero"/><figcaption>'+r+'</figcaption></figure>';
-    return null;
-  });
-  if(cells.some(c=>!c))return;
-  strip.innerHTML=cells.join('');
+  /* Las tarjetas de rol muestran los retratos de busto de
+     assets/ui/retrato_*.png: son archivos, así que la tira se dibuja
+     al momento, sin esperar a que cargue el modelo 3D ni los SVG. */
+  strip.innerHTML=ROLE_NAMES.map(r=>{
+    const cap='<figcaption><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:'+ROLES[r].color+';margin-right:5px"></span>'+r+'<small>'+roleLook(r).silueta+' · cuerpo '+BODIES[ROLES[r].body].name.toLowerCase()+'</small></figcaption>';
+    return '<figure class="sprite-cell"><img src="'+rolePortraitURL(r)+'" alt="Retrato del '+r+' ('+roleLook(r).silueta.toLowerCase()+')"/>'+cap+'</figure>';
+  }).join('');
 }
 fetch('assets/argon-soldiers.svg').then(r=>{if(!r.ok)throw new Error('svg');return r.text();}).then(txt=>{
   const doc=new DOMParser().parseFromString(txt,'image/svg+xml');
@@ -3005,7 +3073,8 @@ function drawSoldier(un,S){
   const nc=un.nation.colors, roleCol=ROLES[un.role].color, skin=SKIN_TONES[un.id%SKIN_TONES.length];
   const isNat=un.skin==='nacion';
   const uniCol=isNat?nc[0]:SKINS.estandar.uniform, helmetCol=isNat?nc[2]:SKINS.estandar.helmet, bandCol=isNat?nc[1]:'#3e4630';
-  const bulky=un.role==='Artillero'?1.16:1;
+  const lk2=roleLook(un.role);
+  const bulky=1; /* el ancho de cada rol lo da la escala de silueta de abajo, no una constante por pieza */
   ctx.save();
   if(un.invisible)ctx.globalAlpha=.45;
   if(!REDUCED_MOTION)ctx.translate(0,Math.sin(FX.t/430+un.id*1.93)*S*0.02);
@@ -3083,6 +3152,13 @@ function drawSoldier(un,S){
     }
     return;
   }
+  /* Silueta por rol también en este dibujo de reserva: todo el cuerpo
+     (piernas, torso, arma y cabeza) se estira o se encoge desde los
+     pies con la escala de ROLE_LOOK, la misma del modelo 3D, así el
+     Artillero se ve enorme y el Espía pequeño en las dos vistas. La
+     sombra, el anillo de energía y la barra de vida quedan fuera de
+     la escala: se dibujaron antes o se dibujan tras el restore. */
+  ctx.translate(cx,feetY);ctx.scale(lk2.s[0],lk2.s[1]);ctx.translate(-cx,-feetY);
   /* dirección del arma: la de mira lógica, con su giro animado */
   const ang=yaw2;
   const faceDir=Math.max(-1,Math.min(1,Math.cos(ang)));
@@ -3327,7 +3403,8 @@ function soldierColors3(un){
 function makeSoldier3(un){
   const c=soldierColors3(un);
   const g=new THREE.Group();
-  const bulky=un.role==='Artillero'?1.22:(un.role==='Francotirador'?0.88:1);
+  const lk3=roleLook(un.role);
+  const bulky=lk3.s[0];
   /* disco de bando y anillo segmentado de energía a los pies */
   const base=new THREE.Mesh(new THREE.CylinderGeometry(0.31,0.34,0.035,24),mat3(c.team,0.6));
   base.position.y=0.02;base.receiveShadow=true;g.add(base);
@@ -3346,7 +3423,7 @@ function makeSoldier3(un){
      hueso más cercano (cadera para
      pierna y bota, hombro para brazo y mano, cuello para la cabeza, hombros
      para el arma) y el sistema de animación mueve los pivotes, no la malla. */
-  const body=new THREE.Group();g.add(body);
+  const body=new THREE.Group();body.scale.set(1,lk3.s[1],1);g.add(body);
   function makeLeg(sideZ){
     const hip=new THREE.Group();hip.position.set(0,0.28,sideZ);
     const leg=box3(0.11,0.27,0.13,shadeHex(c.uni,-34),0,-0.135,0);
@@ -3407,6 +3484,17 @@ function makeSoldier3(un){
   if(un.role==='Comando'){
     head.add(box3(0.34,0.06,0.34,shadeHex(c.role,-18),0,0.075,0,0.7));
   }
+  if(un.role==='Francotirador'){ /* flecos de ghillie sobre el casco */
+    for(let i=0;i<6;i++){const a=i/6*Math.PI*2+0.3;head.add(box3(0.03,0.13,0.03,i%2?'#5d7a28':'#3e5620',Math.sin(a)*0.14,0.02,Math.cos(a)*0.14,0.85));}
+  }
+  if(un.role==='Artillero'){ /* cascos de comunicaciones a las orejas */
+    head.add(box3(0.1,0.12,0.045,'#1e1e22',0,-0.02,0.185,0.6));
+    head.add(box3(0.1,0.12,0.045,'#1e1e22',0,-0.02,-0.185,0.6));
+  }
+  if(un.role==='Médico'){ /* la cruz también sobre la gorra blanca */
+    head.add(box3(0.13,0.03,0.045,'#d92c2c',0,0.232,0,0.5));
+    head.add(box3(0.045,0.03,0.13,'#d92c2c',0,0.232,0,0.5));
+  }
   /* ojos que miran al frente (hacia donde apunta el arma) */
   [-0.065,0.065].forEach(z=>{
     const eye=new THREE.Mesh(new THREE.SphereGeometry(0.02,8,8),new THREE.MeshBasicMaterial({color:0x1c1a17}));
@@ -3421,7 +3509,7 @@ function makeSoldier3(un){
    su skinning de verdad (18 huesos Bip001, matrices bindpose 4×4 y 4 pesos
    por vértice que suman 1,0, verificados en el inventario), el atlas real
    del cuerpo Soldier_Light_d (PVRTC decodificado a PNG: chaleco, piel y
-   cara con bandana). El horneado previo (assets/soldier_rig.json) trae
+   cara con bandana). El horneado previo ([el rig viaja como archivo: assets/soldier_rig.json]) trae
    los locales de hueso derivados de las bindpose y los pesos por vértice.
    Los clips del original sí se reproducen (driveClipSoldier, más abajo):
    el desajuste que los tuvo meses aparcados no era de los clips sino del
@@ -3509,8 +3597,8 @@ loadRealSoldier();
    degenerados se descartan). Fuera se quedaron la malla de colisión
    (Clip), las tarjetas de desvanecido de fuera de tablero, las luces
    giratorias y las partículas: lo que queda son 84.939 vértices y
-   45.942 triángulos en assets/maps/skirmish03.bin y 80.571 vértices y
-   45.030 triángulos en assets/maps/skirmish04.bin (cabecera JSON +
+   45.942 triángulos en [la geometría viaja como archivo: assets/maps/skirmish03.bin] y 80.571 vértices y
+   45.030 triángulos en [la geometría viaja como archivo: assets/maps/skirmish04.bin] (cabecera JSON +
    posiciones/UV en Float32 + índices en Uint32), con los dos atlas en
    JPEG (los mismos archivos de atlas sirven para los dos mapas: el
    IPA los trae idénticos en ambos paquetes). El eje Z va espejado al
@@ -3523,7 +3611,7 @@ loadRealSoldier();
    centro caía a 0,75 y −1,0 unidades del origen) para abrazarlo
    igual. La geometría es la capa visual de estos tableros y no toca
    ni una regla. En la vista clásica, la misma geometría se ve como
-   plano cenital (assets/maps/skirmish03_top.jpg y skirmish04_top.jpg,
+   plano cenital ([el plano cenital viaja como archivo: assets/maps/skirmish03_top.jpg] y skirmish04_top.jpg,
    generados desde estas mismas caras y atlas). Si los archivos no
    cargan, el tablero sigue con sus losas de reserva y la partida no
    cambia. */
@@ -3692,6 +3780,21 @@ function makeGunProp3(un){
   }
   const flash=new THREE.Mesh(new THREE.SphereGeometry(0.055,8,8),new THREE.MeshBasicMaterial({color:0xffd76a,transparent:true,opacity:0}));
   flash.position.set(gl+0.04,0.01,0);gun.add(flash);gun.userData.flash=flash;
+  /* Punto de agarre de cada categoría, en el espacio local del arma
+     (la empuñadura que construye cada rama: la culata-pistola de los
+     fusiles a gl*0,28 y −0,085, la empuñadura de la escopeta a gl*0,16,
+     la caja de la pistola en el propio origen…). El encaje del arma
+     (gunPoseFromHand) coloca exactamente este punto dentro de la mano
+     derecha del soldado, así que la mano cierra sobre la empuñadura
+     de verdad y no sobre un punto genérico del aire. */
+  if(wcat==='Pistolas')gun.userData.grip={x:0,y:-0.05};
+  else if(wcat==='Lanzacohetes')gun.userData.grip={x:gl*0.38,y:-0.03};
+  else if(wcat==='Lanzagranadas')gun.userData.grip={x:gl*0.45,y:-0.05};
+  else if(wcat==='Escopetas')gun.userData.grip={x:gl*0.16,y:-0.06};
+  else if(wcat==='Subfusiles')gun.userData.grip={x:gl*0.30,y:-0.05};
+  else if(wcat==='Ametralladoras')gun.userData.grip={x:gl*0.16,y:-0.05};
+  else if(wcat==='Francotirador')gun.userData.grip={x:gl*0.18,y:-0.05};
+  else gun.userData.grip={x:gl*0.28,y:-0.06};
   return gun;
 }
 function makeRealSoldier3(un){
@@ -3711,13 +3814,18 @@ function makeRealSoldier3(un){
      arriba; el grupo spin+tilt lo deja Y arriba y mirando a +X, y el
      esqueleto va dentro, así que huesos y malla comparten el giro. */
   const spin=new THREE.Group();spin.rotation.y=Math.PI/2;g.add(spin);
-  /* Silueta por tipo de cuerpo sobre la misma malla real: el grupo spin
-     gira los ejes del IPA a los del mundo (su X local es el lateral del
+  /* Silueta por ROL sobre la misma malla real: el grupo spin gira los
+     ejes del IPA a los del mundo (su X local es el lateral del
      soldado, su Y la altura y su Z la profundidad), así que escalarlo
-     ensancha al pesado y afina al ligero sin tocar ni un peso del
-     skinning, porque huesos y malla cuelgan del mismo grupo. */
-  const btScale=un.body==='pesado'?[1.16,1.03,1.10]:un.body==='ligero'?[0.92,0.99,0.95]:[1,1,1];
-  spin.scale.set(btScale[0],btScale[1],btScale[2]);
+     da a cada rol su cuerpo —el Artillero enorme y ancho, el
+     Francotirador flaco y alto, el Espía pequeño, el Ingeniero
+     bajito y rechoncho, el Capitán el más alto— sin tocar ni un peso
+     del skinning, porque huesos y malla cuelgan del mismo grupo. La
+     escala sale de ROLE_LOOK y es la misma en la vista 3D, en el
+     sprite de la clásica y en las tarjetas, que se fotografían desde
+     este mismo constructor. */
+  const lk=roleLook(un.role);
+  spin.scale.set(lk.s[0],lk.s[1],lk.s[2]);
   const tilt=new THREE.Group();tilt.rotation.x=-Math.PI/2;spin.add(tilt);
   const data=REAL.data;
   const bones=data.bones.map(b=>{
@@ -3730,7 +3838,7 @@ function makeRealSoldier3(un){
   const inverses=data.boneInverses.map(a=>new THREE.Matrix4().set(a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8],a[9],a[10],a[11],a[12],a[13],a[14],a[15]));
   const skeleton=new THREE.Skeleton(skinBones,inverses);
   const tint=un.skin==='nacion'?new THREE.Color(c.uni).lerp(new THREE.Color(0xffffff),0.62):new THREE.Color(0xffffff);
-  tint.lerp(new THREE.Color(c.role),0.15);
+  tint.lerp(new THREE.Color(c.role),0.24);
   /* Material cartoon: rampa de 4 pasos en el canal de luz (MeshToonMaterial)
      para el look cel del original, con la textura real del IPA. Si algo
      fallara, se queda el material estándar de siempre. */
@@ -3757,9 +3865,9 @@ function makeRealSoldier3(un){
   /* Mochila de rol, construida en código a la espalda (el frente del grupo
      es +X, por donde sale el arma): es lo que distingue a cada rol de un
      vistazo sobre la misma malla del IPA, igual que el arma de su rol. */
-  const pack=new THREE.Group();pack.position.set(-0.21,0.74,0);
+  const pack=new THREE.Group();pack.position.set(-0.21*lk.s[2],0.74*lk.s[1],0);
   const packCol=un.role==='Médico'?'#eef0e6':un.role==='Ingeniero'?'#5b5348':shadeHex(c.role,-30);
-  const packScale=un.body==='pesado'?1.18:un.body==='ligero'?0.88:1;
+  const packScale=lk.s[0];
   pack.add(box3(0.13,0.32*packScale,0.3*packScale,packCol,0,0,0,0.8));
   if(un.role==='Médico'){pack.add(box3(0.03,0.2,0.06,'#d92c2c',-0.08,0,0,0.5));pack.add(box3(0.03,0.06,0.2,'#d92c2c',-0.08,0,0,0.5));}
   else if(un.role==='Ingeniero'){pack.add(box3(0.14,0.07,0.31,'#f2b234',0,0.19,0,0.6));}
@@ -3782,18 +3890,58 @@ function makeRealSoldier3(un){
     const gear=new THREE.Group();
     gear.rotation.z=Math.PI/2; /* el +Y del grupo sigue al -X local del hueso, que es el arriba renderizado */
     headBone.add(gear);
+    /* Tocado propio de cada rol, en su color y no en el de la nación:
+       es la segunda cosa que se lee de un soldado tras la silueta.
+       Médico: casco blanco con la cruz roja encima. Ingeniero: casco
+       de obra amarillo de ala ancha. Capitán: gorra de plato plana
+       azul oscuro con galón dorado y visera, sin cúpula. Francotirador:
+       cúpula verde con flecos de ghillie colgando. Artillero: cúpula
+       grande de acero oscuro con cascos de comunicaciones en las
+       orejas. Espía: capucha oscura que baja más que ningún casco.
+       Comando: gorra táctica aplastada en el color oscuro de su rol. */
     let gearCol=c.helm;
     if(un.role==='Espía')gearCol='#353144';
-    else if(un.role==='Médico')gearCol='#eef0e6';
+    else if(un.role==='Médico')gearCol='#f4f6f0';
     else if(un.role==='Ingeniero')gearCol='#f2b234';
-    const helm=new THREE.Mesh(new THREE.SphereGeometry(un.role==='Artillero'?0.125:0.112,22,14,0,Math.PI*2,0,Math.PI*(un.role==='Espía'?0.62:0.55)),mat3(gearCol,0.72));
-    helm.position.y=0.05;helm.castShadow=true;gear.add(helm);
+    else if(un.role==='Capitán')gearCol='#232a35';
+    else if(un.role==='Francotirador')gearCol='#4d6b1f';
+    else if(un.role==='Artillero')gearCol='#33363b';
+    else if(un.role==='Comando')gearCol=shadeHex(c.role,-30);
     if(un.role==='Capitán'){
-      const brim=new THREE.Mesh(new THREE.CylinderGeometry(0.15,0.15,0.02,14),mat3(gearCol,0.72));
-      brim.position.y=0;brim.castShadow=true;gear.add(brim);
-    } else if(un.role==='Ingeniero'){
-      const brim=new THREE.Mesh(new THREE.CylinderGeometry(0.145,0.145,0.025,14),mat3('#e8c84e',0.72));
-      brim.position.y=0;brim.castShadow=true;gear.add(brim);
+      const capTop=new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.115,0.055,18),mat3(gearCol,0.72));
+      capTop.position.y=0.075;capTop.castShadow=true;gear.add(capTop);
+      const band=new THREE.Mesh(new THREE.CylinderGeometry(0.121,0.121,0.02,18),mat3('#d9a521',0.5));
+      band.position.y=0.042;gear.add(band);
+      const visor=new THREE.Mesh(new THREE.CylinderGeometry(0.155,0.155,0.018,18),mat3('#14181f',0.6));
+      visor.position.y=0.018;visor.castShadow=true;gear.add(visor);
+    } else {
+      const helm=new THREE.Mesh(new THREE.SphereGeometry(un.role==='Artillero'?0.128:0.112,22,14,0,Math.PI*2,0,Math.PI*(un.role==='Espía'?0.62:0.55)),mat3(gearCol,0.72));
+      helm.position.y=0.05;helm.castShadow=true;
+      if(un.role==='Comando')helm.scale.y=0.62;
+      gear.add(helm);
+      if(un.role==='Médico'){
+        gear.add(box3(0.11,0.016,0.034,'#d92c2c',0,0.163,0,0.5));
+        gear.add(box3(0.034,0.016,0.11,'#d92c2c',0,0.163,0,0.5));
+      } else if(un.role==='Ingeniero'){
+        const brim=new THREE.Mesh(new THREE.CylinderGeometry(0.165,0.165,0.025,16),mat3('#e8c84e',0.72));
+        brim.position.y=0.005;brim.castShadow=true;gear.add(brim);
+      } else if(un.role==='Francotirador'){
+        for(let i=0;i<9;i++){
+          const a=(i/9)*Math.PI*2+0.35;
+          const strand=box3(0.016,0.105,0.016,i%2?'#5d7a28':'#3e5620',Math.cos(a)*0.118,0.045,Math.sin(a)*0.118,0.85);
+          strand.rotation.z=-Math.cos(a)*0.45;strand.rotation.x=Math.sin(a)*0.45;
+          gear.add(strand);
+        }
+      } else if(un.role==='Artillero'){
+        [-1,1].forEach(sd=>{
+          const cup=box3(0.055,0.075,0.032,'#1e1e22',0,0.005,sd*0.117,0.6);
+          gear.add(cup);
+        });
+        gear.add(box3(0.055,0.03,0.085,'#1e1e22',0,0.172,0,0.6));
+      } else if(un.role==='Comando'){
+        const brim=new THREE.Mesh(new THREE.CylinderGeometry(0.138,0.138,0.016,16),mat3(shadeHex(c.role,-48),0.72));
+        brim.position.y=0.008;brim.castShadow=true;gear.add(brim);
+      }
     }
   }
   g.userData={real:true,body:null,segs:segs,selRing:selRing,baseMesh:base,bones:bones,mesh3:mesh,gun:gun,bindLocal:bindLocal,bindWorldQ:bindWorldQ,byName:byName,curQ:bindLocal.map(q=>q.clone()),curRootP:new THREE.Vector3(),walkPh:Math.random()*6.28,bindPos:data.bones.map(b=>new THREE.Vector3(b.pos[0],b.pos[1],b.pos[2])),curDelta:new THREE.Vector3(),clipPhase:Math.random()*10};
@@ -3920,7 +4068,7 @@ function driveRealSoldier(un,mesh,t,moving){
   } else {ud.segs.forEach(s=>{s.visible=false;});ud.selRing.visible=false;}
 }
 /* ================= LOS CLIPS DEL ORIGINAL, REPRODUCIÉNDOSE =================
-   assets/soldier_clips.json trae 22 clips del IPA ya convertidos a este
+   [los clips viajan como archivo: assets/soldier_clips.json] trae 22 clips del IPA ya convertidos a este
    rig (reposo a una y dos manos, paso, disparo por familia de arma,
    impacto de bala, de ráfaga y de explosión, muerte por bala y por
    explosión, lanzar granada, desplegar torreta, interactuar, recoger y
@@ -4110,9 +4258,11 @@ function driveClipSoldier(un,mesh,t,moving){
    las manos de esa postura y la fotografía en tres cuartos con la luz
    de la vista 3D, y guarda el PNG resultante como sprite, uno por
    combinación de rol, arma, skin y nación. Ese sprite
-   es el que la vista clásica dibuja casilla a casilla, el de la tira de
-   roles y el de la ficha del soldado: las dos vistas muestran ya al
-   mismo soldado. Si WebGL no está disponible o el renderizado falla,
+   es el que la vista clásica dibuja casilla a casilla: las dos vistas
+   muestran ya al mismo soldado. (La tira de roles y la ficha del
+   soldado ya no usan esta foto: muestran los retratos de busto de
+   assets/ui/retrato_*.png.) Si WebGL no está disponible o el
+   renderizado falla,
    todo cae en silencio a los sprites SVG de Argon, como hasta ahora, y
    la partida no cambia. El encuadre (cámara a (2.2, 1.35, 1.7) mirando
    a (0.1, 0.52, 0), FOV 38°) deja los pies al 77 % de la altura del
@@ -4152,18 +4302,12 @@ function initRealSpriteRenderer(){
    su clip levanta el brazo con el culatazo y el apunte asentado, con el
    brazo ya extendido hacia delante, llega al segundo. */
 const SPRITE_AIM_CT={fire2h:0.40,fireBurst:0.35,fireHeavy:0.45,fireMini:0.35,fireShoulder:0.60,fire1h:1.00};
-/* Deja el soldado en el fotograma de apunte del clip de su arma,
-   muestreando ese instante las veces que haga falta hasta que la
-   interpolación sobre curQ converge, igual que hace driveClipSoldier
-   fotograma a fotograma en la vista 3D. Devuelve false si el clip de
-   esa familia no está en el paquete, y el llamador cae a la postura de
-   reposo de siempre. */
-function poseSpriteAim(un,grp){
-  const pack=CLIPLIB.pack;if(!pack||!pack.clips)return false;
-  const key=(typeof fireClipFor==='function')?fireClipFor(un.weapon):null;
-  const clip=key?pack.clips[key]:null;
-  const ct=key?SPRITE_AIM_CT[key]:null;
-  if(!clip||ct==null)return false;
+/* Deja el soldado en un fotograma concreto de un clip, muestreando
+   ese instante las veces que haga falta hasta que la interpolación
+   sobre curQ converge, igual que hace driveClipSoldier fotograma a
+   fotograma en la vista 3D. */
+function poseSpriteClip(un,grp,clip,ct){
+  const pack=CLIPLIB.pack;if(!pack||!clip)return false;
   const ud=grp.userData;if(!ud||!ud.bones||!ud.bindLocal||!ud.curQ)return false;
   const tq=new THREE.Quaternion(),tp=new THREE.Vector3(),tp2=new THREE.Vector3();
   for(let n=0;n<24;n++){
@@ -4181,85 +4325,108 @@ function poseSpriteAim(un,grp){
   }
   return true;
 }
+/* La foto por defecto: el fotograma de apunte del clip de su arma.
+   Devuelve false si el clip de esa familia no está en el paquete, y
+   el llamador cae a la postura de reposo de siempre. Tres roles no
+   salen apuntando en su foto: su pose es la de su gesto (ROLE_LOOK),
+   y renderRealSprite la intenta antes que esta. */
+function poseSpriteAim(un,grp){
+  const pack=CLIPLIB.pack;if(!pack||!pack.clips)return false;
+  const key=(typeof fireClipFor==='function')?fireClipFor(un.weapon):null;
+  const clip=key?pack.clips[key]:null;
+  const ct=key?SPRITE_AIM_CT[key]:null;
+  if(!clip||ct==null)return false;
+  return poseSpriteClip(un,grp,clip,ct);
+}
 /* El arma de utilería cuelga de un punto fijo del grupo (0.16, 0.68),
    pensado para la postura reconstruida de driveRealSoldier, y las manos
    de los clips no pasan por ahí: en reposo cuelgan a los lados y en el
    apunte agarran el arma cruzada sobre el pecho, así que sin este
    encaje la foto salía con el fusil flotando delante del soldado. Aquí
-   el arma se recoloca sobre las manos ya posadas (la empuñadura en la
-   mano derecha, el cañón pasando por la de apoyo, que agarra unos
-   centímetros por encima de la muñeca; con la pistola manda el eje del
-   antebrazo derecho) y así el sprite enseña al soldado sujetando su
-   arma, que es lo que la foto promete. Es solo para la foto: la vista
-   3D en vivo no se toca. */
+   el arma se recoloca ANCLADA A LA MANO DERECHA ya posada: su
+   empuñadura (el punto de agarre de su categoría, guardado por
+   makeGunProp3) cae exactamente dentro de esa mano y su eje sigue
+   al antebrazo derecho, que en los clips del IPA apunta hacia
+   delante en reposo, al andar y al disparar. El encaje anterior
+   trazaba el eje del arma de la mano derecha a la izquierda, y esa
+   línea es casi puramente lateral cuando las manos cuelgan a los
+   lados del cuerpo (medido sobre el propio esqueleto: las manos
+   quedan a ±0,30 laterales y a 0,55–0,60 de alto en reposo), así
+   que el fusil salía apuntando de lado y separado de las dos
+   manos: el arma flotante que se veía en las capturas. La mano
+   izquierda de estos clips no agarra el guardamanos en ninguna
+   pose (en el apunte cruza hacia el centro, pero no cae sobre el
+   eje del arma), así que ningún eje entre manos la sujeta: manda
+   la derecha, que es la que empuña en todas las familias. */
+function gunPoseFromHand(rh,fa,grip){
+  const dir=rh.clone().sub(fa);
+  if(dir.lengthSq()<1e-6)return null;
+  dir.normalize();
+  /* El antebrazo manda, con un toque hacia el frente del soldado
+     (+X en el espacio del padre del arma) para que el balanceo del
+     brazo al andar no cabecee el cañón: el arma se mece CON el
+     brazo, pero sigue leyendo como arma llevada hacia delante. */
+  dir.lerp(new THREE.Vector3(1,0,0),0.22).normalize();
+  const up=new THREE.Vector3(0,1,0);
+  const zAxis=new THREE.Vector3().crossVectors(dir,up);
+  if(zAxis.lengthSq()<1e-6)zAxis.set(0,0,1);else zAxis.normalize();
+  const yAxis=new THREE.Vector3().crossVectors(zAxis,dir).normalize();
+  const g=grip||{x:0.2,y:-0.05};
+  const origin=rh.clone().addScaledVector(dir,-g.x).addScaledVector(yAxis,-g.y);
+  const quat=new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(dir,yAxis,zAxis));
+  return {origin:origin,dir:dir,quat:quat};
+}
 function fitSpriteGun(un,grp){
   const ud=grp.userData;if(!ud||!ud.gun||!ud.byName||!ud.bones)return;
-  grp.updateMatrixWorld(true);
+  if(grp.updateWorldMatrix)grp.updateWorldMatrix(true,true);else grp.updateMatrixWorld(true);
   const bonePos=name=>{
     const b=ud.bones[ud.byName[name]];if(!b)return null;
     const v=new THREE.Vector3();b.getWorldPosition(v);return v;
   };
   const rh=bonePos('Bip001 R Hand');if(!rh)return;
-  const up=new THREE.Vector3(0,1,0);
-  let origin=null,dir=null;
-  if(fireClipFor(un.weapon)==='fire1h'){
-    const fa=bonePos('Bip001 R Forearm');if(!fa)return;
-    dir=rh.clone().sub(fa).normalize();
-    origin=rh.clone().add(dir.clone().multiplyScalar(0.03));origin.y+=0.02;
-  }else{
-    const lh=bonePos('Bip001 L Hand');if(!lh)return;
-    const grip=rh.clone();grip.y+=0.05;
-    const fore=lh.clone();fore.y+=0.08;
-    dir=fore.clone().sub(grip).normalize();
-    origin=grip.clone().add(dir.clone().multiplyScalar(-0.10));
-  }
-  const zAxis=new THREE.Vector3().crossVectors(dir,up);
-  if(zAxis.lengthSq()<1e-6)zAxis.set(0,0,1);else zAxis.normalize();
-  const yAxis=new THREE.Vector3().crossVectors(zAxis,dir).normalize();
-  ud.gun.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(dir,yAxis,zAxis));
-  ud.gun.position.copy(origin);
+  const fa=bonePos('Bip001 R Forearm');if(!fa)return;
+  const pose=gunPoseFromHand(rh,fa,ud.gun.userData.grip);
+  if(!pose)return;
+  ud.gun.quaternion.copy(pose.quat);
+  ud.gun.position.copy(pose.origin);
 }
 /* === El arma, agarrada también en la vista 3D EN VIVO ===
-   El mismo encaje de la foto de los sprites, pero cada fotograma y en
-   el espacio local del grupo del soldado: las manos salen de los huesos
-   reales ya posados por el clip en curso, se pasan al espacio del padre
-   del arma con worldToLocal, y el arma se recoloca (empuñadura en la
-   mano derecha, cañón por la de apoyo; con pistola, el eje del
-   antebrazo) con un suavizado corto para que no vibre. Así el fusil
-   deja de flotar delante del pecho en reposo, al andar, al disparar y
-   al encajar, porque sigue a las manos en vez de a un punto fijo. */
+   El mismo anclaje de la foto de los sprites, cada fotograma y en el
+   espacio local del grupo del soldado. Tres causas dejaban el arma
+   flotando y las tres se cierran aquí: (1) el eje entre las dos
+   manos apuntaba de lado en reposo y al andar (ver la nota de
+   gunPoseFromHand), y ahora manda el antebrazo derecho con la
+   empuñadura dentro de la mano; (2) el encaje leía las matrices
+   mundo del fotograma ANTERIOR (updateMatrixWorld no sube a los
+   padres, y el grupo ya se había movido con la interpolación del
+   paso), así que al moverse el arma iba siempre un fotograma por
+   detrás del brazo — el brazo de movimiento flotante — y ahora
+   updateWorldMatrix(true,true) refresca padres e hijos antes de
+   medir; (3) el suavizado de 0,55 por fotograma sumaba su propio
+   retraso sobre el del hueso, y desaparece: la colocación es
+   exacta en el fotograma, porque un arma empuñada no puede ir
+   detrás de la mano ni un instante. El retroceso del disparo se
+   aplica aquí, empujando el arma unos centímetros hacia atrás
+   por su propio eje durante 220 ms. */
 const _lgQuat=HAS_THREE?new THREE.Quaternion():null,_lgMat=HAS_THREE?new THREE.Matrix4():null;
 function fitLiveGun3(un,grp){
   if(!HAS_THREE)return;
   const ud=grp&&grp.userData;if(!ud||!ud.real||!ud.gun||!ud.byName||!ud.bones)return;
   const parent=ud.gun.parent;if(!parent)return;
-  grp.updateMatrixWorld(true);
+  if(grp.updateWorldMatrix)grp.updateWorldMatrix(true,true);else grp.updateMatrixWorld(true);
   const localPos=name=>{
     const b=ud.bones[ud.byName[name]];if(!b)return null;
-    const v=new THREE.Vector3();b.getWorldPosition(v);return parent.worldToLocal(v);
+    const v=new THREE.Vector3();b.getWorldPosition(v);return parent.worldToLocal(v.clone());
   };
   const rh=localPos('Bip001 R Hand');if(!rh)return;
-  let origin=null,dir=null;
-  if(fireClipFor(un.weapon)==='fire1h'){
-    const fa=localPos('Bip001 R Forearm');if(!fa)return;
-    dir=rh.clone().sub(fa).normalize();
-    origin=rh.clone().add(dir.clone().multiplyScalar(0.03));origin.y+=0.02;
-  }else{
-    const lh=localPos('Bip001 L Hand');if(!lh)return;
-    const grip=rh.clone();grip.y+=0.05;
-    const fore=lh.clone();fore.y+=0.08;
-    dir=fore.clone().sub(grip);
-    if(dir.lengthSq()<1e-6)return;
-    dir.normalize();
-    origin=grip.clone().add(dir.clone().multiplyScalar(-0.10));
+  const fa=localPos('Bip001 R Forearm');if(!fa)return;
+  const pose=gunPoseFromHand(rh,fa,ud.gun.userData.grip);
+  if(!pose)return;
+  if(un._shootT!=null&&typeof FX!=='undefined'&&(FX.t-un._shootT)>=0&&(FX.t-un._shootT)<220){
+    pose.origin.addScaledVector(pose.dir,-0.05*(1-(FX.t-un._shootT)/220));
   }
-  const up=new THREE.Vector3(0,1,0);
-  const zAxis=new THREE.Vector3().crossVectors(dir,up);
-  if(zAxis.lengthSq()<1e-6)zAxis.set(0,0,1);else zAxis.normalize();
-  const yAxis=new THREE.Vector3().crossVectors(zAxis,dir).normalize();
-  _lgMat.makeBasis(dir,yAxis,zAxis);_lgQuat.setFromRotationMatrix(_lgMat);
-  if(REDUCED_MOTION||!ud._gunFitted){ud.gun.position.copy(origin);ud.gun.quaternion.copy(_lgQuat);ud._gunFitted=true;}
-  else{ud.gun.position.lerp(origin,0.55);ud.gun.quaternion.slerp(_lgQuat,0.55);}
+  ud.gun.position.copy(pose.origin);
+  ud.gun.quaternion.copy(pose.quat);
 }
 function renderRealSprite(un){
   if(!un||!un.role||!WEAPONS[un.weapon])return null;
@@ -4282,7 +4449,9 @@ function renderRealSprite(un){
        partida, así que se les pasa una vacía y se restaura al
        terminar, sin tocar la real. */
     let posed=false;
-    if(CLIPLIB.ready)posed=poseSpriteAim(un,grp);
+    const lkPose=roleLook(un.role).pose;
+    if(CLIPLIB.ready&&lkPose&&CLIPLIB.pack&&CLIPLIB.pack.clips&&CLIPLIB.pack.clips[lkPose.clip])posed=poseSpriteClip(un,grp,CLIPLIB.pack.clips[lkPose.clip],lkPose.ct);
+    if(!posed&&CLIPLIB.ready)posed=poseSpriteAim(un,grp);
     if(posed){
       fitSpriteGun(un,grp);
     }else{
@@ -4294,6 +4463,10 @@ function renderRealSprite(un){
           else driveRealSoldier(un,grp,900,false);
         }
       }finally{G=hadG;}
+      /* También en la foto de reserva el arma va anclada a la mano
+         de la postura: sin este encaje quedaba en su punto fijo de
+         construcción (0,16, 0,68), flotando delante del pecho. */
+      fitSpriteGun(un,grp);
     }
     hideDisc();
     REAL_SPRITES.scene.add(grp);
@@ -4703,7 +4876,7 @@ function buildArsenal(){
     d.innerHTML='<span class="tag">'+w.cat+'</span><h3>'+name+'</h3><p class="real">'+w.real+'</p><div class="wstats"><div><b>'+w.dmg+'</b><span>Daño</span></div><div><b>'+w.rng+'</b><span>Casillas</span></div><div><b>'+w.cost+' ⚡</b><span>Coste</span></div><div><b style="font-size:12px;padding-top:4px">'+roles.split(',')[0]+'</b><span>Rol</span></div></div><p class="note">'+w.note+(w.once?' <b>Un solo uso por partida.</b>':'')+(w.aoe?' Daño en área.':'')+'</p>';
     g.appendChild(d);
   });
-  const rt=$('#rolesTable');rt.innerHTML=ROLE_NAMES.map(r=>{const bd=BODIES[ROLES[r].body];return '<div style="display:flex;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line);flex-wrap:wrap"><span class="role-dot" style="background:'+ROLES[r].color+';margin-top:5px"></span><b style="min-width:120px">'+r+'</b><span class="mono" style="font-size:13.5px">'+bd.name+' · '+bd.hp+' PV · '+bd.energy+' ⚡ · mover '+bd.moveCost+' ⚡/casilla</span><span style="flex:1;min-width:220px" class="sub">'+ROLES[r].desc+' Armas: '+ROLES[r].weapons.join(', ')+'.</span></div>';}).join('');
+  const rt=$('#rolesTable');rt.innerHTML=ROLE_NAMES.map(r=>{const bd=BODIES[ROLES[r].body];return '<div style="display:flex;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line);flex-wrap:wrap;align-items:center"><span class="role-dot" style="background:'+ROLES[r].color+';margin-top:5px"></span>'+(rolePortraitURL(r)?'<img class="role-thumb" src="'+rolePortraitURL(r)+'" alt="Retrato del '+r+'"/>':'')+'<b style="min-width:120px">'+r+'</b><span class="mono" style="font-size:13.5px">'+bd.name+' · '+roleLook(r).silueta+' · '+bd.hp+' PV · '+bd.energy+' ⚡ · mover '+bd.moveCost+' ⚡/casilla</span><span style="flex:1;min-width:220px" class="sub">'+ROLES[r].desc+' Armas: '+ROLES[r].weapons.join(', ')+'.</span></div>';}).join('');
 }
 
 /* ================= ESCENARIO 3D EN VIVO (PRIMERA PANTALLA) =================
@@ -4712,14 +4885,14 @@ function buildArsenal(){
    librería 3D fallaba al cargar desde su CDN, la partida caía en
    silencio a la vista clásica y la página se veía exactamente igual
    que siempre. Dos arreglos: la librería Three.js viaja ya dentro del
-   propio artefacto (assets/three.min.js, sin depender de ningún CDN),
+   propio artefacto ([Three.js viaja como archivo: assets/three.min.js] sin depender de ningún CDN),
    y este escenario renderiza la vista 3D en la primera pantalla, con
    los mismos soldados y el mismo escenario en volumen de la partida,
    más dos botones que entran directos a jugar en 3D. */
 let DEMO=null;
 function demoStatus(msg){const el=document.getElementById('demoStatus');if(el)el.textContent=msg;}
 function demoUnit(id,team,role,weapon){
-  return {id:id,team:team,role:role,weapon:weapon,skin:'nacion',nation:myNation||NATIONS[0],x:0,y:0,dx:0,dy:0,maxEnergy:8,energy:8,maxHp:250,hp:250,alive:true,invisible:false};
+  return {id:id,team:team,role:role,weapon:weapon,skin:'nacion',nation:myNation||NATIONS[0],x:0,y:0,dx:0,dy:0,maxEnergy:8,energy:8,maxHp:250,hp:250,alive:true,invisible:false,body:ROLES[role]?ROLES[role].body:'medio'};
 }
 function buildDemo(){
   if(DEMO)return true;
@@ -4757,15 +4930,17 @@ function buildDemo(){
   const barrel=new THREE.Mesh(new THREE.CylinderGeometry(0.3,0.3,0.72,18),mat3('#cf3a30',0.55));
   barrel.position.set(-3,0.41,0);barrel.castShadow=true;stage.add(barrel);
   const barrel2=barrel.clone();barrel2.position.set(3,0.41,0);stage.add(barrel2);
-  const defs=[[901,'A','Comando','M4A1',-1.5,-1.2],[902,'A','Médico','M4A1',-1.5,1.1],[903,'B','Artillero','M249 SAW',1.5,-1.1],[904,'B','Francotirador','M40',1.5,1.2]];
+  const defs=[[901,'A','Comando','M4A1',-1.5,-1.2],[902,'A','Médico','M4A1',-1.5,1.1],[903,'B','Artillero','M249 SAW',1.5,-1.1],[904,'B','Espía','MP7',1.5,1.2]];
+  const units=[];
   const meshes=defs.map(d=>{
     const un=demoUnit(d[0],d[1],d[2],d[3]);
+    units.push(un);
     const mesh=REAL.ready?makeRealSoldier3(un):makeSoldier3(un);
     mesh.position.set(d[4],0.05,d[5]);
     mesh.rotation.y=d[1]==='A'?-Math.PI/2:Math.PI/2;
     stage.add(mesh);return mesh;
   });
-  DEMO={renderer:renderer,scene:scene,camera:camera,stage:stage,meshes:meshes,beacon:beacon,lastW:0,lastH:0};
+  DEMO={renderer:renderer,scene:scene,camera:camera,stage:stage,meshes:meshes,units:units,beacon:beacon,lastW:0,lastH:0};
   demoStatus(REAL.ready
     ? 'Vista 3D activa: el soldado que gira es el del original de 2012 (su malla, su textura y su esqueleto), sobre el escenario en volumen. Pulsa «Jugar ahora en 3D» y lo mueves tú.'
     : 'Vista 3D activa: escenario en volumen y soldados sobre la cuadrícula, renderizados ahora mismo. Pulsa «Jugar ahora en 3D» y juegas en este mismo 3D.');
@@ -4790,6 +4965,27 @@ window.__renderDemo=function(){
   DEMO.stage.rotation.y=REDUCED_MOTION?0.6:t/9000;
   if(DEMO.beacon)DEMO.beacon.material.opacity=REDUCED_MOTION?0.16:(0.13+0.06*Math.sin(t/520));
   DEMO.meshes.forEach((m,i)=>{m.position.y=0.05+(REDUCED_MOTION?0:Math.abs(Math.sin(t/700+i*1.7))*0.03);});
+  /* Los soldados del escaparate también se animan con sus clips y
+     llevan el arma anclada a la mano, como en la partida: antes el
+     escenario no movía ni un hueso, así que enseñaban la pose de
+     bind (brazos colgando a los lados) con el arma clavada en su
+     punto fijo de construcción, flotando delante del pecho — la
+     primera arma flotante que se veía al abrir la página. Los
+     motores de pose leen el estado global de partida; fuera de
+     partida se les pasa una vacía y se restaura, como en la foto
+     de los sprites. */
+  {
+    const hadG=G;
+    if(!G)G={selected:null,over:false,winner:null,units:[],turn:'A',round:1};
+    try{
+      DEMO.meshes.forEach((m,i)=>{
+        const un=DEMO.units&&DEMO.units[i];if(!un)return;
+        const ud=m.userData;
+        if(ud&&ud.real){if(CLIPLIB.ready)driveClipSoldier(un,m,t,false);else driveRealSoldier(un,m,t,false);fitLiveGun3(un,m);}
+      });
+    }catch(e){}
+    G=hadG;
+  }
   DEMO.camera.position.set(0,7.6,8.6);
   DEMO.camera.lookAt(0,0,0.2);
   DEMO.renderer.render(DEMO.scene,DEMO.camera);
