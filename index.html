@@ -4432,6 +4432,17 @@ function skyTheme3(theme){
   return {bg:0x212922,fog:0x212922};
 }
 let EMBLEM_TEX={};
+function nationTintColor(nation){
+  if(!nation||!nation.colors)return '#ffffff';
+  let best=nation.colors[0],bestSat=-1;
+  nation.colors.forEach(hex=>{
+    const c=new THREE.Color(hex);
+    const mx=Math.max(c.r,c.g,c.b),mn=Math.min(c.r,c.g,c.b);
+    const sat=mx>0?(mx-mn)/mx:0;
+    if(sat>bestSat){bestSat=sat;best=hex;}
+  });
+  return best;
+}
 function emblemTexture(nation){
   if(!nation)return null;
   if(EMBLEM_TEX[nation.id])return EMBLEM_TEX[nation.id];
@@ -4951,7 +4962,7 @@ function makeRealSoldier3(un){
   /* Skin de NACION: el uniforme se tine con el color de la bandera
      (multiplicado sobre la textura del original, sin taparla). */
   if(un.skin==='nacion'&&un.nation&&un.nation.colors){
-    mat.color.copy(new THREE.Color(un.nation.colors[0])).lerp(new THREE.Color('#ffffff'),0.42);
+    mat.color.copy(new THREE.Color(nationTintColor(un.nation))).lerp(new THREE.Color('#ffffff'),0.42);
   }
   /* Equipo enemigo: el uniforme se tine calido para que no se confunda con
      el tuyo ni de espaldas. El bando A conserva el color natural. */
