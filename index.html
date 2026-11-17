@@ -1756,6 +1756,7 @@ function damage(target,dmg,srcLabel){
   else if(!target.isDrone&&Math.random()<0.2)auVoice(target,'pain',0.35);
 }
 function explodeBarrel(b,srcLabel){
+  try{auPlay('sfx/weapons/cluster_explode.mp3',0.6);}catch(e){}
   if(!b.alive)return;b.alive=false;G.lastMoveUndo=null;FX.shake=11;sfx('boom');fxBurst(b.x,b.y,22,'#ffb03a');fxFloat(b.x,b.y,'💥','#ffe1a8');if(typeof fx3Explosion==='function')fx3Explosion(b.x,b.y,'expl');
   log('💥 ¡Barril explotado por '+srcLabel+'! 70 de daño en las casillas adyacentes.');
   G.units.filter(u=>u.alive&&cheb(u,b)<=1).forEach(u=>damage(u,70,'La explosión del barril'));
@@ -1899,6 +1900,7 @@ function pickupLoot(u){
 }
 function explodeNear(pos){const b=G.map.barrels.find(x=>x.alive&&cheb(x,pos)<=1);if(b)explodeBarrel(b,'la salpicadura');}
 function throwGrenade(u,x,y){
+  try{auPlay('sfx/weapons/grenade_throw_01.mp3',0.5);}catch(e){}
   if(u.grenades<=0){toast('Sin granadas M67.');return;}
   if(u.energy<2){toast('La granada cuesta 2 de energía.');return;}
   if(cheb(u,{x,y})>3){toast('La M67 se lanza a 3 casillas como máximo.');return;}
@@ -1964,6 +1966,7 @@ function renderSoundBtn(){const b=document.getElementById('soundBtn');if(b)b.tex
    MaxRange, Radius, TickDamage). */
 const COVER_COST=3, GAS_COST=3, GAS_DMG=12, GAS_TURNS=2, SWEEP_COST=2, SWEEP_RANGE=3;
 function placeCover(u,x,y){
+  try{auPlay('sfx/abilities/drop_cover.mp3',0.55);}catch(e){}
   if(u.role!=='Ingeniero'){toast('La cobertura desplegable es del Ingeniero.');return;}
   if((u.covers||0)<=0){toast('Sin coberturas: el Ingeniero lleva 2 por partida.');return;}
   if(u.energy<COVER_COST){toast('La cobertura cuesta '+COVER_COST+' ⚡.');return;}
@@ -2002,6 +2005,7 @@ function sweepDetect(u,x,y){
 /* Orbital laser: un solo disparo de precision desde arriba. */
 const ORB_COST=4, ORB_DMG=80, ORB_RANGE=6;
 function fireOrbital(u,x,y){
+  try{auPlay('sfx/weapons/strike_laser_a.mp3',0.6);}catch(e){}
   if(u.role!=='Artillero'){toast('El láser orbital es del Artillero.');return;}
   if((u.orbitals||0)<=0){toast('Sin cargas orbitales: el Artillero lleva 1 por partida.');return;}
   if(u.energy<ORB_COST){toast('El láser orbital cuesta '+ORB_COST+' ⚡.');return;}
@@ -2071,6 +2075,7 @@ function useShield(u){
   updateUI();draw();
 }
 function fireArtillery(u,x,y){
+  try{auPlay('sfx/weapons/strike_artillery_a.mp3',0.6);}catch(e){}
   if(u.role!=='Artillero'){toast('La artillería es del Artillero.');return;}
   if((u.arty||0)<=0){toast('Sin cargas de artillería: el Artillero lleva 2 por partida.');return;}
   if(u.energy<ARTY_COST){toast('La artillería cuesta '+ARTY_COST+' ⚡.');return;}
@@ -2101,6 +2106,7 @@ function throwBees(u,target){
 /* ===== LOTE 3 (F4): molotov, caja de salud y teletransporte ===== */
 const MOLOTOV_COST=3, MOLOTOV_DMG=15, MOLOTOV_TURNS=2, CRATE_COST=3, TELE_COST=3, TELE_RANGE=4;
 function throwMolotov(u,x,y){
+  try{auPlay('sfx/weapons/grenade_throw_01.mp3',0.5);}catch(e){}
   if(u.role!=='Artillero'){toast('El cóctel molotov es del Artillero.');return;}
   if((u.molotovs||0)<=0){toast('Sin molotovs: el Artillero lleva 2 por partida.');return;}
   if(u.energy<MOLOTOV_COST){toast('El molotov cuesta '+MOLOTOV_COST+' ⚡.');return;}
@@ -2170,6 +2176,7 @@ const MINE_DMG=60,MINE_COST=3;
 function mineAt(x,y){return (G&&G.mines||[]).find(m=>m.x===x&&m.y===y)||null;}
 function viewerTeam(){if(!G)return 'A';return G.opp==='local'?G.turn:'A';}
 function placeMine(u,x,y){
+  try{auPlay('sfx/abilities/landmine_place.mp3',0.5);}catch(e){}
   if(u.role!=='Ingeniero'){toast('La Claymore M18A1 es equipo del Ingeniero.');return;}
   if((u.mines||0)<=0){toast('Sin Claymores: el Ingeniero lleva 2 por partida.');return;}
   if(u.energy<MINE_COST){toast('Colocar la Claymore cuesta '+MINE_COST+' ⚡.');return;}
@@ -2347,6 +2354,7 @@ function useSpecial(u,target){
   if(role==='Comando'){toast('El Comando lleva una M67 extra (botón Granada) y 2 aturdidoras M84 (botón Aturdidora): sin daño, pero dejan al enemigo viendo estrellas durante un turno.');return;}
 }
 function deployTurret(u,x,y,type){
+  try{auPlay('sfx/abilities/ability_beep.mp3',0.5);}catch(e){}
   type=type||'m2';
   if(u.energy<5){toast('Desplegar la torreta cuesta 5 ⚡ (un turno casi entero).');return;}
   if(dist(u,{x,y})!==1||blocked(x,y)){toast('La torreta va en una casilla adyacente libre.');return;}
