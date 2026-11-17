@@ -4355,12 +4355,36 @@ function build3DWorld(){
   const geoShown=skTheme&&skSt.ready;
   if(skTheme&&!skSt.ready)loadSkirmishGeo(G.map.theme);
   if(!geoShown){
-    for(let y=0;y<H;y++)for(let x=0;x<W;x++){
-      const h=hash2(x,y);
+    /* Suelo continuo: una sola losa de 12×12 con la textura de casillas
+       pintada (tono por celda + cuadrícula + fila de asfalto), en vez de
+       144 losas sueltas con huecos. Si el canvas fallara, quedan las losas. */
+    const tileCol=(x,y)=>{const h=hash2(x,y);
       const asphalt=(y===H-1);
-      const col=skTheme?['#7e8288','#787c82','#868a90','#74787e'][Math.floor(h*4)]:plazaTheme?['#a8a294','#9f9a8c','#b0aa9c','#97927f'][Math.floor(h*4)]:cruceTheme?['#6b5850','#63524b','#736259','#5b4c45'][Math.floor(h*4)]:astilleroTheme?['#42565e','#3c5058','#4a5e66','#364a52'][Math.floor(h*4)]:rotondaTheme?['#5f5b52','#57534b','#67635b','#4f4c44'][Math.floor(h*4)]:dockTheme?['#4e5d5c','#465554','#576664','#3f4f4e'][Math.floor(h*4)]:depotTheme?['#7d838a','#757b83','#858b91','#6f757d'][Math.floor(h*4)]:platformTheme?['#6f6259','#665a50','#786a5e','#5d5148'][Math.floor(h*4)]:marketTheme?['#8a7a5c','#82724f','#93835f','#7a6a4e'][Math.floor(h*4)]:terminalTheme?['#4f5a63','#48525b','#57626c','#424c54'][Math.floor(h*4)]:asphalt?['#5b5e63','#56595e','#5f6267','#53565b'][Math.floor(h*4)]:['#99968e','#918e85','#a09d94','#8b887f'][Math.floor(h*4)];
-      const tile=box3(0.97,0.09,0.97,col,w2cx(x),0,w2cx(y),0.95);
-      tile.castShadow=false;world.add(tile);
+      return skTheme?['#7e8288','#787c82','#868a90','#74787e'][Math.floor(h*4)]:plazaTheme?['#a8a294','#9f9a8c','#b0aa9c','#97927f'][Math.floor(h*4)]:cruceTheme?['#6b5850','#63524b','#736259','#5b4c45'][Math.floor(h*4)]:astilleroTheme?['#42565e','#3c5058','#4a5e66','#364a52'][Math.floor(h*4)]:rotondaTheme?['#5f5b52','#57534b','#67635b','#4f4c44'][Math.floor(h*4)]:dockTheme?['#4e5d5c','#465554','#576664','#3f4f4e'][Math.floor(h*4)]:depotTheme?['#7d838a','#757b83','#858b91','#6f757d'][Math.floor(h*4)]:platformTheme?['#6f6259','#665a50','#786a5e','#5d5148'][Math.floor(h*4)]:marketTheme?['#8a7a5c','#82724f','#93835f','#7a6a4e'][Math.floor(h*4)]:terminalTheme?['#4f5a63','#48525b','#57626c','#424c54'][Math.floor(h*4)]:asphalt?['#5b5e63','#56595e','#5f6267','#53565b'][Math.floor(h*4)]:['#99968e','#918e85','#a09d94','#8b887f'][Math.floor(h*4)];};
+    let done=false;
+    try{
+      const cv=document.createElement('canvas');cv.width=cv.height=1024;
+      const g2=cv.getContext('2d');
+      const cell=1024/W;
+      for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+        g2.fillStyle=tileCol(x,y);g2.fillRect(Math.floor(x*cell),Math.floor(y*cell),Math.ceil(cell),Math.ceil(cell));
+      }
+      g2.strokeStyle='rgba(24,26,22,0.45)';g2.lineWidth=2;
+      for(let k=0;k<=W;k++){const p=Math.round(k*cell);
+        g2.beginPath();g2.moveTo(p,0);g2.lineTo(p,1024);g2.stroke();
+        g2.beginPath();g2.moveTo(0,p);g2.lineTo(1024,p);g2.stroke();}
+      const ftex=new THREE.CanvasTexture(cv);ftex.colorSpace=THREE.SRGBColorSpace;ftex.anisotropy=4;
+      const slab=new THREE.Mesh(new THREE.BoxGeometry(W,0.09,H),new THREE.MeshStandardMaterial({map:ftex,roughness:0.95}));
+      slab.position.y=0;slab.receiveShadow=true;world.add(slab);
+      const rim=new THREE.Mesh(new THREE.BoxGeometry(W+0.34,0.14,H+0.34),new THREE.MeshStandardMaterial({color:0x3a3d36,roughness:0.9}));
+      rim.position.y=-0.07;rim.receiveShadow=true;world.add(rim);
+      done=true;
+    }catch(e){}
+    if(!done){
+      for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+        const tile=box3(0.97,0.09,0.97,tileCol(x,y),w2cx(x),0,w2cx(y),0.95);
+        tile.castShadow=false;world.add(tile);
+      }
     }
   } else {
     const geoMesh=buildSkirmishGeo3(G.map.theme);
