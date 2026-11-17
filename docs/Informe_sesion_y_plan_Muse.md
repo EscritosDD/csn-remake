@@ -1,8 +1,15 @@
-# Informe de sesión y plan de arte para Muse
+# Informe de sesión y plan de arte completo para Muse
 
 Fecha: 17 nov 2026 (sesión nocturna). Autor: el agente (DeepSeek Harness).
 Estado del repo: todo lo descrito está en `main` y empujado a
 github.com/EscritosDD/csn-remake.
+
+> **Cómo leer este documento.**
+> La **Parte 1** es el informe honesto de lo trabajado esta sesión (qué se
+> arregló, qué se verificó y qué quedó pendiente). La **Parte 2** es la
+> biblia de producción de arte para dejar el juego acabado: qué generar con
+> Muse, con qué especificaciones, en qué orden, dónde va cada archivo y qué
+> se considera "terminado" en cada área.
 
 ---
 
@@ -106,120 +113,390 @@ en tablero de código como capa de reserva.
    del grupo) y está sin hacer.
 4. **Contorno tipo dibujo** del soldado (rim/outline) no implementado.
 5. Las texturas de los mapas de Londres son las originales del IPA (uso
-   privado); para publicar hay que sustituirlas por arte propio → ver plan.
+   privado); para publicar hay que sustituirlas por arte propio → Parte 2.
 
 ---
 
-# PARTE 2 — Plan de acción completo para Muse
+# PARTE 2 — Plan de arte completo para Muse
 
-## 2.1 Dirección de arte (la del original, medida)
+Objetivo: dejar CSN **visualmente acabado como videojuego**: interfaz de
+juego completa, personajes terminados, mapas con piel propia y pantallas de
+arranque/cierre. Todo el arte 2D y de texturas se genera en Muse; el motor
+(sigue igual) solo cambia archivos o pide una pequeña edición de código.
 
-- **Estilo**: cartoon estilizado, formas simples, sombreado plano con
-  contraste suave. Nada fotorrealista.
-- **Paleta de referencia**: acero #A9AEB2, hormigón #7F858B, asfalto #5B5E63,
-  madera #8D6436/#AB8248, óxido/rojo barril #CF3A30, ámbar #F2B234,
-  cian #39C2D7, azul nación #387EC9, rojo nación #C95338, papel #F4F1E6,
-  fondo oscuro #141A12.
-- **Regla de oro**: saturación media-baja; los personajes y la UI son lo
-  más saturado; el escenario se mantiene apagado para que el juego se lea.
-- **Formato de entrega**: PNG (o JPEG calidad 85) sin canal alfa salvo que
-  se indique; **1024×1024** para atlas y suelos; **256×256** para el
-  soldado; **512×512** para iconos grandes; **700×700** para planos.
+## 2.0 Reglas de trabajo con Muse
 
-## 2.2 Lista de assets a generar (con destino exacto)
+1. Un lote = una tanda de Muse con un prompt. Genera 4-6 variantes por lote
+   y elige una; no encadenes variantes sobre variantes.
+2. **Siempre pedir formato**: PNG, resolución exacta de la tabla, sin texto
+   (el texto va en HTML), sin marcos que no se pidan.
+3. **Seamless** cuando se indique: la textura debe repetir sin costura al
+   testearla en la vista 3D.
+4. Los assets de UI se generan como **piezas sueltas con fondo
+   transparente** (bordes de botón, iconos), no como capturas de pantalla.
+5. Guarda cada archivo **con el nombre exacto de la tabla** y en su carpeta
+   destino; así la integración es copiar/pegar sin tocar código.
+6. Si Muse produce algo con estilo distinto al resto, se descarta: la
+   coherencia vale más que la pieza aislada.
 
-### A. Atlas de los mapas de Londres (prioridad máxima)
-Dos atlas de 1024×1024 que sustituyan a los del IPA sin cambiar UVs.
-- `assets/maps/skirmish_atlas0.png` (reemplaza): fachadas de ladrillo
-  londinense, ventanas, tejados, asfalto, aceras, pintura vial, farolas.
-- `assets/maps/skirmish_atlas1.png` (reemplaza): contenedores, vallas,
-  señales de obra, grafitis suaves, detalles metálicos.
-- Especificación: **seamless dentro de cada zona**, sin texto legible, sin
-  logos, luz neutra (el juego ilumina), margen de seguridad 8 px entre
-  zonas. Los UVs actuales esperan un atlas pintado "por zonas": generar un
-  atlas de texturas variadas en rejilla de 4×4 zonas de 256 px.
+## 2.1 Definición de "juego acabado" (checklist global)
 
-### B. Suelo de los mapas de código
-- Un solo PNG tileable 1024×1024 **que represente 12×12 casillas**:
-  `suelo_almacen.png` (hormigón de nave industrial con juntas y manchas
-  suaves), `suelo_patio.png` (asfalto portuario), `suelo_plaza.png`,
-  `suelo_embarcadero.png`, `suelo_mercado.png`.
-- Integración: la textura se pinta hoy por canvas; se puede sustituir por
-  estos PNG en `build3DWorld` (basta cambiar la fuente del `CanvasTexture`).
+El juego se considera visualmente terminado cuando:
 
-### C. Props 3D (texturas, no modelos)
-- `tex_caja_madera.png` (256²): tablones, esquinas metálicas.
-- `tex_barril.png` (256²): chapa roja con fleje y símbolo de peligro.
-- `tex_muro.png` (256²): hormigón con manchas.
-- `tex_contenedor_{azul,rojo,amarillo,verde}.png` (256²): corrugado.
-- Uso: sustituir el color plano de `mat3` por `map` en los props.
+- [ ] **Portada** con logotipo, fondo propio, tarjetas de modo y naciones
+      con arte (no bloques de texto).
+- [ ] **Configuración** con selectores de escuadra, mapa y modo con
+      miniaturas y arte propio.
+- [ ] **HUD en partida** con iconos para todo (armas, acciones, estados) y
+      el retrato del soldado seleccionado.
+- [ ] **Soldado** con textura propia (3 cuerpos × 2 skins), tocados y
+      armas coherentes.
+- [ ] **Los 8 mapas de Londres** con atlas propios (mismos UVs).
+- [ ] **Los 5 mapas de código** con suelo y props texturizados.
+- [ ] **13 planos cenitales** propios para la vista clásica.
+- [ ] **Efectos** (humo, chispas, viñeta) y **pantallas de carga,
+      victoria y derrota**.
+- [ ] Ningún icono con emoji, ningún placeholder "Cargando".
 
-### D. Soldado (sustituir la textura del IPA)
-- `assets/soldier_tex.png` (256×256 RGBA): **el mismo espacio UV** que la
-  textura actual. Reglas: uniforme verde oliva + franjas de nación en
-  hombros/brazos (variantes azul #387EC9 y roja #C95338), correajes,
-  botas, guantes; estilo pintado plano, contorno oscuro sutil.
-- Generar 3 variantes: ligero/medio/pesado (mismo UV, distinto uniforme).
+## 2.2 Dirección de arte y sistema de diseño
 
-### E. UI e iconos
-- `icon_{fusil,pistola,granada,aturnidora,medico,ingeniero,espia}.png`
-  (128²): trazo limpio, 2 tonos + color de rol.
-- Fondo de portada: si se mantiene ilustración, **key art propio** en
-  lugar de la actual (una escena 3D estilizada, no una foto de estudios).
+### 2.2.1 Paleta maestra
 
-### F. Efectos y extras
-- `tex_humo.png` (256²): nube suave para granadas.
-- `tex_ruido.png` (256²): grano sutil para la viñeta del suelo.
+| Uso | Hex |
+|---|---|
+| Acero / metal | `#A9AEB2` |
+| Hormigón / muro | `#7F858B` |
+| Asfalto | `#5B5E63` |
+| Madera / caja | `#8D6436` (cuerpo) · `#AB8248` (tapa) |
+| Óxido / barril explosivo | `#CF3A30` (cuerpo) · `#7C1D18` (flebres) |
+| Ámbar de UI / baliza | `#F2B234` |
+| Cian aliado | `#39C2D7` |
+| Nación azul | `#387EC9` |
+| Nación roja | `#C95338` |
+| Papel / texto claro | `#F4F1E6` |
+| Fondo oscuro | `#141A12` |
+| Verde vida / OK | `#69D66F` |
 
-## 2.3 Prompts listos para Muse (inglés, ajustables)
+Regla: **escenario apagado (saturación baja), personajes y UI saturados**.
+Así el jugador lee la partida de un vistazo.
 
-**Atlas Londres 0** — "Hand-painted stylized game texture atlas, 1024x1024,
-4x4 grid of seamless patches: london brick facades with windows, slate
-roofs, wet asphalt, pavement slabs, road markings, street lamps; muted
-desaturated colors, flat painted style, soft ambient occlusion, no text,
-no logos, even neutral lighting".
+### 2.2.2 Tipografía
 
-**Atlas Londres 1** — "…4x4 grid: shipping containers (blue/red/yellow),
-wooden construction barriers, road works signs, chain-link fence, metal
-vent grilles, subtle graffiti; same muted painted style, no text".
+- Títulos: condensada, mayúsculas, con tracking ligero (la UI actual ya usa
+  este aire). Mantener la familia que ya carga el juego; no introducir otra.
+- Cuerpo: la misma familia a tamaños 14/16 px.
+- Números de daño/energía: negrita, alineados a la derecha.
 
-**Suelo almacén** — "Top-down seamless concrete warehouse floor texture,
-12x12 faint grid of square slabs, oil stains and cracks, muted gray-green,
-flat painted cartoon style".
+### 2.2.3 Formas y materiales (UI)
 
-**Soldado** — "Video-game character texture sheet painted for a chibi
-military soldier, flat hand-painted style, olive drab uniform with blue
-shoulder patches, black boots, leather straps, subtle dark outlines, no
-shading gradients; designed for a 256x256 UV layout".
+- Radios de esquina: 10 px (tarjetas), 8 px (botones), 6 px (insignias).
+- Bordes: 1 px `rgba(0,0,0,.18)` + sombra suave `0 2px 6px rgba(0,0,0,.15)`.
+- Botón primario: relleno ámbar `#F2B234`, texto oscuro.
+- Botón secundario: relleno papel `#F4F1E6`, texto oscuro, borde.
+- Botón peligro: relleno rojo `#C95338`, texto blanco.
+- Estados: normal, hover (+8 % de brillo), pulsado (−8 %), deshabilitado
+  (opacidad 45 %).
 
-## 2.4 Dónde va cada archivo y cómo se integra
+### 2.2.4 Estilo de personajes
 
-| Archivo generado | Destino | Integración |
+- Proporción chibi (cabeza grande), cuerpo simple, sin anatomía detallada.
+- Pintado plano con **contorno oscuro fino** (2 px a 512) y sombra suave.
+- Uniforme verde oliva base; franjas de nación en hombros y brazos.
+- Cada rol se distingue por **tocado + mochila + arma**, no por cara.
+
+## 2.3 Inventario completo de assets
+
+Formato de la tabla: **archivo** · tamaño · notas. Destino: `assets/`
+salvo que se indique. Todas las fases van numeradas en 2.6.
+
+### 2.3.1 Marca e identidad (Fase 0)
+
+| Archivo | Tamaño | Notas |
 |---|---|---|
-| skirmish_atlas0/1.png | `assets/maps/` | sustitución directa (mismos nombres) |
-| suelo_*.png | `assets/maps/` | cambiar la fuente del `CanvasTexture` en `build3DWorld` |
-| tex_*.png | `assets/` | `mat3` acepta un `map` opcional; props lo usan |
-| soldier_tex.png | `assets/` | sustitución directa (mismo UV) |
-| icon_*.png | `assets/` | `<img>` de la UI y tarjetas de arma |
-| key art | `assets/` | `<img>` de portada |
+| `logo_csn.png` | 1024×320 | Logotipo "CSN" estilizado militar, papel + ámbar |
+| `logo_csn_blanco.png` | 1024×320 | Versión para fondos oscuros |
+| `favicon.png` | 64×64 | Insignia reducida |
+| `key_art_portada.jpg` | 1920×1080 | Escena clave: soldados en la calle de Londres, 3D estilizado |
+| `fondo_menu.jpg` | 1920×1080 | Fondo tenue (mapa desenfocado) para el menú |
 
-## 2.5 Orden recomendado (fases)
+### 2.3.2 Interfaz — portada y menú (Fase 1)
 
-1. **Fase 1 (hoy)**: atlas de Londres 0 y 1 → el salto visual más grande en
-   los 8 mapas reales. Verificar en juego; los UVs no cambian.
-2. **Fase 2**: textura del soldado (3 variantes) → personajes.
-3. **Fase 3**: suelos de los 5 mapas de código.
-4. **Fase 4**: texturas de props y barriles.
-5. **Fase 5**: iconos de arma/rol y key art de portada.
-6. **Fase 6**: humo y post-proceso suave.
+| Archivo | Tamaño | Notas |
+|---|---|---|
+| `ui_boton_primario.png` | 256×96 | 9-slice, ámbar |
+| `ui_boton_secundario.png` | 256×96 | 9-slice, papel |
+| `ui_boton_peligro.png` | 256×96 | 9-slice, rojo |
+| `ui_panel.png` | 256×256 | 9-slice, papel claro con borde |
+| `ui_panel_oscuro.png` | 256×256 | 9-slice, para el HUD |
+| `ui_tarjeta.png` | 256×256 | 9-slice, tarjeta de modo/arma |
+| `modo_eliminacion.png` | 256² | Insignia: dos escuadras frente a frente |
+| `modo_baliza.png` | 256² | Insignia: baliza central |
+| `modo_dominacion.png` | 256² | Insignia: anillos concéntricos |
+| `modo_escolta.png` | 256² | Insignia: dron protegido |
+| `nacion_<n>.png` | 256² × N | Insignia de cada nación (leer `NATIONS`): escudo + colores |
+| `map_min_<mapa>.png` | 256² × 13 | Miniatura de cada tablero para el selector |
 
-Cada fase: generar → sustituir archivo → recargar con `JUGAR.bat` →
-comprobar en 3D (la vista clásica usa los planos cenitales).
+### 2.3.3 Interfaz — configuración de partida (Fase 1)
 
-## 2.6 Cómo verificar sin capturas 3D
+| Archivo | Tamaño | Notas |
+|---|---|---|
+| `setup_marco_escuadra.png` | 512×256 | Marco de slot de escuadra |
+| `setup_slot_vacio.png` | 128² | Silueta "sin soldado" |
+| `ui_interruptor_on.png` / `_off.png` | 128×64 | Interruptores (IA, sonido) |
+| `ui_barra_fondo.png` / `_relleno.png` | 256×32 | Barra de vida/energía |
 
-- Abrir `JUGAR.bat` y mirar en pantalla (es el test definitivo).
-- Abrir la consola del navegador y escribir `window.skState('depot')` para
-  ver si la geometría está lista, y `window.__csn3d` para el render.
-- El tablero 2D se puede capturar con clic derecho → guardar imagen, o
-  desde consola: `document.querySelector('#board').toDataURL()`.
+### 2.3.4 Interfaz — HUD en partida (Fase 2)
+
+| Archivo | Tamaño | Notas |
+|---|---|---|
+| `hud_retrato_<rol>.png` | 512² × 7 | Retrato pintado de cada rol (chibi, estilo 2.2.4) |
+| `hud_icono_<accion>.png` | 128² × 9 | disparar, granada, aturdir, energía, mover, capturar, reparar, recoger, esperar |
+| `hud_icono_<estado>.png` | 96² × 5 | aturdido, cubierto, vigilancia, cegado, herido |
+| `hud_icono_<objeto>.png` | 96² × 7 | botiquín, baliza, torreta, mina, botín cura, botín energía, botín granada |
+| `hud_turno_aliado.png` / `_rival.png` | 512×64 | Cabecera de turno |
+| `hud_log_borde.png` | 512×64 | Cabecera del registro de combate |
+| `hud_fin_victoria.png` / `hud_fin_derrota.png` | 1250×400 | Pancartas de fin de partida |
+
+### 2.3.5 Iconografía de armas (Fase 2)
+
+Una ficha por arma del arsenal (leer `ARSENAL`/`WEAPONS` en el código para
+la lista exacta; cubrir estas familias):
+
+| Familia | Archivos |
+|---|---|
+| Fusiles de asalto y carabinas | `arma_fusil_<n>.png` (4-5 variantes) |
+| Subfusiles | `arma_subfusil.png` |
+| Escopetas | `arma_escopeta.png` |
+| Francotiradores | `arma_sniper_<n>.png` (2) |
+| Ametralladoras | `arma_ametralladora.png` |
+| Lanzacohetes / lanzagranadas | `arma_lanzador.png`, `arma_lanzagranadas.png` |
+| Pistolas | `arma_pistola_<n>.png` (2) |
+| Granadas y aturdidoras | `arma_granada_<tipo>.png` (3), `arma_aturdidora.png` |
+| Cuerpo a cuerpo | `arma_cuchillo.png` |
+
+Todas 128², vista lateral, 2 tonos + detalle, mismo ángulo y grosor de trazo.
+
+### 2.3.6 Personajes (Fase 3)
+
+| Archivo | Tamaño | Notas |
+|---|---|---|
+| `soldier_tex_ligero.png` | 256² RGBA | Mismo Layout UV que la textura actual |
+| `soldier_tex_medio.png` | 256² RGBA | Base verde oliva + correajes |
+| `soldier_tex_pesado.png` | 256² RGBA | Armadura ligera + correajes gruesos |
+| `tex_casco_emblema.png` | 128² | Emblema de nación para el casco (plano, se pega) |
+| `skin_nacion_<n>_overlay.png` | 256² RGBA | Franjas de nación sobre el uniforme (opcional; hoy va por tinte) |
+
+Notas de producción:
+- Los tres cuerpos usan **el mismo despiece UV**; solo cambia el pintado.
+- Las naciones se resuelven hoy con un tinte del material: si se quiere
+  más detalle, usar los overlays y desactivar el tinte.
+- Prohibido: caras detalladas, pelo, camuflajes finos (no se leen a tamaño
+  de juego).
+
+### 2.3.7 Mapas (Fase 4)
+
+| Archivo | Tamaño | Notas |
+|---|---|---|
+| `skirmish_atlas0.png` | 1024² | Reemplaza el atlas 0 de los 8 mapas de Londres: fachadas de ladrillo, tejados, asfalto, aceras, marcas viales, farolas |
+| `skirmish_atlas1.png` | 1024² | Reemplaza el atlas 1: contenedores, vallas, señales de obra, rejas, grafitis suaves |
+| `suelo_almacen.png` | 1024² | 12×12 casillas, hormigón de nave |
+| `suelo_patio.png` | 1024² | Asfalto portuario |
+| `suelo_plaza.png` | 1024² | Losas de plaza |
+| `suelo_embarcadero.png` | 1024² | Muelle de hormigón y tablones |
+| `suelo_mercado.png` | 1024² | Adoquín / tierra |
+| `top_<mapa>.jpg` | 700² × 13 | Plano cenital de cada tablero |
+| `tex_caja_madera.png` | 256² | Tablones y esquinas metálicas |
+| `tex_barril.png` | 256² | Chapa roja con fleje y símbolo de peligro |
+| `tex_muro.png` | 256² | Hormigón con manchas |
+| `tex_contenedor_<color>.png` | 256² × 4 | Corrugado azul/rojo/amarillo/verde |
+| `tex_baliza.png` | 128² | Panel ámbar de la baliza |
+| `tex_torreta.png` | 256² | Metal de la torreta |
+| `tex_dron.png` | 256² | Casco del dron |
+
+### 2.3.8 Efectos y atmósfera (Fase 5)
+
+| Archivo | Tamaño | Notas |
+|---|---|---|
+| `fx_humo.png` | 512² (hoja 4×4) | Nubes suaves para granadas |
+| `fx_chispas.png` | 512² (hoja 4×4) | Chispas de impacto |
+| `fx_explosion.png` | 512² (hoja 4×4) | Bola de fuego de barriles |
+| `fx_vineta.png` | 1920×1080 RGBA | Viñeta suave para encuadrar la acción |
+| `fx_grano.png` | 512² | Grano sutil (opacidad baja) |
+
+### 2.3.9 Pantallas especiales (Fase 5)
+
+| Archivo | Tamaño | Notas |
+|---|---|---|
+| `pantalla_carga.jpg` | 1920×1080 | Fondo + hueco central para la barra |
+| `carga_barra.png` | 512×32 | 9-slice de la barra de carga |
+| `transicion_rayos.png` | 1920×1080 RGBA | Barrido opcional entre pantallas |
+
+## 2.4 Prompts por lote (copy-paste para Muse)
+
+> Ajusta el estilo con la frase maestra: *"hand-painted stylized cartoon
+> game art, muted palette, soft ambient occlusion, flat shading, no text,
+> no logos, transparent background when applicable"*.
+
+**L1 — Logotipo**: "Military stylized game logo 'CSN' in bold condensed
+letters, paper-white fill with amber #F2B234 accents and a thin dark
+outline, slight 3D extrusion, on transparent background, 1024x320".
+
+**L2 — Key art**: "Stylized cartoon key art of a chibi military squad
+advancing through a deserted London street at dusk, brick buildings,
+shipping crates and barrels, amber lighting, hand-painted style, muted
+palette, no text, 1920x1080".
+
+**L3 — Insignias de modo (4)**: "Four square game-mode badges, flat
+hand-painted style, 1) two opposing squads face to face, 2) a glowing amber
+beacon in the center, 3) concentric capture rings, 4) a small drone with a
+shield ring. Muted military palette with amber and cyan accents, dark
+outline, 256x256 each".
+
+**L4 — Retratos de rol (7)**: "Chibi military soldier portrait, bust
+view, painted flat style with thin dark outline, olive drab uniform, role
+distinctive gear: [sniper hood and scope / heavy gunner with ammo belt /
+spy with scarf / medic with red cross backpack / engineer with tool belt /
+commando with balaclava / captain with peaked cap and gold trim]. Neutral
+gray background, 512x512 each".
+
+**L5 — Iconos de arma (serie)**: "Game inventory icons, side view, painted
+flat style, thin dark outline, two tones plus metallic highlights, same
+angle and stroke weight across the set: assault rifle, SMG, pump shotgun,
+bolt-action sniper rifle, light machine gun, rocket launcher, grenade
+launcher, pistol, fragmentation grenade, stun grenade, smoke grenade,
+combat knife. 128x128 each, transparent background".
+
+**L6 — Atlas de Londres 0**: "Hand-painted stylized game texture atlas,
+1024x1024, 4x4 grid of seamless patches: london brick facades with windows,
+slate roofs, wet asphalt, pavement slabs, road markings, street lamps,
+drain covers, painted wall patches; muted desaturated colors, flat painted
+style, soft ambient occlusion, no text, no logos, even neutral lighting".
+
+**L7 — Atlas de Londres 1**: "…4x4 grid: shipping containers in blue, red
+and yellow, wooden construction barriers, road-works signs, chain-link
+fence, metal vents, subtle graffiti, stacked pallets; same muted painted
+style, no text".
+
+**L8 — Suelos (5)**: "Top-down seamless game floor texture, 1024x1024,
+faint 12x12 grid of square tiles, hand-painted cartoon style, muted palette,
+[warehouse concrete with oil stains / harbor asphalt / plaza stone slabs /
+dock concrete and planks / cobblestone market dirt], no text".
+
+**L9 — Textura del soldado**: "Video-game character texture sheet for a
+chibi military soldier, flat hand-painted style, olive drab uniform, black
+boots, leather straps and pouches, subtle dark outlines, no gradients, no
+face detail, designed for a 256x256 UV layout, top-down painted".
+
+**L10 — Props**: "Hand-painted game prop texture, 256x256, seamless,
+[wooden crate planks with metal corners / red steel explosive barrel with
+hazard band / stained concrete wall / corrugated shipping container in
+blue], muted palette, flat cartoon style".
+
+**L11 — Efectos**: "Game VFX sprite sheet, 4x4 frames, 512x512, soft
+painted smoke puffs / orange sparks / fireball explosion / subtle vignette /
+film grain overlay, transparent background, cartoon style".
+
+## 2.5 Guía de integración técnica (archivo → código)
+
+### 2.5.1 Sustituciones directas (sin tocar código)
+
+| Archivo | Destino | Efecto |
+|---|---|---|
+| `skirmish_atlas0/1.png` | `assets/maps/` | Cambia la piel de los 8 mapas de Londres al recargar |
+| `soldier_tex.png` | `assets/` | Nueva piel del soldado en 3D y en los sprites del tablero |
+| `top_<mapa>.jpg` | `assets/maps/<key>_top.jpg` | Plano cenital de la vista clásica |
+
+### 2.5.2 Cambios de código pequeños (los hago yo cuando existan los archivos)
+
+| Archivo | Punto de integración |
+|---|---|
+| `suelo_*.png` | En `build3DWorld`, el `CanvasTexture` del suelo continuo pasa a cargar el PNG (1 línea por tema) |
+| `tex_*.png` (props) | `mat3(color)` acepta un `map` opcional; los props pasan su textura |
+| `hud_icono_*.png`, `arma_*.png` | Sustituyen los emoji/pictogramas de las tarjetas del HUD por `<img>` |
+| `hud_retrato_<rol>.png` | `<img>` en la tarjeta del soldado seleccionado y en el roster |
+| `modo_*.png`, `nacion_<n>.png`, `map_min_<mapa>.png` | `<img>` en las tarjetas de la portada/selector |
+| `hud_fin_*.png` | Pancarta en el overlay de fin de partida |
+| `pantalla_carga.jpg`, `carga_barra.png` | Overlay de carga al abrir el juego |
+| `logo_csn*.png`, `favicon.png` | Cabecera y `<link rel="icon">` |
+| `key_art_portada.jpg`, `fondo_menu.jpg` | Fondo de la portada y del menú |
+
+### 2.5.3 Nombres exactos de los mapas en los planos
+
+`almacen`, `patio`, `skirmish01`, `skirmish02`, `skirmish`, `skirmish04`,
+`skirmish05`, `skirmish06`, `skirmish07`, `skirmish08`, `skirmish09`,
+`skirmish10`, `skirmish11` (los `_top.jpg` existentes ya siguen este patrón).
+
+## 2.6 Fases de producción con criterios de aceptación
+
+### Fase 0 — Sistema de diseño (0,5 día)
+Genera la paleta de referencia como *swatch sheet* y 3 botones de muestra.
+**Aceptado cuando**: los 3 botones y un panel se ven coherentes entre sí y
+con la paleta 2.2.1.
+
+### Fase 1 — Interfaz de videojuego (2-3 días)
+L1-L3, botones, paneles, tarjetas, insignias de modo y nación, miniaturas
+de mapa, favicon y key art.
+**Aceptado cuando**: portada y selector de partida están hechos con arte y
+no con bloques de texto; no queda ningún emoji en esas pantallas.
+
+### Fase 2 — HUD e iconografía (2-3 días)
+L4-L5, acciones, estados, objetos, barras, registro, pancartas de fin.
+**Aceptado cuando**: en partida cada botón y cada tarjeta tiene su icono;
+el retrato del soldado seleccionado se ve; victoria/derrota muestran
+pancarta.
+
+### Fase 3 — Personajes (3-4 días)
+L9, los 3 cuerpos, casco con emblema, overlays de nación opcionales.
+**Aceptado cuando**: en la vista 3D el soldado tiene textura propia legible
+a tamaño de juego; ligero/medio/pesado se distinguen.
+
+### Fase 4 — Mapas (4-6 días, es el bloque grande)
+L6-L7 (atlas), L8 (suelos), L10 (props), planos cenitales.
+**Aceptado cuando**: los 8 mapas de Londres llevan los atlas nuevos sin
+desalinear; los 5 mapas de código tienen su suelo; las 13 miniaturas y los
+13 planos están puestos.
+
+### Fase 5 — Efectos y pantallas (1-2 días)
+L11, carga, transiciones, viñeta.
+**Aceptado cuando**: abrir el juego muestra pantalla de carga; las granadas
+de humo y las explosiones usan sprites nuevos; el encuadre lleva viñeta.
+
+### Fase 6 — Pasada de coherencia (1 día)
+Repasar todo en juego: tamaños, contraste, legibilidad a 1080p y en móvil.
+**Aceptado cuando**: la checklist de 2.1 está entera marcada.
+
+## 2.7 Cómo verificar cada fase sin capturas 3D
+
+1. `JUGAR.bat` → recargar con Ctrl+F5 → mirar en pantalla (test definitivo).
+2. Consola del navegador:
+   - `window.skState('depot')` → `ready:true` y vértices del mapa.
+   - `window.__csn3d` → tema, `geo`, unidades y triángulos del render.
+3. Captura del tablero clásico: consola →
+   `document.querySelector('#board').toDataURL()` y guardar.
+4. Para comprobar que una textura sustituida carga:
+   `performance.getEntriesByType('resource').filter(r=>r.name.includes('atlas'))`
+   debe listar el PNG nuevo.
+
+## 2.8 Qué NO debe generar Muse (y por qué)
+
+- **Modelos 3D**: Muse es 2D. Si se quieren modelos nuevos (soldados,
+  props) hacen falta generadores 3D (Meshy/Tripo) o modelado manual; el
+  pipeline actual (box3 + texturas) cubre ya el juego.
+- **Animaciones**: las 22 del IPA ya están integradas; las de código cubren
+  el resto.
+- **Texto en imagen**: siempre texto real en HTML (se traduce y se ve nítido).
+- **Capturas de pantalla**: no sirven como arte; se genera pieza a pieza.
+
+## 2.9 Orden de ataque recomendado (si solo puede hacerse una cosa por día)
+
+1. Día 1: atlas de Londres 0 y 1 (los 8 mapas cambian enteros).
+2. Día 2: textura del soldado (los personajes dejan de ser el IPA).
+3. Día 3: botones/paneles/insignias de modo + nación + miniaturas.
+4. Día 4: iconos de arma y acciones del HUD + retratos de rol.
+5. Día 5: suelos y props de los mapas de código.
+6. Día 6: plano cenital y pantallas de carga/fin.
+7. Día 7: pasada de coherencia y limpieza.
+
+Con eso el juego queda, en lo visual, **acabado como videojuego**: arte
+propio en personajes, mapas y toda la interfaz, sin depender de los assets
+del original salvo el modelo y las animaciones que ya están integradas.
