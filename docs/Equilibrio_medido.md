@@ -95,3 +95,17 @@ Lectura:
 El harness juega con gas, molotov, artilleria, abejas, escudo,
 tranquilizante, canon de agua, kit, torreta de cohetes y laser orbital
 activos; los numeros de arriba son con esas habilidades en juego.
+
+
+## Muestra grande de Dominacion Almacen (40 partidas)
+
+Las muestras de 10 partidas oscilaban demasiado (5-5, 2-8, 12-8 en otras
+rondas). Con **40 partidas** el resultado es concluyente:
+
+| Modo - mapa | A | B | Sesgo | Rondas |
+|---|---|---|---|---|
+| Dominacion - Almacen (40) | **20** | **20** | **50/50** | 12,6 |
+
+Conclusion: Dominacion en Almacen esta equilibrada; lo que parecia sesgo
+era ruido de muestras pequenas. Para las proximas mediciones se usara
+n >= 30 en los modos que se quieran dar por cerrados.
