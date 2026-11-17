@@ -3537,11 +3537,11 @@ function parseOBJ3(txt,skin){
   const pos=[],uv=[],nor=[],si=[],sw=[],outIdx=[];
   txt.split('\n').forEach(line=>{
     const p=line.trim().split(/\s+/);
-    if(p[0]==='v')P.push([+p[1],+p[2],+p[3]]);
+    if(p[0]==='v')P.push([-(+p[1]),+p[2],+p[3]]);
     else if(p[0]==='vt')UV.push([+p[1],+p[2]]);
-    else if(p[0]==='vn')NO.push([+p[1],+p[2],+p[3]]);
+    else if(p[0]==='vn')NO.push([-(+p[1]),+p[2],+p[3]]);
     else if(p[0]==='f'){
-      for(let i=1;i<=3;i++){
+      for(let i=3;i>=1;i--){
         const t=p[i].split('/');const vi=+t[0]-1,ti=+t[1]-1,ni=+t[2]-1;
         const key=vi+'/'+ti+'/'+ni;
         if(idxMap[key]==null){
@@ -3740,7 +3740,7 @@ function makeGunProp3(un){
     piece(0.12,0.05,0.06,gripC,0,-0.085,0);
     piece(0.07,0.04,0.05,dark,gl*0.5+0.03,-0.03,0);
   } else if(wcat==='Subfusiles'){
-    gl=0.5;
+    gl=0.56;
     piece(gl,0.055,0.055,steel,gl*0.5,0,0);
     piece(0.12,0.05,0.05,dark,-0.07,0,0);
     piece(gl*0.16,0.09,0.04,dark,gl*0.42,-0.075,0);
@@ -3780,21 +3780,28 @@ function makeGunProp3(un){
   }
   const flash=new THREE.Mesh(new THREE.SphereGeometry(0.055,8,8),new THREE.MeshBasicMaterial({color:0xffd76a,transparent:true,opacity:0}));
   flash.position.set(gl+0.04,0.01,0);gun.add(flash);gun.userData.flash=flash;
-  /* Punto de agarre de cada categoría, en el espacio local del arma
-     (la empuñadura que construye cada rama: la culata-pistola de los
-     fusiles a gl*0,28 y −0,085, la empuñadura de la escopeta a gl*0,16,
-     la caja de la pistola en el propio origen…). El encaje del arma
-     (gunPoseFromHand) coloca exactamente este punto dentro de la mano
-     derecha del soldado, así que la mano cierra sobre la empuñadura
-     de verdad y no sobre un punto genérico del aire. */
-  if(wcat==='Pistolas')gun.userData.grip={x:0,y:-0.05};
-  else if(wcat==='Lanzacohetes')gun.userData.grip={x:gl*0.38,y:-0.03};
-  else if(wcat==='Lanzagranadas')gun.userData.grip={x:gl*0.45,y:-0.05};
-  else if(wcat==='Escopetas')gun.userData.grip={x:gl*0.16,y:-0.06};
-  else if(wcat==='Subfusiles')gun.userData.grip={x:gl*0.30,y:-0.05};
-  else if(wcat==='Ametralladoras')gun.userData.grip={x:gl*0.16,y:-0.05};
-  else if(wcat==='Francotirador')gun.userData.grip={x:gl*0.18,y:-0.05};
-  else gun.userData.grip={x:gl*0.28,y:-0.06};
+  /* Escala compacta y proporcional a la silueta del rol: el soldado real
+     mide ~1,08 m y la separación entre palmas ronda los 0,40 m, así que
+     recortar ~14 % las armas largas (26 % las pistolas) y multiplicar por
+     el factor medio de ROLE_LOOK evita fusiles desmesurados o pistolas más
+     largas que el antebrazo. */
+  const lk=roleLook(un.role);
+  const roleScale=(lk.s[0]+lk.s[1]+lk.s[2])/3;
+  const catScale=(wcat==='Pistolas')?0.74:0.86;
+  const gunScale=catScale*roleScale;
+  gun.scale.setScalar(gunScale);
+  gun.userData.scale=gunScale;
+  gun.userData.cat=wcat;
+  /* Punto de agarre de cada categoría en el espacio local del arma,
+     colocado exactamente dentro de la palma derecha del soldado. */
+  if(wcat==='Pistolas')gun.userData.grip={x:0.02,y:-0.06,scale:gunScale};
+  else if(wcat==='Lanzacohetes')gun.userData.grip={x:un.weapon==='RPG-7'?gl*0.40:gl*0.18,y:-0.055,scale:gunScale};
+  else if(wcat==='Lanzagranadas')gun.userData.grip={x:un.weapon==='M32 MGL'?gl*0.14:gl*0.28,y:-0.055,scale:gunScale};
+  else if(wcat==='Escopetas')gun.userData.grip={x:gl*0.16,y:-0.06,scale:gunScale};
+  else if(wcat==='Subfusiles')gun.userData.grip={x:gl*0.22,y:-0.055,scale:gunScale};
+  else if(wcat==='Ametralladoras')gun.userData.grip={x:gl*0.16,y:-0.055,scale:gunScale};
+  else if(wcat==='Francotirador')gun.userData.grip={x:gl*0.18,y:-0.055,scale:gunScale};
+  else gun.userData.grip={x:gl*0.28,y:-0.065,scale:gunScale};
   return gun;
 }
 function makeRealSoldier3(un){
@@ -4053,8 +4060,7 @@ function driveRealSoldier(un,mesh,t,moving){
   }
   ud.curRootP.lerp(rootOff,k);ud.bones[0].position.copy(ud.curRootP);
   const firing=name==='fire';
-  if(ud.gun){
-    ud.gun.position.x=0.16+(firing&&!REDUCED_MOTION?-0.045*Math.max(0,1-ct*5):0);
+  if(ud.gun&&ud.gun.userData&&ud.gun.userData.flash){
     ud.gun.userData.flash.material.opacity=firing&&ct<0.09?0.95:0;
   }
   ud.mesh3.material.opacity=un.invisible?0.45:1;
@@ -4230,8 +4236,7 @@ function driveClipSoldier(un,mesh,t,moving){
   _cv2.copy(pelvOff).add(ud.curDelta).sub(_cv.copy(pelvOff).applyQuaternion(ud.bones[0].quaternion));
   ud.bones[0].position.copy(_cv2);
   const firing=key.indexOf('fire')===0;
-  if(ud.gun){
-    ud.gun.position.x=0.16+(firing&&!REDUCED_MOTION?-0.045*Math.max(0,1-ct*5):0);
+  if(ud.gun&&ud.gun.userData&&ud.gun.userData.flash){
     ud.gun.userData.flash.material.opacity=(firing&&ct<0.09)?0.95:0;
   }
   ud.mesh3.material.opacity=un.invisible?0.45:1;
@@ -4306,9 +4311,10 @@ const SPRITE_AIM_CT={fire2h:0.40,fireBurst:0.35,fireHeavy:0.45,fireMini:0.35,fir
    ese instante las veces que haga falta hasta que la interpolación
    sobre curQ converge, igual que hace driveClipSoldier fotograma a
    fotograma en la vista 3D. */
-function poseSpriteClip(un,grp,clip,ct){
+function poseSpriteClip(un,grp,clip,ct,clipKey){
   const pack=CLIPLIB.pack;if(!pack||!clip)return false;
   const ud=grp.userData;if(!ud||!ud.bones||!ud.bindLocal||!ud.curQ)return false;
+  ud._clipKey=clipKey||'';
   const tq=new THREE.Quaternion(),tp=new THREE.Vector3(),tp2=new THREE.Vector3();
   for(let n=0;n<24;n++){
     for(let i=0;i<ud.bones.length;i++){
@@ -4336,97 +4342,99 @@ function poseSpriteAim(un,grp){
   const clip=key?pack.clips[key]:null;
   const ct=key?SPRITE_AIM_CT[key]:null;
   if(!clip||ct==null)return false;
-  return poseSpriteClip(un,grp,clip,ct);
+  return poseSpriteClip(un,grp,clip,ct,key);
 }
-/* El arma de utilería cuelga de un punto fijo del grupo (0.16, 0.68),
-   pensado para la postura reconstruida de driveRealSoldier, y las manos
-   de los clips no pasan por ahí: en reposo cuelgan a los lados y en el
-   apunte agarran el arma cruzada sobre el pecho, así que sin este
-   encaje la foto salía con el fusil flotando delante del soldado. Aquí
-   el arma se recoloca ANCLADA A LA MANO DERECHA ya posada: su
-   empuñadura (el punto de agarre de su categoría, guardado por
-   makeGunProp3) cae exactamente dentro de esa mano y su eje sigue
-   al antebrazo derecho, que en los clips del IPA apunta hacia
-   delante en reposo, al andar y al disparar. El encaje anterior
-   trazaba el eje del arma de la mano derecha a la izquierda, y esa
-   línea es casi puramente lateral cuando las manos cuelgan a los
-   lados del cuerpo (medido sobre el propio esqueleto: las manos
-   quedan a ±0,30 laterales y a 0,55–0,60 de alto en reposo), así
-   que el fusil salía apuntando de lado y separado de las dos
-   manos: el arma flotante que se veía en las capturas. La mano
-   izquierda de estos clips no agarra el guardamanos en ninguna
-   pose (en el apunte cruza hacia el centro, pero no cae sobre el
-   eje del arma), así que ningún eje entre manos la sujeta: manda
-   la derecha, que es la que empuña en todas las familias. */
-function gunPoseFromHand(rh,fa,grip){
-  const dir=rh.clone().sub(fa);
-  if(dir.lengthSq()<1e-6)return null;
-  dir.normalize();
-  /* El antebrazo manda, con un toque hacia el frente del soldado
-     (+X en el espacio del padre del arma) para que el balanceo del
-     brazo al andar no cabecee el cañón: el arma se mece CON el
-     brazo, pero sigue leyendo como arma llevada hacia delante. */
-  dir.lerp(new THREE.Vector3(1,0,0),0.22).normalize();
-  const up=new THREE.Vector3(0,1,0);
-  const zAxis=new THREE.Vector3().crossVectors(dir,up);
-  if(zAxis.lengthSq()<1e-6)zAxis.set(0,0,1);else zAxis.normalize();
-  const yAxis=new THREE.Vector3().crossVectors(zAxis,dir).normalize();
-  const g=grip||{x:0.2,y:-0.05};
-  const origin=rh.clone().addScaledVector(dir,-g.x).addScaledVector(yAxis,-g.y);
-  const quat=new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(dir,yAxis,zAxis));
-  return {origin:origin,dir:dir,quat:quat};
+/* Encaje del arma anclado a las palmas reales:
+   - Bip001 R Hand y Bip001 L Hand son las articulaciones de las muñecas;
+     la palma donde cierra el puño queda ~10,3 cm hacia −X en el espacio
+     local de cada hueso de mano (medido directamente sobre la malla
+     corregida). Anclar ahí la empuñadura evita que el arma cuelgue de
+     la muñeca.
+   - En armas largas en reposo o apunte/disparo, ambas manos sostienen el
+     fusil (palma D → palma I) con transición suave (smoothstep) según la
+     altura de la mano izquierda y la separación entre palmas; al andar,
+     con pistola o en gestos/impactos, manda el antebrazo derecho con
+     estabilización suave hacia +X.
+   - Tanto la foto de sprites (fitSpriteGun) como el vivo (fitLiveGun3)
+     usan este mismo cálculo convertido al espacio local de ud.gun.parent
+     en el mismo fotograma, sin retrasos ni sobrescrituras. */
+const _gpDir=HAS_THREE?new THREE.Vector3():null,_gpTwoH=HAS_THREE?new THREE.Vector3():null,_gpFwd=HAS_THREE?new THREE.Vector3(1,0,0):null;
+const _gpUp=HAS_THREE?new THREE.Vector3(0,1,0):null,_gpZ=HAS_THREE?new THREE.Vector3():null,_gpY=HAS_THREE?new THREE.Vector3():null;
+const _gpOrigin=HAS_THREE?new THREE.Vector3():null,_gpQuat=HAS_THREE?new THREE.Quaternion():null,_gpMat=HAS_THREE?new THREE.Matrix4():null;
+const _gpRPalm=HAS_THREE?new THREE.Vector3():null,_gpLPalm=HAS_THREE?new THREE.Vector3():null,_gpFA=HAS_THREE?new THREE.Vector3():null;
+const _gpPalmR=HAS_THREE?new THREE.Vector3(-0.103,0.016,0):null,_gpPalmL=HAS_THREE?new THREE.Vector3(-0.102,0.016,0):null;
+function _smooth01(e0,e1,x){const t=Math.max(0,Math.min(1,(x-e0)/(e1-e0)));return t*t*(3-2*t);}
+function gunPoseFromHand(rPalm,fa,grip,lPalm,opts){
+  _gpDir.copy(rPalm).sub(fa);
+  if(_gpDir.lengthSq()<1e-6)return null;
+  _gpDir.normalize();
+  const is1h=!!(opts&&opts.is1h);
+  const roleH=(opts&&opts.roleH)||1;
+  const roleAvg=(opts&&opts.roleAvg)||1;
+  _gpDir.lerp(_gpFwd,is1h?0.30:0.32).normalize();
+  let w2h=0;
+  if(!is1h&&lPalm&&!(opts&&opts.force1h)){
+    const span=rPalm.distanceTo(lPalm)/roleAvg;
+    const ly=lPalm.y/roleH;
+    w2h=_smooth01(0.28,0.42,ly)*_smooth01(0.20,0.28,span)*(1-_smooth01(0.52,0.62,span));
+    if(w2h>0.001){
+      _gpTwoH.copy(lPalm).sub(rPalm);
+      if(_gpTwoH.lengthSq()>1e-6){
+        _gpTwoH.normalize();
+        _gpDir.lerp(_gpTwoH,w2h).normalize();
+      }
+    }
+  }
+  _gpZ.crossVectors(_gpDir,_gpUp);
+  if(_gpZ.lengthSq()<1e-4)_gpZ.set(0,0,1);else _gpZ.normalize();
+  _gpY.crossVectors(_gpZ,_gpDir).normalize();
+  const g=grip||{x:0.2,y:-0.05,scale:1};
+  const gs=g.scale||1;
+  _gpOrigin.copy(rPalm).addScaledVector(_gpDir,-g.x*gs).addScaledVector(_gpY,-g.y*gs);
+  _gpMat.makeBasis(_gpDir,_gpY,_gpZ);
+  _gpQuat.setFromRotationMatrix(_gpMat);
+  return {origin:_gpOrigin,dir:_gpDir,quat:_gpQuat};
 }
-function fitSpriteGun(un,grp){
-  const ud=grp.userData;if(!ud||!ud.gun||!ud.byName||!ud.bones)return;
-  if(grp.updateWorldMatrix)grp.updateWorldMatrix(true,true);else grp.updateMatrixWorld(true);
-  const bonePos=name=>{
-    const b=ud.bones[ud.byName[name]];if(!b)return null;
-    const v=new THREE.Vector3();b.getWorldPosition(v);return v;
-  };
-  const rh=bonePos('Bip001 R Hand');if(!rh)return;
-  const fa=bonePos('Bip001 R Forearm');if(!fa)return;
-  const pose=gunPoseFromHand(rh,fa,ud.gun.userData.grip);
-  if(!pose)return;
-  ud.gun.quaternion.copy(pose.quat);
-  ud.gun.position.copy(pose.origin);
-}
-/* === El arma, agarrada también en la vista 3D EN VIVO ===
-   El mismo anclaje de la foto de los sprites, cada fotograma y en el
-   espacio local del grupo del soldado. Tres causas dejaban el arma
-   flotando y las tres se cierran aquí: (1) el eje entre las dos
-   manos apuntaba de lado en reposo y al andar (ver la nota de
-   gunPoseFromHand), y ahora manda el antebrazo derecho con la
-   empuñadura dentro de la mano; (2) el encaje leía las matrices
-   mundo del fotograma ANTERIOR (updateMatrixWorld no sube a los
-   padres, y el grupo ya se había movido con la interpolación del
-   paso), así que al moverse el arma iba siempre un fotograma por
-   detrás del brazo — el brazo de movimiento flotante — y ahora
-   updateWorldMatrix(true,true) refresca padres e hijos antes de
-   medir; (3) el suavizado de 0,55 por fotograma sumaba su propio
-   retraso sobre el del hueso, y desaparece: la colocación es
-   exacta en el fotograma, porque un arma empuñada no puede ir
-   detrás de la mano ni un instante. El retroceso del disparo se
-   aplica aquí, empujando el arma unos centímetros hacia atrás
-   por su propio eje durante 220 ms. */
-const _lgQuat=HAS_THREE?new THREE.Quaternion():null,_lgMat=HAS_THREE?new THREE.Matrix4():null;
-function fitLiveGun3(un,grp){
+function fitGunToHand3(un,grp,isLive){
   if(!HAS_THREE)return;
-  const ud=grp&&grp.userData;if(!ud||!ud.real||!ud.gun||!ud.byName||!ud.bones)return;
+  const ud=grp&&grp.userData;if(!ud||!ud.gun||!ud.byName||!ud.bones)return;
   const parent=ud.gun.parent;if(!parent)return;
   if(grp.updateWorldMatrix)grp.updateWorldMatrix(true,true);else grp.updateMatrixWorld(true);
-  const localPos=name=>{
-    const b=ud.bones[ud.byName[name]];if(!b)return null;
-    const v=new THREE.Vector3();b.getWorldPosition(v);return parent.worldToLocal(v.clone());
-  };
-  const rh=localPos('Bip001 R Hand');if(!rh)return;
-  const fa=localPos('Bip001 R Forearm');if(!fa)return;
-  const pose=gunPoseFromHand(rh,fa,ud.gun.userData.grip);
+  const bR=ud.bones[ud.byName['Bip001 R Hand']];
+  const bFA=ud.bones[ud.byName['Bip001 R Forearm']];
+  if(!bR||!bFA)return;
+  _gpRPalm.copy(_gpPalmR).applyMatrix4(bR.matrixWorld);
+  parent.worldToLocal(_gpRPalm);
+  _gpFA.setFromMatrixPosition(bFA.matrixWorld);
+  parent.worldToLocal(_gpFA);
+  const bL=ud.bones[ud.byName['Bip001 L Hand']];
+  let hasL=false;
+  if(bL){
+    _gpLPalm.copy(_gpPalmL).applyMatrix4(bL.matrixWorld);
+    parent.worldToLocal(_gpLPalm);
+    hasL=true;
+  }
+  const lk=roleLook(un.role);
+  const ck=ud._clipKey||'';
+  const is1h=(ud.gun.userData.cat==='Pistolas');
+  const force1h=(ck==='death'||ck==='deathExpl'||ck==='hit'||ck==='hitBurst'||ck==='hitExpl'||ck==='throw'||ck==='deploy'||ck==='interact'||ck==='victory'||ck==='pickup');
+  const pose=gunPoseFromHand(_gpRPalm,_gpFA,ud.gun.userData.grip,hasL?_gpLPalm:null,{
+    is1h:is1h,
+    force1h:force1h,
+    roleH:lk.s[1],
+    roleAvg:(lk.s[0]+lk.s[1]+lk.s[2])/3
+  });
   if(!pose)return;
-  if(un._shootT!=null&&typeof FX!=='undefined'&&(FX.t-un._shootT)>=0&&(FX.t-un._shootT)<220){
-    pose.origin.addScaledVector(pose.dir,-0.05*(1-(FX.t-un._shootT)/220));
+  if(isLive&&un._shootT!=null&&typeof FX!=='undefined'&&(FX.t-un._shootT)>=0&&(FX.t-un._shootT)<220){
+    pose.origin.addScaledVector(pose.dir,-0.045*(1-(FX.t-un._shootT)/220));
   }
   ud.gun.position.copy(pose.origin);
   ud.gun.quaternion.copy(pose.quat);
+}
+function fitSpriteGun(un,grp){fitGunToHand3(un,grp,false);}
+function fitLiveGun3(un,grp){
+  if(!(grp&&grp.userData&&grp.userData.real))return;
+  fitGunToHand3(un,grp,true);
 }
 function renderRealSprite(un){
   if(!un||!un.role||!WEAPONS[un.weapon])return null;
@@ -4450,7 +4458,7 @@ function renderRealSprite(un){
        terminar, sin tocar la real. */
     let posed=false;
     const lkPose=roleLook(un.role).pose;
-    if(CLIPLIB.ready&&lkPose&&CLIPLIB.pack&&CLIPLIB.pack.clips&&CLIPLIB.pack.clips[lkPose.clip])posed=poseSpriteClip(un,grp,CLIPLIB.pack.clips[lkPose.clip],lkPose.ct);
+    if(CLIPLIB.ready&&lkPose&&CLIPLIB.pack&&CLIPLIB.pack.clips&&CLIPLIB.pack.clips[lkPose.clip])posed=poseSpriteClip(un,grp,CLIPLIB.pack.clips[lkPose.clip],lkPose.ct,lkPose.clip);
     if(!posed&&CLIPLIB.ready)posed=poseSpriteAim(un,grp);
     if(posed){
       fitSpriteGun(un,grp);

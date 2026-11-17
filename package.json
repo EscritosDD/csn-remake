@@ -5,6 +5,8 @@
   "description": "CSN (Chess Soldier Nation), remake de RAD Soldiers. Juego estatico HTML5/Canvas + Three.js, sin dependencias ni build.",
   "scripts": {
     "dev": "node server.js",
+    "build": "node bench/check-syntax.js",
+    "lint": "node --check server.js && node bench/check-syntax.js",
     "start": "node server.js"
   }
 }
