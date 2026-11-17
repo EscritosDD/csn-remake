@@ -375,6 +375,17 @@ canvas#board{border-radius:10px;box-shadow:0 0 0 2px rgba(0,0,0,.45), inset 0 0 
 
     <div id="menuArea">
       <div id="demoSlotPlay"></div>
+      <!-- Menu estilo original: entradas directas y monedas -->
+      <div class="panel" id="origMenu" style="margin-top:16px">
+        <h2>Menú</h2>
+        <div class="grid3" style="margin-top:8px">
+          <button class="btn primary" id="mnuQuick">⚡ Quick game<small class="sub">Partida rápida en el Almacén</small></button>
+          <button class="btn" id="mnuOnline">🌐 Play online<small class="sub">Sin servidor: IA o dos jugadores en local</small></button>
+          <button class="btn" id="mnuChallenges">🏆 Challenges<small class="sub">Operación Londres · 5 misiones</small></button>
+          <button class="btn" id="mnuExpansions">📦 Expansions<small class="sub">Contenido futuro</small></button>
+        </div>
+        <p class="sub" style="margin:10px 0 0"><span class="tag amber" id="coinsTag">🪙 0</span> Monedas de CSN: se ganan al vencer a la IA (25 por victoria).</p>
+      </div>
       <div class="grid3" style="margin-top:18px">
         <div class="mode-card" data-modecard="eliminacion">
           <img class="mode-art" src="assets/ui/modo_eliminacion.png" alt="Dos escuadras de soldados frente a frente"/>
@@ -2333,6 +2344,7 @@ function endGame(winner,reason){
     }
     if(typeof renderCampaignPanel==='function')renderCampaignPanel();
   }
+  if(winner==='A'&&G.opp==='ia')coinsSet(coinsGet()+25);
   const survivors=G.units.filter(u=>u.alive).map(u=>u.role+' ('+u.team+', '+u.hp+' PV)').join(' · ')||'Sin supervivientes.';
   showModal('<h2>'+title+'</h2><p><b>'+reason+'</b></p>'+extra+'<p class="sub">Partida de '+G.round+' rondas. Supervivientes: '+survivors+'</p><div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px">'+campaignButtons+'<button class="btn primary big" onclick="closeModal();backToMenu()">Volver al menú</button>'+(G.mode==='campana'?'':'<button class="btn big" onclick="closeModal();openSetup(G.mode)">Revancha</button>')+'</div>');
 }
@@ -3829,6 +3841,12 @@ function drawSoldier(un,S){
   /* sombra suave y anillo segmentado de energía */
   ctx.beginPath();ctx.ellipse(cx,feetY+3,S*.37,S*.115,0,0,7);ctx.fillStyle='rgba(8,10,8,.38)';ctx.fill();
   segRing(cx,feetY,S*.43,S*.155,un);
+  /* Arco de vida en el suelo (verde el jugador, azul el rival), como el original */
+  if(un.hp>0){
+    const hpF=Math.max(0,Math.min(1,un.hp/un.maxHp)),a0=Math.PI*0.5,a1=a0+Math.PI*2*hpF;
+    ctx.beginPath();ctx.ellipse(cx,feetY,S*.55,S*.21,0,a0,a1);ctx.strokeStyle='rgba(6,8,6,.5)';ctx.lineWidth=7;ctx.stroke();
+    ctx.beginPath();ctx.ellipse(cx,feetY,S*.55,S*.21,0,a0,a1);ctx.strokeStyle=un.team==='A'?'#4fdc6e':'#4f8fe0';ctx.lineWidth=4;ctx.stroke();
+  }
   if(G.selected===un){
     ctx.beginPath();ctx.ellipse(cx,feetY,S*.5,S*.19,0,0,7);ctx.strokeStyle='#ffffff';ctx.lineWidth=2.6;ctx.setLineDash([9,6]);ctx.lineDashOffset=REDUCED_MOTION?0:-FX.t/45;ctx.stroke();ctx.setLineDash([]);
   }
@@ -4672,6 +4690,10 @@ function makeGunProp3(un){
 function makeRealSoldier3(un){
   const c=soldierColors3(un);
   const g=new THREE.Group();
+  /* Arco de vida en el suelo (verde el jugador, azul el rival): media luna
+     por PV con drawRange sobre un anillo de 64 segmentos. */
+  const hpArc=new THREE.Mesh(new THREE.RingGeometry(0.44,0.54,64,1,0,Math.PI*2),new THREE.MeshBasicMaterial({color:un.team==='A'?0x4fdc6e:0x4f8fe0,transparent:true,opacity:0.92,side:THREE.DoubleSide,depthWrite:false}));
+  hpArc.rotation.x=-Math.PI/2;hpArc.position.y=0.05;g.add(hpArc);g.userData.hpArc=hpArc;
   const contactSh=makeContactShadow3(0.42,0.008);if(contactSh)g.add(contactSh);
   const base=new THREE.Mesh(new THREE.CylinderGeometry(0.31,0.34,0.035,24),mat3(c.team,0.6));
   base.position.y=0.02;base.receiveShadow=true;g.add(base);
@@ -6158,6 +6180,7 @@ window.__render3D=function(){
     const mesh=T3.units.get(un.id);if(!mesh)return;
     const rx=un.dx!=null?un.dx:un.x, ry=un.dy!=null?un.dy:un.y;
     mesh.position.x=w2cx(rx);mesh.position.z=w2cx(ry);
+    if(mesh.userData.hpArc){const f=Math.max(0,Math.min(1,un.hp/un.maxHp));mesh.userData.hpArc.geometry.setDrawRange(0,Math.floor(64*6*f));mesh.userData.hpArc.visible=un.alive;}
     const moving=Math.abs(un.x-rx)>0.03||Math.abs(un.y-ry)>0.03;
     mesh.position.y=0.05+(moving&&!REDUCED_MOTION?Math.abs(Math.sin(t/90+un.id))*0.05:0);
     const yaw=advanceUnitYaw(un,t);
@@ -6407,6 +6430,17 @@ function quickStart(mapId){
 }
 document.getElementById('quickStartBtn').onclick=()=>quickStart('almacen');
 document.getElementById('quickSkirmishBtn').onclick=()=>quickStart('skirmish');
+/* ---- Menu estilo original (F6): entradas directas y monedas ---- */
+const COINS_KEY='radsoldiers_coins';
+function coinsGet(){return Math.max(0,parseInt(lsGet(COINS_KEY)||'500',10)||0);}
+function coinsSet(n){lsSet(COINS_KEY,String(Math.max(0,n)));const t=document.getElementById('coinsTag');if(t)t.textContent='🪙 '+coinsGet();}
+(function wireOrigMenu(){
+  const q=document.getElementById('mnuQuick');if(q)q.onclick=()=>quickStart('almacen');
+  const o=document.getElementById('mnuOnline');if(o)o.onclick=()=>toast('Sin servidor de partidas: el online del original no está disponible. Juega contra la IA o a dos jugadores en local.');
+  const c=document.getElementById('mnuChallenges');if(c)c.onclick=()=>{const b=document.querySelector('[data-start="campana"]');if(b)b.click();else toast('La campaña está en la portada, más abajo.');};
+  const e=document.getElementById('mnuExpansions');if(e)e.onclick=()=>toast('Expansiones: aún no hay contenido descargable. El arte propio y las skins llegan por fases.');
+  coinsSet(coinsGet());
+})();
 /* Partida de prueba del humo M18: el 5 contra 5 es la única escuadra
    por defecto con Espía, así que esta entrada despliega ese formato
    en el Almacén con el Espía del jugador ya seleccionado y su botón

@@ -11,7 +11,7 @@ Cada fase se marca hecha solo con su evidencia (números en este doc + commit).
 | F3 Informe CSN vs original | **hecho** | docs/Informe_CSN_vs_original.md (16 areas con fuentes) | b65db20 |
 | F4 Contenido del original | **en curso** | lote 1: 10 personajes, 4 cajas de habilidad y empujon. lote 2: cobertura, gas y barrido. lote 3: molotov, caja de salud y teletransporte. lote 4: escudo, artilleria y abejas. lote 5: tranquilizante, canon de agua y kit de herramientas (con UI e IA) | a64160d, 5f37dc1, 635f2d9, 0d251d6, (lote 5) |
 | F5 Mapas | **en curso** | lote 1: props por tema. lote 2: remates (fuente plaza, grua embarcadero, buzon/coches S03-S04) | 15633bf + este |
-| F6 Interfaz | pendiente | - | - |
+| F6 Interfaz | **en curso** | lote 1: arco de vida en el suelo (2D y 3D), menu estilo original y monedas. El dano previsto ya existia en ambas vistas | (este commit) |
 | F7 Pantallas y assets | pendiente | - | - |
 | F8 Personajes y skins | pendiente | - | - |
 | F9 UI minimalista | pendiente | - | - |
