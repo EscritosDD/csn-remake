@@ -7,8 +7,8 @@ Cada fase se marca hecha solo con su evidencia (números en este doc + commit).
 |---|---|---|---|
 | F0 Base y capturas | **hecho** | `_capture_all.mjs`: captura 3D real (640 KB) + 2D del tablero (1,03 MB) con `__csn3d.geo:true` y 0 errores | 234a5e3 |
 | F1 Escolta | **hecho** | ver números abajo | (este commit) |
-| F2 Equilibrio | pendiente | - | - |
-| F3 Informe CSN vs original | pendiente | - | - |
+| F2 Equilibrio | **hecho** | tabla en docs/Equilibrio_medido.md (200+ partidas, muestras ampliadas) | c72f4d4 |
+| F3 Informe CSN vs original | **hecho** | docs/Informe_CSN_vs_original.md (16 areas con fuentes) | b65db20 |
 | F4 Contenido del original | pendiente | - | - |
 | F5 Mapas | pendiente | - | - |
 | F6 Interfaz | pendiente | - | - |
