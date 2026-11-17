@@ -130,6 +130,17 @@ headless con `__csn3d.geo` y captura 2D. Commit y push por fase.
 4. **Arte propio definitivo**: los trajes del IPA son de Splash Damage;
    las skins propias y la UI nueva son el camino para publicar.
 
+## 3.bis Estado a fecha de hoy (rondas 1-4 del objetivo)
+
+| Fase | Estado | Evidencia |
+|---|---|---|
+| F1 catálogo | **hecho** | 42 iconos en `assets/ui/ability/`; `docs/Catalogo_habilidades_original.md` con las 44 y su estado (19 implementadas) |
+| F2 mapas | **en curso** | 8 Skirmish reales + 6 misiones de campaña (la 6.ª, El convoy, escolta en Skirmish_10); ambiente en los 13 temas |
+| F3 interfaz | **en curso** | título con Quick/Online/Challenges/Expansions/Cuartel/Armería; campaña por capítulos; Armería con catálogo; tabla de resultados; escuadra por hueco ya existente |
+| F4 personajes | **en curso** | 7 modelos por clase del IPA; 17 personajes del reparto; 7 personajes propios; skin de nación con tinte y emblema; bando enemigo teñido; selector de personaje por rol |
+| F5 audio | **hecho** | 77 clips (armas, voces, ambientes) conectados |
+| F6 calidad | **en curso** | batería completa por ronda (sintaxis, tableros, tests, harness, headless) |
+
 ## 4. Criterio de «base reconocible» (checklist final)
 
 - [ ] Título con las 4 entradas del original y monedas.
