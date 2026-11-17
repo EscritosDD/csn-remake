@@ -404,7 +404,7 @@ button img.ab-ico{width:18px;height:18px;vertical-align:-3px;margin-right:6px;bo
   <section class="screen" id="scr-play">
     <div class="hero">
       <h1>Ajedrez con <em>fusiles de verdad</em></h1>
-<p>Ajedrez por turnos con <b>fusiles de verdad</b>: dos escuadras en una cuadrícula de 12×12, energía por casilla, cobertura direccional y armas reales con sus datos técnicos. Elige nación, monta tu escuadra y juega en vista clásica o en 3D, contra la IA o contra un amigo en el mismo dispositivo.</p>
+<p>Ajedrez por turnos con <b>fusiles de verdad</b>: dos escuadras, energía, cobertura direccional y armas reales. Elige nación, monta tu escuadra y a jugar.</p>
     </div>
 
     <div id="menuArea">
@@ -415,12 +415,12 @@ button img.ab-ico{width:18px;height:18px;vertical-align:-3px;margin-right:6px;bo
         <div class="grid3" style="margin-top:8px">
           <button class="btn primary" id="mnuQuick">⚡ Quick game<small class="sub">Partida rápida en el Almacén</small></button>
           <button class="btn" id="mnuOnline">🌐 Play online<small class="sub">Sin servidor: IA o dos jugadores en local</small></button>
-          <button class="btn" id="mnuChallenges">🏆 Challenges<small class="sub">Operación Londres · 5 misiones</small></button>
+          <button class="btn" id="mnuChallenges">🏆 Challenges<small class="sub">Operación Londres · 6 misiones</small></button>
           <button class="btn" id="mnuExpansions">📦 Expansions<small class="sub">Contenido futuro</small></button>
           <button class="btn" id="mnuBarracks">🏰 Cuartel<small class="sub">Tropas, skins, arsenal y monedas</small></button>
           <button class="btn" id="mnuArmory">🛠 Armería<small class="sub">Armas y catálogo de habilidades del original</small></button>
         </div>
-        <p class="sub" style="margin:10px 0 0"><span class="tag amber" id="coinsTag">🪙 0</span> Monedas de CSN: se ganan al vencer a la IA (25 por victoria).</p>
+        <p class="sub" style="margin:10px 0 0"><span class="tag amber" id="coinsTag">🪙 0</span> +25 monedas por victoria contra la IA.</p>
       </div>
       <!-- Bocadillo de tutorial con los botones del original -->
       <div id="tutBubble" style="display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:60;max-width:600px;width:calc(100% - 32px)">
@@ -5053,6 +5053,12 @@ function makeRealSoldier3(un){
       helm.position.y=0.05;helm.castShadow=true;
       if(un.role==='Comando')helm.scale.y=0.62;
       gear.add(helm);
+      /* Skin de nacion: cinta del casco con el segundo color de la bandera. */
+      if(un.skin==='nacion'&&un.nation&&un.nation.colors&&un.nation.colors[1]){
+        const rr=un.role==='Artillero'?0.131:0.115;
+        const nb=new THREE.Mesh(new THREE.CylinderGeometry(rr,rr,0.022,18),mat3(un.nation.colors[1],0.6));
+        nb.position.y=0.038;gear.add(nb);
+      }
       if(un.role==='Médico'){
         gear.add(box3(0.11,0.016,0.034,'#d92c2c',0,0.163,0,0.5));
         gear.add(box3(0.034,0.016,0.11,'#d92c2c',0,0.163,0,0.5));
