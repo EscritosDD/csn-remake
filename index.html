@@ -5420,6 +5420,29 @@ function buildThemedProps3(world,theme){
     for(let i=0;i<3;i++)cylp(0.14,0.5,'#3f444a');
     boxp(1.6,0.5,0.5,'#5c5346','wall');
   }
+  /* Remates por mapa para que ninguno se quede a medias. */
+  if(theme==='plaza'){const sp=take();if(sp){const g=new THREE.Group();g.position.set(sp.x,0,sp.z);
+    const rim=new THREE.Mesh(new THREE.CylinderGeometry(0.92,0.98,0.3,16),mat3('#8a8578',0.85));rim.position.y=0.15;rim.castShadow=true;g.add(rim);
+    const water=new THREE.Mesh(new THREE.CylinderGeometry(0.78,0.78,0.06,16),mat3('#3f6f8f',0.35));water.position.y=0.31;g.add(water);
+    const jet=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.09,0.9,8),mat3('#7f9fb4',0.4));jet.position.y=0.75;g.add(jet);
+    world.add(g);}}
+  if(theme==='dock'){const sp=take();if(sp){const g=new THREE.Group();g.position.set(sp.x,0,sp.z);
+    const a=new THREE.Mesh(new THREE.BoxGeometry(0.28,3.4,0.28),mat3('#c9a227',0.6));a.position.set(0,1.7,0);a.castShadow=true;g.add(a);
+    const b=new THREE.Mesh(new THREE.BoxGeometry(1.9,0.2,0.2),mat3('#8a6f1c',0.6));b.position.set(0.85,3.3,0);b.castShadow=true;g.add(b);
+    const hook=new THREE.Mesh(new THREE.BoxGeometry(0.06,0.9,0.06),mat3('#3b4046',0.5));hook.position.set(1.7,2.85,0);g.add(hook);
+    world.add(g);}
+    for(let i=0;i<3;i++)cylp(0.22,0.18,'#5c5346');}
+  if(theme==='skirmish03'||theme==='skirmish04'){const sp=take();if(sp){
+    const g=new THREE.Group();g.position.set(sp.x,0,sp.z);
+    const box2=new THREE.Mesh(new THREE.BoxGeometry(0.5,1.0,0.5),mat3('#b3362b',0.7));box2.position.y=0.5;box2.castShadow=true;g.add(box2);
+    const cap=new THREE.Mesh(new THREE.BoxGeometry(0.56,0.1,0.56),mat3('#7a1f17',0.7));cap.position.y=1.05;g.add(cap);
+    world.add(g);}
+    for(let i=0;i<2;i++){const sp2=take();if(!sp2)continue;const g2=new THREE.Group();g2.position.set(sp2.x,0,sp2.z);
+      const body=new THREE.Mesh(new THREE.BoxGeometry(1.15,0.42,0.56),mat3(i?'#3f5a74':'#6b6252',0.8));body.position.y=0.3;body.castShadow=true;g2.add(body);
+      const roof=new THREE.Mesh(new THREE.BoxGeometry(0.66,0.3,0.5),mat3(i?'#2f4457':'#514a3e',0.8));roof.position.set(-0.05,0.66,0);g2.add(roof);
+      ['#1c1f22','#1c1f22'].forEach((c,k)=>{const w2=new THREE.Mesh(new THREE.CylinderGeometry(0.13,0.13,0.1,10),mat3(c,0.6));w2.rotation.x=Math.PI/2;w2.position.set(k?0.34:-0.36,0.13,0.29);g2.add(w2);});
+      world.add(g2);}
+    for(let i=0;i<2;i++)boxp(0.9,0.5,0.14,'#e0b83a','crate');}
 }
 function build3DWorld(){
   if(!T3||!G)return;
