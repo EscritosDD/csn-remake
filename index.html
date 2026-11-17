@@ -6610,6 +6610,12 @@ document.getElementById('quickStartBtn').onclick=()=>quickStart('almacen');
 document.getElementById('quickSkirmishBtn').onclick=()=>quickStart('skirmish');
 
 /* Reparto del original (17 personajes del IPA) con clase, traje y si es jugable. */
+const LS_CHARS='csn_chars_v1';
+let CHAR_PREFS={};
+function loadChars(){try{const r=lsGet(LS_CHARS);return r?JSON.parse(r):{};}catch(e){return {};}}
+function saveChars(v){try{lsSet(LS_CHARS,JSON.stringify(v));}catch(e){}}
+const ROLE_BODY={'Francotirador':'Soldier_Light','Artillero':'Soldier_Heavy','Espía':'Agent_Light','Médico':'Medic','Ingeniero':'Engineer','Comando':'Agent_Heavy','Capitán':'Commander'};
+function charsForRole(role){const b=ROLE_BODY[role];return ORIG_CAST.filter(c=>c.body===b);}
 const ORIG_CAST=[
  {name:'Hipster Dave',body:'Soldier_Light',outfit:'Soldier_Light_d / DeltaForce / Veteran',role:'Francotirador',play:true},
  {name:'Archie Fletcher',body:'Soldier_Light',outfit:'Rambo / DeerHunter',role:'',play:false},
@@ -6709,13 +6715,17 @@ function renderBarracks(){
   const roles=Object.keys(ROLES);
   const catOrder=[];const byCat={};
   Object.entries(WEAPONS).forEach(([name,w])=>{if(!byCat[w.cat]){byCat[w.cat]=[];catOrder.push(w.cat);}byCat[w.cat].push(name+' ('+w.dmg+'/'+w.rng+')');});
+  CHAR_PREFS=loadChars();
   el.innerHTML=
     '<div class="panel" style="margin-top:12px"><h2>Reparto del original · 17 personajes</h2><p class="sub" style="margin:0 0 6px">Los personajes del IPA con su clase y su traje. Los marcados en ámbar son jugables ahora.</p><div class="grid3" style="margin-top:8px">'+
     ORIG_CAST.map(c=>'<div class="panel" style="'+(c.play?'border-color:var(--amber)':'opacity:.75')+'"><b style="font-size:13px">'+c.name+'</b><p class="sub" style="margin:2px 0 0;font-size:11px">'+c.body+' · '+c.outfit+'</p>'+(c.play?'<span class="tag amber" style="margin-top:4px">jugable · '+c.role+'</span>':'<span class="tag" style="margin-top:4px">pendiente</span>')+'</div>').join('')+
     '</div></div>'+
     '<div class="panel" style="margin-top:12px"><h2>Tropas · '+roles.length+' roles</h2><div class="grid3" style="margin-top:8px">'+
     roles.map(r=>{const ch=CHARACTERS.find(c=>c.role===r);const body=BODIES[ROLES[r].body];
-      return '<div class="panel"><img class="roster-portrait" style="width:64px;height:64px" src="'+(rolePortraitURL(r)||'assets/ui/retrato_capitan.png')+'" alt=""/><h3 style="margin:6px 0 2px">'+r+'</h3><p class="sub" style="margin:0">'+(ch?ch.name:'—')+' · '+body.name+'</p><p class="sub" style="margin:4px 0 0">'+ROLES[r].weapons.length+' armas · '+ROLES[r].special+'</p></div>';}).join('')+
+      const opts=charsForRole(r);
+      const cur=(CHAR_PREFS[r]||(opts[0]&&opts[0].name)||(ch?ch.name:''));
+      const sel='<select data-charrole="'+r+'" style="width:100%;margin-top:4px;font-size:12px">'+opts.map(o=>'<option'+(o.name===cur?' selected':'')+'>'+o.name+'</option>').join('')+'</select>';
+      return '<div class="panel"><img class="roster-portrait" style="width:64px;height:64px" src="'+(rolePortraitURL(r)||'assets/ui/retrato_capitan.png')+'" alt=""/><h3 style="margin:6px 0 2px">'+r+'</h3><p class="sub" style="margin:0">'+body.name+' · '+ROLES[r].weapons.length+' armas</p>'+sel+'<p class="sub" style="margin:4px 0 0;font-size:11px">'+ROLES[r].special+'</p></div>';}).join('')+
     '</div></div>'+
     '<div class="panel" style="margin-top:12px"><h2>Arsenal · '+Object.keys(WEAPONS).length+' armas</h2>'+
     catOrder.map(c=>'<p class="sub" style="margin:6px 0 0"><b>'+c+'</b>: '+byCat[c].join(' · ')+'</p>').join('')+
@@ -6748,6 +6758,7 @@ function tutHide(){const b=document.getElementById('tutBubble');if(b)b.style.dis
   const c=document.getElementById('mnuChallenges');if(c)c.onclick=()=>{const b=document.querySelector('[data-start="campana"]');if(b)b.click();else toast('La campaña está en la portada, más abajo.');};
   const e=document.getElementById('mnuExpansions');if(e)e.onclick=()=>toast('Expansiones: aún no hay contenido descargable. El arte propio y las skins llegan por fases.');
   const bk=document.getElementById('mnuBarracks');if(bk)bk.onclick=openBarracks;
+  document.addEventListener('change',(e)=>{const t=e.target;if(t&&t.dataset&&t.dataset.charrole){CHAR_PREFS=loadChars();CHAR_PREFS[t.dataset.charrole]=t.value;saveChars(CHAR_PREFS);toast('Personaje de '+t.dataset.charrole+': '+t.value+'.');}});
   const ar=document.getElementById('mnuArmory');if(ar)ar.onclick=()=>showScreen('scr-arsenal');
   const bb=document.getElementById('barrBack');if(bb)bb.onclick=()=>showScreen('scr-play');
   coinsSet(coinsGet());
