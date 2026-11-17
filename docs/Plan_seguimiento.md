@@ -13,7 +13,7 @@ Cada fase se marca hecha solo con su evidencia (números en este doc + commit).
 | F5 Mapas | **en curso** | lote 1: props por tema. lote 2: remates (fuente plaza, grua embarcadero, buzon/coches S03-S04) | 15633bf + este |
 | F6 Interfaz | **hecho** | arco de vida (2D y 3D), menu original con monedas, tutorial en bocadillo; el dano previsto y el HUD ya existian | 9a62989 + bfe888f |
 | F7 Pantallas y assets | **hecho** | aistudio documentadas, iconos de estado en roster, iconos de objeto tipograficos, carga y victoria/derrota, decision CSS vs PNG | 87e82da |
-| F8 Personajes y skins | **en curso** | lote 1: personalidad por nacion (12, solo visual) y anillo de rol en 3D | (este commit) |
+| F8 Personajes y skins | **hecho** | lote 1: personalidad por nacion y anillo de rol. lote 2: 8 armas nuevas (37 total) en los pools, sin tocar el arma por defecto de la IA | 0d8951b + este |
 | F9 UI minimalista | pendiente | - | - |
 
 ## F1 — Escolta: diagnóstico y arreglo (hecho)
