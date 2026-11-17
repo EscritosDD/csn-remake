@@ -9,7 +9,7 @@ Cada fase se marca hecha solo con su evidencia (números en este doc + commit).
 | F1 Escolta | **hecho** | ver números abajo | (este commit) |
 | F2 Equilibrio | **hecho** | tabla en docs/Equilibrio_medido.md (200+ partidas, muestras ampliadas) | c72f4d4 |
 | F3 Informe CSN vs original | **hecho** | docs/Informe_CSN_vs_original.md (16 areas con fuentes) | b65db20 |
-| F4 Contenido del original | **en curso** | lote 1: 10 personajes con nombre, 4 cajas de habilidad con efectos y empujon | (este commit) |
+| F4 Contenido del original | **en curso** | lote 1: 10 personajes, 4 cajas de habilidad y empujon. lote 2: cobertura desplegable, granada de gas y barrido detector (con UI e IA) | a64160d + este |
 | F5 Mapas | pendiente | - | - |
 | F6 Interfaz | pendiente | - | - |
 | F7 Pantallas y assets | pendiente | - | - |

@@ -1574,7 +1574,7 @@ function makeUnit(team,def,i,nation,skin){
   if(team==='B'&&setup.opp==='ia'){if(setup.difficulty==='veterano'){maxEnergy+=1;energy=maxEnergy;}else if(setup.difficulty==='elite'){maxEnergy+=2;energy=maxEnergy;maxHp+=25;hp=maxHp;}}
   return {id:++uid,team,role:def.role,name:ch?ch.name:def.role,charBio:ch?ch.bio:'',weapon:def.weapon,skin:skin||'nacion',x:sp.x,y:sp.y,dx:sp.x,dy:sp.y,hp:hp,maxHp:maxHp,
     energy:energy,maxEnergy:maxEnergy,alive:true,invisible:false,invisTurns:0,suppressed:false,stunned:false,stunFresh:false,vetLevel:vetLevel,slotIndex:i,
-    grenades:def.role==='Comando'?2:1,flashes:def.role==='Comando'?2:0,smokes:def.role==='Espía'?2:0,mines:def.role==='Ingeniero'?2:0,heals:2,revives:1,captainUsed:false,movedThisTurn:false,
+    grenades:def.role==='Comando'?2:1,flashes:def.role==='Comando'?2:0,smokes:def.role==='Espía'?2:0,mines:def.role==='Ingeniero'?2:0,covers:def.role==='Ingeniero'?2:0,gases:def.role==='Artillero'?2:0,sweeps:def.role==='Espía'?1:0,heals:2,revives:1,captainUsed:false,movedThisTurn:false,
     specialUsedTurn:false,onceUsed:false,nation,hasShot:false,
     facing:team==='A'?0:2,overwatch:false,returnKey:'',body:role.body,moveCost:body.moveCost};
 }
@@ -1833,6 +1833,47 @@ function renderSoundBtn(){const b=document.getElementById('soundBtn');if(b)b.tex
    disipa al empezar el turno de quien la lanzó en la segunda ronda
    siguiente. No hace daño y no bloquea el movimiento: solo la vista,
    y para los dos bandos. */
+/* ================= HABILIDADES DEL ORIGINAL (F4) =================
+   Cobertura desplegable, granada de gas y barrido detector, con los
+   parametros del esquema AbilityGameplayData.cs (RequiredAP, MaxUses,
+   MaxRange, Radius, TickDamage). */
+const COVER_COST=3, GAS_COST=3, GAS_DMG=12, GAS_TURNS=2, SWEEP_COST=2, SWEEP_RANGE=3;
+function placeCover(u,x,y){
+  if(u.role!=='Ingeniero'){toast('La cobertura desplegable es del Ingeniero.');return;}
+  if((u.covers||0)<=0){toast('Sin coberturas: el Ingeniero lleva 2 por partida.');return;}
+  if(u.energy<COVER_COST){toast('La cobertura cuesta '+COVER_COST+' ⚡.');return;}
+  if(cheb(u,{x,y})!==1){toast('La cobertura se despliega en una casilla adyacente.');return;}
+  if(blocked(x,y)||inBeacon(x,y)){toast('Esa casilla está ocupada o es la baliza.');return;}
+  G.lastMoveUndo=null;spendEnergy(u,COVER_COST);u.covers--;
+  G.map.obstacles.push({type:'shelf',x,y,hp:60,cover:true});
+  playOnce(u,'interact');sfx('place');
+  log('🧱 '+u.role+' despliega cobertura en ('+(x+1)+','+(y+1)+'): 60 PV, estorba el paso y da cobertura. Quedan '+u.covers+'.');
+  G.actionMode='move';updateUI();draw();
+}
+function throwGas(u,x,y){
+  if(u.role!=='Artillero'){toast('La granada de gas es del Artillero.');return;}
+  if((u.gases||0)<=0){toast('Sin granadas de gas: el Artillero lleva 2 por partida.');return;}
+  if(u.energy<GAS_COST){toast('La granada de gas cuesta '+GAS_COST+' ⚡.');return;}
+  if(cheb(u,{x,y})>3){toast('La granada de gas se lanza a 3 casillas como máximo.');return;}
+  if(cheb(u,{x,y})===0){toast('No te lances la granada de gas a los pies.');return;}
+  G.lastMoveUndo=null;spendEnergy(u,GAS_COST);u.gases--;playOnce(u,'throw');
+  if(typeof fx3Proj==='function')fx3Proj(u,{x,y},'m67');
+  G.smoke.push({x,y,team:u.team,left:GAS_TURNS,kind:'gas'});
+  log('☣ '+u.role+' ('+u.team+') lanza una granada de gas a ('+(x+1)+','+(y+1)+'): nube de '+GAS_TURNS+' rondas, '+GAS_DMG+' de daño por turno en radio 1.');
+  G.actionMode='move';updateUI();draw();
+}
+function sweepDetect(u,x,y){
+  if(u.role!=='Espía'){toast('El barrido detector es del Espía.');return;}
+  if((u.sweeps||0)<=0){toast('Sin barridos: el Espía lleva 1 por partida.');return;}
+  if(u.energy<SWEEP_COST){toast('El barrido cuesta '+SWEEP_COST+' ⚡.');return;}
+  if(cheb(u,{x,y})>SWEEP_RANGE){toast('El barrido alcanza '+SWEEP_RANGE+' casillas.');return;}
+  G.lastMoveUndo=null;spendEnergy(u,SWEEP_COST);u.sweeps--;
+  let found=0;
+  G.units.filter(e=>e.alive&&e.team!==u.team&&e.invisible&&cheb(e,{x,y})<=1).forEach(e=>{e.invisible=false;e.invisTurns=0;found++;});
+  playOnce(u,'interact');sfx('place');
+  log('📡 '+u.role+' barre la zona de ('+(x+1)+','+(y+1)+'): '+(found?('revela '+found+' enemigo(s) invisible(s).'):'no hay invisibles en el radio.'));
+  G.actionMode='move';updateUI();draw();
+}
 function throwSmoke(u,x,y){
   if(u.role!=='Espía'){toast('La M18 de humo es equipo del Espía.');return;}
   if((u.smokes||0)<=0){toast('Sin granadas de humo M18: el Espía lleva 2 por partida.');return;}
@@ -2206,6 +2247,10 @@ function endTurn(){
     if(x.buffDmgT>0){x.buffDmgT--;if(x.buffDmgT<=0){x.buffDmg=0;log('· '+x.role+' pierde el bonus de munición mejorada.');}}
     if(x.buffArmorT>0){x.buffArmorT--;if(x.buffArmorT<=0){x.buffArmor=0;log('· '+x.role+' pierde la protección de analgésicos.');}}
   });
+  /* Nube de gas: daña a todo soldado en su radio al empezar un turno. */
+  if(G.smoke&&G.smoke.some(s=>s.kind==='gas')){
+    G.units.filter(x=>x.alive&&G.smoke.some(g=>g.kind==='gas'&&cheb(x,g)<=1)).forEach(x=>damage(x,GAS_DMG,'La nube de gas'));
+  }
   /* Aturdidos por la M84: quien cierra su turno ya servido (la bandera
      puesta y el turno aturdido ya empezado, stunFresh en falso) se
      despeja aquí, al acabar ESE turno suyo y no antes: así un aliado
@@ -2695,6 +2740,25 @@ function aiUnitAct(u){
         }
         if(bestG){throwGrenade(u,bestG.x,bestG.y);return res();}
       }
+      /* Habilidades nuevas (F4): gas del Artillero, cobertura del Ingeniero y barrido del Espía */
+      if(u.role==='Artillero'&&(u.gases||0)>0&&u.energy>=GAS_COST){
+        let bestG=null,bestN=0;
+        for(let gy=0;gy<H;gy++)for(let gx=0;gx<W;gx++){
+          if(cheb(u,{x:gx,y:gy})>3||cheb(u,{x:gx,y:gy})===0)continue;
+          let e=0,f=0;G.units.forEach(x=>{if(!x.alive||cheb(x,{x:gx,y:gy})>1)return;if(x.team!==u.team)e++;else f++;});
+          if(e>f&&e>bestN){bestN=e;bestG={x:gx,y:gy};}
+        }
+        if(bestG&&bestN>=1){throwGas(u,bestG.x,bestG.y);return res();}
+      }
+      if(u.role==='Ingeniero'&&(u.covers||0)>0&&u.energy>=COVER_COST&&enemies.some(e=>cheb(u,e)<=6)&&Math.random()<0.5){
+        const spots=[[1,0],[-1,0],[0,1],[0,-1]].map(d=>({x:u.x+d[0],y:u.y+d[1]})).filter(p=>p.x>=0&&p.y>=0&&p.x<W&&p.y<H&&!blocked(p.x,p.y)&&!inBeacon(p.x,p.y));
+        const ally=G.units.filter(a=>a.alive&&a.team===u.team&&a!==u&&a.hp<=a.maxHp*0.7).sort((a,b)=>a.hp-b.hp)[0];
+        if(spots.length&&ally)placeCover(u,spots[0].x,spots[0].y);
+      }
+      if(u.role==='Espía'&&(u.sweeps||0)>0&&u.energy>=SWEEP_COST){
+        const inv=enemies.find(e=>e.invisible);
+        if(inv){sweepDetect(u,inv.x,inv.y);return res();}
+      }
       /* Escolta: si el dron está sin escolta pegada o tocado, concentrar fuego; si está bien escoltado, castiga al escolta crítico o presiona al dron */
       if(drone&&cheb(u,drone)<=w.rng&&hasLOS(u,drone)&&hitChance(u,drone,w)>0){
         if(hardAI&&u.role==='Francotirador'&&!drone.movedThisTurn&&u.energy>=w.cost+3){useSpecial(u,drone);return res();}
@@ -2815,6 +2879,9 @@ function boardTileClick(t){
   if(G.actionMode==='smoke'&&u){throwSmoke(u,t.x,t.y);return;}
   if(G.actionMode==='mine'&&u){placeMine(u,t.x,t.y);return;}
   if(G.actionMode==='flash'&&u){throwFlash(u,t.x,t.y);return;}
+  if(G.actionMode==='cover'&&u){placeCover(u,t.x,t.y);return;}
+  if(G.actionMode==='gas'&&u){throwGas(u,t.x,t.y);return;}
+  if(G.actionMode==='sweep'&&u){sweepDetect(u,t.x,t.y);return;}
   if(G.actionMode==='drone'&&u){
     const cu0=unitAt(t.x,t.y);
     if(cu0&&cu0.team===G.turn){selectUnit(cu0);return;}
@@ -2958,6 +3025,9 @@ function updateUI(){
    (effMode(G)!=='dominacion'&&onTurret&&G.map.turret.owner!==u.team?'<button data-act="capture" '+(isTurn&&u.energy>=2?'':'disabled')+'>⚙ Capturar torreta central<small>2 ⚡ · disparará al final de tus turnos</small></button>':'')+
    (u.role==='Ingeniero'?'<button data-act="deploy" class="'+(G.actionMode==='deploy'?'on':'')+'" '+(isTurn?'':'disabled')+'>🛠 Torreta M2 (desplegar)<small>5 ⚡ · casilla adyacente · 120 PV</small></button>':'')+
    (u.role==='Ingeniero'?'<button data-act="mine" class="'+(G.actionMode==='mine'?'on':'')+'" '+(isTurn&&(u.mines||0)>0?'':'disabled')+'>💥 Claymore M18A1<small>'+MINE_COST+' ⚡ · casilla adyacente · quedan '+(u.mines||0)+' · oculta al enemigo · '+MINE_DMG+' de daño a quien la pise</small></button>':'')+
+   (u.role==='Ingeniero'?'<button data-act="cover" class="'+(G.actionMode==='cover'?'on':'')+'" '+(isTurn&&(u.covers||0)>0?'':'disabled')+'>🧱 Cobertura desplegable<small>'+COVER_COST+' ⚡ · casilla adyacente · quedan '+(u.covers||0)+' · 60 PV, estorba el paso y da cobertura</small></button>':'')+
+   (u.role==='Artillero'?'<button data-act="gas" class="'+(G.actionMode==='gas'?'on':'')+'" '+(isTurn&&(u.gases||0)>0?'':'disabled')+'>☣ Granada de gas<small>'+GAS_COST+' ⚡ · lanza a 3 · quedan '+(u.gases||0)+' · nube '+GAS_TURNS+' rondas: '+GAS_DMG+' de daño por turno en radio 1</small></button>':'')+
+   (u.role==='Espía'?'<button data-act="sweep" class="'+(G.actionMode==='sweep'?'on':'')+'" '+(isTurn&&(u.sweeps||0)>0?'':'disabled')+'>📡 Barrido detector<small>'+SWEEP_COST+' ⚡ · radio '+SWEEP_RANGE+' · quedan '+(u.sweeps||0)+' · revela invisibles</small></button>':'')+
    (effMode(G)==='escolta'&&G.drone&&G.drone.alive&&u.team==='A'?'<button data-act="guide" class="'+(G.actionMode==='drone'?'on':'')+'" '+(isTurn&&dist(u,G.drone)<=1&&u.energy>=2&&G.drone.movesLeft>0?'':'disabled')+'>🤖 Guiar dron · 2 ⚡<small>Mueve el dron 1 casilla · quedan '+G.drone.movesLeft+' guiados esta ronda · tienes que estar pegado a él — luego toca la casilla destino junto al dron</small></button>':'')+
    '</div>'+(u.team!==G.turn?'<p class="sub" style="margin-top:8px">Este soldado es del bando rival: podrás actuar con él en su turno'+(G.opp==='ia'?' (lo mueve la IA)':'')+'.</p>':'');
   card.querySelectorAll('[data-act]').forEach(b=>b.onclick=()=>{
@@ -2968,6 +3038,9 @@ function updateUI(){
     if(act==='smoke'){G.actionMode='smoke';toast('Toca la casilla centro de la cortina M18 (máx. 4 casillas): tapará esa casilla y las 4 adyacentes durante 2 rondas.');}
     if(act==='mine'){G.actionMode='mine';toast('Toca una casilla adyacente libre para colocar la Claymore: el enemigo no la verá hasta pisarla.');}
     if(act==='flash'){G.actionMode='flash';toast('Toca la casilla donde estallará la M84 (máx. 4 casillas): aturdirá a todo soldado en radio 1, también a los tuyos; solo se salva quien la lanza, que aparta la mirada.');}
+    if(act==='cover'){G.actionMode='cover';toast('Toca una casilla adyacente libre para levantar la cobertura (60 PV).');}
+    if(act==='gas'){G.actionMode='gas';toast('Toca la casilla central de la nube de gas (máx. 3 casillas).');}
+    if(act==='sweep'){G.actionMode='sweep';toast('Toca el centro del barrido (radio '+SWEEP_RANGE+'): revela a los invisibles.');}
     if(act==='overwatch'){setOverwatch(u);}
     if(act==='special'){useSpecial(u,null);}
     if(act==='capture'){captureTurret(u);}
