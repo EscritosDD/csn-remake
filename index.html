@@ -352,6 +352,10 @@ button img.ab-ico{width:18px;height:18px;vertical-align:-3px;margin-right:6px;bo
 .ab-card img{width:44px;height:44px;border-radius:8px;background:#1d221c}
 .ab-card b{font-size:11px;line-height:1.1}
 .ab-card small{font-size:10px;color:var(--muted)}
+.res-table{margin:12px auto 0;max-width:420px;border:1.5px solid var(--line);border-radius:10px;overflow:hidden;font-size:13px}
+.res-row{display:grid;grid-template-columns:1.2fr .8fr .8fr .8fr;gap:4px;padding:6px 10px;border-top:1px solid var(--line)}
+.res-row.head{background:var(--panel2);font-weight:700;border-top:none}
+.res-row span{text-align:center}
 </style>
 </head>
 <body>
@@ -1685,7 +1689,7 @@ function startGame(squadA,squadB){
   const campMission=setup.mode==='campana'?CAMPAIGN_MISSIONS[setup.campaignMission]:null;
   const matchSeed=((Math.random()*0x7fffffff)>>>0)||1;
   G={mode:setup.mode,opp:setup.opp,turn:'A',round:1,matchSeed,units:[],map:buildMap(setup.map),deployed:[],lootBoxes:[],lootDropped:{},
-     beacon:{A:0,B:0},dom:{A:0,B:0},smoke:[],mines:[],drone:effSetupMode()==='escolta'?{isDrone:true,role:'Dron averiado',team:'A',x:ESCORT_START.x,y:ESCORT_START.y,dx:ESCORT_START.x,dy:ESCORT_START.y,hp:ESCORT_DRONE_HP,maxHp:ESCORT_DRONE_MAXHP,alive:true,invisible:false,weapon:null,facing:0,movesLeft:ESCORT_GUIDES_PER_ROUND,movedThisTurn:false,delivered:false}:null,difficulty:setup.opp==='ia'?setup.difficulty:'normal',campaignMission:setup.mode==='campana'?setup.campaignMission:null,campaignObjective:campMission?campMission.objective:null,
+     beacon:{A:0,B:0},dom:{A:0,B:0},stats:{A:{dmg:0,kills:0},B:{dmg:0,kills:0}},smoke:[],mines:[],drone:effSetupMode()==='escolta'?{isDrone:true,role:'Dron averiado',team:'A',x:ESCORT_START.x,y:ESCORT_START.y,dx:ESCORT_START.x,dy:ESCORT_START.y,hp:ESCORT_DRONE_HP,maxHp:ESCORT_DRONE_MAXHP,alive:true,invisible:false,weapon:null,facing:0,movesLeft:ESCORT_GUIDES_PER_ROUND,movedThisTurn:false,delivered:false}:null,difficulty:setup.opp==='ia'?setup.difficulty:'normal',campaignMission:setup.mode==='campana'?setup.campaignMission:null,campaignObjective:campMission?campMission.objective:null,
      selected:null,actionMode:'move',over:false,aiBusy:false,lastMoveUndo:null,rivalNation,
      names:{A:myNation.name+' (J1)',B:setup.mode==='guerra'?rivalNation.name+' (IA)':(setup.opp==='ia'?'Escuadra IA':'Jugador 2')}};
   document.body.dataset.state='playing';
@@ -1738,6 +1742,7 @@ function damage(target,dmg,srcLabel){
   if(target.buffArmor&&!target.isDrone)dmg=Math.max(1,Math.round(dmg*target.buffArmor));
   if(target.shieldT>0&&!target.isDrone)dmg=Math.max(1,Math.round(dmg*SHIELD_MULT));
   target.hp-=dmg;
+  if(G&&G.stats&&G._dmgTeam&&G._dmgTeam!==target.team){const st=G.stats[G._dmgTeam];st.dmg+=dmg;if(target.hp<=0)st.kills++;}
   target._hitT=FX.t;target._hitAmt=Math.min(1,dmg/70);
   /* Tipo de impacto, para elegir el clip del original en la vista 3D:
      explosión (barril, M67, salpicadura, lanzacohetes, lanzagranadas),
@@ -1762,6 +1767,7 @@ function explodeBarrel(b,srcLabel){
 }
 function tryShoot(shooter,target,weaponName,multiplier,opts){
   opts=opts||{};
+  if(G)G._dmgTeam=shooter.team;
   const w=WEAPONS[weaponName];
   const freeCost=!!opts.freeCost;
   if(!freeCost&&shooter.energy<w.cost){toast('Energía insuficiente: '+weaponName+' cuesta '+w.cost+' ⚡.');return false;}
@@ -1832,6 +1838,7 @@ function tryShoot(shooter,target,weaponName,multiplier,opts){
       }
     }
   }
+  G._dmgTeam=null;
   checkWin();updateUI();draw();return true;
 }
 function setOverwatch(u){
@@ -2373,7 +2380,7 @@ function turretFire(ownerTeam){
     const inR=targets.filter(t=>cheb(pos,t)<=rng&&hasLOS(pos,t)&&!smokeBlocksLOS(pos,t)).sort((a,b)=>cheb(pos,a)-cheb(pos,b));
     if(inR.length){
       fxTracer(pos,inR[0]);if(typeof fx3Shot==='function')fx3Shot(pos,inR[0],'Ametralladoras');sfx('shoot');
-      damage(inR[0],dmg,label);
+      G._dmgTeam=ownerTeam;damage(inR[0],dmg,label);G._dmgTeam=null;
     }
   };
   if(effMode(G)!=='dominacion'&&G.map.turret.owner===ownerTeam)fire(TURRET_POS,30,6,'La torreta central');
@@ -2477,9 +2484,13 @@ function endGame(winner,reason){
   }
   if(winner==='A'&&G.opp==='ia')coinsSet(coinsGet()+25);
   const survivors=G.units.filter(u=>u.alive).map(u=>u.role+' ('+u.team+', '+u.hp+' PV)').join(' · ')||'Sin supervivientes.';
+  const ST=G.stats||{A:{dmg:0,kills:0},B:{dmg:0,kills:0}};
+  const aliveN=t=>G.units.filter(u=>u.alive&&u.team===t).length;
+  const resTable='<div class="res-table"><div class="res-row head"><span>Bando</span><span>Vivos</span><span>Daño</span><span>Derribos</span></div>'+
+    ['A','B'].map(t=>'<div class="res-row"><span>'+(t==='A'?'Tú':'Rival')+'</span><span>'+aliveN(t)+'</span><span>'+ST[t].dmg+'</span><span>'+ST[t].kills+'</span></div>').join('')+'</div>';
   const won=(winner==='A'),lbl=(winner==='A'?'VICTORIA':winner==='draw'?'EMPATE':'DERROTA');
   const modeArt=effMode(G)==='dominacion'?'modo_dominacion':effMode(G)==='escolta'?'modo_escolta':effMode(G)==='baliza'?'modo_baliza':'modo_eliminacion';
-  showModal('<div class="endWrap '+(won?'win':'lose')+'"><div class="endBanner">'+lbl+'</div><img class="endArt" src="assets/ui/'+modeArt+'.png" alt=""/><h2>'+title+'</h2><p><b>'+reason+'</b></p>'+extra+'<p class="sub">Partida de '+G.round+' rondas. Supervivientes: '+survivors+'</p><div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px">'+campaignButtons+'<button class="btn primary big" onclick="closeModal();backToMenu()">Volver al menú</button>'+(G.mode==='campana'?'':'<button class="btn big" onclick="closeModal();openSetup(G.mode)">Revancha</button>')+'</div></div>');
+  showModal('<div class="endWrap '+(won?'win':'lose')+'"><div class="endBanner">'+lbl+'</div><img class="endArt" src="assets/ui/'+modeArt+'.png" alt=""/><h2>'+title+'</h2><p><b>'+reason+'</b></p>'+extra+'<p class="sub">Partida de '+G.round+' rondas. Supervivientes: '+survivors+'</p>'+resTable+'<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px">'+campaignButtons+'<button class="btn primary big" onclick="closeModal();backToMenu()">Volver al menú</button>'+(G.mode==='campana'?'':'<button class="btn big" onclick="closeModal();openSetup(G.mode)">Revancha</button>')+'</div></div>');
 }
 function showModal(html){$('#modalBox').innerHTML=html;$('#modal').classList.add('on');}
 function closeModal(){$('#modal').classList.remove('on');}
