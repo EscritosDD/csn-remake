@@ -6773,8 +6773,8 @@ function renderBarracks(){
   Object.entries(WEAPONS).forEach(([name,w])=>{if(!byCat[w.cat]){byCat[w.cat]=[];catOrder.push(w.cat);}byCat[w.cat].push(name+' ('+w.dmg+'/'+w.rng+')');});
   CHAR_PREFS=loadChars();
   el.innerHTML=
-    '<div class="panel" style="margin-top:12px"><h2>Reparto del original · 17 personajes</h2><p class="sub" style="margin:0 0 6px">Los personajes del IPA con su clase y su traje. Los marcados en ámbar son jugables ahora.</p><div class="grid3" style="margin-top:8px">'+
-    ORIG_CAST.map(c=>'<div class="panel" style="'+(c.play?'border-color:var(--amber)':'opacity:.75')+'"><b style="font-size:13px">'+c.name+'</b><p class="sub" style="margin:2px 0 0;font-size:11px">'+c.body+' · '+c.outfit+'</p>'+(c.play?'<span class="tag amber" style="margin-top:4px">jugable · '+c.role+'</span>':'<span class="tag" style="margin-top:4px">pendiente</span>')+'</div>').join('')+
+    '<div class="panel" style="margin-top:12px"><h2>Reparto · '+(OWN_CAST.length+ORIG_CAST.length)+' personajes</h2><p class="sub" style="margin:0 0 6px">Los personajes del IPA con su clase y su traje. Los marcados en ámbar son jugables ahora.</p><div class="grid3" style="margin-top:8px">'+
+    OWN_CAST.concat(ORIG_CAST).map(c=>'<div class="panel" style="'+(c.play?'border-color:var(--amber)':'opacity:.75')+'"><b style="font-size:13px">'+(c.own?'★ ':'')+c.name+'</b><p class="sub" style="margin:2px 0 0;font-size:11px">'+c.body+' · '+c.outfit+'</p>'+(c.play?'<span class="tag amber" style="margin-top:4px">jugable · '+c.role+(c.own?' · propio':'')+'</span>':'<span class="tag" style="margin-top:4px">pendiente</span>')+'</div>').join('')+
     '</div></div>'+
     '<div class="panel" style="margin-top:12px"><h2>Tropas · '+roles.length+' roles</h2><div class="grid3" style="margin-top:8px">'+
     roles.map(r=>{const ch=CHARACTERS.find(c=>c.role===r);const body=BODIES[ROLES[r].body];
