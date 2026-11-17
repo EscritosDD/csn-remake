@@ -1,0 +1,10 @@
+{
+  "name": "csn-remake",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CSN (Chess Soldier Nation), remake de RAD Soldiers. Juego estatico HTML5/Canvas + Three.js, sin dependencias ni build.",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js"
+  }
+}
