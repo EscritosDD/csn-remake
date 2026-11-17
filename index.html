@@ -1651,6 +1651,7 @@ function startGame(squadA,squadB){
      selected:null,actionMode:'move',over:false,aiBusy:false,lastMoveUndo:null,rivalNation,
      names:{A:myNation.name+' (J1)',B:setup.mode==='guerra'?rivalNation.name+' (IA)':(setup.opp==='ia'?'Escuadra IA':'Jugador 2')}};
   document.body.dataset.state='playing';
+  try{auAmbient(G.map.theme);}catch(e){}
   setTurnSeed(1,'A');
   squadA.forEach((d,i)=>G.units.push(makeUnit('A',d,i,myNation,setup.skinA)));
   squadB.forEach((d,i)=>G.units.push(makeUnit('B',d,i,rivalNation,setup.opp==='local'?setup.skinB:'nacion')));
@@ -1674,7 +1675,7 @@ function log(msg){const el=$('#log');const d=document.createElement('div');d.inn
 function teamName(t){return G.names[t];}
 function aliveCount(t){return G.units.filter(u=>u.team===t&&u.alive).length;}
 
-function selectUnit(u){if(!u)return;G.selected=u;G.actionMode='move';updateUI();draw();}
+function selectUnit(u){if(!u)return;G.selected=u;G.actionMode='move';if(u.team===G.turn)auVoice(u,'select',0.45);updateUI();draw();}
 
 /* ---- actions ---- */
 function spendEnergy(u,n){u.energy-=n;}
@@ -1708,7 +1709,8 @@ function damage(target,dmg,srcLabel){
   if(target.hp<=0&&target._deathT==null){target._deathT=FX.t;target._deathKind=expl?'expl':'bullet';}
   if(target.x!=null){fxFloat(target.x,target.y,'−'+dmg,'#ffd9d2');fxBurst(target.x,target.y,7,'#ffb199');}
   log(srcLabel+' hace <b>'+dmg+'</b> de daño a '+target.role+' ('+target.team+'). Le quedan '+Math.max(0,target.hp)+' PV.');
-  if(target.hp<=0){target.hp=0;target.alive=false;target.invisible=false;log('✕ '+target.role+' ('+target.team+') eliminado.');}
+  if(target.hp<=0){target.hp=0;target.alive=false;target.invisible=false;if(!target.isDrone)auVoice(target,'death',0.55);log('✕ '+target.role+' ('+target.team+') eliminado.');}
+  else if(!target.isDrone&&Math.random()<0.2)auVoice(target,'pain',0.35);
 }
 function explodeBarrel(b,srcLabel){
   if(!b.alive)return;b.alive=false;G.lastMoveUndo=null;FX.shake=11;sfx('boom');fxBurst(b.x,b.y,22,'#ffb03a');fxFloat(b.x,b.y,'💥','#ffe1a8');if(typeof fx3Explosion==='function')fx3Explosion(b.x,b.y,'expl');
@@ -1737,7 +1739,7 @@ function tryShoot(shooter,target,weaponName,multiplier,opts){
   if(!freeCost)spendEnergy(shooter,w.cost);shooter.hasShot=true;if(shooter.invisible){shooter.invisible=false;log('La invisibilidad del Espía se rompe al disparar.');}
   if(w.once)shooter.onceUsed=true;
   const f=angleToFacing(target.x-shooter.x,target.y-shooter.y);if(f!=null)shooter.facing=f;
-  shooter._shootT=FX.t;shooter._shootW=weaponName;shooter._fireKey=fireClipFor(weaponName);sfx('shoot');
+  shooter._shootT=FX.t;shooter._shootW=weaponName;shooter._fireKey=fireClipFor(weaponName);auWeapon(w.cat);if(Math.random()<0.3)auVoice(shooter,'firing',0.4);
   if(target.x!=null){
     fxTracer(shooter,target);fxBurst(shooter.x,shooter.y,3,'#ffe9a8');
     if(typeof fx3Shot==='function')fx3Shot(shooter,target,w.cat);
@@ -1889,6 +1891,20 @@ function sfx(kind){if(!soundOn)return;try{
   else if(kind==='win'){[523,659,784,1046].forEach((f,i)=>setTimeout(()=>tone(f,0.16,'triangle',0.06),i*120));}
   else if(kind==='lose'){[392,330,262,196].forEach((f,i)=>setTimeout(()=>tone(f,0.16,'triangle',0.06),i*120));}
  }catch(e){}}
+/* ================= AUDIO DEL ORIGINAL (F5) =================
+   Los clips salen del IPA: sonidos de arma por categoria, explosiones,
+   voces de cada personaje (select, confirm, pain, death, firing, thanks)
+   y ambiente por mapa. Se crean elementos Audio por reproduccion y se
+   respeta el boton de silencio. */
+const AU_BASE='assets/audio/';
+const WEAPON_SFX={'Fusiles de asalto':'assaultrifle_fire','Subfusiles':'assaultrifle_fire','Ametralladoras':'assaultrifle_fire','Escopetas':'shotgun_fire','Francotirador':'sniperrifle_fire','Lanzacohetes':'rocketlauncher_fire','Lanzagranadas':'cluster_explode','Pistolas':'beretta_fire'};
+const VOICE_FILES={'Francotirador':'Francotirador','Artillero':'Artillero','Espía':'Espia','Médico':'Medico','Ingeniero':'Ingeniero','Comando':'Comando','Capitán':'Capitan'};
+let AU_AMBIENT=null;
+function auPlay(path,vol,loop){if(!soundOn)return null;try{const a=new Audio(AU_BASE+path);a.volume=vol==null?0.6:vol;if(loop)a.loop=true;a.play().catch(()=>{});return a;}catch(e){return null;}}
+function auWeapon(cat){const f=WEAPON_SFX[cat];if(f)auPlay('sfx/weapons/'+f+'.mp3',0.5);}
+function auVoice(un,ev,vol){if(!un||!un.role)return;const f=VOICE_FILES[un.role];if(!f)return;auPlay('voice/'+f+'/'+ev+'.mp3',vol==null?0.5:vol);}
+function auAmbient(theme){if(AU_AMBIENT){try{AU_AMBIENT.pause();}catch(e){}AU_AMBIENT=null;}const f=auPlay('ambient/'+theme+'/amb0.mp3',0.22,true);AU_AMBIENT=f;}
+function auStopAmbient(){if(AU_AMBIENT){try{AU_AMBIENT.pause();}catch(e){}AU_AMBIENT=null;}}
 function renderSoundBtn(){const b=document.getElementById('soundBtn');if(b)b.textContent=soundOn?'🔊 Sonido: sí':'🔇 Sonido: no';}
 /* ---- M18 · GRANADA DE HUMO (solo el Espía) ----
    El Espía lanza la M18 a 4 casillas como máximo (2 ⚡, lleva 2) y la
@@ -2429,7 +2445,7 @@ function endGame(winner,reason){
 }
 function showModal(html){$('#modalBox').innerHTML=html;$('#modal').classList.add('on');}
 function closeModal(){$('#modal').classList.remove('on');}
-function backToMenu(){$('#gameArea').style.display='none';$('#setupArea').style.display='none';$('#menuArea').style.display='block';G=null;document.body.dataset.state='menu';refreshGuerra();renderNationChip();if(typeof renderCampaignPanel==='function')renderCampaignPanel();}
+function backToMenu(){try{auStopAmbient();}catch(e){}$('#gameArea').style.display='none';$('#setupArea').style.display='none';$('#menuArea').style.display='block';G=null;document.body.dataset.state='menu';refreshGuerra();renderNationChip();if(typeof renderCampaignPanel==='function')renderCampaignPanel();}
 $('#quitBtn').onclick=()=>{showModal('<h2>¿Abandonar la partida?</h2><p>Se perderá el progreso de esta partida. Tu nación y tu marcador de Guerra de Naciones no se tocan.</p><div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px"><button class="btn danger big" onclick="closeModal();backToMenu()">Sí, abandonar</button><button class="btn big" onclick="closeModal()">Seguir jugando</button></div>');};
 
 function endTurn(){
