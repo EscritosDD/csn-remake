@@ -13,7 +13,7 @@ Cada fase se marca hecha solo con su evidencia (números en este doc + commit).
 | F5 Mapas | **hecho** | props por tema (12 temas) + remates (fuente, grua, buzon/coches); suelo y props de juego ya texturizados | 15633bf, 8005cde |
 | F6 Interfaz | **hecho** | arco de vida (2D y 3D), menu original con monedas, tutorial en bocadillo; el dano previsto y el HUD ya existian | 9a62989 + bfe888f |
 | F7 Pantallas y assets | **hecho** | aistudio documentadas, iconos de estado en roster, iconos de objeto tipograficos, carga y victoria/derrota, decision CSS vs PNG | 87e82da |
-| F8 Personajes y skins | **hecho** | lote 1: personalidad por nacion y anillo de rol. lote 2: 8 armas nuevas (37 total) en los pools, sin tocar el arma por defecto de la IA | 0d8951b + este |
+| F8 Personajes y skins | **hecho** | lote 1: personalidad por nacion y anillo de rol. lote 2: 8 armas nuevas (37 total). lote 3: MODELOS POR CLASE del IPA (Soldier_Light/Heavy, Agent_Light/Heavy, Medic, Engineer, Commander) con su rig y textura | 0d8951b, 5d34682, (lote 3) |
 | F9 UI minimalista | **hecho** | tarjetas a 2 lineas con texto al pasar, mapas plegados y pantalla Cuartel (tropas, skins, arsenal, desbloqueos) | 6cfd463 |
 
 ## F1 — Escolta: diagnóstico y arreglo (hecho)
