@@ -343,6 +343,9 @@ details.more{margin-top:8px}
 details.more summary{cursor:pointer;font-weight:700;font-size:13px;color:var(--ink);padding:6px 0}
 details.more summary:hover{color:var(--amber)}
 button img.ab-ico{width:18px;height:18px;vertical-align:-3px;margin-right:6px;border-radius:4px;background:#1d221c}
+.chapter-head{display:flex;align-items:center;gap:10px;margin:12px 0 6px;padding:8px 10px;border-radius:10px;background:var(--panel2);border:1.5px solid var(--line)}
+.ch-ico{width:34px;height:34px;border-radius:8px;background:#1d221c;object-fit:contain}
+.ch-lock{width:20px;height:20px;opacity:.8}
 </style>
 </head>
 <body>
@@ -1012,13 +1015,28 @@ function renderCampaignPanel(){
   if(prog)prog.innerHTML=c.done?'Operación completada. Puedes reiniciarla o seguir jugando misiones sueltas desde aquí.':('Progreso: <b>'+c.next+' de 5</b> misiones superadas'+(c.vet&&c.vet.length?(' · Veterania por posición: '+c.vet.map((v,i)=>'Pos. '+(i+1)+': +'+(v*25)+' PV / +'+v+' ⚡').join(' · ')):' · Sin veterania todavía: sobrevive a la primera misión.'));
   const list=document.getElementById('campaignList');if(!list)return;
   list.innerHTML='';
-  CAMPAIGN_MISSIONS.forEach((m,i)=>{
-    const state=c.done||i<c.next?'done':(i===c.next?'current':'locked');
-    const b=document.createElement('button');b.className='campaign-mission '+state;b.type='button';
-    b.innerHTML='<span class="mission-num">'+(state==='done'?'✓':(i+1))+'</span><span style="flex:1"><b>Misión '+(i+1)+' · '+m.title+(state==='done'?' · superada':state==='current'?' · siguiente':' · bloqueada')+'</b><p>'+m.brief+'</p></span>';
-    b.disabled=state==='locked';
-    b.onclick=()=>{if(state!=='locked')openSetup('campana',i);};
-    list.appendChild(b);
+  /* Campaña por CAPITULOS, como el original: icono de capitulo, progreso
+     y misiones con candado del IPA cuando toca. */
+  const CHAPTERS=[
+    {name:'Capítulo 1 · Primer contacto',icon:'assets/ui/modo_eliminacion.png',from:0,to:1},
+    {name:'Capítulo 2 · Londres en llamas',icon:'assets/ui/modo_dominacion.png',from:2,to:3},
+    {name:'Capítulo 3 · La última guardia',icon:'assets/ui/modo_eliminacion.png',from:4,to:4}
+  ];
+  CHAPTERS.forEach((ch,ci)=>{
+    const head=document.createElement('div');
+    head.className='chapter-head';
+    const doneN=CAMPAIGN_MISSIONS.slice(ch.from,ch.to+1).filter((m,i)=>c.done||(ch.from+i)<c.next).length;
+    head.innerHTML='<img class="ch-ico" src="'+ch.icon+'" alt=""/><span style="flex:1"><b>'+ch.name+'</b></span><span class="mono" style="color:var(--muted);font-size:12px">'+doneN+'/'+(ch.to-ch.from+1)+'</span>';
+    list.appendChild(head);
+    for(let i=ch.from;i<=ch.to;i++){
+      const m=CAMPAIGN_MISSIONS[i];
+      const state=c.done||i<c.next?'done':(i===c.next?'current':'locked');
+      const b=document.createElement('button');b.className='campaign-mission '+state;b.type='button';
+      b.innerHTML='<span class="mission-num">'+(state==='done'?'✓':(i+1))+'</span><span style="flex:1"><b>Misión '+(i+1)+' · '+m.title+(state==='done'?' · superada':state==='current'?' · siguiente':' · bloqueada')+'</b><p>'+m.brief+'</p></span>'+(state==='locked'?'<span class="ch-lock" aria-hidden="true">🔒</span>':'');
+      b.disabled=state==='locked';
+      b.onclick=()=>{if(state!=='locked')openSetup('campana',i);};
+      list.appendChild(b);
+    }
   });
 }
 function openSetup(mode,missionIdx){
