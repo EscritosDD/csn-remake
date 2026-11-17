@@ -324,6 +324,18 @@ canvas#board{border-radius:10px;box-shadow:0 0 0 2px rgba(0,0,0,.45), inset 0 0 
 .panel,.mode-card,.weapon,.unit-card,.skin-card,.modal-box,.howto>div,.nation-card{background-color:var(--panel)}
 .mode-art{width:100%;height:auto;display:block;border-radius:10px}
 .nation-art{width:100%;max-width:148px;height:auto;display:block;align-self:center}
+/* Pantalla de carga (F7) */
+#bootScreen{position:fixed;inset:0;z-index:130;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 40%,#1c2620,#0f1310 70%)}
+#bootScreen .bootBox{width:min(420px,84vw);text-align:center}
+#bootScreen img{width:min(320px,70vw);filter:drop-shadow(0 6px 18px rgba(0,0,0,.5))}
+.bootBar{height:10px;border-radius:6px;background:rgba(255,255,255,.12);margin:18px 0 10px;overflow:hidden}
+.bootBar i{display:block;height:100%;width:5%;background:linear-gradient(90deg,#f2b234,#39c2d7);border-radius:6px;transition:width .18s}
+/* Fin de partida (F7) */
+.endWrap{text-align:center}
+.endBanner{font-weight:800;letter-spacing:.08em;font-size:26px;padding:10px 0;border-radius:10px;margin-bottom:10px;color:#fff}
+.endWrap.win .endBanner{background:linear-gradient(90deg,#2f6b3f,#4fdc6e)}
+.endWrap.lose .endBanner{background:linear-gradient(90deg,#6b2f2f,#ff6b5a)}
+.endArt{width:100%;max-width:340px;border-radius:12px;margin:6px auto 10px;display:block;box-shadow:0 6px 20px rgba(0,0,0,.35)}
 </style>
 </head>
 <body>
@@ -2359,7 +2371,9 @@ function endGame(winner,reason){
   }
   if(winner==='A'&&G.opp==='ia')coinsSet(coinsGet()+25);
   const survivors=G.units.filter(u=>u.alive).map(u=>u.role+' ('+u.team+', '+u.hp+' PV)').join(' · ')||'Sin supervivientes.';
-  showModal('<h2>'+title+'</h2><p><b>'+reason+'</b></p>'+extra+'<p class="sub">Partida de '+G.round+' rondas. Supervivientes: '+survivors+'</p><div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px">'+campaignButtons+'<button class="btn primary big" onclick="closeModal();backToMenu()">Volver al menú</button>'+(G.mode==='campana'?'':'<button class="btn big" onclick="closeModal();openSetup(G.mode)">Revancha</button>')+'</div>');
+  const won=(winner==='A'),lbl=(winner==='A'?'VICTORIA':winner==='draw'?'EMPATE':'DERROTA');
+  const modeArt=effMode(G)==='dominacion'?'modo_dominacion':effMode(G)==='escolta'?'modo_escolta':effMode(G)==='baliza'?'modo_baliza':'modo_eliminacion';
+  showModal('<div class="endWrap '+(won?'win':'lose')+'"><div class="endBanner">'+lbl+'</div><img class="endArt" src="assets/ui/'+modeArt+'.png" alt=""/><h2>'+title+'</h2><p><b>'+reason+'</b></p>'+extra+'<p class="sub">Partida de '+G.round+' rondas. Supervivientes: '+survivors+'</p><div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px">'+campaignButtons+'<button class="btn primary big" onclick="closeModal();backToMenu()">Volver al menú</button>'+(G.mode==='campana'?'':'<button class="btn big" onclick="closeModal();openSetup(G.mode)">Revancha</button>')+'</div></div>');
 }
 function showModal(html){$('#modalBox').innerHTML=html;$('#modal').classList.add('on');}
 function closeModal(){$('#modal').classList.remove('on');}
@@ -6469,6 +6483,21 @@ function tutHide(){const b=document.getElementById('tutBubble');if(b)b.style.dis
   const e=document.getElementById('mnuExpansions');if(e)e.onclick=()=>toast('Expansiones: aún no hay contenido descargable. El arte propio y las skins llegan por fases.');
   coinsSet(coinsGet());
 })();
+/* Pantalla de carga: se cierra cuando el soldado real está listo (o a los 9 s). */
+(function bootScreen(){
+  const start=()=>{
+    const el=document.getElementById('bootScreen'),fill=document.getElementById('bootFill'),msg=document.getElementById('bootMsg');
+    if(!el)return;
+    let p=6;const t0=Date.now();
+    const it=setInterval(()=>{
+      p=Math.min(96,p+2+Math.random()*3);
+      if(typeof REAL!=='undefined'&&REAL.ready){p=Math.min(100,p+12);if(msg)msg.textContent='Listo: soldado, animaciones y mapas cargados.';}
+      if(fill)fill.style.width=p+'%';
+      if(p>=100||Date.now()-t0>9000){clearInterval(it);el.style.transition='opacity .45s';el.style.opacity='0';setTimeout(()=>{el.style.display='none';},480);}
+    },130);
+  };
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
+})();
 /* Partida de prueba del humo M18: el 5 contra 5 es la única escuadra
    por defecto con Espía, así que esta entrada despliega ese formato
    en el Almacén con el Espía del jugador ya seleccionado y su botón
@@ -6534,5 +6563,6 @@ loadSkirmishTop('skirmish03');loadSkirmishTop('skirmish04');
 })();
 $('#guerraCountdown').textContent=fmtCountdown(msToNextSaturday());
 </script>
+<div id="bootScreen"><div class="bootBox"><img src="assets/ui/logo_csn.png" alt="CSN"/><div class="bootBar"><i id="bootFill"></i></div><p class="sub" id="bootMsg" style="color:#cfd6c8">Cargando el tablero, los soldados y los mapas…</p></div></div>
 </body>
 </html>

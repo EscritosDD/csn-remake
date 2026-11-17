@@ -66,3 +66,20 @@ skins) y F9 (UI minimalista), **no se cargan en la portada** para no
 despistar al jugador (la misma razon por la que se retiro la imagen de
 Muse). Si alguna representa una pantalla concreta que se quiera usar, se
 integra entonces.
+
+
+## Decisiones de arte de interfaz (F7)
+
+- **Botones y panel PNG** (`ui_boton_primario/secundario/peligro.png`,
+  `ui_panel.png`): se conservan como referencia, pero la interfaz sigue con
+  **CSS** (consistente, responsive y con estados normal/hover/pulsado). Los
+  PNG no se aplican como 9-slice para no romper la legibilidad en pantallas
+  pequenas. Decision: CSS; los PNG quedan documentados como alternativa.
+- **Iconos de estado y objeto**: sistema tipografico coherente (aturdido 💫,
+  invisible 👻, vigilancia 👁, suprimido ⚡, abejas 🐝, escudo 🛡, herido 🩹;
+  granada 💣, humo 💨, aturdidora ✸, claymore 💥, gas ☣, molotov 🔥,
+  cobertura 🧱, tranquilizante 💉, canon de agua 💦, kit 🔧, teletransporte
+  🌀, barrido 📡, artilleria 💥). No requiere assets y escala con el texto.
+- **Pantallas**: pantalla de carga con logo y barra (se cierra cuando el
+  soldado real esta listo o a los 9 s) y fin de partida con pancarta de
+  VICTORIA/DERROTA y el arte del modo.
