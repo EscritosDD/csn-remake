@@ -391,12 +391,6 @@ canvas#board{border-radius:10px;box-shadow:0 0 0 2px rgba(0,0,0,.45), inset 0 0 
       </div>
 
       <div class="panel" style="margin-top:14px">
-        <h2>Tus soldados, dentro del juego</h2>
-<p class="sub">Los <b>7 roles</b> del juego —Francotirador, Artillero, Espía, Médico, Ingeniero, Comando y Capitán—, cada uno con su aspecto, su arma y su especial. Son los mismos soldados en la vista clásica y en la 3D.</p>
-        <div class="sprite-strip" id="spriteStrip"><p class="sub" style="margin:0">Cargando los sprites de los 7 roles…</p></div>
-      </div>
-
-      <div class="panel" style="margin-top:14px">
         <h2>Tus skins</h2>
         <p class="sub">Al empezar tienes exactamente <b>dos skins</b>, y las dos son <b>solo aspecto, sin pasivas</b>. La de Nación es una skin más, no la definitiva: más adelante llegarán otras skins, y esas sí darán pasivas pequeñas. Eliges la skin de tu escuadra al configurar cada partida.</p>
         <div class="skin-cards">
@@ -4402,22 +4396,34 @@ function build3DWorld(){
   T3.obMeshes=[];T3.barrelMeshes=[];T3.medkitMeshes=[];
   G.map.obstacles.forEach(o=>{
     let m;
-    if(o.type==='wall'){m=box3(0.94,0.85,0.94,'#7f858b',w2cx(o.x),0.47,w2cx(o.y),0.8);
-      const cap=box3(0.98,0.08,0.98,'#a9aeb2',w2cx(o.x),0.93,w2cx(o.y),0.8);const grp=new THREE.Group();grp.add(m,cap);m=grp;}
-    else if(o.type==='shelf'){const pal=[['#f4c13d','#dda017'],['#ef7d3c','#d8622b'],['#4aa3ad','#2e7f86']][Math.floor(hash2(o.x*11,o.y*5)*3)];
-      m=box3(0.96,1.05,0.96,pal[0],w2cx(o.x),0.57,w2cx(o.y),0.75);
-      const door=box3(0.05,0.7,0.4,pal[1],w2cx(o.x)+0.49,0.45,w2cx(o.y),0.7);const grp=new THREE.Group();grp.add(m,door);m=grp;}
-    else {m=box3(0.86,0.6,0.86,'#9a6c34',w2cx(o.x),0.35,w2cx(o.y),0.9);
-      const lid=box3(0.9,0.07,0.9,'#bd8c4e',w2cx(o.x),0.68,w2cx(o.y),0.9);const grp=new THREE.Group();grp.add(m,lid);m=grp;}
+    if(o.type==='wall'){
+      m=new THREE.Group();
+      m.add(box3(0.86,0.62,0.86,'#83898f',w2cx(o.x),0.34,w2cx(o.y),0.8));
+      m.add(box3(0.9,0.12,0.9,'#5f656b',w2cx(o.x),0.07,w2cx(o.y),0.8));
+      m.add(box3(0.9,0.06,0.9,'#aab0b5',w2cx(o.x),0.68,w2cx(o.y),0.8));
+    }
+    else if(o.type==='shelf'){
+      const pal=[['#d9b13a','#a9862a'],['#c9762f','#9c5a24'],['#3f8b93','#2e6a71']][Math.floor(hash2(o.x*11,o.y*5)*3)];
+      m=new THREE.Group();
+      m.add(box3(0.8,0.56,0.8,pal[0],w2cx(o.x),0.3,w2cx(o.y),0.8));
+      m.add(box3(0.84,0.05,0.84,pal[1],w2cx(o.x),0.6,w2cx(o.y),0.8));
+      m.add(box3(0.04,0.36,0.3,pal[1],w2cx(o.x)+0.41,0.3,w2cx(o.y),0.7));
+    }
+    else {
+      m=new THREE.Group();
+      m.add(box3(0.7,0.44,0.7,'#8d6436',w2cx(o.x),0.26,w2cx(o.y),0.9));
+      m.add(box3(0.74,0.05,0.74,'#ab8248',w2cx(o.x),0.5,w2cx(o.y),0.9));
+      m.add(box3(0.06,0.4,0.72,'#6f4d26',w2cx(o.x)+0.36,0.26,w2cx(o.y),0.9));
+    }
     world.add(m);T3.obMeshes.push({o:o,mesh:m});
   });
   G.map.barrels.forEach(b=>{
     const grp=new THREE.Group();grp.position.set(w2cx(b.x),0,w2cx(b.y));
-    const cyl=new THREE.Mesh(new THREE.CylinderGeometry(0.3,0.3,0.72,18),mat3('#cf3a30',0.55));
-    cyl.position.y=0.41;cyl.castShadow=true;cyl.receiveShadow=true;grp.add(cyl);
-    const ring1=new THREE.Mesh(new THREE.TorusGeometry(0.305,0.018,8,24),mat3('#7c1d18',0.5));
-    ring1.rotation.x=Math.PI/2;ring1.position.y=0.25;grp.add(ring1);
-    const ring2=ring1.clone();ring2.position.y=0.58;grp.add(ring2);
+    const cyl=new THREE.Mesh(new THREE.CylinderGeometry(0.26,0.26,0.62,18),mat3('#cf3a30',0.55));
+    cyl.position.y=0.35;cyl.castShadow=true;cyl.receiveShadow=true;grp.add(cyl);
+    const ring1=new THREE.Mesh(new THREE.TorusGeometry(0.265,0.016,8,24),mat3('#7c1d18',0.5));
+    ring1.rotation.x=Math.PI/2;ring1.position.y=0.22;grp.add(ring1);
+    const ring2=ring1.clone();ring2.position.y=0.5;grp.add(ring2);
     world.add(grp);T3.barrelMeshes.push({b:b,mesh:grp});
   });
   G.map.medkits.forEach(mk=>{
