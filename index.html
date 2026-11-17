@@ -408,7 +408,7 @@ canvas#board{border-radius:10px;box-shadow:0 0 0 2px rgba(0,0,0,.45), inset 0 0 
           <img class="mode-art" src="assets/ui/modo_dominacion.png" alt="Soldados tomando posiciones en varias zonas del tablero"/>
           <span class="tag amber">Nuevo · Control de zonas</span>
           <h3>Dominación</h3>
-          <p>Tres zonas a la vez: <b>Depósito</b> (flanco oeste), <b>Centro</b> (la baliza) y <b>Muelle</b> (flanco este). Al cerrar cada ronda, quien controle más zonas suma puntos: 1 punto por zona, 2 si controlas las tres. Gana quien llegue a <b>10 puntos</b> o elimine al rival. Ya no basta con aguantar un punto: hay que repartir la escuadra y decidir dónde pelear.</p>
+          <p>Tres zonas a la vez: <b>Depósito</b> (flanco oeste), <b>Centro</b> (la baliza) y <b>Muelle</b> (flanco este). Al iniciar tu turno desde la ronda 2, sumas 1 punto por cada zona que mantengas controlada (y 1 extra si dominas las tres). Gana quien llegue a <b>10 puntos</b> o elimine al rival. Ya no basta con aguantar un punto: hay que repartir la escuadra y decidir dónde pelear.</p>
           <button class="btn primary" data-start="dominacion">Configurar partida</button>
         </div>
         <div class="mode-card" data-modecard="campana" style="grid-column:span 2">
@@ -427,7 +427,7 @@ canvas#board{border-radius:10px;box-shadow:0 0 0 2px rgba(0,0,0,.45), inset 0 0 
           <img class="mode-art" src="assets/ui/modo_escolta.png" alt="Una escuadra escoltando a un dron averiado" style="max-width:340px"/>
           <span class="tag amber">Nuevo · Escolta asimétrica</span>
           <h3>Escolta del dron</h3>
-          <p>Un <b>dron averiado</b> (180 PV, pero entra ya dañado con 120) espera en tu flanco oeste y la <b>extracción</b> está en el este, tras las líneas rivales. Pega a tus soldados a él y <b>guíalo casilla a casilla</b> (máximo 2 guiados por ronda, 2 ⚡ del guía cada uno) mientras el rival intenta destruirlo: si el dron llega a la extracción, gana la escolta; si el dron cae, o si la defensa aguanta <b>15 rondas</b>, gana la defensa. Eliminar a la escuadra rival también vale, y tu Médico puede reparar el dron sobre la marcha. La IA rival juega el objetivo: intercepta al dron, le dispara primero a él y lo granadea en cuanto lo tiene a tiro.</p>
+          <p>Un <b>dron averiado</b> (240 PV, entra ya dañado con 180) espera en tu flanco oeste y la <b>extracción</b> está en el este, tras las líneas rivales. Pega a tus soldados a él (mientras tenga al menos un soldado aliado pegado recibe <b>−50 % de daño</b>) y <b>guíalo casilla a casilla</b> (máximo 2 guiados por ronda, 2 ⚡ del guía cada uno) mientras el rival intenta destruirlo: si el dron llega a la extracción, gana la escolta; si el dron cae, o si la defensa aguanta <b>15 rondas</b>, gana la defensa. Eliminar a la escuadra rival también vale, y tu Médico puede reparar el dron sobre la marcha. La IA rival juega el objetivo: intercepta al dron, le dispara primero a él y lo granadea en cuanto lo tiene a tiro.</p>
           <button class="btn primary" data-start="escolta" style="align-self:flex-start">Configurar partida</button>
         </div>
       </div>
@@ -636,11 +636,11 @@ canvas#board{border-radius:10px;box-shadow:0 0 0 2px rgba(0,0,0,.45), inset 0 0 
       <div><b>8 · Guerra de Naciones</b><p>Solo sábado y domingo. Tu escuadra, con la skin de tu nación, contra una nación rival de la IA. Cada victoria suma 1 punto al marcador local de tu nación.</p></div>
       <div><b>9 · Skins</b><p>Empiezas con dos: la Estándar, el soldado genérico sin nada especial, y la de tu Nación, con los colores de su bandera y el emblema de sus fuerzas armadas. Las dos son solo aspecto. Las skins que lleguen más adelante darán pasivas pequeñas; estas dos, ninguna.</p></div>
       <div><b>13 · El tablero está vivo</b><p>Nada se teletransporta: cada soldado se desliza hasta su casilla y respira en reposo mientras espera órdenes, los disparos se ven como trazadoras con su impacto y su número de daño flotante, y las explosiones sacuden la cámara. La baliza pulsa, las cajas de botín flotan sobre su casilla y la torreta central gira patrullando hasta que alguien la captura. Si tu sistema pide reducir el movimiento, la animación se apaga y el tablero vuelve a ser estático sin perder ninguna regla.</p></div>
-      <div><b>14 · Dominación</b><p>Tres zonas: Depósito (casilla 4,5 contando desde la esquina superior izquierda), Centro (las cuatro casillas de la baliza) y Muelle (casilla 9,8), elegidas libres de muros, cajas y barriles en los trece tableros y simétricas a 180° entre sí. Una zona es tuya si al cerrar la ronda tienes al menos un soldado dentro y ningún enemigo dentro. Al cerrar cada ronda sumas 1 punto por zona controlada, y 1 punto extra si controlas las tres. Gana quien llegue a 10 puntos; si nadie llega, al final de la ronda 15 gana quien tenga más puntos, y eliminar al rival también gana al instante. Las zonas se ven en el tablero con su letra y su color de control, y el marcador va sobre el tablero.</p></div>
+      <div><b>14 · Dominación</b><p>Tres zonas: Depósito (casilla 4,5 contando desde la esquina superior izquierda), Centro (las cuatro casillas de la baliza) y Muelle (casilla 9,8), elegidas libres de muros, cajas y barriles en los trece tableros y simétricas a 180° entre sí. Una zona es tuya si tienes al menos un soldado dentro y ningún enemigo dentro. Al iniciar tu turno desde la ronda 2 sumas 1 punto por zona controlada, y 1 punto extra si controlas las tres. Gana quien llegue a 10 puntos; si nadie llega, al final de la ronda 15 gana quien tenga más puntos, y eliminar al rival también gana al instante. Las zonas se ven en el tablero con su letra y su color de control, y el marcador va sobre el tablero.</p></div>
       <div><b>15 · Campaña · Operación Londres</b><p>Cinco misiones en orden, cada una con mapa, objetivo, formato y dificultad propios. La escuadra arrastra veterania entre misiones: sobrevivir a una misión da +25 PV y +1 de energía máxima en las siguientes, acumulable. Perder una misión no borra la veterania ni el progreso: solo repites esa misión. Completar las cinco cierra la operación.</p></div>
       <div><b>16 · Dificultad de la IA</b><p>Recluta: la IA hace un 15 % menos de daño. Normal: la IA de siempre. Veterano: +1 de energía por soldado rival, cura con el Médico, despliega la torreta del Ingeniero y prioriza baliza y zonas de Dominación. Élite: todo lo de Veterano y además +2 de energía, +25 PV, +15 % de daño y revive con el Médico. Normal, Veterano y Élite concentran el fuego sobre tu soldado más herido (Recluta dispara al más cercano). A dos jugadores la dificultad no se aplica.</p></div>
       <div><b>17 · El arma, agarrada también en 3D en vivo</b><p>El arreglo de los sprites llega a la vista 3D en directo: cada fotograma, el arma de utilería se recoloca sobre las manos reales del esqueleto (empuñadura en la mano derecha y guardamanos en la de apoyo; con pistola, sobre el eje del antebrazo), así que ya no flota delante del pecho ni en reposo ni al andar, disparar o encajar un tiro.</p></div>
-      <div><b>18 · Escolta del dron</b><p>Modo asimétrico: la escuadra del Jugador 1 escolta y la rival defiende. El dron averiado (180 PV, entra ya dañado con 120) sale de la casilla (2,6) contando desde la esquina superior izquierda, y la extracción es la zona 2×2 de las columnas 11–12 y filas 6–7, en el este. Guiarlo cuesta pegarse a él: un soldado adyacente pulsa «Guiar dron» (2 ⚡) y toca la casilla destino junto al dron, y entre toda la escuadra hay 2 guiados por ronda, así que el dron avanza como mucho 2 casillas por ronda y siempre con escolta al lado. El Médico lo repara con su especial (+80 PV, del mismo cupo de 2 curaciones) estando adyacente. El dron no dispara, no devuelve fuego y no provoca vigilancia, pero los disparos, las granadas, la salpicadura y los barriles sí le dañan, y su cobertura direccional cuenta como la de un soldado. Gana la escolta si el dron pisa la extracción o si elimina al rival; gana la defensa si destruye el dron, elimina a la escolta o aguanta las 15 rondas. Contra la IA, la defensa juega el objetivo: intercepta, dispara primero al dron y lo granadea.</p></div>
+      <div><b>18 · Escolta del dron</b><p>Modo asimétrico: la escuadra del Jugador 1 escolta y la rival defiende. El dron averiado (240 PV, entra ya dañado con 180) sale de la casilla (2,6) contando desde la esquina superior izquierda, y la extracción es la zona 2×2 de las columnas 11–12 y filas 6–7, en el este. Guiarlo cuesta pegarse a él: un soldado adyacente pulsa «Guiar dron» (2 ⚡) y toca la casilla destino junto al dron, y entre toda la escuadra hay 2 guiados por ronda, así que el dron avanza como mucho 2 casillas por ronda y siempre con escolta al lado. Además, <b>blindaje de escolta</b>: mientras el dron tenga al menos un soldado aliado adyacente, todo daño que reciba se reduce a la mitad (−50 %). El Médico lo repara con su especial (+80 PV, del mismo cupo de 2 curaciones) estando adyacente. El dron no dispara, no devuelve fuego y no provoca vigilancia, pero los disparos, las granadas, la salpicadura y los barriles sí le dañan, y su cobertura direccional cuenta como la de un soldado. Gana la escolta si el dron pisa la extracción o si elimina al rival; gana la defensa si destruye el dron, elimina a la escolta o aguanta las 15 rondas. Contra la IA, la defensa juega el objetivo: intercepta, dispara primero al dron y lo granadea.</p></div>
       <div><b>19 · Humo M18 del Espía</b><p>El Espía lleva <b>2 granadas de humo M18</b> por partida (botón «Humo M18», 2 ⚡, lanzamiento a 4 casillas). La cortina tapa la casilla destino y las 4 adyacentes en cruz, y <b>bloquea la visión a través de ella durante 2 rondas completas</b>: nadie dispara, devuelve fuego, vigila ni acierta con torreta a través del humo, y tampoco se acierta a quien está <b>dentro</b> del humo ni se dispara desde dentro a más de 1 casilla; el indicador de puntería lo marca como <b>«Sin tiro · humo M18»</b> y el aviso al intentarlo nombra el humo. Lo mismo vale para disparar contra una torreta desplegada, un barril o una caja que queden tras la cortina. Las <b>granadas M67 no se ven afectadas</b>: se lanzan en arco, por encima de la cortina. El humo <b>no bloquea el movimiento</b> (se entra y se cruza libremente) y a 1 casilla el tiro se resuelve igual, porque entre dos casillas pegadas no hay humo de por medio. Tapa a los dos bandos por igual, se disipa sola al empezar el turno de quien la lanzó en la segunda ronda siguiente, y la IA del Espía la usa para taparse cuando tiene al enemigo a tiro y con visión. En Escolta, una cortina entre la defensa y el dron le compra al dron dos rondas de avance sin recibir fuego. Para verlo en juego sin configurar nada: el botón <b>«Probar el humo M18»</b> de la pantalla de inicio despliega un 5 contra 5 con un Espía por escuadra y el tuyo ya seleccionado.</p></div>
       <div><b>20 · El giro</b><p>Cada soldado mira hacia su <b>dirección de mira</b> (hacia donde se movió o disparó por última vez), y esa dirección es la que decide su cobertura y si le atacan por la espalda. Al cambiar de mira, el soldado <b>gira sobre el terreno</b> por el camino más corto, en unos 300 ms por cuarto de vuelta, con su pasito de ajuste: ya no rota de golpe ni mira hacia otro sitio distinto del que calculan las reglas. En la vista clásica el giro se lee en el volteo del sprite y en que se estrecha un instante mientras rota. Las torretas y el dron giran igual. Es un giro construido en código: entre los clips del original convertidos no hay ninguno de giro. Si tu sistema pide reducir el movimiento, el giro es instantáneo.</p></div>
       <div><b>21 · Minas Claymore M18A1 del Ingeniero</b><p>El Ingeniero lleva <b>2 minas Claymore</b> por partida (botón «Claymore M18A1», 3 ⚡) y las coloca en una <b>casilla adyacente libre</b>. La mina queda <b>oculta para el enemigo</b> en las dos vistas: solo la ve quien la colocó, a ras de suelo y con un LED rojo, y ni el registro de partida revela dónde la puso la IA. No bloquea el movimiento, ni la visión, ni da cobertura. Cuando un soldado enemigo <b>acaba su movimiento sobre su casilla</b>, la mina estalla: <b>60 de daño</b> explosivo a ese soldado y la mina se consume. Bajo los pies de su propio bando no estalla nunca, y el dron de Escolta no las dispara, porque no presiona el suelo. La IA del Ingeniero las siembra en la baliza, en las zonas de Dominación y de cara al enemigo.</p></div>
@@ -813,12 +813,12 @@ const DOM_TARGET=10, DOM_MAX_ROUNDS=15;
    tableros, y salida y extracción son simétricas a 180° entre sí.
    Guiado: un soldado de la escolta adyacente al dron lo mueve 1 casilla
    por 2 ⚡, con un máximo de 2 guiados por ronda entre toda la
-   escuadra. El dron entra averiado (120 de 180 PV) y el Médico puede
+   escuadra. El dron entra averiado (180 de 240 PV) y el Médico puede
    repararlo. La defensa gana destruyéndolo, eliminando a la escolta o
    aguantando ESCORT_MAX_ROUNDS rondas. */
 const ESCORT_START={x:1,y:5};
 const ESCORT_EXT=[{x:10,y:5},{x:11,y:5},{x:10,y:6},{x:11,y:6}];
-const ESCORT_MAX_ROUNDS=15, ESCORT_DRONE_MAXHP=180, ESCORT_DRONE_HP=120, ESCORT_GUIDES_PER_ROUND=2;
+const ESCORT_MAX_ROUNDS=15, ESCORT_DRONE_MAXHP=240, ESCORT_DRONE_HP=180, ESCORT_GUIDES_PER_ROUND=2;
 function isExtraction(x,y){return ESCORT_EXT.some(t=>t.x===x&&t.y===y);}
 /* ===== CAMPAÑA · OPERACIÓN LONDRES ===== */
 const CAMPAIGN_MISSIONS=[
@@ -962,8 +962,8 @@ function openSetup(mode,missionIdx){
   $('#setupTitle').textContent='Configurar partida · '+(titles[mode]||mode);
   $('#setupSub').textContent=mode==='guerra'
     ? 'Evento de fin de semana: '+myNation.name+' contra '+setup.rivalNation.name+' (IA). Formato fijo 4 contra 4 y modo Captura de baliza. Elige los roles y las armas de tu escuadra.'
-    : mode==='dominacion' ? 'Dominación: tres zonas (Depósito, Centro y Muelle), 1 punto por zona al cerrar cada ronda y punto extra si controlas las tres. Gana quien llegue a 10 puntos, tenga más al final de la ronda 15 o elimine al rival.'
-    : mode==='escolta' ? 'Escolta asimétrica: tu escuadra (Jugador 1) escolta al dron averiado desde el oeste hasta la extracción del este, guiándolo con soldados pegados a él (2 ⚡ por casilla, 2 guiados por ronda). La escuadra rival defiende: gana si destruye el dron o aguanta 15 rondas. Tu Médico puede reparar el dron con su especial. Elige mapa, formato y roles como en cualquier partida.'
+    : mode==='dominacion' ? 'Dominación: tres zonas (Depósito, Centro y Muelle). Desde la ronda 2, al iniciar tu turno sumas 1 punto por zona que mantengas controlada y 1 punto extra si controlas las tres. Gana quien llegue a 10 puntos, tenga más al final de la ronda 15 o elimine al rival.'
+    : mode==='escolta' ? 'Escolta asimétrica: tu escuadra (Jugador 1) escolta al dron averiado desde el oeste hasta la extracción del este, guiándolo con soldados pegados a él (2 ⚡ por casilla, 2 guiados por ronda). Mientras tenga un soldado aliado pegado recibe −50 % de daño. La escuadra rival defiende: gana si destruye el dron o aguanta 15 rondas. Tu Médico puede reparar el dron con su especial. Elige mapa, formato y roles como en cualquier partida.'
     : mode==='campana' ? CAMPAIGN_MISSIONS[setup.campaignMission].brief+' El mapa, el formato y la dificultad vienen fijados por la misión; tú eliges roles y armas.'
     : 'Elige formato, rival y la composición de cada escuadra. Cada rol tiene sus armas permitidas y su especial, y su vida, energía y coste de movimiento van por tipo de cuerpo (ligero, medio o pesado), como en el original.';
   const locked=(mode==='guerra'||mode==='campana');
@@ -1033,7 +1033,10 @@ $('#launchBtn').onclick=()=>startGame(readSquad('A'),readSquad('B'));
    con la ronda y el bando, y todos los tiros, críticos y dispersiones de
    ese turno salen de ella en orden. */
 let rngState=987654321;
-function setTurnSeed(round,turn){rngState=((round*987643+(turn==='A'?12345:67890))>>>0)||1;}
+function setTurnSeed(round,turn){
+  const salt=(typeof G!=='undefined'&&G&&G.matchSeed)?G.matchSeed:1;
+  rngState=((Math.imul(round,987643)^Math.imul(salt,2654435761)^(turn==='A'?12345:67890))>>>0)||1;
+}
 function rng(){rngState=(Math.imul(rngState,1664525)+1013904223)>>>0;return rngState/4294967296;}
 function facingVec(u){const m={0:[1,0],1:[0,1],2:[-1,0],3:[0,-1]};return m[(u.facing==null?(u.team==='A'?0:2):u.facing)]||[1,0];}
 function angleToFacing(dx,dy){if(dx===0&&dy===0)return null;if(Math.abs(dx)>=Math.abs(dy))return dx>=0?0:2;return dy>=0?1:3;}
@@ -1464,10 +1467,11 @@ function cheb(a,b){return Math.max(Math.abs(a.x-b.x),Math.abs(a.y-b.y));}
 function moveCostOf(unit){const r=ROLES[unit.role];return r?(BODIES[r.body]||BODIES.medio).moveCost:2;}
 function reachable(unit,budget){
   const mc=moveCostOf(unit);
+  const dirs=(unit&&unit.team==='B')?[[-1,0],[1,0],[0,-1],[0,1]]:[[1,0],[-1,0],[0,1],[0,-1]];
   const seen=new Map();const key=(x,y)=>x+','+y;
   const q=[{x:unit.x,y:unit.y,d:0}];seen.set(key(unit.x,unit.y),0);
   while(q.length){const c=q.shift();if(c.d+mc>budget)continue;
-    [[1,0],[-1,0],[0,1],[0,-1]].forEach(([dx,dy])=>{const nx=c.x+dx,ny=c.y+dy,k=key(nx,ny);
+    dirs.forEach(([dx,dy])=>{const nx=c.x+dx,ny=c.y+dy,k=key(nx,ny);
       if(nx<0||ny<0||nx>=W||ny>=H||seen.has(k))return;
       if(obAt(nx,ny)||unitAt(nx,ny)||deployedAt(nx,ny)||droneAt(nx,ny))return;
       seen.set(k,c.d+mc);q.push({x:nx,y:ny,d:c.d+mc});});}
@@ -1496,7 +1500,7 @@ function coverLevel(target,shooter){
   let best=0;
   const dirs=[[1,0],[-1,0],[0,1],[0,-1]];
   for(const [dx,dy] of dirs){const o=obAt(target.x+dx,target.y+dy);if(!o)continue;
-    const toward=(target.x+dx-shooter.x)*(target.x-shooter.x)+(target.y+dy-shooter.y)*(target.y-shooter.y);
+    const toward=dx*(shooter.x-target.x)+dy*(shooter.y-target.y);
     if(toward<=0)continue;
     let lvl=0;
     if(o.type==='wall'||o.type==='shelf')lvl=3;
@@ -1561,7 +1565,8 @@ function startGame(squadA,squadB){
   uid=0;
   const rivalNation=setup.mode==='guerra'?setup.rivalNation:(setup.opp==='local'?myNation:NATIONS[Math.floor(Math.random()*NATIONS.length)]);
   const campMission=setup.mode==='campana'?CAMPAIGN_MISSIONS[setup.campaignMission]:null;
-  G={mode:setup.mode,opp:setup.opp,turn:'A',round:1,units:[],map:buildMap(setup.map),deployed:[],lootBoxes:[],lootDropped:{},
+  const matchSeed=((Math.random()*0x7fffffff)>>>0)||1;
+  G={mode:setup.mode,opp:setup.opp,turn:'A',round:1,matchSeed,units:[],map:buildMap(setup.map),deployed:[],lootBoxes:[],lootDropped:{},
      beacon:{A:0,B:0},dom:{A:0,B:0},smoke:[],mines:[],drone:setup.mode==='escolta'?{isDrone:true,role:'Dron averiado',team:'A',x:ESCORT_START.x,y:ESCORT_START.y,dx:ESCORT_START.x,dy:ESCORT_START.y,hp:ESCORT_DRONE_HP,maxHp:ESCORT_DRONE_MAXHP,alive:true,invisible:false,weapon:null,facing:0,movesLeft:ESCORT_GUIDES_PER_ROUND,movedThisTurn:false,delivered:false}:null,difficulty:setup.opp==='ia'?setup.difficulty:'normal',campaignMission:setup.mode==='campana'?setup.campaignMission:null,campaignObjective:campMission?campMission.objective:null,
      selected:null,actionMode:'move',over:false,aiBusy:false,lastMoveUndo:null,rivalNation,
      names:{A:myNation.name+' (J1)',B:setup.mode==='guerra'?rivalNation.name+' (IA)':(setup.opp==='ia'?'Escuadra IA':'Jugador 2')}};
@@ -1575,8 +1580,8 @@ function startGame(squadA,squadB){
   $('#setupArea').style.display='none';$('#menuArea').style.display='none';$('#gameArea').style.display='block';
   $('#log').innerHTML='';
   log('Despliegue en el mapa '+G.map.name+'. Modo: '+(effMode(G)==='eliminacion'?'Eliminación':effMode(G)==='dominacion'?'Dominación':effMode(G)==='escolta'?'Escolta del dron':G.mode==='guerra'?'Guerra de Naciones · Captura de baliza':'Captura de baliza')+(G.mode==='campana'?(' · Campaña Misión '+(G.campaignMission+1)+' · '+CAMPAIGN_MISSIONS[G.campaignMission].title):'')+' · Dificultad IA: '+G.difficulty+' · '+setup.fmt+' contra '+setup.fmt+'.');
-  if(effMode(G)==='dominacion')log('⬢ Dominación: al cerrar cada ronda, 1 punto por zona controlada (Depósito, Centro, Muelle) y 1 extra si controlas las tres. Gana quien llegue a '+DOM_TARGET+' puntos.');
-  if(effMode(G)==='escolta')log('🤖 Escolta: el dron averiado ('+ESCORT_DRONE_HP+'/'+ESCORT_DRONE_MAXHP+' PV) espera en (2,6). Pega un soldado a él, pulsa «Guiar dron» (2 ⚡) y toca la casilla destino: máximo '+ESCORT_GUIDES_PER_ROUND+' guiados por ronda. Si pisa la extracción del este (columnas 11–12, filas 6–7), gana la escolta; si el dron cae o pasan '+ESCORT_MAX_ROUNDS+' rondas, gana la defensa.');
+  if(effMode(G)==='dominacion')log('⬢ Dominación: mantén las zonas (Depósito, Centro, Muelle) hasta el inicio de tu siguiente turno (desde la ronda 2): +1 punto por zona y +1 extra si dominas las tres. Gana quien llegue a '+DOM_TARGET+' puntos.');
+  if(effMode(G)==='escolta')log('🤖 Escolta: el dron averiado ('+ESCORT_DRONE_HP+'/'+ESCORT_DRONE_MAXHP+' PV) espera en (2,6). Pega un soldado a él (−50 % de daño mientras tenga escolta pegado), pulsa «Guiar dron» (2 ⚡) y toca la casilla destino: máximo '+ESCORT_GUIDES_PER_ROUND+' guiados por ronda. Si pisa la extracción del este (columnas 11–12, filas 6–7), gana la escolta; si el dron cae o pasan '+ESCORT_MAX_ROUNDS+' rondas, gana la defensa.');
   G.units.filter(u=>u.team==='A'&&u.vetLevel>0).forEach(u=>log('★ '+u.role+' entra con veterania nivel '+u.vetLevel+': +'+(u.vetLevel*25)+' PV y +'+u.vetLevel+' ⚡ por las misiones que ya sobrevivió.'));
   if(G.mode==='guerra')log('⚑ '+myNation.name+' contra '+rivalNation.name+'. Que gane tu nación.');
   log('Turno de '+G.names.A+'. Toca un soldado para seleccionarlo, toca una casilla iluminada para mover y a un enemigo para disparar.');
@@ -1608,6 +1613,9 @@ function fireClipFor(weaponName){
 function playOnce(u,key){if(u){u._onceKey=key;u._onceT=FX.t;}}
 function damage(target,dmg,srcLabel){
   if(!target.alive)return;
+  if(target.isDrone&&G&&G.units&&G.units.some(u=>u.alive&&u.team==='A'&&dist(u,target)<=1)){
+    dmg=Math.max(1,Math.round(dmg*0.5));
+  }
   target.hp-=dmg;
   target._hitT=FX.t;target._hitAmt=Math.min(1,dmg/70);
   /* Tipo de impacto, para elegir el clip del original en la vista 3D:
@@ -2000,6 +2008,8 @@ function deployTurret(u,x,y){
   G.actionMode='move';updateUI();draw();
 }
 function captureTurret(u){
+  if(effMode(G)==='dominacion'){toast('En Dominación no se usa la torreta central.');return;}
+  if(G&&G.round<2){toast('La torreta central se calibra en la ronda 1: se puede capturar desde la ronda 2.');return;}
   if(!(u.x===TURRET_POS.x&&u.y===TURRET_POS.y)){toast('La torreta capturable solo se captura desde su casilla central.');return;}
   if(G.map.turret.owner===u.team){toast('La torreta central ya es de tu bando.');return;}
   if(u.energy<2){toast('Capturar la torreta cuesta 2 ⚡.');return;}
@@ -2024,19 +2034,20 @@ function turretFire(ownerTeam){
       damage(inR[0],dmg,label);
     }
   };
-  if(G.map.turret.owner===ownerTeam)fire(TURRET_POS,40,6,'La torreta central');
+  if(effMode(G)!=='dominacion'&&G.map.turret.owner===ownerTeam)fire(TURRET_POS,30,6,'La torreta central');
   G.deployed.filter(t=>t.alive&&t.team===ownerTeam).forEach(t=>fire(t,45,6,'La torreta M2 desplegada'));
 }
 
 /* ---- turn flow ---- */
-function scoreDominationAtRoundEnd(){
-  if(!G||effMode(G)!=='dominacion')return;
-  let aPts=0,bPts=0;const names=[];
-  DOM_ZONES.forEach(z=>{const c=domControl(z);if(c==='A'){aPts++;names.push(z.name+' para J1');}else if(c==='B'){bPts++;names.push(z.name+' para el rival');}});
-  if(aPts===3)aPts++;
-  if(bPts===3)bPts++;
-  G.dom.A+=aPts;G.dom.B+=bPts;
-  log('⬢ Cierre de ronda '+G.round+' en Dominación: '+(names.length?names.join(' · '):'ninguna zona controlada')+' → J1 +'+aPts+' (total '+G.dom.A+') · Rival +'+bPts+' (total '+G.dom.B+').');
+function scoreDominationFor(team){
+  if(!G||effMode(G)!=='dominacion'||G.round<2)return;
+  let pts=0;const held=[];
+  DOM_ZONES.forEach(z=>{if(domControl(z)===team){pts++;held.push(z.name);}});
+  if(pts===3)pts++;
+  if(pts>0){
+    G.dom[team]+=pts;
+    log('⬢ Inicio de turno de '+teamName(team)+' (R'+G.round+') en Dominación: '+held.join(', ')+' → +'+pts+' (total J1 '+G.dom.A+' · Rival '+G.dom.B+').');
+  }
 }
 function checkBeaconAtTurnEnd(teamJustPlayed){
   if(effMode(G)==='eliminacion'||effMode(G)==='dominacion'||effMode(G)==='escolta')return;
@@ -2062,10 +2073,15 @@ function checkWin(){
     if(G.beacon.A>=5){winner='A';reason='Baliza aguantada durante 5 turnos.';}
     if(G.beacon.B>=5){winner='B';reason='La baliza enemiga llegó a 5 turnos.';}
   }
-  else if(effMode(G)==='dominacion'){
-    if(G.dom.A>=DOM_TARGET){winner='A';reason='Dominación: '+G.dom.A+' puntos, primero en llegar a '+DOM_TARGET+'.';}
-    else if(G.dom.B>=DOM_TARGET){winner='B';reason='Dominación rival: '+G.dom.B+' puntos, primero en llegar a '+DOM_TARGET+'.';}
-    else if(G.round>DOM_MAX_ROUNDS){if(G.dom.A>G.dom.B){winner='A';reason='Dominación al final de la ronda '+DOM_MAX_ROUNDS+': '+G.dom.A+' a '+G.dom.B+'.';}else if(G.dom.B>G.dom.A){winner='B';reason='Dominación al final de la ronda '+DOM_MAX_ROUNDS+': '+G.dom.B+' a '+G.dom.A+'.';}else{winner='draw';reason='Dominación empatada a '+G.dom.A+' al final de la ronda '+DOM_MAX_ROUNDS+'.';}}
+  else if(effMode(G)==='dominacion'&&(G._domRoundDone||G.round>DOM_MAX_ROUNDS)){
+    if((G.dom.A>=DOM_TARGET||G.dom.B>=DOM_TARGET)&&G.dom.A!==G.dom.B){
+      if(G.dom.A>G.dom.B){winner='A';reason='Dominación al cerrar ronda: '+G.dom.A+' a '+G.dom.B+'.';}
+      else{winner='B';reason='Dominación rival al cerrar ronda: '+G.dom.B+' a '+G.dom.A+'.';}
+    } else if(G.round>DOM_MAX_ROUNDS||(G._domRoundDone&&G.round>=DOM_MAX_ROUNDS)){
+      if(G.dom.A>G.dom.B){winner='A';reason='Dominación al final de la ronda '+DOM_MAX_ROUNDS+': '+G.dom.A+' a '+G.dom.B+'.';}
+      else if(G.dom.B>G.dom.A){winner='B';reason='Dominación al final de la ronda '+DOM_MAX_ROUNDS+': '+G.dom.B+' a '+G.dom.A+'.';}
+      else{winner='draw';reason='Dominación empatada a '+G.dom.A+' al final de la ronda '+DOM_MAX_ROUNDS+'.';}
+    }
   }
   else if(effMode(G)==='escolta'){
     if(G.round>ESCORT_MAX_ROUNDS){winner='B';reason='El dron no llegó a la extracción en '+ESCORT_MAX_ROUNDS+' rondas: la defensa aguanta y la escolta fracasa.';}
@@ -2126,7 +2142,14 @@ function endTurn(){
   checkBeaconAtTurnEnd(G.turn);
   if(checkWin())return;
   const next=G.turn==='A'?'B':'A';
-  if(next==='A'){scoreDominationAtRoundEnd();if(checkWin())return;G.round++;maybeDropLoot();if(effMode(G)==='dominacion'&&G.round>DOM_MAX_ROUNDS){if(checkWin())return;}if(effMode(G)==='escolta'&&G.round>ESCORT_MAX_ROUNDS){if(checkWin())return;}if(G.drone){G.drone.movesLeft=ESCORT_GUIDES_PER_ROUND;G.drone.movedThisTurn=false;}}
+  if(next==='A'){
+    if(effMode(G)==='dominacion'){G._domRoundDone=true;if(checkWin())return;G._domRoundDone=false;}
+    G.round++;maybeDropLoot();
+    if(effMode(G)==='dominacion'&&G.round>DOM_MAX_ROUNDS){if(checkWin())return;}
+    if(effMode(G)==='escolta'&&G.round>ESCORT_MAX_ROUNDS){if(checkWin())return;}
+    if(G.drone){G.drone.movesLeft=ESCORT_GUIDES_PER_ROUND;G.drone.movedThisTurn=false;}
+  }
+  if(effMode(G)==='dominacion'&&G.round>=2){scoreDominationFor(next);}
   /* Humo de las M18: cada cortina envejece al empezar el turno de
      quien la lanzó y se disipa cuando su contador llega a 0, así que
      tapa durante SMOKE_TURNS rondas completas de los dos bandos. */
@@ -2176,87 +2199,375 @@ function aiUnitAct(u){
       const w=WEAPONS[u.weapon];
       const drone=(effMode(G)==='escolta'&&G.drone&&G.drone.alive)?G.drone:null;
       const hardAI=(G.difficulty==='veterano'||G.difficulty==='elite');
-      /* ESCOLTA (bando A): guiar y proteger el dron hacia la extracción */
+      /* ESCOLTA (bando A): el Francotirador cubre desde atrás; el resto abre brecha, limpia barriles peligrosos, guía, repara y protege el dron */
       if(u.team==='A'&&drone){
         const d=drone;
-        /* 1) guiar si estoy pegado y hay guiados y energía */
-        if(dist(u,d)<=1&&d.movesLeft>0&&u.energy>=2){
-          const ext=ESCORT_EXT.slice().sort((a,b)=>pathDist(a,d)-pathDist(b,d))[0];
-          let bx=null,by=null,bd=99;
-          for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){
+        const ext=ESCORT_EXT.slice().sort((a,b)=>pathDist(a,d)-pathDist(b,d))[0];
+        const pathDistBrk=(a,b)=>{
+          if(a.x===b.x&&a.y===b.y)return 0;
+          const distM=new Int16Array(W*H).fill(999);
+          const idx=(x,y)=>y*W+x;
+          const dq=[{x:a.x,y:a.y,c:0}];distM[idx(a.x,a.y)]=0;
+          while(dq.length){
+            dq.sort((p,q)=>p.c-q.c);
+            const cur=dq.shift();
+            if(cur.x===b.x&&cur.y===b.y)return cur.c;
+            if(cur.c>distM[idx(cur.x,cur.y)])continue;
+            for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){
+              const nx=cur.x+dx,ny=cur.y+dy;
+              if(nx<0||ny<0||nx>=W||ny>=H)continue;
+              const o=obAt(nx,ny);
+              if(o&&o.type!=='crate')continue;
+              const nc=cur.c+(o?2:1);
+              if(nc<distM[idx(nx,ny)]){distM[idx(nx,ny)]=nc;dq.push({x:nx,y:ny,c:nc});}
+            }
+          }
+          return 99;
+        };
+        const curExtDist=pathDistBrk(d,ext);
+        const blockingCrates=G.map.obstacles.filter(o=>o.type==='crate'&&o.x>=d.x&&o.x<=10&&Math.abs(o.y-d.y)<=2)
+          .sort((a,b)=>(cheb(d,a)-cheb(d,b))||(Math.abs(a.y-d.y)-Math.abs(b.y-d.y)));
+        const dangerousBarrels=G.map.barrels.filter(b=>b.alive&&b.x>=d.x&&b.x<=d.x+3&&Math.abs(b.y-d.y)<=2
+          &&cheb(b,d)>1&&!G.units.some(a=>a.alive&&a.team==='A'&&cheb(a,b)<=1));
+        const shootCrateIfNeeded=()=>{
+          for(const br of dangerousBarrels){
+            if(u.energy<w.cost)break;
+            if(cheb(u,br)<=w.rng&&hasLOS(u,br)&&!smokeBlocksLOS(u,br)){
+              spendEnergy(u,w.cost);explodeBarrel(br,u.role+' (A)');
+              if(!G||G.over)return true;
+              return true;
+            }
+          }
+          for(const cr of blockingCrates){
+            if(cr.hp<=0)continue;
+            if(u.energy<w.cost)break;
+            if(cheb(u,cr)<=w.rng&&hasLOS(u,cr)&&!smokeBlocksLOS(u,cr)){
+              spendEnergy(u,w.cost);cr.hp-=w.dmg;
+              if(cr.hp<=0){G.map.obstacles=G.map.obstacles.filter(o=>o!==cr);}
+              return true;
+            }
+          }
+          return false;
+        };
+        const droneGuards=(ex)=>{
+          const exc=ex||null;
+          return G.units.filter(a=>a.alive&&a.team==='A'&&a!==exc&&dist(a,d)<=1).length;
+        };
+        /* El Francotirador apoya desde cobertura a media/larga distancia: limpia cajas/barriles o castiga amenazas, sin meterse al cuerpo a cuerpo */
+        if(w.rng>=8){
+          const reachS=reachable(u,Math.max(0,u.energy-w.cost));
+          let bestS=null,bestScoreS=1e9;
+          reachS.forEach((dd,k)=>{
+            const [x,y]=k.split(',').map(Number);const pos={x,y};
+            const dEnemy=target?cheb(pos,target):8;
+            const dDrone=dist(pos,d);
+            const cov=target?coverLevel(pos,target):0;
+            let s=Math.abs(dDrone-5)*2.2+dd*0.4-cov*2.5;
+            if(target&&dEnemy<5)s+=(5-dEnemy)*6;
+            if(target&&cheb(pos,target)<=w.rng&&hasLOS(pos,target)&&!smokeBlocksLOS(pos,target))s-=6;
+            if(G.map.barrels.some(b=>b.alive&&cheb(pos,b)<=1))s+=16;
+            if(s<bestScoreS){bestScoreS=s;bestS={x,y,d:dd};}
+          });
+          if(!u.movedThisTurn&&bestS&&(bestS.x!==u.x||bestS.y!==u.y)){
+            const ff=angleToFacing(bestS.x-u.x,bestS.y-u.y);if(ff!=null)u.facing=ff;
+            u.x=bestS.x;u.y=bestS.y;u.energy-=bestS.d;u.movedThisTurn=true;checkMines(u);checkOverwatch(u);pickupLoot(u);
+          }
+          if(!u.alive||!G||G.over)return res();
+          const sFoes=G.units.filter(e=>e.alive&&e.team!==u.team&&!e.invisible&&cheb(u,e)<=w.rng&&hasLOS(u,e)&&!smokeBlocksLOS(u,e)&&hitChance(u,e,w)>0)
+            .sort((a,b)=>(dist(a,d)-dist(b,d))||(a.hp-b.hp));
+          if(dangerousBarrels.length&&cheb(u,dangerousBarrels[0])<=w.rng&&hasLOS(u,dangerousBarrels[0])&&!smokeBlocksLOS(u,dangerousBarrels[0])&&u.energy>=w.cost){
+            shootCrateIfNeeded();
+          }
+          let ft=sFoes[0]||null;
+          if(ft&&!ft.movedThisTurn&&u.energy>=w.cost+3){useSpecial(u,ft);if(!G||G.over)return res();}
+          let ss=0;
+          while(ft&&ft.alive&&u.energy>=w.cost&&ss<2){if(!tryShoot(u,ft,u.weapon,null))break;ss++;if(!ft.alive)ft=sFoes.find(e=>e.alive)||null;}
+          if(!ss&&blockingCrates.length&&u.energy>=w.cost){shootCrateIfNeeded();}
+          if(u.alive&&G&&!G.over&&u.energy>=3&&!u.overwatch&&!u.stunned) {u.energy-=3;u.overwatch=true;}
+          return res();
+        }
+        /* 0) Médico: si el dron tiene daño serio (<=155 PV, o <=maxHp-40 desde R3) o un aliado está herido, curarlo */
+        if(u.role==='Médico'&&u.heals>0&&u.energy>=3){
+          const hurtAlly=G.units.filter(a=>a.alive&&a.team==='A'&&a.hp<=a.maxHp*0.65&&dist(u,a)<=1).sort((a,b)=>a.hp-b.hp)[0];
+          const droneNeedsHeal=(d.hp<=155)||(G.round>=3&&d.hp<=d.maxHp-40);
+          const healTgt=droneNeedsHeal?d:hurtAlly;
+          if(healTgt){
+            if(dist(u,healTgt)<=1){useSpecial(u,healTgt);if(!G||G.over)return res();}
+            else if(u.energy>=moveCostOf(u)+3){
+              const reach=reachable(u,u.energy-3);
+              let best=null,bestS=1e9;
+              reach.forEach((dd,k)=>{const [x,y]=k.split(',').map(Number);const s=dist({x,y},healTgt)*4+dd+(G.map.barrels.some(b=>b.alive&&cheb({x,y},b)<=1)?14:0);if(s<bestS){bestS=s;best={x,y,d:dd};}});
+              if(best&&dist(best,healTgt)<=1){
+                const ff=angleToFacing(best.x-u.x,best.y-u.y);if(ff!=null)u.facing=ff;
+                u.x=best.x;u.y=best.y;u.energy-=best.d;u.movedThisTurn=true;checkMines(u);checkOverwatch(u);pickupLoot(u);
+                if(u.alive&&G.drone&&G.drone.alive&&dist(u,healTgt)<=1&&u.energy>=3){useSpecial(u,healTgt);if(!G||G.over)return res();}
+              }
+            }
+          }
+        }
+        /* 0b) Despejar barril peligroso o caja bloqueante si hay tiro limpio antes de empujar */
+        if((dangerousBarrels.length||blockingCrates.length)&&u.energy>=w.cost+2&&dist(u,d)>1){
+          shootCrateIfNeeded();
+          if(!G||G.over||!u.alive)return res();
+        }
+        /* 1) guiar si está pegado y mejora ruta directa al este (garantizando escolta adyacente activa) */
+        const tryGuideFwd=(maxGuides, allowUnmovedSelf)=>{
+          if(dist(u,d)>1||d.movesLeft<=0||u.energy<2)return false;
+          const lim=maxGuides||2;
+          let guided=0;
+          for(let step=0;step<lim;step++){
+            if(dist(u,d)>1||d.movesLeft<=0||u.energy<2)break;
+            let bx=null,by=null,bestSc=1e9;
+            const curPd=pathDistBrk(d,ext);
+            for(const [dx,dy] of [[1,0],[0,1],[0,-1],[-1,0]]){
+              const nx=d.x+dx,ny=d.y+dy;
+              if(nx<0||ny<0||nx>=W||ny>=H||blocked(nx,ny))continue;
+              const pd=pathDistBrk({x:nx,y:ny},ext);
+              const allyNext=G.units.some(a=>a.alive&&a.team==='A'&&a!==u&&dist(a,{x:nx,y:ny})<=1);
+              const canReachAdj=!u.movedThisTurn&&(()=>{const r=reachable(u,u.energy-2);for(const [k] of r){const [px,py]=k.split(',').map(Number);if(dist({x:px,y:py},{x:nx,y:ny})===1)return true;}return false;})();
+              const keepGuard=isExtraction(nx,ny)||allyNext||canReachAdj||(allowUnmovedSelf&&enemies.filter(e=>cheb(e,{x:nx,y:ny})<=WEAPONS[e.weapon].rng&&hasLOS(e,{x:nx,y:ny})&&!smokeBlocksLOS(e,{x:nx,y:ny})).length===0);
+              if(!keepGuard)continue;
+              if(pd>curPd&&!isExtraction(nx,ny))continue;
+              const nearBarrel=G.map.barrels.some(b=>b.alive&&cheb({x:nx,y:ny},b)<=1)?3.5:0;
+              const sc=pd*2+nearBarrel-(nx>d.x?0.6:0)-(isExtraction(nx,ny)?50:0);
+              if(sc<bestSc){bestSc=sc;bx=nx;by=ny;}
+            }
+            if(bx==null)break;
+            guideDrone(u,bx,by);
+            guided++;
+            if(!G||G.over)return true;
+          }
+          return guided>0;
+        };
+        /* 1a) Limpiar amenazas pegadas o aturdirlas antes de exponer al dron */
+        if(u.role==='Comando'&&(u.flashes||0)>0&&u.energy>=FLASH_COST){
+          const threat=enemies.find(e=>!e.stunned&&cheb(u,e)<=FLASH_RANGE&&!G.units.some(a=>a.alive&&a.team===u.team&&a!==u&&cheb(a,e)<=1));
+          if(threat)throwFlash(u,threat.x,threat.y);
+        }
+        const canExtractNow=ESCORT_EXT.some(e=>!blocked(e.x,e.y)&&dist(d,e)<=d.movesLeft);
+        if(canExtractNow){
+          if(tryGuideFwd(2,true)&&(!G||G.over))return res();
+        } else if(!u.movedThisTurn&&dist(u,d)<=1&&d.movesLeft>0&&u.energy>=2+moveCostOf(u)){
+          /* Empuja 1 casilla ANTES de mover, luego acompaña para mantener el -50% de blindaje */
+          tryGuideFwd(1,false);
+          if(!G||G.over)return res();
+        }
+        /* 1b) si está bloqueando la casilla delantera directa del dron hacia la extracción, apartarse */
+        const needForwardTile=(()=>{
+          for(const [dx,dy] of [[1,0],[0,1],[0,-1]]){
             const nx=d.x+dx,ny=d.y+dy;
-            if(nx<0||ny<0||nx>=W||ny>=H||blocked(nx,ny))continue;
-            const pd=pathDist({x:nx,y:ny},ext);
-            if(pd<bd){bd=pd;bx=nx;by=ny;}
+            if(nx>=0&&ny>=0&&nx<W&&ny<H&&!obAt(nx,ny)&&pathDistBrk({x:nx,y:ny},ext)<curExtDist){
+              if(u.x===nx&&u.y===ny)return true;
+            }
           }
-          if(bx!=null){guideDrone(u,bx,by);return res();}
-        }
-        /* 1b) pegado pero sin casilla libre: apartarse para dejar paso */
-        if(dist(u,d)<=1){
-          for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){
-            const nx=u.x+dx,ny=u.y+dy;
-            if(nx<0||ny<0||nx>=W||ny>=H)continue;
-            if(obAt(nx,ny)||unitAt(nx,ny)||droneAt(nx,ny)||deployedAt(nx,ny))continue;
-            const mc=moveCostOf(u);if(u.energy<mc)break;
-            const ff=angleToFacing(nx-u.x,ny-u.y);if(ff!=null)u.facing=ff;
-            u.x=nx;u.y=ny;u.energy-=mc;u.movedThisTurn=true;checkMines(u);checkOverwatch(u);pickupLoot(u);
-            log('IA: '+u.role+' se aparta para dejar paso al dron.');
-            break;
-          }
-        }
-        /* 2) acercarse al dron para poder guiarlo (reservando 2 ⚡) */
-        if(dist(u,d)>1){
-          const reach=reachable(u,Math.max(0,u.energy-2));
+          return false;
+        })();
+        if(needForwardTile&&!u.movedThisTurn){
+          const reach=reachable(u,u.energy);
           let best=null,bestS=1e9;
-          reach.forEach((dd,k)=>{const [x,y]=k.split(',').map(Number);const s=dist({x,y},d)*3+dd;if(s<bestS){bestS=s;best={x,y,d:dd};}});
-          if(best&&(best.x!==u.x||best.y!==u.y)){
-            const fx=u.x,fy=u.y,ff=angleToFacing(best.x-fx,best.y-fy);if(ff!=null)u.facing=ff;
+          reach.forEach((dd,k)=>{const [x,y]=k.split(',').map(Number);const pd=pathDistBrk({x,y},ext);const nearD=dist({x,y},d);const cov=coverLevel({x,y},enemies[0])>0?-3:0;const bPen=G.map.barrels.some(b=>b.alive&&cheb({x,y},b)<=1)?14:0;const s=pd*2+dd+(nearD===1?0:3)+(x>d.x&&Math.abs(y-d.y)<=1?6:0)+cov+bPen;if(s<bestS){bestS=s;best={x,y,d:dd};}});
+          if(best){
+            const ff=angleToFacing(best.x-u.x,best.y-u.y);if(ff!=null)u.facing=ff;
             u.x=best.x;u.y=best.y;u.energy-=best.d;u.movedThisTurn=true;checkMines(u);checkOverwatch(u);pickupLoot(u);
-            log('IA: '+u.role+' escolta avanza junto al dron.');
           }
         }
-        /* 3) defender: disparar al enemigo más cercano al dron */
-        const foes=G.units.filter(e=>e.alive&&e.team!==u.team&&!e.invisible).sort((a,b)=>dist(a,d)-dist(b,d));
+        /* 2) moverse junto al dron (máx 1–2 escoltas pegados en flancos seguros; obligatorio si nadie lo escolta aún) */
+        const needGuards=droneGuards(u);
+        if(!u.movedThisTurn&&u.energy>=moveCostOf(u)&&(needGuards<1||(d.movesLeft>0&&needGuards<2))&&dist(u,d)>1){
+          const reserveE=(needGuards<1)?0:(d.movesLeft>0?2:Math.min(w.cost,3));
+          const reach=reachable(u,Math.max(0,u.energy-reserveE));
+          let best=null,bestS=1e9;
+          reach.forEach((dd,k)=>{const [x,y]=k.split(',').map(Number);const dToD=dist({x,y},d);const isBlock=(pathDistBrk({x,y},ext)<curExtDist&&dToD===1)?5:0;const covBonus=coverLevel({x,y},enemies[0])>0?-4:0;const guardBonus=(dToD===1)?(needGuards<1?-28:-11):0;const bPen=G.map.barrels.some(b=>b.alive&&cheb({x,y},b)<=1)?14:0;const adjAllies=G.units.filter(a=>a.alive&&a.team===u.team&&a!==u&&cheb({x,y},a)<=1).length;const s=dToD*3.2+dd*0.5+isBlock+covBonus+guardBonus+bPen+adjAllies*2.0;if(s<bestS){bestS=s;best={x,y,d:dd};}});
+          if(best&&(best.x!==u.x||best.y!==u.y)){
+            const ff=angleToFacing(best.x-u.x,best.y-u.y);if(ff!=null)u.facing=ff;
+            u.x=best.x;u.y=best.y;u.energy-=best.d;u.movedThisTurn=true;checkMines(u);checkOverwatch(u);pickupLoot(u);
+            if(u.alive&&G.drone&&G.drone.alive&&(d.x<4||droneGuards(u)>=1)){if(tryGuideFwd(2,false)&&(!G||G.over))return res();}
+          }
+        } else if(!u.movedThisTurn&&u.energy>=moveCostOf(u)){
+          const reach=reachable(u,Math.max(0,u.energy-w.cost));
+          let best=null,bestS=1e9;
+          reach.forEach((dd,k)=>{const [x,y]=k.split(',').map(Number);const isFront=(x>d.x&&Math.abs(y-d.y)<=1&&dist({x,y},d)<=1)?6:0;const covB=coverLevel({x,y},enemies[0])>0?-4.5:0;const guardB=(dist({x,y},d)===1&&needGuards<1)?-22:0;const bPen=G.map.barrels.some(b=>b.alive&&cheb({x,y},b)<=1)?16:0;const adjAllies=G.units.filter(a=>a.alive&&a.team===u.team&&a!==u&&cheb({x,y},a)<=1).length;const wantDist=dist({x,y},d)*1.8+pathDistBrk({x,y},ext)*0.8;const lanePen=(Math.abs(y-d.y)>3)?4:0;const s=wantDist+dd*0.55+isFront+covB+guardB+bPen+adjAllies*2.2+lanePen;if(s<bestS){bestS=s;best={x,y,d:dd};}});
+          if(best){
+            const ff=angleToFacing(best.x-u.x,best.y-u.y);if(ff!=null)u.facing=ff;
+            u.x=best.x;u.y=best.y;u.energy-=best.d;u.movedThisTurn=true;checkMines(u);checkOverwatch(u);pickupLoot(u);
+          }
+        }
+        /* 3) apoyos tácticos de escolta: torreta M2 cuando hay contacto, humo M18 sobre el dron, aturdidora M84 y M67 */
+        if(!u.alive||!G||G.over)return res();
+        if(u.role==='Ingeniero'&&u.energy>=5&&(d.x>=3||enemies.some(e=>cheb(u,e)<=7))&&!G.deployed.some(t=>t.alive&&t.team===u.team)){
+          const spots=[[1,0],[0,1],[0,-1],[-1,0]].map(dd=>({x:u.x+dd[0],y:u.y+dd[1]})).filter(p=>p.x>=0&&p.y>=0&&p.x<W&&p.y<H&&!blocked(p.x,p.y));
+          if(spots.length)deployTurret(u,spots[0].x,spots[0].y);
+        }
+        if(u.role==='Espía'&&(u.smokes||0)>0&&u.energy>=2&&!smokeAt(d.x,d.y)){
+          const shooterThreat=enemies.find(e=>cheb(e,d)<=8&&hasLOS(e,d)&&!smokeBlocksLOS(e,d));
+          if(shooterThreat){
+            const sx=Math.max(0,Math.min(W-1,d.x+Math.sign(shooterThreat.x-d.x))),sy=Math.max(0,Math.min(H-1,d.y+Math.sign(shooterThreat.y-d.y)));
+            if(cheb(u,{x:sx,y:sy})>=1&&cheb(u,{x:sx,y:sy})<=4)throwSmoke(u,sx,sy);
+          }
+        }
+        if(u.role==='Comando'&&(u.flashes||0)>0&&u.energy>=FLASH_COST){
+          const threat=enemies.find(e=>!e.stunned&&cheb(u,e)<=FLASH_RANGE&&!G.units.some(a=>a.alive&&a.team===u.team&&a!==u&&cheb(a,e)<=1));
+          if(threat)throwFlash(u,threat.x,threat.y);
+        }
+        if(u.grenades>0&&u.energy>=2){
+          const gTgt=enemies.find(e=>cheb(u,e)<=3&&cheb(u,e)>=2&&!G.units.some(a=>a.alive&&a.team===u.team&&a!==u&&cheb(a,e)<=1)&&cheb(e,d)>1);
+          if(gTgt){throwGrenade(u,gTgt.x,gTgt.y);if(!G||G.over)return res();}
+        }
+        /* 4) combatir amenazas o abrir brecha, reservando 2⚡ si puede empujar al dron hasta 2 pasos */
+        const guideReserve=(d.movesLeft>0&&dist(u,d)<=1&&u.energy>=w.cost+2)?2:0;
+        if((dangerousBarrels.length||blockingCrates.length)&&u.energy>=w.cost+guideReserve){
+          shootCrateIfNeeded();
+          if(!G||G.over||!u.alive)return res();
+        }
+        const foes=G.units.filter(e=>e.alive&&e.team!==u.team&&!e.invisible).sort((a,b)=>(dist(a,d)-dist(b,d))||(a.hp-b.hp));
         let tgt=null;
-        for(const e of foes){if(cheb(u,e)<=w.rng&&hasLOS(u,e)&&hitChance(u,e,w)>0){tgt=e;break;}}
-        if(tgt){let shots=0;while(tgt&&tgt.alive&&u.energy>=w.cost&&shots<3){if(!tryShoot(u,tgt,u.weapon,null))break;shots++;}}
+        for(const e of foes){if(cheb(u,e)<=w.rng&&hasLOS(u,e)&&!smokeBlocksLOS(u,e)&&hitChance(u,e,w)>0){tgt=e;break;}}
+        if(tgt){let shots=0;while(tgt&&tgt.alive&&u.energy>=w.cost+guideReserve&&shots<3){if(!tryShoot(u,tgt,u.weapon,null))break;shots++;if(!tgt.alive)tgt=foes.find(e=>e.alive&&cheb(u,e)<=w.rng&&hasLOS(u,e)&&!smokeBlocksLOS(u,e)&&hitChance(u,e,w)>0)||null;}}
+        if(u.alive&&G&&!G.over&&dist(u,d)<=1&&d.movesLeft>0&&u.energy>=2){if(tryGuideFwd(2,false)&&(!G||G.over))return res();}
+        if(u.alive&&G&&!G.over&&u.energy>=3&&!u.overwatch&&!u.stunned&&Math.random()<0.65){u.energy-=3;u.overwatch=true;}
         return res();
       }
-      /* Médico Veterano/Élite: cura, y en Élite también revive a un caído adyacente */
+      /* Médico: cura a un aliado adyacente, o se acerca a un aliado muy herido para curarlo */
       if(u.role==='Médico'){
         if(hardAI){const deadAlly=G.units.find(a=>!a.alive&&a.team===u.team&&dist(u,a)<=1);if(deadAlly&&G.difficulty==='elite'&&u.revives>0&&u.energy>=4){useSpecial(u,deadAlly);return res();}}
-        const hurt=G.units.find(a=>a.alive&&a.team===u.team&&a.hp<a.maxHp*(hardAI?0.75:0.55)&&dist(u,a)<=1);
-        if(hurt&&u.heals>0&&u.energy>=3){useSpecial(u,hurt);return res();}
+        const healThresh=hardAI?0.75:0.60;
+        const hurtAdj=G.units.filter(a=>a.alive&&a.team===u.team&&a.hp<a.maxHp*healThresh&&dist(u,a)<=1).sort((a,b)=>(a.hp/a.maxHp)-(b.hp/b.maxHp))[0];
+        if(hurtAdj&&u.heals>0&&u.energy>=3){useSpecial(u,hurtAdj);return res();}
+        if(!drone&&u.heals>0&&u.energy>=moveCostOf(u)+3){
+          const hurtFar=G.units.filter(a=>a.alive&&a.team===u.team&&a!==u&&a.hp<a.maxHp*0.58).sort((a,b)=>(a.hp/a.maxHp)-(b.hp/b.maxHp))[0];
+          if(hurtFar){
+            const reachH=reachable(u,u.energy-3);
+            let bh=null,bhS=1e9;
+            reachH.forEach((dd,k)=>{const [x,y]=k.split(',').map(Number);if(dist({x,y},hurtFar)<=1){const cov=coverLevel({x,y},target)>0?-2:0;if(dd+cov<bhS){bhS=dd+cov;bh={x,y,d:dd};}}});
+            if(bh){
+              const ff=angleToFacing(bh.x-u.x,bh.y-u.y);if(ff!=null)u.facing=ff;
+              u.x=bh.x;u.y=bh.y;u.energy-=bh.d;u.movedThisTurn=true;checkMines(u);checkOverwatch(u);pickupLoot(u);
+              if(u.alive&&G&&!G.over&&hurtFar.alive&&dist(u,hurtFar)<=1&&u.energy>=3){useSpecial(u,hurtFar);return res();}
+            }
+          }
+        }
       }
       /* Ingeniero Veterano/Élite: despliega su torreta si le queda energía tras acercarse */
       if(hardAI&&u.role==='Ingeniero'&&u.energy>=5&&!G.deployed.some(t=>t.alive&&t.team===u.team)){
         const spots=[[1,0],[-1,0],[0,1],[0,-1]].map(d=>({x:u.x+d[0],y:u.y+d[1]})).filter(p=>!blocked(p.x,p.y));
         if(spots.length&&cheb(u,target)<=6){deployTurret(u,spots[0].x,spots[0].y);}
       }
-      if(u.role==='Espía'&&u.energy>=6&&cheb(u,target)>3){useSpecial(u,null);}
+      if(u.role==='Espía'&&u.energy>=6&&cheb(u,target)>3&&cheb(u,target)<=8){useSpecial(u,null);}
       /* Capitán Veterano/Élite: da su orden al aliado con más arma y menos energía */
       if(hardAI&&u.role==='Capitán'&&!u.captainUsed){const ally=G.units.filter(a=>a.alive&&a.team===u.team&&a!==u).sort((a,b)=>a.energy-b.energy)[0];if(ally&&ally.energy<=ally.maxEnergy-3)useSpecial(u,ally);}
-      /* move toward target, beacon or the nearest unheld domination zone */
+      /* move toward target, beacon or distributed domination zone */
+      const nearestZTile=(z)=>z.tiles.slice().sort((a,b)=>pathDist(u,a)-pathDist(u,b)||dist(u,a)-dist(u,b))[0];
       let goal=target,goalZone=null;
       if(effMode(G)==='dominacion'){
-        const unheld=DOM_ZONES.filter(z=>domControl(z)!==u.team);
-        if(unheld.length){const zone=unheld.sort((a,b)=>dist(u,a.tiles[0])-dist(u,b.tiles[0]))[0];const zt=zone.tiles[0];const inOwn=DOM_ZONES.some(z=>domControl(z)===u.team&&inDomZone(u.x,u.y,z));if(!inOwn||hardAI&&Math.random()<0.4){goal=zt;goalZone=zone;}}
+        const allies=G.units.filter(a=>a.alive&&a.team===u.team);
+        const alreadyIn=DOM_ZONES.find(z=>inDomZone(u.x,u.y,z));
+        const zoneLoad=(z)=>allies.filter(a=>a!==u&&(inDomZone(a.x,a.y,z)||a._domGoal===z.id)).length;
+        const zoneOrder=u.team==='B'?['sur','centro','norte']:['norte','centro','sur'];
+        const homeZone=DOM_ZONES.find(z=>z.id===zoneOrder[0]);
+        if(w.rng>=8){
+          u._domGoal=homeZone.id;goal=nearestZTile(homeZone);goalZone=homeZone;
+        } else if(alreadyIn&&(domControl(alreadyIn)!==u.team||zoneLoad(alreadyIn)===0)){
+          u._domGoal=alreadyIn.id;goal=nearestZTile(alreadyIn);goalZone=alreadyIn;
+        } else {
+          const cand=DOM_ZONES.slice().sort((a,b)=>{
+            const aMine=domControl(a)===u.team?1:0,bMine=domControl(b)===u.team?1:0;
+            if(aMine!==bMine)return aMine-bMine;
+            const aSoloCentro=(G.round<=2&&a.id==='centro'&&zoneLoad(a)===0&&allies.length>=3)?1:0;
+            const bSoloCentro=(G.round<=2&&b.id==='centro'&&zoneLoad(b)===0&&allies.length>=3)?1:0;
+            if(aSoloCentro!==bSoloCentro)return aSoloCentro-bSoloCentro;
+            const aLoad=zoneLoad(a),bLoad=zoneLoad(b);
+            if(aLoad!==bLoad)return aLoad-bLoad;
+            const pdA=pathDist(u,nearestZTile(a)),pdB=pathDist(u,nearestZTile(b));
+            if(pdA!==pdB)return pdA-pdB;
+            return zoneOrder.indexOf(a.id)-zoneOrder.indexOf(b.id);
+          });
+          const zone=cand[0];
+          u._domGoal=zone.id;
+          goal=nearestZTile(zone);goalZone=zone;
+        }
       } else if(drone){
         /* Escolta: la defensa juega el objetivo, no solo a eliminar:
            marcha a interceptar al dron y se planta en su ruta; quien ya
            lo tiene a tiro y con visión no se mueve y le dispara. */
         goal=drone;
-      } else if(effMode(G)==='baliza'&&!inBeacon(u.x,u.y)&&(hardAI||Math.random()<0.6))goal={x:5,y:5};
-      if(goalZone?!inDomZone(u.x,u.y,goalZone):(cheb(u,goal)>w.rng||!hasLOS(u,goal))){
-        const reach=reachable(u,u.energy- (u.energy>w.cost? w.cost:0));
+      } else if(effMode(G)==='baliza'&&!inBeacon(u.x,u.y)&&(hardAI||Math.random()<0.65)){
+        goal=BEACON.slice().sort((a,b)=>pathDist(u,a)-pathDist(u,b))[0];
+      }
+      const hasCleanShot=target&&cheb(u,target)<=w.rng&&hasLOS(u,target)&&!smokeBlocksLOS(u,target);
+      const lateStall=(!goalZone&&!drone&&G.round>=12);
+      const holdFireDom=goalZone&&hasCleanShot&&(w.rng>=8||enemies.some(e=>cheb(u,e)<=4));
+      if(!u.movedThisTurn&&(goalZone?(!inDomZone(u.x,u.y,goalZone)&&!holdFireDom):(cheb(u,goal)>w.rng||!hasLOS(u,goal)||smokeBlocksLOS(u,goal)))){
+        const canRecruitSkip=G.difficulty==='recluta';
+        const reserveBudget=(u.energy>w.cost&&cheb(u,goal)<=w.rng+4)?w.cost:((!drone&&!lateStall&&G.round>=2&&u.energy>=moveCostOf(u)+3&&!canRecruitSkip)?3:0);
+        const reach=reachable(u,Math.max(0,u.energy-reserveBudget));
         let best=null,bestScore=1e9;
-        reach.forEach((d,k)=>{const [x,y]=k.split(',').map(Number);let s=pathDist({x,y},goal)*2+d;if(hardAI){/* Veterano/Élite: premia acabar en zona de Dominación/baliza y con cobertura */if(effMode(G)==='dominacion'&&DOM_ZONES.some(z=>inDomZone(x,y,z)))s-=6;if(inBeacon(x,y))s-=3;const nearCov=[[1,0],[-1,0],[0,1],[0,-1]].some(dd=>obAt(x+dd[0],y+dd[1]));if(nearCov)s-=2;}if(s<bestScore){bestScore=s;best={x,y,d};}});
+        const distW=lateStall?4.8:(G.round>=10?3.4:(G.round<=2?2.8:2.5));
+        const optApproach=goalZone?(w.rng>=8?4:1):(lateStall?0:(G.round>=10?(w.rng>=8?4:2):(w.rng>=8?(G.round===1?10:7):(w.rng>=5?4:(G.round<=2?2:2)))));
+        const alliesNow=G.units.filter(a=>a.alive&&a.team===u.team&&a!==u);
+        reach.forEach((d,k)=>{
+          const [x,y]=k.split(',').map(Number);
+          const pos={x,y};
+          const rawPD=pathDist(pos,goal);
+          const effPD=Math.max(0,rawPD-optApproach);
+          let s=effPD*distW+d*0.45;
+          if(u._prevPos&&u._prevPos.x===x&&u._prevPos.y===y)s+=5;
+          if(effMode(G)==='dominacion'&&goalZone&&inDomZone(x,y,goalZone))s-=(w.rng>=8?2:8);
+          if(effMode(G)==='dominacion'&&DOM_ZONES.some(z=>inDomZone(x,y,z)))s-=(w.rng>=8?1:(hardAI?5:3));
+          if(effMode(G)==='baliza'&&inBeacon(x,y))s-=(hardAI?5:3);
+          if(!canRecruitSkip&&!lateStall){
+            const dirCov=target?coverLevel(pos,target):0;
+            const centerCov=coverLevel(pos,{x:u.team==='A'?11:0,y:u.team==='A'?5:6});
+            const effCov=Math.min(dirCov,centerCov||dirCov);
+            const nearCov=[[1,0],[-1,0],[0,1],[0,-1]].some(dd=>obAt(x+dd[0],y+dd[1]));
+            if(effCov>0)s-=(1.8+effCov*1.05);
+            else if(dirCov>0)s-=(1.2+dirCov*0.55);
+            else if(nearCov)s-=1;
+            else if(target&&cheb(pos,target)<=6&&hasLOS(target,pos))s+=4.5;
+            if(G.round<=2&&(x===0||x===W-1))s+=4;
+            if(target&&w.rng>=8&&cheb(pos,target)<5)s+=(5-cheb(pos,target))*5;
+            if(w.rng>=5&&target){
+              const nearFoes=enemies.filter(e=>cheb(pos,e)<=3).length;
+              if(nearFoes>0)s+=nearFoes*(w.rng>=8?10:5);
+            }
+            const threatCnt=enemies.filter(e=>cheb(pos,e)<=WEAPONS[e.weapon].rng+2&&hasLOS(e,pos)&&!smokeBlocksLOS(e,pos)).length;
+            if(G.round<=4&&threatCnt>0&&effCov<2&&(centerCov===0||dirCov<2)){
+              s+=effCov===0?(threatCnt*(G.round<=2?6.5:4)):(threatCnt*2.2);
+            }
+            if(G.round===1&&!drone){
+              const pastMid=(u.team==='A'?x>=6:x<=5);
+              if(pastMid&&(!goalZone||!inDomZone(x,y,goalZone)||effCov<2))s+=(effCov>=2?4:11);
+              if(w.rng>=8&&(u.team==='A'?x>=3:x<=8)&&effCov<2)s+=14;
+              if(w.rng>=8&&cheb(pos,target)<=7)s+=9;
+              if(alliesNow.length&&!alliesNow.some(a=>cheb(pos,a)<=4))s+=6;
+            }
+            if(G.round<=3&&u.energy-d<w.cost){
+              const threat=enemies.some(e=>{
+                const ew=WEAPONS[e.weapon];
+                const eStep=Math.max(0,Math.floor((e.maxEnergy-ew.cost)/moveCostOf(e)));
+                const reachRng=Math.min(10,ew.rng+Math.min(3,eStep));
+                return cheb(pos,e)<=reachRng&&(hasLOS(e,pos)||cheb(pos,e)<=ew.rng+2);
+              });
+              if(threat&&dirCov<2)s+=6;
+            }
+            if(G.round===1)s+=Math.max(Math.abs(x-5.5),Math.abs(y-5.5))*0.35;
+            if(G.map.barrels.some(b=>b.alive&&cheb(pos,b)<=1))s+=18;
+            else if(target&&cheb(pos,target)<=6&&G.map.barrels.some(b=>b.alive&&cheb(pos,b)<=2))s+=8;
+            if(w.rng>=8&&target&&cheb(pos,target)<=7&&effCov<2)s+=7;
+            const adjAllies=alliesNow.filter(a=>cheb(pos,a)<=1).length;
+            if(adjAllies>0&&target&&cheb(pos,target)<=8)s+=adjAllies*4.5;
+            if(target&&cheb(pos,target)<=w.rng&&hasLOS(pos,target)&&!smokeBlocksLOS(pos,target))s-=(G.round===1&&u.energy-d<w.cost?0:5);
+            if(effMode(G)!=='dominacion'&&G.round>=2&&x===TURRET_POS.x&&y===TURRET_POS.y&&G.map.turret.owner!==u.team&&u.energy-d>=2)s-=6;
+          } else if(lateStall){
+            if(target&&cheb(pos,target)<=w.rng&&hasLOS(pos,target)&&!smokeBlocksLOS(pos,target))s-=12;
+          }
+          if(s<bestScore){bestScore=s;best={x,y,d};}
+        });
         if(best&&(best.x!==u.x||best.y!==u.y)){
-          const fx=u.x,fy=u.y;const ff=angleToFacing(best.x-fx,best.y-fy);if(ff!=null)u.facing=ff;u.x=best.x;u.y=best.y;u.energy-=best.d;u.movedThisTurn=true;checkMines(u);checkOverwatch(u);pickupLoot(u);
+          const fx=u.x,fy=u.y;u._prevPos={x:fx,y:fy};const ff=angleToFacing(best.x-fx,best.y-fy);if(ff!=null)u.facing=ff;u.x=best.x;u.y=best.y;u.energy-=best.d;u.movedThisTurn=true;checkMines(u);checkOverwatch(u);pickupLoot(u);
           log('IA: '+u.role+' avanza de ('+(fx+1)+','+(fy+1)+') a ('+(u.x+1)+','+(u.y+1)+').');
           const mk=G.map.medkits.find(m=>!m.used&&m.x===u.x&&m.y===u.y);
-          if(mk){mk.used=true;u.hp=Math.min(u.maxHp,u.hp+50);playOnce(u,'pickup');log('IA: '+u.role+' usa el botiquín (+50 PV).');}
-          if(u.x===TURRET_POS.x&&u.y===TURRET_POS.y&&G.map.turret.owner!=='B'&&u.energy>=2)captureTurret(u);
+          if(mk&&u.alive&&u.hp<u.maxHp){mk.used=true;u.hp=Math.min(u.maxHp,u.hp+50);playOnce(u,'pickup');log('IA: '+u.role+' usa el botiquín (+50 PV).');}
+          if(effMode(G)!=='dominacion'&&G.round>=2&&u.x===TURRET_POS.x&&u.y===TURRET_POS.y&&G.map.turret.owner!==u.team&&u.energy>=2)captureTurret(u);
         }
       }
       /* Espía: cortina de humo M18 táctica (sin desperdiciar en turno 1 ni
@@ -2306,29 +2617,49 @@ function aiUnitAct(u){
         }
         if(bestF&&(bestFE>=2||Math.random()<0.5))throwFlash(u,bestF.x,bestF.y);
       }
-      /* Escolta: granada al dron si está a tiro de lanzamiento */
-      if(drone&&u.grenades>0&&u.energy>=2&&cheb(u,drone)<=3&&Math.random()<0.6){throwGrenade(u,drone.x,drone.y);return res();}
-      /* grenade if clustered */
-      const near=G.units.filter(e=>e.alive&&e.team!==u.team&&cheb(e,u)<=3);
-      if(u.grenades>0&&u.energy>=2&&near.length>=2){throwGrenade(u,near[0].x,near[0].y);return res();}
-      /* Escolta: el dron es el objetivo prioritario de fuego. Si está a
-         tiro y con visión, la defensa le dispara a él antes que a los
-         escoltas; el Francotirador Veterano/Élite le aplica además el
-         tiro certero si el dron no se ha movido este turno. */
+      /* Escolta: granada al dron cuando flaquea o sin blindaje */
+      const droneGuarded=drone&&G.units.some(a=>a.alive&&a.team==='A'&&dist(a,drone)<=1);
+      if(drone&&u.grenades>0&&u.energy>=2&&cheb(u,drone)<=3&&cheb(u,drone)>=2&&(!droneGuarded||drone.hp<=160)&&Math.random()<0.55){throwGrenade(u,drone.x,drone.y);return res();}
+      /* Granada M67 táctica: busca la casilla óptima sin fuego amigo */
+      if(u.grenades>0&&u.energy>=2){
+        let bestG=null,bestGS=0,bestGE=0;
+        for(let gy=0;gy<H;gy++)for(let gx=0;gx<W;gx++){
+          if(cheb(u,{x:gx,y:gy})>3||cheb(u,{x:gx,y:gy})<=1)continue;
+          let ge=0,ga=0,direct=0;
+          G.units.forEach(e=>{if(!e.alive||cheb(e,{x:gx,y:gy})>1)return;if(e.team!==u.team){ge++;if(e.x===gx&&e.y===gy)direct=1;}else ga++;});
+          if(ga>0)continue;
+          const bHit=G.map.barrels.some(b=>b.alive&&cheb(b,{x:gx,y:gy})<=1&&G.units.some(e=>e.alive&&e.team!==u.team&&cheb(e,b)<=1));
+          const gs=ge*2+(bHit?2:0)+direct;
+          if((ge>=2||(ge>=1&&bHit))&&gs>bestGS){bestGS=gs;bestGE=ge;bestG={x:gx,y:gy};}
+        }
+        if(bestG){throwGrenade(u,bestG.x,bestG.y);return res();}
+      }
+      /* Escolta: si el dron está sin escolta pegada o tocado, concentrar fuego; si está bien escoltado, castiga al escolta crítico o presiona al dron */
       if(drone&&cheb(u,drone)<=w.rng&&hasLOS(u,drone)&&hitChance(u,drone,w)>0){
         if(hardAI&&u.role==='Francotirador'&&!drone.movedThisTurn&&u.energy>=w.cost+3){useSpecial(u,drone);return res();}
-        let dshots=0;
-        while(u.energy>=w.cost&&dshots<3&&G.drone&&G.drone.alive){if(!tryShoot(u,drone,u.weapon,null))break;dshots++;}
-        if(!G||G.over||!G.drone||!G.drone.alive)return res();
+        const weakEscort=G.units.some(a=>a.alive&&a.team==='A'&&a.hp<=50&&cheb(u,a)<=w.rng&&hasLOS(u,a)&&!smokeBlocksLOS(u,a));
+        if(!droneGuarded||!weakEscort){
+          let dshots=0;
+          const maxDShots=(!droneGuarded||hardAI)?3:(drone.hp<=170?2:1);
+          while(u.energy>=w.cost&&dshots<maxDShots&&G.drone&&G.drone.alive){if(!tryShoot(u,drone,u.weapon,null))break;dshots++;}
+          if(!G||G.over||!G.drone||!G.drone.alive)return res();
+        }
       }
-      /* shoot: Élite concentra fuego en el más herido; Recluta, en el más cercano */
-      target=G.units.filter(e=>e.alive&&e.team!==u.team&&!e.invisible).sort((a,b)=>G.difficulty==='recluta'?(dist(u,a)-dist(u,b)):(a.hp-b.hp))[0];
+      /* shoot: Élite/Normal concentran fuego en el objetivo alcanzable más herido; Recluta, en el más cercano */
+      const pickShootTarget=()=>{
+        const hittable=G.units.filter(e=>e.alive&&e.team!==u.team&&!e.invisible&&cheb(u,e)<=w.rng&&hasLOS(u,e)&&!smokeBlocksLOS(u,e)&&hitChance(u,e,w)>0);
+        const pool=hittable.length?hittable:G.units.filter(e=>e.alive&&e.team!==u.team&&!e.invisible);
+        pool.sort((a,b)=>G.difficulty==='recluta'?(dist(u,a)-dist(u,b)):(a.hp-b.hp||hitChance(u,b,w)-hitChance(u,a,w)));
+        return pool[0]||null;
+      };
+      target=pickShootTarget();
       /* Francotirador Veterano/Élite: tiro certero sobre objetivo quieto */
       if(hardAI&&u.role==='Francotirador'&&target&&!target.movedThisTurn&&u.energy>=WEAPONS[u.weapon].cost+3){useSpecial(u,target);return res();}
       let shots=0;
-      while(target&&u.energy>=w.cost&&shots<3){if(!tryShoot(u,target,u.weapon,null))break;shots++;if(!target.alive)target=G.units.filter(e=>e.alive&&e.team!==u.team&&!e.invisible)[0];}
+      const maxShots=(G.round===1&&w.rng>=8)?1:3;
+      while(target&&u.energy>=w.cost&&shots<maxShots){if(!tryShoot(u,target,u.weapon,null))break;shots++;if(!target.alive)target=pickShootTarget();}
       if(u.energy>=1&&target&&cheb(u,target)<=3&&u.energy<w.cost)tryShoot(u,target,PISTOL,null);
-      if(u.alive&&u.energy>=3&&shots===0&&Math.random()<0.35&&!u.overwatch&&!u.stunned){u.energy-=3;u.overwatch=true;log('IA: '+u.role+' se queda en vigilancia.');}
+      if(u.alive&&u.energy>=3&&shots===0&&!u.overwatch&&!u.stunned&&!lateStall&&Math.random()<(G.round===1?0.5:0.75)){u.energy-=3;u.overwatch=true;log('IA: '+u.role+' se queda en vigilancia.');}
       res();
     },420);
   });
@@ -2497,7 +2828,7 @@ function boardTileClick(t){
       log(u.role+' ('+u.team+') se mueve de ('+(fx+1)+','+(fy+1)+') a ('+(t.x+1)+','+(t.y+1)+') · −'+cost+' ⚡.');
       const mk=G.map.medkits.find(m=>!m.used&&m.x===t.x&&m.y===t.y);
       if(mk&&u.alive){mk.used=true;u.hp=Math.min(u.maxHp,u.hp+50);playOnce(u,'pickup');fxFloat(t.x,t.y,'+50 PV','#8df09a');log('✚ '+u.role+' recoge el botiquín del mapa: +50 PV (ahora '+u.hp+').');}
-      if(t.x===TURRET_POS.x&&t.y===TURRET_POS.y&&G.map.turret.owner!==u.team)toast('Estás sobre la torreta central: pulsa «Capturar torreta» (2 ⚡).');
+      if(effMode(G)!=='dominacion'&&t.x===TURRET_POS.x&&t.y===TURRET_POS.y&&G.map.turret.owner!==u.team)toast('Estás sobre la torreta central: pulsa «Capturar torreta» (2 ⚡).');
       G.lastMoveUndo=(!hadMine&&!hadWatcher&&!hadLoot&&!hadMedkit&&u.alive&&!G.over)?snap:null;
       updateUI();draw();return;
     }
@@ -2563,7 +2894,7 @@ function updateUI(){
    (u.role==='Comando'?'<button data-act="flash" class="'+(G.actionMode==='flash'?'on':'')+'" '+(isTurn&&(u.flashes||0)>0?'':'disabled')+'>✸ Aturdidora M84<small>Sin daño · lanza a 4 · 2 ⚡ · quedan '+(u.flashes||0)+' · aturde en radio 1 durante 1 turno: −6 ⚡ y −25 de puntería, sin fuego de respuesta ni vigilancia · también ciega a los tuyos</small></button>':'')+
    '<button data-act="overwatch" '+(isTurn&&!u.overwatch&&u.energy>=3?'':'disabled')+'>👁 Vigilancia [4]<small>3 ⚡ · dispara gratis al primer enemigo que se mueva a su alcance en el turno rival</small></button>'+
    '<button data-act="special" class="'+(G.actionMode==='special'||G.actionMode==='deploy'?'on':'')+'" '+(isTurn?'':'disabled')+'>★ '+ROLES[u.role].special+' [5]<small>'+ROLES[u.role].sdesc+'</small></button>'+
-   (onTurret&&G.map.turret.owner!==u.team?'<button data-act="capture" '+(isTurn&&u.energy>=2?'':'disabled')+'>⚙ Capturar torreta central<small>2 ⚡ · disparará al final de tus turnos</small></button>':'')+
+   (effMode(G)!=='dominacion'&&onTurret&&G.map.turret.owner!==u.team?'<button data-act="capture" '+(isTurn&&u.energy>=2?'':'disabled')+'>⚙ Capturar torreta central<small>2 ⚡ · disparará al final de tus turnos</small></button>':'')+
    (u.role==='Ingeniero'?'<button data-act="deploy" class="'+(G.actionMode==='deploy'?'on':'')+'" '+(isTurn?'':'disabled')+'>🛠 Torreta M2 (desplegar)<small>5 ⚡ · casilla adyacente · 120 PV</small></button>':'')+
    (u.role==='Ingeniero'?'<button data-act="mine" class="'+(G.actionMode==='mine'?'on':'')+'" '+(isTurn&&(u.mines||0)>0?'':'disabled')+'>💥 Claymore M18A1<small>'+MINE_COST+' ⚡ · casilla adyacente · quedan '+(u.mines||0)+' · oculta al enemigo · '+MINE_DMG+' de daño a quien la pise</small></button>':'')+
    (effMode(G)==='escolta'&&G.drone&&G.drone.alive&&u.team==='A'?'<button data-act="guide" class="'+(G.actionMode==='drone'?'on':'')+'" '+(isTurn&&dist(u,G.drone)<=1&&u.energy>=2&&G.drone.movesLeft>0?'':'disabled')+'>🤖 Guiar dron · 2 ⚡<small>Mueve el dron 1 casilla · quedan '+G.drone.movesLeft+' guiados esta ronda · tienes que estar pegado a él — luego toca la casilla destino junto al dron</small></button>':'')+
