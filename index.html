@@ -707,18 +707,18 @@ canvas#board{border-radius:10px;box-shadow:0 0 0 2px rgba(0,0,0,.45), inset 0 0 
    su bandera y por el emblema de sus fuerzas armadas (motivo simplificado y
    redibujado para el juego, no una copia del escudo oficial). */
 const NATIONS=[
- {id:'es',name:'España',colors:['#AA151B','#F1BF00','#AA151B'],dir:'h',emblem:'♛',emblemName:'Corona del escudo de las Fuerzas Armadas'},
- {id:'us',name:'Estados Unidos',colors:['#B22234','#FFFFFF','#3C3B6E'],dir:'h',emblem:'★',emblemName:'Estrella de las Fuerzas Armadas de EE. UU.'},
- {id:'gb',name:'Reino Unido',colors:['#012169','#FFFFFF','#C8102E'],dir:'h',emblem:'⚔',emblemName:'Espadas cruzadas y corona del Ejército británico'},
- {id:'fr',name:'Francia',colors:['#0055A4','#FFFFFF','#EF4135'],dir:'v',emblem:'⚜',emblemName:'Flor de lis de la tradición militar francesa'},
- {id:'de',name:'Alemania',colors:['#1a1a1a','#DD0000','#FFCC00'],dir:'h',emblem:'✠',emblemName:'Cruz de la Bundeswehr'},
- {id:'ru',name:'Rusia',colors:['#FFFFFF','#0039A6','#D52B1E'],dir:'h',emblem:'★',emblemName:'Estrella roja de las Fuerzas Armadas rusas'},
- {id:'cn',name:'China',colors:['#DE2910','#FFDE00','#DE2910'],dir:'h',emblem:'★',emblemName:'Estrella del Ejército Popular de Liberación'},
- {id:'jp',name:'Japón',colors:['#FFFFFF','#BC002D','#FFFFFF'],dir:'h',emblem:'◎',emblemName:'Sol naciente de las Fuerzas de Autodefensa'},
- {id:'it',name:'Italia',colors:['#009246','#FFFFFF','#CE2B37'],dir:'v',emblem:'✪',emblemName:'Estrella de las Fuerzas Armadas italianas'},
- {id:'br',name:'Brasil',colors:['#009739','#FEDD00','#012169'],dir:'h',emblem:'✶',emblemName:'Estrella del Ejército brasileño'},
- {id:'ca',name:'Canadá',colors:['#FF0000','#FFFFFF','#FF0000'],dir:'v',emblem:'✦',emblemName:'Hoja de arce de las Fuerzas Armadas canadienses'},
- {id:'au',name:'Australia',colors:['#00247D','#FFCD00','#FF0000'],dir:'h',emblem:'✸',emblemName:'Sol naciente del Ejército australiano'}
+ {id:'es',name:'España',colors:['#AA151B','#F1BF00','#AA151B'],dir:'h',emblem:'♛',emblemName:'Corona del escudo de las Fuerzas Armadas',pers:{name:'Temple',desc:'Aguantar la posición: veteranía en la defensa.'}},
+ {id:'us',name:'Estados Unidos',colors:['#B22234','#FFFFFF','#3C3B6E'],dir:'h',emblem:'★',emblemName:'Estrella de las Fuerzas Armadas de EE. UU.',pers:{name:'Fuego sostenido',desc:'Doctrina de apoyos largos y potencia de fuego.'}},
+ {id:'gb',name:'Reino Unido',colors:['#012169','#FFFFFF','#C8102E'],dir:'h',emblem:'⚔',emblemName:'Espadas cruzadas y corona del Ejército británico',pers:{name:'Puntería',desc:'Precisión de tiro y disciplina de cobertura.'}},
+ {id:'fr',name:'Francia',colors:['#0055A4','#FFFFFF','#EF4135'],dir:'v',emblem:'⚜',emblemName:'Flor de lis de la tradición militar francesa',pers:{name:'Maniobra',desc:'Movimiento rápido y flanqueos.'}},
+ {id:'de',name:'Alemania',colors:['#1a1a1a','#DD0000','#FFCC00'],dir:'h',emblem:'✠',emblemName:'Cruz de la Bundeswehr',pers:{name:'Ingeniería',desc:'Técnica de torretas y equipos de apoyo.'}},
+ {id:'ru',name:'Rusia',colors:['#FFFFFF','#0039A6','#D52B1E'],dir:'h',emblem:'★',emblemName:'Estrella roja de las Fuerzas Armadas rusas',pers:{name:'Resistencia',desc:'Aguantar el castigo y contraatacar.'}},
+ {id:'cn',name:'China',colors:['#DE2910','#FFDE00','#DE2910'],dir:'h',emblem:'★',emblemName:'Estrella del Ejército Popular de Liberación',pers:{name:'Logística',desc:'Economía de energía y apoyo de escuadra.'}},
+ {id:'jp',name:'Japón',colors:['#FFFFFF','#BC002D','#FFFFFF'],dir:'h',emblem:'◎',emblemName:'Sol naciente de las Fuerzas de Autodefensa',pers:{name:'Disciplina',desc:'Coordinación silenciosa y precisión.'}},
+ {id:'it',name:'Italia',colors:['#009246','#FFFFFF','#CE2B37'],dir:'v',emblem:'✪',emblemName:'Estrella de las Fuerzas Armadas italianas',pers:{name:'Terreno',desc:'Lectura del mapa y la cobertura.'}},
+ {id:'br',name:'Brasil',colors:['#009739','#FEDD00','#012169'],dir:'h',emblem:'✶',emblemName:'Estrella del Ejército brasileño',pers:{name:'Iniciativa',desc:'Empuje y primeros asaltos.'}},
+ {id:'ca',name:'Canadá',colors:['#FF0000','#FFFFFF','#FF0000'],dir:'v',emblem:'✦',emblemName:'Hoja de arce de las Fuerzas Armadas canadienses',pers:{name:'Paciencia',desc:'Tiros largos y calma bajo presión.'}},
+ {id:'au',name:'Australia',colors:['#00247D','#FFCD00','#FF0000'],dir:'h',emblem:'✸',emblemName:'Sol naciente del Ejército australiano',pers:{name:'Exploradores',desc:'Movilidad y visión.'}}
 ];
 function nationById(id){return NATIONS.find(n=>n.id===id)||null;}
 /* Escudos de nación de la Fase 1 (assets/ui/nacion_*.png), por id de nación. */
@@ -909,7 +909,7 @@ function buildNationGrid(){
   const grid=$('#nationGrid');grid.innerHTML='';
   NATIONS.forEach(n=>{
     const b=document.createElement('button');b.className='nation-card';b.dataset.id=n.id;
-    b.innerHTML='<img class="nation-art" src="assets/ui/nacion_'+NATION_ART[n.id]+'.png" alt="Escudo de '+n.name+'"/><span style="display:flex;gap:8px;align-items:center">'+flagArtHTML(n)+emblemHTML(n)+'</span><span>'+n.name+'</span><small style="color:var(--muted);font-weight:500;font-size:12px">'+n.emblemName+'</small>';
+    b.innerHTML='<img class="nation-art" src="assets/ui/nacion_'+NATION_ART[n.id]+'.png" alt="Escudo de '+n.name+'"/><span style="display:flex;gap:8px;align-items:center">'+flagArtHTML(n)+emblemHTML(n)+'</span><span>'+n.name+'</span><small style="color:var(--muted);font-weight:500;font-size:12px">'+n.emblemName+'</small>'+(n.pers?'<small style="color:var(--ink);font-weight:600;font-size:12px">'+n.pers.name+' · <span style="color:var(--muted);font-weight:500">'+n.pers.desc+'</span></small>':'')+'<small style="color:var(--muted);font-size:11px">Personalidad solo visual: no altera el equilibrio.</small>';
     b.onclick=()=>{pickedNation=n;document.querySelectorAll('.nation-card').forEach(c=>c.classList.toggle('sel',c.dataset.id===n.id));$('#confirmNation').disabled=false;$('#nationPickLabel').innerHTML='Has elegido <b>'+n.name+'</b>. Si confirmas, será tu nación para siempre en este dispositivo.';};
     grid.appendChild(b);
   });
@@ -930,7 +930,7 @@ function renderNationChip(){
   if(!myNation){chip.style.display='none';return;}
   const wins=+(lsGet(LS_WINS)||0);
   chip.style.display='flex';
-  chip.innerHTML=flagArtHTML(myNation,true)+emblemHTML(myNation)+'<span>'+myNation.name+'</span><span class="mono" style="color:var(--amber);font-size:13px" title="Victorias en Guerra de Naciones">★ '+wins+'</span>';
+  chip.innerHTML=flagArtHTML(myNation,true)+emblemHTML(myNation)+'<span title="'+(myNation.pers?myNation.pers.name+': '+myNation.pers.desc:'')+'">'+myNation.name+'</span><span class="mono" style="color:var(--amber);font-size:13px" title="Victorias en Guerra de Naciones">★ '+wins+'</span>';
 }
 function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
@@ -4721,6 +4721,9 @@ function makeRealSoldier3(un){
      por PV con drawRange sobre un anillo de 64 segmentos. */
   const hpArc=new THREE.Mesh(new THREE.RingGeometry(0.44,0.54,64,1,0,Math.PI*2),new THREE.MeshBasicMaterial({color:un.team==='A'?0x4fdc6e:0x4f8fe0,transparent:true,opacity:0.92,side:THREE.DoubleSide,depthWrite:false}));
   hpArc.rotation.x=-Math.PI/2;hpArc.position.y=0.05;g.add(hpArc);g.userData.hpArc=hpArc;
+  /* Anillo fino del color del rol: distingue a cada especialista de un vistazo. */
+  const roleRing=new THREE.Mesh(new THREE.RingGeometry(0.36,0.405,48,1,0,Math.PI*2),new THREE.MeshBasicMaterial({color:new THREE.Color(c.role),transparent:true,opacity:0.85,side:THREE.DoubleSide,depthWrite:false}));
+  roleRing.rotation.x=-Math.PI/2;roleRing.position.y=0.055;g.add(roleRing);
   const contactSh=makeContactShadow3(0.42,0.008);if(contactSh)g.add(contactSh);
   const base=new THREE.Mesh(new THREE.CylinderGeometry(0.31,0.34,0.035,24),mat3(c.team,0.6));
   base.position.y=0.02;base.receiveShadow=true;g.add(base);
