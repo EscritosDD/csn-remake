@@ -386,6 +386,19 @@ canvas#board{border-radius:10px;box-shadow:0 0 0 2px rgba(0,0,0,.45), inset 0 0 
         </div>
         <p class="sub" style="margin:10px 0 0"><span class="tag amber" id="coinsTag">🪙 0</span> Monedas de CSN: se ganan al vencer a la IA (25 por victoria).</p>
       </div>
+      <!-- Bocadillo de tutorial con los botones del original -->
+      <div id="tutBubble" style="display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:60;max-width:600px;width:calc(100% - 32px)">
+        <div class="panel">
+          <p class="sub" id="tutText" style="margin:0 0 8px">Tutorial rápido: toca un botón para saber qué hace en partida.</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn small" data-tut="undo">↶ Deshacer</button>
+            <button class="btn small" data-tut="settings">⚙ Ajustes</button>
+            <button class="btn small" data-tut="home">⌂ Inicio</button>
+            <button class="btn small" data-tut="confirm">✔ Confirmar</button>
+            <button class="btn primary small" id="tutDone">Entendido</button>
+          </div>
+        </div>
+      </div>
       <div class="grid3" style="margin-top:18px">
         <div class="mode-card" data-modecard="eliminacion">
           <img class="mode-art" src="assets/ui/modo_eliminacion.png" alt="Dos escuadras de soldados frente a frente"/>
@@ -3191,7 +3204,7 @@ function updateUI(){
   G.units.forEach(u=>{
     const b=document.createElement('button');
     b.className=(G.selected===u?'sel':'')+(u.alive?'':' dead');
-    b.innerHTML=(rolePortraitURL(u.role)?'<img class="roster-portrait" src="'+rolePortraitURL(u.role)+'" alt=""/>':'')+'<span class="role-dot" style="background:'+ROLES[u.role].color+'"></span><span style="flex:none"><b>'+u.role+'</b>'+(u.name&&u.name!==u.role?'<br><small style="color:var(--muted)">'+u.name+'</small>':'')+(u.vetLevel?'<span class="vet-badge">Vet. '+u.vetLevel+'</span>':'')+' <span style="color:'+(u.team==='A'?'var(--teamA)':'var(--teamB)')+'">●'+u.team+'</span><br><small style="color:var(--muted)">'+u.weapon+' · ⚡'+(u.alive?u.energy:0)+'</small></span><span class="mini-hp"><i style="width:'+Math.round(u.hp/u.maxHp*100)+'%"></i></span><b class="mono" style="font-size:13px">'+(u.alive?u.hp+' PV':'K.O.')+'</b>';
+    b.innerHTML=(rolePortraitURL(u.role)?'<img class="roster-portrait" src="'+rolePortraitURL(u.role)+'" alt=""/>':'')+'<span class="role-dot" style="background:'+ROLES[u.role].color+'"></span><span style="flex:none"><b>'+u.role+'</b>'+(u.name&&u.name!==u.role?'<br><small style="color:var(--muted)">'+u.name+'</small>':'')+((u.alive?[u.stunned?'💫':(u.invisible?'👻':''),u.overwatch?'👁':'',u.suppressed?'⚡':'',((u.beesT||0)>0)?'🐝':'',((u.shieldT||0)>0)?'🛡':'',(u.hp<=u.maxHp*0.35?'🩹':'')]:[]).filter(Boolean).length?'<br><small title="estados">'+[u.stunned?'💫':(u.invisible?'👻':''),u.overwatch?'👁':'',u.suppressed?'⚡':'',((u.beesT||0)>0)?'🐝':'',((u.shieldT||0)>0)?'🛡':'',(u.hp<=u.maxHp*0.35?'🩹':'')].filter(Boolean).join('')+'</small>':'')+(u.vetLevel?'<span class="vet-badge">Vet. '+u.vetLevel+'</span>':'')+' <span style="color:'+(u.team==='A'?'var(--teamA)':'var(--teamB)')+'">●'+u.team+'</span><br><small style="color:var(--muted)">'+u.weapon+' · ⚡'+(u.alive?u.energy:0)+'</small></span><span class="mini-hp"><i style="width:'+Math.round(u.hp/u.maxHp*100)+'%"></i></span><b class="mono" style="font-size:13px">'+(u.alive?u.hp+' PV':'K.O.')+'</b>';
     b.onclick=()=>{if(u.alive&&u.team===G.turn&&!G.aiBusy)selectUnit(u);};
     r.appendChild(b);
   });
@@ -6434,6 +6447,21 @@ document.getElementById('quickSkirmishBtn').onclick=()=>quickStart('skirmish');
 const COINS_KEY='radsoldiers_coins';
 function coinsGet(){return Math.max(0,parseInt(lsGet(COINS_KEY)||'500',10)||0);}
 function coinsSet(n){lsSet(COINS_KEY,String(Math.max(0,n)));const t=document.getElementById('coinsTag');if(t)t.textContent='🪙 '+coinsGet();}
+/* ---- Tutorial en bocadillo (F6): explica los 4 botones del original ---- */
+const TUT_TEXTS={
+  undo:'Deshacer: vuelve atrás el último movimiento de tu soldado en este turno (botón ↶ del panel de acción).',
+  settings:'Ajustes: el botón de sonido (🔊) silencia o activa los efectos; la cámara se ajusta con Q/E, +/− y C.',
+  home:'Inicio: desde la partida, «Abandonar» te devuelve al menú sin borrar tu nación ni las monedas.',
+  confirm:'Confirmar: «Terminar turno» cierra tu turno y deja actuar al rival. La vista 2D/3D se cambia sin tocar la partida.'
+};
+function tutShow(){const b=document.getElementById('tutBubble');if(b)b.style.display='block';}
+function tutHide(){const b=document.getElementById('tutBubble');if(b)b.style.display='none';lsSet('radsoldiers_tut','1');}
+(function wireTutorial(){
+  const b=document.getElementById('tutBubble');if(!b)return;
+  b.querySelectorAll('[data-tut]').forEach(btn=>btn.onclick=()=>{const k=btn.dataset.tut;const t=document.getElementById('tutText');if(t)t.textContent=TUT_TEXTS[k]||'';toast(TUT_TEXTS[k]||'');});
+  const d=document.getElementById('tutDone');if(d)d.onclick=tutHide;
+  if(!lsGet('radsoldiers_tut'))setTimeout(tutShow,1200);
+})();
 (function wireOrigMenu(){
   const q=document.getElementById('mnuQuick');if(q)q.onclick=()=>quickStart('almacen');
   const o=document.getElementById('mnuOnline');if(o)o.onclick=()=>toast('Sin servidor de partidas: el online del original no está disponible. Juega contra la IA o a dos jugadores en local.');
