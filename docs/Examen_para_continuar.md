@@ -169,3 +169,42 @@ clips por nombre de hueso con una tabla de correspondencia.
 menú → Challenges (6 misiones, 1 disponible) → misión 1 → setup de campaña →
 lanzar → partida en 3D (`theme:"plaza"`, 8 unidades, barra con 8 acciones).
 Capturas: `docs/capturas/E2E_CAMPANA.png` y `docs/capturas/UI_HUD_barra.png`.
+
+
+## 9. Mallas de clase: lo que se ha descubierto (ronda de armas + modelos)
+
+Estado: **siguen sin usarse**, pero ya no es un misterio. Todo el código está
+hecho y probado; se activa con `window.__classModels=true` y por defecto
+queda la malla base con su uniforme.
+
+### Lo que se probó y qué se aprendió
+
+1. **El rig base manda el orden.** `driveClipSoldier` aplica los clips por
+   **índice**: `clip.rot[pack.bones[i]]` → `ud.bones[i].quaternion`. Si el rig
+   de clase no tiene exactamente los mismos 20 huesos en el mismo orden que
+   `assets/soldier_rig.json`, las rotaciones caen en huesos equivocados. Los
+   rigs de clase ya se reextraen en ese orden exacto (20/20).
+2. **Los vértices van espejados en X.** `parseOBJ3` hace
+   `P.push([-(+p[1]), +p[2], +p[3]])`: la geometría se dibuja con el eje X
+   invertido. Por eso hay que espejar también el rig: posiciones `(-x,y,z)`,
+   cuaterniones `(x,-y,-z,w)` y matrices de bind `S·M·S` con
+   `S=diag(-1,1,1,1)`. Los rigs actuales en `assets/soldier/*_rig.json` ya
+   están espejados así.
+3. **Aun así la malla se deforma.** Con el orden y el espejo corregidos la
+   malla sigue explotando en reposo (sin clips), lo que apunta a que las
+   **bind poses del IPA no están en el mismo espacio que los vértices** para
+   estas mallas (posible transformación del `SkinnedMeshRenderer` o bind
+   poses pre-multiplicadas). Siguiente paso concreto: comparar la matriz
+   `m_LocalToWorldMatrix` del SkinnedMeshRenderer con las bind poses y
+   aplicarla si falta; o generar el rig con el mismo pipeline que produjo
+   `assets/soldier_rig.json`.
+4. **Truco de diagnóstico**: `window.__classModels=true` activa las mallas de
+   clase; `window.__forceBaseModel` ya existía para forzar la base. Con
+   ambos se compara en el navegador sin tocar código.
+
+### Mientras tanto
+
+Cada clase se distingue por **uniforme del original** (Veteran, Spetsnaz,
+DeltaForce, Rambo, Decon, DeerHunter, base), **proporciones** (`ROLE_LOOK`,
+0,84-1,30) y **equipo propio** (mochila, placas, antena, emblema). No es el
+cuerpo distinto del original, pero se leen como siete soldados distintos.
