@@ -1982,11 +1982,21 @@ function sfx(kind){if(!soundOn)return;try{
    respeta el boton de silencio. */
 const AU_BASE='assets/audio/';
 const WEAPON_SFX={'Fusiles de asalto':'assaultrifle_fire','Subfusiles':'assaultrifle_fire','Ametralladoras':'assaultrifle_fire','Escopetas':'shotgun_fire','Francotirador':'sniperrifle_fire','Lanzacohetes':'rocketlauncher_fire','Lanzagranadas':'cluster_explode','Pistolas':'beretta_fire'};
+/* Voz propia por personaje (los 17 del IPA); los propios caen a la voz de
+   su rol. */
+const CHAR_VOICE={'Hipster Dave':'Hipster_Dave','Archie Fletcher':'Archie_Fletcher','Soap':'Soap','Spud':'Spud','Ivan Tkilya':'Ivan_Tkilya','Mme La Hacque':'Mme_La_Hacque','Sneaky Pete':'Sneaky_Pete','Sister Florence':'Sister_Florence','Textbook Kate':'Textbook_Kate','Riot Medic':'Riot_Medic','Big Time Taschmann':'Big_Time_Taschmann','Megan McNick':'Megan_McNick','Carlito Grosso':'Carlito_Grosso','Riot Agent':'Riot_Agent','Riot Engineer':'Riot_Engineer','Commander (M)':'Commander_M','Commander (F)':'Commander_F'};
 const VOICE_FILES={'Francotirador':'Francotirador','Artillero':'Artillero','Espía':'Espia','Médico':'Medico','Ingeniero':'Ingeniero','Comando':'Comando','Capitán':'Capitan'};
 let AU_AMBIENT=null;
 function auPlay(path,vol,loop){if(!soundOn)return null;try{const a=new Audio(AU_BASE+path);a.volume=vol==null?0.6:vol;if(loop)a.loop=true;a.play().catch(()=>{});return a;}catch(e){return null;}}
 function auWeapon(cat){const f=WEAPON_SFX[cat];if(f)auPlay('sfx/weapons/'+f+'.mp3',0.5);}
-function auVoice(un,ev,vol){if(!un||!un.role)return;const f=VOICE_FILES[un.role];if(!f)return;auPlay('voice/'+f+'/'+ev+'.mp3',vol==null?0.5:vol);}
+function auVoice(un,ev,vol){
+  if(!un||!un.role)return;
+  let folder=null;
+  try{const nm=charNameFor(un.role);if(nm&&CHAR_VOICE[nm])folder=CHAR_VOICE[nm];}catch(e){}
+  if(!folder)folder=VOICE_FILES[un.role];
+  if(!folder)return;
+  auPlay('voice/'+folder+'/'+ev+'.mp3',vol==null?0.5:vol);
+}
 function auAmbient(theme){if(AU_AMBIENT){try{AU_AMBIENT.pause();}catch(e){}AU_AMBIENT=null;}const f=auPlay('ambient/'+theme+'/amb0.mp3',0.22,true);AU_AMBIENT=f;}
 function auStopAmbient(){if(AU_AMBIENT){try{AU_AMBIENT.pause();}catch(e){}AU_AMBIENT=null;}}
 function renderSoundBtn(){const b=document.getElementById('soundBtn');if(b)b.textContent=soundOn?'🔊 Sonido: sí':'🔇 Sonido: no';}
