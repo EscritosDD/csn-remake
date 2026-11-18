@@ -190,7 +190,15 @@ queda la malla base con su uniforme.
    cuaterniones `(x,-y,-z,w)` y matrices de bind `S·M·S` con
    `S=diag(-1,1,1,1)`. Los rigs actuales en `assets/soldier/*_rig.json` ya
    están espejados así.
-3. **Aun así la malla se deforma.** Con el orden y el espejo corregidos la
+3. **Las bind poses llevan ESCALA.** Comando y Espía tienen escala 0,4 en
+   todas sus bind poses (determinante 0,06 = 0,4³) y el resto de mallas
+   esconden escalas menores. Un rig de pos+quat la pierde y el skinning
+   explota. Ya está implementado: el rig guarda `scale` por hueso (para
+   `bone.scale`) y las matrices locales se descomponen normalizando la parte
+   rotacional. Además los OBJ de clase se escriben con la **X ya invertida**
+   para que `parseOBJ3` (que niega x) devuelva la geometría original, sin
+   espejar el rig.
+4. **Aun así la malla se deforma.** Con el orden y el espejo corregidos la
    malla sigue explotando en reposo (sin clips), lo que apunta a que las
    **bind poses del IPA no están en el mismo espacio que los vértices** para
    estas mallas (posible transformación del `SkinnedMeshRenderer` o bind
