@@ -18,7 +18,7 @@ Qué hay aquí y para qué sirve. Si vienes nuevo, lee en este orden.
 | [Diseno_del_juego.md](Diseno_del_juego.md) | Reglas, modos, economía y estructura de partida |
 | [Arsenal_real.md](Arsenal_real.md) | Las 37 armas con sus datos reales y su traducción al juego |
 | [Estetica_original.md](Estetica_original.md) | Paletas y aspecto del original |
-| [Arte_visual.md](Arte_visual.md) | Inventario de arte (mucha referencia vive en `_original/`, fuera del repo) |
+| [Arte_visual.md](Arte_visual.md) | Inventario de arte (mucha referencia vive en `_original/`, en el repo) |
 | [Informe_CSN_vs_original.md](Informe_CSN_vs_original.md) | Comparación lado a lado con RAD Soldiers |
 
 ## Auditorías y capturas

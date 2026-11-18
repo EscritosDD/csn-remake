@@ -39,7 +39,7 @@ integridad de datos (`data.test.js`) y humo 3D en navegador con captura.
 | `assets/ui/` | Retratos, naciones, modos, iconos de habilidad del original, logo y arte de la portada. |
 | `bench/` | Verificación: `bench/VERIFICAR.ps1`, `check-syntax.js`, `boards.js`, `rules.test.js`, `data.test.js`, `harness.js`. |
 | `docs/` | Diseño, arquitectura, equilibrio medido, catálogo de habilidades, capturas 3D y planes. |
-| `_referencia_original/` (fuera del repo) | Código descompilado y datos del original (solo lectura, referencia). No se versiona. |
+| `referencia_original/` | Código descompilado y datos del original (solo lectura, referencia para desarrollo). |
 
 ## Herramientas de medida
 
@@ -86,5 +86,5 @@ tools/                utilidades sueltas (servidor node, package.json)
 _capture_all.mjs      generador de capturas 3D
 ```
 
-El material de referencia del IPA (`referencia_original/`) **no se versiona**:
-vive fuera del repo, en `D:\Juegos\CSN\_referencia_original`.
+El material de referencia del IPA está en `referencia_original/` (código descompilado del
+original y datos de animaciones/prefabs). Es solo lectura y no lo usa el juego en ejecución.

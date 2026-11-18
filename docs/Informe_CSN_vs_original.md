@@ -1,5 +1,3 @@
-> **Nota de alcance:** las fuentes citadas (`referencia_original/decompiled`, `referencia_original/datos`) viven **fuera del repositorio**, en `D:\Juegos\CSN\_referencia_original`, para no versionar 1.625 archivos de material de referencia que el juego no usa.
-
 # Informe CSN contra el original, punto por punto
 
 Fecha: 18 nov 2026. Encargo pendiente de la lista de Gemini Studio: informe
