@@ -5027,6 +5027,9 @@ function makeRealSoldier3(un){
   }
   /* Equipo enemigo: el uniforme se tine calido para que no se confunda con
      el tuyo ni de espaldas. El bando A conserva el color natural. */
+  if(un.skin==='estandar'){
+    try{const cn=charNameFor(un.role);const ce=OWN_CAST.concat(ORIG_CAST).find(c=>c.name===cn);if(ce&&ce.tint)mat.color.copy(new THREE.Color(ce.tint)).lerp(new THREE.Color('#ffffff'),0.42);}catch(e){}
+  }
   if(un.skin==='clase'&&ROLES[un.role]){mat.color.copy(new THREE.Color(ROLES[un.role].color)).lerp(new THREE.Color('#ffffff'),0.30);}
   if(un.team==='B'){mat.color.lerp(new THREE.Color('#c95338'),0.22);}
   mat.color.copy(tint);
@@ -5772,6 +5775,16 @@ function buildThemedProps3(world,theme){
       const c=new THREE.Mesh(new THREE.BoxGeometry(1.5,0.18,0.18),mat3('#8a6f1c',0.6));c.position.set(0,3.1,0);g.add(c);world.add(g);}}
     for(let i=0;i<2;i++)lamp();
   } else if(theme==='platform'||theme==='rotonda'||theme==='cruce'){
+    if(theme==='rotonda'||theme==='skirmish03'||theme==='skirmish04'){
+      /* Cabina telefonica roja de Londres. */
+      const spT=take();
+      if(spT){const g=new THREE.Group();g.position.set(spT.x,0,spT.z);
+        const body=new THREE.Mesh(new THREE.BoxGeometry(0.7,1.7,0.7),mat3('#b8202a',0.75));body.position.y=0.85;body.castShadow=true;g.add(body);
+        const win=new THREE.Mesh(new THREE.BoxGeometry(0.5,1.0,0.06),mat3('#cfe6f2',0.3));win.position.set(0,1.05,0.36);g.add(win);
+        const top=new THREE.Mesh(new THREE.BoxGeometry(0.8,0.12,0.8),mat3('#8f1a22',0.7));top.position.y=1.76;g.add(top);
+        const lamp=new THREE.Mesh(new THREE.CylinderGeometry(0.16,0.16,0.1,8),mat3('#e8c84e',0.5));lamp.position.y=1.88;g.add(lamp);
+        g.rotation.y=rand()*Math.PI*2;world.add(g);}
+    }
     if(theme==='platform'){
       /* Maquina expendedora del anden: cuerpo, cristal y botones. */
       const spV=take();
@@ -6842,7 +6855,7 @@ function saveChars(v){try{lsSet(LS_CHARS,JSON.stringify(v));}catch(e){}}
 const OWN_CAST=[
  {name:'Lobo',body:'Soldier_Light',outfit:'Veterano de CSN',role:'Francotirador',play:true,own:true},
  {name:'Mula',body:'Soldier_Heavy',outfit:'Porteador de asalto',role:'Artillero',play:true,own:true},
- {name:'Sombra',body:'Agent_Light',outfit:'Infiltración CSN',role:'Espía',play:true,own:true},
+ {name:'Sombra',body:'Agent_Light',outfit:'Infiltración CSN',role:'Espía',play:true,own:true,tint:'#2b2738'},
  {name:'Alfiler',body:'Medic',outfit:'Sanitario de trinchera',role:'Médico',play:true,own:true},
  {name:'Tuerca',body:'Engineer',outfit:'Manitas de campaña',role:'Ingeniero',play:true,own:true},
  {name:'Faro',body:'Agent_Heavy',outfit:'Punta de lanza',role:'Comando',play:true,own:true},
@@ -6853,8 +6866,8 @@ const OWN_CAST=[
  {name:'Llave',body:'Engineer',outfit:'Zapadora CSN',role:'Ingeniero',play:true,own:true},
  {name:'Trueno',body:'Agent_Heavy',outfit:'Asalto CSN',role:'Comando',play:true,own:true},
  {name:'Ciclón',body:'Soldier_Light',outfit:'Tiradora de precisión',role:'Francotirador',play:true,own:true},
- {name:'Roca',body:'Soldier_Heavy',outfit:'Ametrallador de CSN',role:'Artillero',play:true,own:true},
- {name:'Víbora',body:'Agent_Light',outfit:'Infiltración nocturna',role:'Espía',play:true,own:true},
+ {name:'Roca',body:'Soldier_Heavy',outfit:'Ametrallador de CSN',role:'Artillero',play:true,own:true,tint:'#4a4034'},
+ {name:'Víbora',body:'Agent_Light',outfit:'Infiltración nocturna',role:'Espía',play:true,own:true,tint:'#31402c'},
  {name:'Venda',body:'Medic',outfit:'Camillera de asalto',role:'Médico',play:true,own:true},
  {name:'Engranaje',body:'Engineer',outfit:'Especialista en torretas',role:'Ingeniero',play:true,own:true},
  {name:'Centella',body:'Agent_Heavy',outfit:'Reacción rápida',role:'Comando',play:true,own:true}
