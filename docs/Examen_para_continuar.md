@@ -240,3 +240,31 @@ Cada clase se distingue por **uniforme del original** (Veteran, Spetsnaz,
 DeltaForce, Rambo, Decon, DeerHunter, base), **proporciones** (`ROLE_LOOK`,
 0,84-1,30) y **equipo propio** (mochila, placas, antena, emblema). No es el
 cuerpo distinto del original, pero se leen como siete soldados distintos.
+
+
+## 10. Estado final de la tanda de armas y modelos
+
+| Bloque | Estado | Evidencia |
+|---|---|---|
+| Armas del original en 3D | **Hecho** | 23 mallas en `assets/weapons/*.obj` con su textura; en partida se anclan por la culata, se escalan por categoría y el fogonazo va al final del cañón. Verificado con sonda: 8 armas reales en escena |
+| Carátulas en la Armería | **Hecho** | 38 PNG en `assets/weapons/covers/` (arte `item_weapon_*` del IPA); 31 fichas con arte y 6 con render 3D de respaldo |
+| Cuerpos de clase | **6 de 7** | Francotirador, Artillero, Espía, Médico, Ingeniero y Capitán cargan su malla del IPA; el Comando usa la malla base (`CLASS_MODEL_SKIP`) |
+| Causa raíz del destrozo de mallas | **Resuelta** | el buffer de índices del IPA es un **triangle strip**: 2923 índices → 1456 triángulos (antes 974 con 480 degenerados) |
+| Verificación | **TODO OK** | sintaxis 0 · 19/19 tableros · reglas 6/6 · datos 6/6 · humo 3D con `units:8` |
+
+### El Comando: lo que se sabe
+
+`Agent_Heavy` trae **17 huesos y 17 bind poses** (los recuentos cuadran), pero la
+cadena derivada de sus bind poses no las reproduce: el error de
+`boneWorld × boneInverse` es **3,6 en la cabeza** (en las otras seis clases es
+0,00000). Se probaron orden de huesos, espejo X, escala horneada, `bone.scale`,
+transposición de bind poses, `bindMatrix` de la malla, normalización de la
+escala global del esqueleto y retargeting por delta. Todos fallan solo en esta
+malla, así que el problema está en los datos del IPA para ese personaje, no en
+el cargador.
+
+**Vías que quedan**: (a) hornear su esqueleto con el pipeline que produjo
+`assets/soldier_rig.json`; (b) usar su malla **sin skinning** en pose fija
+(sólida, pero sin animación de miembros) y animarla con un truco de
+transformación del grupo; (c) dejarlo con la malla base, que es el estado
+actual.
