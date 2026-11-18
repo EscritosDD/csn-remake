@@ -4,9 +4,13 @@ Herramientas que ejecutan el motor real del juego fuera del navegador, sin cambi
 
 ## Qué hay aquí
 
-- `boards.js` — mide los 13 tableros con el BFS real (`pathDist`) sobre los `MAP_DEFS` de `index.html`: casillas libres conectadas, pasos a la baliza, ruta del dron, simetría 180° y solapes. **Resolvió la discrepancia del 16/11**: la página (L464) era correcta; la auditoría erró en 3 celdas.
+- `boards.js` — mide los 13 tableros con el BFS real (`pathDist`) sobre los `MAP_DEFS` de `index.html`: casillas libres conectadas, pasos a la baliza, ruta del dron, simetría 180° y solapes. **Resolvió la discrepancia del 16/11**: la página (L464) era correcta; la auditoría erró en 3 celdas. *(Hoy mide los 19 tableros: los 13 jugables más los 6 de campaña.)*
 - `harness.js` — **harness IA contra IA** sobre el motor real (carga el `<script>` inline en un contexto sin navegador y juega partidas con `startGame`/`aiUnitAct`/`endTurn`). Es el banco que la auditoría del 16/11 declaraba inexistente.
 - `check-syntax.js` — comprueba que el JS incrustado de `index.html` parsea (0 errores).
+- `rules.test.js` / `data.test.js` — tests del motor (carga el juego en VM) y de los catálogos.
+- `covers.test.js` — carátulas de la Armería: 37 armas con malla+textura, las 6 sin arte original (malla RPG) y la regresión del bucle de reintentos (F1).
+- `weapons.test.js` — datos de las 37 armas: rangos, categorías, notas, arsenal por rol, longitudes 3D por categoría y coherencia de costes (F4).
+- `meshes.test.js` — las 7 mallas de clase: geometría OBJ válida, rigs con huesos del rig base **en su orden** (los clips se aplican por índice), estructura pos/quat/skinBones/boneInverses, escalas en rango, altura horneada común y clips con huesos conocidos (F4; la receta §11 del examen como aserciones).
 
 ## Uso
 
@@ -14,6 +18,8 @@ Herramientas que ejecutan el motor real del juego fuera del navegador, sin cambi
 node bench/boards.js
 node bench/check-syntax.js
 node bench/harness.js <modo> <mapa> <partidas> <formato>
+node bench/rules.test.js && node bench/data.test.js
+node bench/covers.test.js && node bench/weapons.test.js && node bench/meshes.test.js
 # modo: eliminacion | baliza | dominacion   (escolta aún no: IA asimétrica)
 # mapa: almacen | patio | skirmish | skirmish04 | ...
 ```
