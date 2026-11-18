@@ -521,7 +521,7 @@ details.rule p{margin:6px 0 0;font-size:12.5px;line-height:1.45}
 
       <div class="panel" style="margin-top:14px">
         <h2>Tus skins</h2>
-        <p class="sub">Al empezar tienes exactamente <b>dos skins</b>, y las dos son <b>solo aspecto, sin pasivas</b>. La de Nación es una skin más, no la definitiva: más adelante llegarán otras skins, y esas sí darán pasivas pequeñas. Eliges la skin de tu escuadra al configurar cada partida.</p>
+        <p class="sub">Tienes <b>tres skins</b>, y las tres son <b>solo aspecto, sin pasivas</b>: Estándar (genérica), Clase (color del rol) y Nación (bandera, casco y emblema). La de Nación es una skin más, no la definitiva: más adelante llegarán otras skins, y esas sí darán pasivas pequeñas. Eliges la skin de tu escuadra al configurar cada partida.</p>
         <div class="skin-cards">
           <div class="skin-card">
             <span class="tag">Skin inicial · Sin pasiva</span>
@@ -6847,7 +6847,7 @@ function renderAbilityCatalog(){
 function renderBarracks(){
   const el=document.getElementById('barrContent'),nt=document.getElementById('barrNation');
   if(!el)return;
-  if(nt)nt.innerHTML=myNation?('<b>'+myNation.name+'</b>'+(myNation.pers?' · '+myNation.pers.name+' — '+myNation.pers.desc:'')+' · 🪙 '+coinsGet()+' · skins: Estándar y Nación'):('Sin nación elegida · 🪙 '+coinsGet());
+  if(nt)nt.innerHTML=myNation?('<b>'+myNation.name+'</b>'+(myNation.pers?' · '+myNation.pers.name+' — '+myNation.pers.desc:'')+' · 🪙 '+coinsGet()+' · skins: Estándar, Clase y Nación'):('Sin nación elegida · 🪙 '+coinsGet());
   const roles=Object.keys(ROLES);
   const catOrder=[];const byCat={};
   Object.entries(WEAPONS).forEach(([name,w])=>{if(!byCat[w.cat]){byCat[w.cat]=[];catOrder.push(w.cat);}byCat[w.cat].push(name+' ('+w.dmg+'/'+w.rng+')');});

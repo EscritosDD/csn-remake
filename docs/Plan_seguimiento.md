@@ -72,3 +72,22 @@ banda 70/30 del plan.
 > arranca el render (rAF se estrangula en ventanas ocluidas). Para verificar
 > estado, usar headless (el trazador _dbg.mjs da geo:true); para capturas,
 > la ventana debe quedar visible.
+
+
+## Estado tras las rondas del plan director (objetivo automatico)
+
+- **F1 catalogo**: hecho. 42 iconos del IPA en `assets/ui/ability/` y
+  `docs/Catalogo_habilidades_original.md` con las 44 y su estado.
+- **F2 mapas**: 8 Skirmish reales + 6 misiones de campana, todas con
+  captura 3D en `docs/Capturas_3D.md`; ambiente en los 13 temas y cielo
+  propio por tema.
+- **F3 interfaz**: titulo con el arte y logo del original, menu, campana
+  por capitulos, armeria con catalogo, cuartel con 29 personajes, escuadra
+  con retratos y personaje, resultados con estadisticas, reglas plegables.
+- **F4 personajes**: 7 modelos por clase del IPA (malla+rig+textura),
+  29 personajes (17 del original + 12 propios), skins Estandar/Clase/Nacion
+  con tinte, cinta de casco, banda de mochila y emblema; enemigo teñido.
+- **F5 presentacion**: 77 clips de audio del IPA (armas, voces, ambiente,
+  habilidades) y camara que acompaña al disparo con sacudida.
+- **F6 calidad**: bateria por ronda (sintaxis 0, tableros 13/13, rules.test
+  6/6, harness con n>=30 en los modos cerrados, headless y capturas 3D).
