@@ -1,5 +1,10 @@
 # Capturas 3D de los mapas (base reconocible)
 
+![Portada](capturas/PORTADA.png)
+
+_La portada: arte y logo del RAD Soldiers original sobre la que se construye
+CSN, con el tablero 3D en vivo debajo._
+
 Capturas reales del juego en vista 3D (`_capture_all.mjs` con
 `Page.bringToFront`), tomadas tras las fases F0-F9 y las rondas del plan
 director. Los triangulos y llamadas salen de `window.__csn3d`.

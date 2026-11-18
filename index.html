@@ -75,7 +75,7 @@ nav.tabs button.on{background:var(--amber);border-color:var(--amber);color:#1913
 .hero h1{font-size:clamp(34px,5.4vw,58px);line-height:.98;margin:0 0 8px;font-weight:700;text-transform:uppercase}
 .hero h1 em{font-style:normal;color:var(--amber)}
 .hero p{max-width:72ch;color:var(--muted);margin:0;font-size:17px}
-.hero p b{color:var(--ink)}
+.hero:not(.heroOrigen) p b{color:var(--ink)}
 /* screens */
 .screen{display:none}.screen.on{display:block}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px}
@@ -5786,6 +5786,13 @@ function buildThemedProps3(world,theme){
         g.rotation.y=rand()*Math.PI*2;world.add(g);}
     }
     if(theme==='platform'){
+      /* Banco de anden junto a la maquina. */
+      const spBn=take();
+      if(spBn){const g=new THREE.Group();g.position.set(spBn.x,0,spBn.z);
+        const seat=new THREE.Mesh(new THREE.BoxGeometry(1.3,0.08,0.4),mat3('#8d6436',0.85));seat.position.y=0.45;seat.castShadow=true;g.add(seat);
+        const back=new THREE.Mesh(new THREE.BoxGeometry(1.3,0.4,0.07),mat3('#8d6436',0.85));back.position.set(0,0.68,-0.18);g.add(back);
+        [-0.5,0.5].forEach(dx=>{const leg=new THREE.Mesh(new THREE.BoxGeometry(0.07,0.45,0.35),mat3('#3b4046',0.6));leg.position.set(dx,0.22,0);g.add(leg);});
+        g.rotation.y=rand()*Math.PI*2;world.add(g);}
       /* Maquina expendedora del anden: cuerpo, cristal y botones. */
       const spV=take();
       if(spV){const g=new THREE.Group();g.position.set(spV.x,0,spV.z);
@@ -6861,23 +6868,23 @@ function saveChars(v){try{lsSet(LS_CHARS,JSON.stringify(v));}catch(e){}}
 /* Personajes nuevos propios de CSN: nombre, clase (cuerpo del IPA) y rol. */
 const OWN_CAST=[
  {name:'Lobo',body:'Soldier_Light',outfit:'Veterano de CSN',role:'Francotirador',play:true,own:true,tint:'#3c4436'},
- {name:'Mula',body:'Soldier_Heavy',outfit:'Porteador de asalto',role:'Artillero',play:true,own:true},
+ {name:'Mula',body:'Soldier_Heavy',outfit:'Porteador de asalto',role:'Artillero',play:true,own:true,tint:'#4b4235'},
  {name:'Sombra',body:'Agent_Light',outfit:'Infiltración CSN',role:'Espía',play:true,own:true,tint:'#2b2738'},
- {name:'Alfiler',body:'Medic',outfit:'Sanitario de trinchera',role:'Médico',play:true,own:true},
- {name:'Tuerca',body:'Engineer',outfit:'Manitas de campaña',role:'Ingeniero',play:true,own:true},
+ {name:'Alfiler',body:'Medic',outfit:'Sanitario de trinchera',role:'Médico',play:true,own:true,tint:'#d8dcd2'},
+ {name:'Tuerca',body:'Engineer',outfit:'Manitas de campaña',role:'Ingeniero',play:true,own:true,tint:'#b8891f'},
  {name:'Faro',body:'Agent_Heavy',outfit:'Punta de lanza',role:'Comando',play:true,own:true,tint:'#3a4050'},
- {name:'Brújula',body:'Commander',outfit:'Mando de campo',role:'Capitán',play:true,own:true},
+ {name:'Brújula',body:'Commander',outfit:'Mando de campo',role:'Capitán',play:true,own:true,tint:'#2f3540'},
  {name:'Yunque',body:'Soldier_Heavy',outfit:'Asalto pesado CSN',role:'Artillero',play:true,own:true,tint:'#4d3f2f'},
- {name:'Gacela',body:'Agent_Light',outfit:'Exploradora CSN',role:'Espía',play:true,own:true},
- {name:'Bisturí',body:'Medic',outfit:'Cirujana de campaña',role:'Médico',play:true,own:true},
- {name:'Llave',body:'Engineer',outfit:'Zapadora CSN',role:'Ingeniero',play:true,own:true},
- {name:'Trueno',body:'Agent_Heavy',outfit:'Asalto CSN',role:'Comando',play:true,own:true},
- {name:'Ciclón',body:'Soldier_Light',outfit:'Tiradora de precisión',role:'Francotirador',play:true,own:true},
+ {name:'Gacela',body:'Agent_Light',outfit:'Exploradora CSN',role:'Espía',play:true,own:true,tint:'#6b7a52'},
+ {name:'Bisturí',body:'Medic',outfit:'Cirujana de campaña',role:'Médico',play:true,own:true,tint:'#e2e6dc'},
+ {name:'Llave',body:'Engineer',outfit:'Zapadora CSN',role:'Ingeniero',play:true,own:true,tint:'#7a5a2e'},
+ {name:'Trueno',body:'Agent_Heavy',outfit:'Asalto CSN',role:'Comando',play:true,own:true,tint:'#3f4a3a'},
+ {name:'Ciclón',body:'Soldier_Light',outfit:'Tiradora de precisión',role:'Francotirador',play:true,own:true,tint:'#5a5f6b'},
  {name:'Roca',body:'Soldier_Heavy',outfit:'Ametrallador de CSN',role:'Artillero',play:true,own:true,tint:'#4a4034'},
  {name:'Víbora',body:'Agent_Light',outfit:'Infiltración nocturna',role:'Espía',play:true,own:true,tint:'#31402c'},
- {name:'Venda',body:'Medic',outfit:'Camillera de asalto',role:'Médico',play:true,own:true},
- {name:'Engranaje',body:'Engineer',outfit:'Especialista en torretas',role:'Ingeniero',play:true,own:true},
- {name:'Centella',body:'Agent_Heavy',outfit:'Reacción rápida',role:'Comando',play:true,own:true}
+ {name:'Venda',body:'Medic',outfit:'Camillera de asalto',role:'Médico',play:true,own:true,tint:'#cfd6cc'},
+ {name:'Engranaje',body:'Engineer',outfit:'Especialista en torretas',role:'Ingeniero',play:true,own:true,tint:'#6a5a3a'},
+ {name:'Centella',body:'Agent_Heavy',outfit:'Reacción rápida',role:'Comando',play:true,own:true,tint:'#4a3f52'}
 ];
 const CLASS_LABEL={'Soldier_Light':'Soldado ligero','Soldier_Heavy':'Soldado pesado','Agent_Light':'Agente ligero','Medic':'Médico','Engineer':'Ingeniero','Engineer_Light':'Ingeniero ligero','Agent_Heavy':'Agente pesado','Commander':'Comandante','Medic_therapist':'Médico (terapia)','Engineer_Heavy':'Ingeniero pesado','Engineer (RiotCop)':'Ingeniero antidisturbios','Commander_F':'Comandante (F)'};
 const CLASS_ORDER=['Soldier_Light','Soldier_Heavy','Agent_Light','Medic','Engineer','Agent_Heavy','Commander'];
