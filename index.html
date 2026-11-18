@@ -844,7 +844,7 @@ body[data-state="playing"]{padding-bottom:112px}
             <div class="viewer-status" id="viewerStatus">Selecciona un personaje o un arma.</div>
           </div>
           <div class="viewer-meta">
-            <div><h2 id="viewerName" style="margin:0">Modelo 3D</h2><p class="sub" id="viewerDescription" style="margin:4px 0 0">La textura aplicada aparece junto al modelo.</p></div>
+            <div><h2 id="viewerName" style="margin:0">Modelo 3D</h2><p class="sub" id="viewerDescription" style="margin:4px 0 0">La textura aplicada aparece junto al modelo.</p><p class="sub" id="viewerAssetInfo" style="margin:4px 0 0"></p></div>
             <img class="viewer-texture" id="viewerTexture" alt="Textura del modelo" hidden/>
           </div>
           <label class="viewer-zoom">Zoom <input id="viewerZoom" type="range" min="1" max="2.5" step="0.05" value="1" aria-label="Zoom del modelo"/></label>
@@ -7641,18 +7641,62 @@ $('#guerraCountdown').textContent=fmtCountdown(msToNextSaturday());
     renderer:null,scene:null,camera:null,spin:null,platform:null,
     baseDistance:3,drag:null,lastFrame:0,selection:0,
     kind:'roles',name:'',skinIndex:0,idleActor:null,idleClipKey:'idle2h',
-    frameRequested:false,models:{roles:{},weapons:{}},textures:{}
+    frameRequested:false,models:{roles:{},weapons:{}},textures:{},bodyGeo:{}
   };
   const viewerOutfits=['base','decon','deerhunter','deltaforce','halloween','rambo','spetsnaz','veteran'];
+  /* Personajes del original (ORIG_CAST, sin Soap ni Spud: repetirían el
+     soldado genérico, mismo cuerpo Soldier_Light y misma textura base).
+     Cada personaje muestra la malla de su cuerpo (body) y su textura
+     propia (outfit, en assets/soldier/cast/); el rol solo se usa para
+     mostrarlo y como respaldo cuando el cuerpo no trae rol. Los 3
+     diseños Meshy de Dani se mantienen como entradas propias. */
+  const VIEWER_ROLE_FALLBACK={
+    'Riot Medic':'Médico','Megan McNick':'Ingeniero','Carlito Grosso':'Ingeniero',
+    'Riot Engineer':'Ingeniero','Commander (F)':'Capitán'
+  };
+  const VIEWER_CAST_TEXTURE={
+    'Hipster Dave':'Soldier_Light_DeltaForce_d.png',
+    'Archie Fletcher':'Soldier_Light_Rambo_DeerHunter_d.png',
+    'Ivan Tkilya':'Soldier_heavy_GermanSpecialForces_d.png',
+    'Mme La Hacque':'Agent_light_JewelThief_d.png',
+    'Sneaky Pete':'Agent_light_d.png',
+    'Sister Florence':'Medic_Rescue_d.png',
+    'Riot Medic':'Medic_Therapist_d.png',
+    'Textbook Kate':'Medic_d.png',
+    'Big Time Taschmann':'Engineer_Spetsnaz_d.png',
+    'Megan McNick':'Engineer_Light_Trinity_d.png',
+    'Carlito Grosso':'Engineer_Heavy_EOD_d.png',
+    'Riot Agent':'Agent_Heavy_Skin1_d.png',
+    'Riot Engineer':'Engineer_RiotCop_d.png',
+    'Commander (M)':'Commander_d.png',
+    'Commander (F)':'Commander_F_d.png'
+  };
+  /* Cuerpo -> .obj en assets/soldier/bodies/ (solo los cuerpos que no
+     son una clase del repo). Los demás cuerpos usan REAL.byRole o el
+     soldado genérico (REAL), según VIEWER_BODY_ROLE. */
+  const VIEWER_BODY_FILE={
+    'Soldier_Heavy':'Soldier_Heavy.obj',
+    'Agent_Light':'Agent_Light.obj',
+    'Medic_therapist':'Medic_therapist_1248v.obj',
+    'Engineer_Light':'Engineer_Light.obj',
+    'Engineer_Heavy':'Engineer_Heavy.obj',
+    'Engineer (RiotCop)':'Engineer_RiotCop.obj',
+    'Commander_F':'CommanderF.obj'
+  };
+  const VIEWER_BODY_ROLE={'Medic':'Médico','Engineer':'Ingeniero','Agent_Heavy':'Comando','Commander':'Capitán'};
   const viewerCharacters=[
-    {key:'original:01',label:'Modelo 01',file:'soldier.obj'},
-    ...Object.entries(ROLE_MODEL_FILES)
-      .filter(([role])=>!['Francotirador','Artillero','Espía'].includes(role))
-      .map(([role,file],index)=>({
-      key:'original:'+String(index+5).padStart(2,'0'),
-      label:'Modelo '+String(index+5).padStart(2,'0'),
-      role,file:file+'.obj'
-    })),
+    ...ORIG_CAST.filter(c=>c.name!=='Soap'&&c.name!=='Spud').map((character,index)=>{
+      const role=character.role||VIEWER_ROLE_FALLBACK[character.name]||'';
+      const bodyFile=VIEWER_BODY_FILE[character.body]||'';
+      const bodyRole=VIEWER_BODY_ROLE[character.body]||'';
+      return {
+        key:'original:'+String(index+1).padStart(2,'0'),
+        label:character.name,name:character.name,role,bio:character.bio||'',
+        body:character.body,bodyFile,bodyRole,
+        outfit:VIEWER_CAST_TEXTURE[character.name]||'',
+        file:bodyFile||(bodyRole?ROLE_MODEL_FILES[bodyRole]+'.obj':'soldier.obj')
+      };
+    }),
     {key:'own:09',label:'Diseño Meshy 09',role:'Francotirador',mesh:'Francotirador'},
     {key:'own:10',label:'Diseño Meshy 10',role:'Artillero',mesh:'Artillero'},
     {key:'own:11',label:'Diseño Meshy 11',role:'Espía',mesh:'Espia'}
@@ -7661,9 +7705,9 @@ $('#guerraCountdown').textContent=fmtCountdown(msToNextSaturday());
     entry.skins=entry.mesh
       ?[{key:'own',label:'Textura Meshy'}]
       :[
-        ...(entry.role?[{key:'native',label:'Skin 01 · textura propia'}]:[]),
+        ...(entry.outfit?[{key:'cast',label:'Textura propia · '+entry.outfit}]:[]),
         ...viewerOutfits.map((skin,index)=>({
-          key:skin,label:'Skin '+String(index+1+(entry.role?1:0)).padStart(2,'0')+' · '+skin+'.png'
+          key:skin,label:'Skin '+String(index+1+(entry.outfit?1:0)).padStart(2,'0')+' · '+skin+'.png'
         }))
       ];
   });
@@ -7814,10 +7858,17 @@ $('#guerraCountdown').textContent=fmtCountdown(msToNextSaturday());
       ?viewerCharacters.find(item=>item.key===key)
       :viewerWeaponFiles.includes(key)?{label:key,file:key}:null;
     if(!entry)throw new Error('El modelo seleccionado no pertenece al catálogo del visor.');
-    document.getElementById('viewerName').textContent=entry.label;
+    document.getElementById('viewerName').textContent=entry.name||entry.label;
     document.getElementById('viewerDescription').textContent=kind==='roles'
-      ?(entry.mesh?'Diseño Meshy independiente · '+entry.mesh+'.':'Malla '+entry.file+' · '+entry.skins[Math.min(viewer.skinIndex,entry.skins.length-1)].label+'.')
+      ?(entry.mesh
+        ?'Diseño Meshy independiente · '+entry.mesh+'.'
+        :'Rol: '+(entry.role||'—')+'. '+(entry.bio||''))
       :'Malla y textura del arsenal · '+entry.file+'.obj';
+    document.getElementById('viewerAssetInfo').textContent=kind==='roles'
+      ?(entry.mesh
+        ?('Malla '+entry.mesh+'.obj · Textura Meshy.')
+        :('Malla '+entry.file+' · '+(entry.outfit?('Textura '+entry.outfit):entry.skins[Math.min(viewer.skinIndex,entry.skins.length-1)].label)+'.'))
+      :'';
     texturePreview.hidden=true;
     texturePreview.removeAttribute('src');
     return {entry,skin:kind==='roles'?entry.skins[Math.min(viewer.skinIndex,entry.skins.length-1)]:null};
@@ -7925,50 +7976,106 @@ $('#guerraCountdown').textContent=fmtCountdown(msToNextSaturday());
     };
     return model;
   }
+  /* Carga un cuerpo de assets/soldier/bodies/ con el cargador del juego
+     (parseOBJ3). Los .obj de bodies/ no traen rig, así que se parsean
+     con un skin a cero: el visor los muestra como malla estática y
+     borra skinIndex/skinWeight al clonar, igual que los roles. La
+     altura se normaliza a la de los modelos de clase (~1.14) con el
+     percentil 95 de Z, robusto a un accesorio alto: Agent_Light viene
+     a 3.55 y sin normalizar se vería gigante. */
+  async function loadViewerBody(file){
+    const path='assets/soldier/bodies/'+file;
+    if(viewer.bodyGeo[path])return viewer.bodyGeo[path];
+    const text=await fetch(path).then(r=>{if(!r.ok)throw new Error('No se pudo cargar el cuerpo '+file);return r.text();});
+    let count=0;
+    for(const line of text.split('\n')){if(line.startsWith('v '))count++;}
+    const skin={skinIndex:new Array(count*4).fill(0),skinWeight:new Array(count*4).fill(0)};
+    const geo=parseOBJ3(text,skin);
+    const pos=geo.attributes.position.array;
+    const zs=[];
+    for(let i=2;i<pos.length;i+=3)zs.push(pos[i]);
+    zs.sort((a,b)=>a-b);
+    const p95=zs[Math.floor(zs.length*0.95)]||1;
+    const scale=1.14/p95;
+    if(scale!==1)geo.scale(scale,scale,scale);
+    viewer.bodyGeo[path]=geo;
+    return geo;
+  }
   async function makeViewerOriginal(entry,skin){
-    const source=entry.role?REAL.byRole[entry.role]:REAL;
-    let texture=skin.key==='native'?source.tex:null;
-    if(skin.key==='base'&&!entry.role)texture=source.tex;
-    const texturePath='assets/soldier/outfits/'+skin.key+'.png';
-    if(!texture&&viewer.textures[texturePath])texture=viewer.textures[texturePath];
-    if(!texture){
-      if(skin.key==='native')throw new Error('El modelo no tiene una textura propia disponible.');
-      texture=await new Promise((resolve,reject)=>{
-        new THREE.TextureLoader().load(texturePath,resolve,undefined,reject);
-      });
-      texture.colorSpace=THREE.SRGBColorSpace;
-      viewer.textures[texturePath]=texture;
+    /* La geometría la decide el cuerpo (entry.body), no el rol: cada
+       personaje muestra la malla de su cuerpo. Los 4 roles IPA usan
+       REAL.byRole; los cuerpos variantes se cargan de bodies/; el
+       cuerpo Soldier_Light usa el soldado genérico (REAL). */
+    let source=null,bodyGeo=null;
+    if(entry.bodyFile){
+      bodyGeo=await loadViewerBody(entry.bodyFile);
+    }else if(entry.bodyRole){
+      source=REAL.byRole[entry.bodyRole];
+      if(!source)throw new Error('El modelo de clase '+entry.bodyRole+' todavía no está disponible.');
+    }else{
+      source=REAL;
     }
-    if(entry.role){
-      const geometry=source.geo.clone();
-      geometry.deleteAttribute('skinIndex');
-      geometry.deleteAttribute('skinWeight');
-      geometry.computeVertexNormals();
-      const mesh=new THREE.Mesh(geometry,new THREE.MeshStandardMaterial({
-        map:texture,roughness:0.85,metalness:0.02,transparent:false,opacity:1,depthWrite:true,
-        side:THREE.DoubleSide
-      }));
-      mesh.castShadow=true;
-      const model=new THREE.Group();
+    let texture=null;
+    if(skin.key==='cast'&&entry.outfit){
+      const texturePath='assets/soldier/cast/'+entry.outfit;
+      if(viewer.textures[texturePath])texture=viewer.textures[texturePath];
+      else{
+        texture=await new Promise((resolve,reject)=>{
+          new THREE.TextureLoader().load(texturePath,resolve,undefined,reject);
+        });
+        texture.colorSpace=THREE.SRGBColorSpace;
+        viewer.textures[texturePath]=texture;
+      }
+    }else if(skin.key==='native'&&source){
+      texture=source.tex;
+    }
+    if(!texture){
+      const texturePath='assets/soldier/outfits/'+skin.key+'.png';
+      if(viewer.textures[texturePath])texture=viewer.textures[texturePath];
+      else{
+        texture=await new Promise((resolve,reject)=>{
+          new THREE.TextureLoader().load(texturePath,resolve,undefined,reject);
+        });
+        texture.colorSpace=THREE.SRGBColorSpace;
+        viewer.textures[texturePath]=texture;
+      }
+    }
+    if(!texture)throw new Error('El modelo no tiene una textura disponible.');
+    /* Solo el soldado genérico sin rol usa el modelo con esqueleto y
+       pose de reposo (el único que la tiene sin descabalarse). Todos
+       los demás son malla estática: forzar animatable en todos es lo
+       que descabaló los modelos. */
+    if(!entry.bodyFile&&!entry.bodyRole&&!entry.role){
+      const model=makeViewerRiggedModel(source.geo.clone(),source.data,texture);
       model.scale.setScalar(1.15);
-      const spin=new THREE.Group();spin.rotation.y=Math.PI/2;model.add(spin);
-      const tilt=new THREE.Group();tilt.rotation.x=-Math.PI/2;spin.add(tilt);
-      mesh.scale.setScalar(0.95);tilt.add(mesh);
-      model.userData.staticRole=true;
+      const mesh=model.userData.mesh3;
+      model.remove(mesh);
+      const spin=new THREE.Group();
+      spin.rotation.y=Math.PI/2;
+      model.add(spin);
+      const tilt=new THREE.Group();
+      tilt.rotation.x=-Math.PI/2;
+      spin.add(tilt);
+      mesh.scale.setScalar(0.95);
+      tilt.add(mesh);
       return model;
     }
-    const model=makeViewerRiggedModel(source.geo.clone(),source.data,texture);
+    const geometry=bodyGeo?bodyGeo.clone():(source?source.geo.clone():null);
+    if(!geometry)throw new Error('El modelo no tiene una geometría disponible.');
+    geometry.deleteAttribute('skinIndex');
+    geometry.deleteAttribute('skinWeight');
+    geometry.computeVertexNormals();
+    const mesh=new THREE.Mesh(geometry,new THREE.MeshStandardMaterial({
+      map:texture,roughness:0.85,metalness:0.02,transparent:false,opacity:1,depthWrite:true,
+      side:THREE.DoubleSide
+    }));
+    mesh.castShadow=true;
+    const model=new THREE.Group();
     model.scale.setScalar(1.15);
-    const mesh=model.userData.mesh3;
-    model.remove(mesh);
-    const spin=new THREE.Group();
-    spin.rotation.y=Math.PI/2;
-    model.add(spin);
-    const tilt=new THREE.Group();
-    tilt.rotation.x=-Math.PI/2;
-    spin.add(tilt);
-    mesh.scale.setScalar(0.95);
-    tilt.add(mesh);
+    const spin=new THREE.Group();spin.rotation.y=Math.PI/2;model.add(spin);
+    const tilt=new THREE.Group();tilt.rotation.x=-Math.PI/2;spin.add(tilt);
+    mesh.scale.setScalar(0.95);tilt.add(mesh);
+    model.userData.staticRole=true;
     return model;
   }
   function viewerWeaponCacheKey(file){
@@ -8024,7 +8131,7 @@ $('#guerraCountdown').textContent=fmtCountdown(msToNextSaturday());
       }
       if(token!==viewer.selection)return;
       mount(model);
-      document.getElementById('viewerDescription').textContent=kind==='roles'
+      document.getElementById('viewerAssetInfo').textContent=kind==='roles'
         ?(model.userData.meshy?'Malla OBJ y textura Meshy en pose del modelo · '+skin.label+'.':'Malla '+entry.file+' · '+skin.label+'.')
         :'Malla y textura del arsenal · '+entry.file+'.obj';
     }catch(error){
