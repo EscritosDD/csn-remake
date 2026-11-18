@@ -268,3 +268,36 @@ el cargador.
 (sólida, pero sin animación de miembros) y animarla con un truco de
 transformación del grupo; (c) dejarlo con la malla base, que es el estado
 actual.
+
+
+## 11. Receta definitiva de las 7 mallas de clase (cerrado)
+
+Las siete clases usan ya su malla del IPA, con su animación. La receta que
+funciona, en orden:
+
+1. **Índices como triangle strip** (la causa raíz del destrozo): recorrer
+   `MeshHandler.m_IndexBuffer` de dos en dos descartando degenerados e
+   invirtiendo el orden en los impares → n triángulos correctos.
+2. **Rig en el orden de huesos del rig base** (`assets/soldier_rig.json`),
+   porque los clips se aplican por índice.
+3. **Escala de clase horneada** en los vértices (factor `ROLE_SCALES`) y
+   **raíz del esqueleto a escala 1** (si la raíz lleva escala, el cuerpo sale
+   gigante o diminuto).
+4. **OBJ con la X ya invertida** (porque `parseOBJ3` niega `x`).
+5. **`boneInverses` autoconstantes**: `inverse_i = inv(mundo_i)` calculado
+   desde los mundos derivados del propio rig. Esto es lo que arregló el
+   Comando, cuyas bind poses del IPA no cierran con su cadena (residuo
+   constante: rotación 90° en Z y escala 1,283 en todos los huesos).
+6. **`bone.scale`** en el juego y **retargeting por delta** de los clips
+   (`q = rest_clase · (rest_base⁻¹ · q_clip)`).
+
+Verificado: sintaxis 0, 19/19 tableros, reglas 6/6, datos 6/6, humo 3D, y
+capturas de las siete clases en partida (Comando, Francotirador, Médico,
+Ingeniero, Artillero, Espía, Capitán).
+
+### Pendiente menor (no bloquea)
+
+- Confirmar de cerca Espía y Capitán y, si su silueta no cuadra, suavizar
+  `ROLE_LOOK` (la proporción extra puede exagerar el cuerpo real).
+- Carátulas 3D para las seis armas sin arte original (lanzacohetes y
+  lanzagranadas).
