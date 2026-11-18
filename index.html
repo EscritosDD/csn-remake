@@ -590,9 +590,9 @@ details.info .info-body b{color:var(--ink)}
           <button class="btn primary" data-start="dominacion">Configurar partida</button>
         </div>
         <div class="mode-card" data-modecard="campana" style="grid-column:span 2">
-          <span class="tag amber">Nuevo · 5 misiones encadenadas</span>
+          <span class="tag amber">Nuevo · 6 misiones encadenadas</span>
           <h3>Campaña · Operación Londres</h3>
-          <details class="info"><summary>ⓘ Más información</summary><div class="info-body"><p id="campaignDesc">Cinco misiones seguidas sobre los tableros del juego, cada una con un objetivo distinto: eliminación, baliza, dominación, defensa del puente y asalto final 5 contra 5 contra la IA en Élite. Tu escuadra <b>arrastra la veterania</b>: cada soldado que sobrevive a una misión empieza la siguiente con <b>+25 PV y +1 ⚡</b> por misión superada, y los caídos vuelven, pero sin veterania. El progreso se guarda en este dispositivo.</p></div></details>
+          <details class="info"><summary>ⓘ Más información</summary><div class="info-body"><p id="campaignDesc">Seis misiones seguidas sobre los tableros del juego, cada una con un objetivo distinto: eliminación, baliza, dominación, defensa del puente y asalto final 5 contra 5 contra la IA en Élite. Tu escuadra <b>arrastra la veterania</b>: cada soldado que sobrevive a una misión empieza la siguiente con <b>+25 PV y +1 ⚡</b> por misión superada, y los caídos vuelven, pero sin veterania. El progreso se guarda en este dispositivo.</p></div></details>
           <div id="campaignProgress" class="statline" style="margin:4px 0"></div>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
             <button class="btn primary" id="campaignBtn">Ver la campaña y jugar la siguiente misión</button>
@@ -610,7 +610,7 @@ details.info .info-body b{color:var(--ink)}
         </div>
       </div>
       <div class="panel" id="campaignPanel" style="margin-top:14px;display:none">
-        <h2>Operación Londres · Las 5 misiones</h2>
+        <h2>Operación Londres · Las 6 misiones</h2>
         <details class="info"><summary>ⓘ ¿Cómo funciona la campaña?</summary><div class="info-body"><p class="sub">Juega las misiones en orden. Puedes repetir la configuración de escuadra antes de cada una, pero el mapa, el objetivo y la dificultad de la IA los fija la misión. Si pierdes, repites esa misión sin perder la veterania ya ganada.</p></div></details>
         <div class="campaign-list" id="campaignList"></div>
       </div>
@@ -837,7 +837,7 @@ details.info .info-body b{color:var(--ink)}
       <details class="rule"><summary><b>9 · Skins</b><span class="rule-info">ⓘ</span></summary><div class="info-body"><p>Empiezas con dos: la Estándar, el soldado genérico sin nada especial, y la de tu Nación, con los colores de su bandera y el emblema de sus fuerzas armadas. Las dos son solo aspecto. Las skins que lleguen más adelante darán pasivas pequeñas; estas dos, ninguna.</p></div></details>
       <details class="rule"><summary><b>13 · El tablero está vivo</b><span class="rule-info">ⓘ</span></summary><div class="info-body"><p>Nada se teletransporta: cada soldado se desliza hasta su casilla y respira en reposo mientras espera órdenes, los disparos se ven como trazadoras con su impacto y su número de daño flotante, y las explosiones sacuden la cámara. La baliza pulsa, las cajas de botín flotan sobre su casilla y la torreta central gira patrullando hasta que alguien la captura. Si tu sistema pide reducir el movimiento, la animación se apaga y el tablero vuelve a ser estático sin perder ninguna regla.</p></div></details>
       <details class="rule"><summary><b>14 · Dominación</b><span class="rule-info">ⓘ</span></summary><div class="info-body"><p>Tres zonas: Depósito (casilla 4,5 contando desde la esquina superior izquierda), Centro (las cuatro casillas de la baliza) y Muelle (casilla 9,8), elegidas libres de muros, cajas y barriles en los trece tableros y simétricas a 180° entre sí. Una zona es tuya si tienes al menos un soldado dentro y ningún enemigo dentro. Al iniciar tu turno desde la ronda 2 sumas 1 punto por zona controlada, y 1 punto extra si controlas las tres. Gana quien llegue a 10 puntos; si nadie llega, al final de la ronda 15 gana quien tenga más puntos, y eliminar al rival también gana al instante. Las zonas se ven en el tablero con su letra y su color de control, y el marcador va sobre el tablero.</p></div></details>
-      <details class="rule"><summary><b>15 · Campaña · Operación Londres</b><span class="rule-info">ⓘ</span></summary><div class="info-body"><p>Cinco misiones en orden, cada una con mapa, objetivo, formato y dificultad propios. La escuadra arrastra veterania entre misiones: sobrevivir a una misión da +25 PV y +1 de energía máxima en las siguientes, acumulable. Perder una misión no borra la veterania ni el progreso: solo repites esa misión. Completar las cinco cierra la operación.</p></div></details>
+      <details class="rule"><summary><b>15 · Campaña · Operación Londres</b><span class="rule-info">ⓘ</span></summary><div class="info-body"><p>Seis misiones en orden, cada una con mapa, objetivo, formato y dificultad propios. La escuadra arrastra veterania entre misiones: sobrevivir a una misión da +25 PV y +1 de energía máxima en las siguientes, acumulable. Perder una misión no borra la veterania ni el progreso: solo repites esa misión. Completar las seis cierra la operación.</p></div></details>
       <details class="rule"><summary><b>16 · Dificultad de la IA</b><span class="rule-info">ⓘ</span></summary><div class="info-body"><p>Recluta: la IA hace un 15 % menos de daño. Normal: la IA de siempre. Veterano: +1 de energía por soldado rival, cura con el Médico, despliega la torreta del Ingeniero y prioriza baliza y zonas de Dominación. Élite: todo lo de Veterano y además +2 de energía, +25 PV, +15 % de daño y revive con el Médico. Normal, Veterano y Élite concentran el fuego sobre tu soldado más herido (Recluta dispara al más cercano). A dos jugadores la dificultad no se aplica.</p></div></details>
       <details class="rule"><summary><b>17 · El arma, agarrada también en 3D en vivo</b><span class="rule-info">ⓘ</span></summary><div class="info-body"><p>El arreglo de los sprites llega a la vista 3D en directo: cada fotograma, el arma de utilería se recoloca sobre las manos reales del esqueleto (empuñadura en la mano derecha y guardamanos en la de apoyo; con pistola, sobre el eje del antebrazo), así que ya no flota delante del pecho ni en reposo ni al andar, disparar o encajar un tiro.</p></div></details>
       <details class="rule"><summary><b>18 · Escolta del dron</b><span class="rule-info">ⓘ</span></summary><div class="info-body"><p>Modo asimétrico: la escuadra del Jugador 1 escolta y la rival defiende. El dron averiado (240 PV, entra entero) sale de la casilla (2,6) contando desde la esquina superior izquierda, y la extracción es la zona 2×2 de las columnas 11–12 y filas 6–7, en el este. Guiarlo cuesta pegarse a él: un soldado adyacente pulsa «Guiar dron» (2 ⚡) y toca la casilla destino junto al dron, y entre toda la escuadra hay 2 guiados por ronda, así que el dron avanza como mucho 2 casillas por ronda y siempre con escolta al lado. Además, <b>blindaje de escolta</b>: mientras el dron tenga al menos un soldado aliado adyacente, todo daño que reciba se reduce a ~la mitad (−53 % medido). El Médico lo repara con su especial (+80 PV, del mismo cupo de 2 curaciones) estando adyacente. El dron no dispara, no devuelve fuego y no provoca vigilancia, pero los disparos, las granadas, la salpicadura y los barriles sí le dañan, y su cobertura direccional cuenta como la de un soldado. Gana la escolta si el dron pisa la extracción o si elimina al rival; gana la defensa si destruye el dron, elimina a la escolta o aguanta las 15 rondas. Contra la IA, la defensa juega el objetivo: intercepta, dispara primero al dron y lo granadea.</p></div></details>
@@ -2261,7 +2261,11 @@ function auVoice(un,ev,vol){
   if(!folder)return;
   auPlay('voice/'+folder+'/'+ev+'.mp3',vol==null?0.5:vol);
 }
-function auAmbient(theme){if(AU_AMBIENT){try{AU_AMBIENT.pause();}catch(e){}AU_AMBIENT=null;}const f=auPlay('ambient/'+theme+'/amb0.mp3',0.20,true);AU_AMBIENT=f;}
+/* Ambiente por mapa: varios mapas comparten el mismo archivo de ambiente
+   del original (mismo contenido), así que los temas duplicados apuntan al
+   archivo canónico y no se guarda una copia por mapa. */
+const AMBIENT_FILE={astillero:'ambient/skirmish04/amb0.mp3',platform:'ambient/skirmish04/amb0.mp3',cruce:'ambient/rotonda/amb0.mp3',depot:'ambient/skirmish03/amb0.mp3',terminal:'ambient/skirmish03/amb0.mp3'};
+function auAmbient(theme){if(AU_AMBIENT){try{AU_AMBIENT.pause();}catch(e){}AU_AMBIENT=null;}const f=auPlay(AMBIENT_FILE[theme]||('ambient/'+theme+'/amb0.mp3'),0.20,true);AU_AMBIENT=f;}
 /* Musica del original: siete temas de partida del IPA, uno al azar por
    partida, en bucle y a volumen bajo. */
 const MUSIC_TRACKS=['game_subtle_01','game_subtle_02','game_subtle_03','game_subtle_04','game_subtle_05','game_subtle_06','game_subtle_07'];
@@ -5082,7 +5086,8 @@ loadRealSoldier();
    cambia. */
 const SKIRMISH_GEO={
  skirmish03:{bin:'assets/maps/skirmish03.bin',atlas:['assets/maps/skirmish03_atlas0.jpg','assets/maps/skirmish03_atlas1.jpg'],top:'assets/maps/skirmish03_top.jpg'},
- skirmish04:{bin:'assets/maps/skirmish04.bin',atlas:['assets/maps/skirmish04_atlas0.jpg','assets/maps/skirmish04_atlas1.jpg'],top:'assets/maps/skirmish04_top.jpg'},
+ /* Los atlas de Skirmish_04 son byte a byte los de Skirmish_03: se reutilizan. */
+ skirmish04:{bin:'assets/maps/skirmish04.bin',atlas:['assets/maps/skirmish03_atlas0.jpg','assets/maps/skirmish03_atlas1.jpg'],top:'assets/maps/skirmish04_top.jpg'},
  depot:{bin:'assets/maps/skirmish05.bin',atlas:['assets/maps/skirmish_atlas0.png','assets/maps/skirmish_atlas1.png'],top:'assets/maps/skirmish05_top.jpg'},
  platform:{bin:'assets/maps/skirmish06.bin',atlas:['assets/maps/skirmish_atlas0.png','assets/maps/skirmish_atlas1.png'],top:'assets/maps/skirmish06_top.jpg'},
  terminal:{bin:'assets/maps/skirmish08.bin',atlas:['assets/maps/skirmish_atlas0.png','assets/maps/skirmish_atlas1.png'],top:'assets/maps/skirmish08_top.jpg'},
@@ -8653,7 +8658,9 @@ const MAP_PIECES=[
     const [response,rigResponse,texture]=await Promise.all([
       fetch(base+'.obj'),fetch(base+'_rig.json'),
       new Promise((resolve,reject)=>{
-        new THREE.TextureLoader().load(base+'_tex.png',resolve,undefined,reject);
+        /* La textura Meshy es byte a byte la misma que la de clase en
+           assets/soldier/, así que se carga de ahí y no se guarda duplicada. */
+        new THREE.TextureLoader().load('assets/soldier/'+entry.mesh+'_tex.png',resolve,undefined,reject);
       })
     ]);
     if(!response.ok)throw new Error('No se pudo cargar el OBJ Meshy de '+entry.mesh+'.');

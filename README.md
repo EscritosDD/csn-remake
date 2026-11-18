@@ -3,8 +3,8 @@
 Remake jugable de **RAD Soldiers** (Splash Damage / WarChest, 2012) como juego
 web por turnos, **en 3D como el original**: escuadras de soldados con roles y
 armas reales, modos Eliminación, Captura de baliza, Dominación, Escolta y
-guerra por naciones, 13 tableros (8 Skirmish con geometría real del IPA y 5
-propios) y una campaña de 6 misiones.
+guerra por naciones, 19 tableros (8 Skirmish con geometría real del IPA, 5
+propios y 6 de campaña) y una campaña de 6 misiones.
 
 ## Cómo jugar
 
@@ -21,11 +21,11 @@ No vale abrirlo como archivo (`file://`): el juego carga assets por HTTP.
 ## Verificar que todo está sano
 
 ```
-powershell -ExecutionPolicy Bypass -File bench\bench/VERIFICAR.ps1
+powershell -ExecutionPolicy Bypass -File bench/VERIFICAR.ps1
 ```
 
 Hace cinco comprobaciones y devuelve 0 si todo pasa: sintaxis del script,
-13 tableros (simetría y solapes), reglas del motor (`rules.test.js`),
+19 tableros (simetría y solapes), reglas del motor (`rules.test.js`),
 integridad de datos (`data.test.js`) y humo 3D en navegador con captura.
 
 ## Qué hay dentro
@@ -82,7 +82,7 @@ assets/               mallas, texturas, audio, iconos y geometria de mapas
 bench/                verificacion y pruebas (VERIFICAR.ps1, rules, datos, tableros, harness)
 docs/                 documentacion (indice en docs/README.md)
 docs/historico/       planes y auditorias de sesiones anteriores
-tools/                utilidades sueltas (servidor node, package.json)
+tools/                utilidades de Z.ai y de modelos (scripts .ps1 y .py)
 _capture_all.mjs      generador de capturas 3D
 ```
 
