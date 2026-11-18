@@ -137,3 +137,19 @@ diseno (iniciativa alterna) sigue pendiente del jugador.
 El 65 % A de las muestras de 10 era ruido: con 30 partidas queda
 equilibrada. Se confirma la norma: no dar un modo por sesgado con menos de
 30 partidas.
+
+
+## Tabla consolidada final (todas las muestras, n>=30 por modo)
+
+| Modo - mapa | A | B | n | Sesgo |
+|---|---|---|---|---|
+| Dominacion - Almacen | 61 | 79 | 140 | 56 % B |
+| Eliminacion - Skirmish_03 | 39 | 31 | 70 | 56 % A |
+| Baliza - Skirmish_03 | 41 | 29 | 80 | 59 % A |
+| Escolta - Almacen | 22 | 8 | 30 | 73 % A (dron 22/30) |
+
+Lectura final: Eliminacion y Baliza tienen una ventaja leve del primero en
+mover (~56-59 % A) y Dominacion una ventaja leve del segundo (~56 % B).
+Todo dentro del margen de una muestra de este tamano; no se toca ninguna
+regla base. Escolta es asimetrica por diseno (el atacante tiene el dron) y
+ya no se pierde al 100 % como al principio.

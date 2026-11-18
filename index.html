@@ -1786,6 +1786,8 @@ function damage(target,dmg,srcLabel){
      ráfaga (ametralladoras) o bala; la muerte hereda el mismo tipo. */
   const expl=/explos|M67|salpicadura|barril|RPG|AT4|M72|M203|M32/i.test(srcLabel||'');
   target._hitKind=expl?'expl':(/M249|M240|PKM|MG3/.test(srcLabel||'')?'burst':'bullet');
+  /* Impacto seco del original (bala), solo en dano no explosivo. */
+  if(!expl){try{auPlay('sfx/weapons/bullet_hit_0'+(1+Math.floor(Math.random()*2))+'.mp3',0.3);}catch(e){}}
   if(target.hp<=0&&target._deathT==null){target._deathT=FX.t;target._deathKind=expl?'expl':'bullet';}
   if(target.x!=null){fxFloat(target.x,target.y,'−'+dmg,'#ffd9d2');fxBurst(target.x,target.y,7,'#ffb199');}
   log(srcLabel+' hace <b>'+dmg+'</b> de daño a '+target.role+' ('+target.team+'). Le quedan '+Math.max(0,target.hp)+' PV.');
