@@ -5770,6 +5770,16 @@ function buildThemedProps3(world,theme){
     for(let i=0;i<3;i++)lamp();
     for(let i=0;i<2;i++)cylp(0.3,0.5,'#5c5346');
   } else if(theme==='market'||theme==='plaza'){
+    if(theme==='market'){
+      /* Puesto de fruta: mesa, cajas de colores, toldo y postes. */
+      const spM=take();
+      if(spM){const g=new THREE.Group();g.position.set(spM.x,0,spM.z);
+        const table=new THREE.Mesh(new THREE.BoxGeometry(1.6,0.5,0.9),mat3('#8d6436',0.8));table.position.y=0.25;table.castShadow=true;g.add(table);
+        ['#c9a227','#a4432f','#3f7a52','#3f6f8f'].forEach((c,i)=>{const b=new THREE.Mesh(new THREE.BoxGeometry(0.3,0.16,0.34),mat3(c,0.7));b.position.set(-0.55+i*0.36,0.58,0);g.add(b);});
+        const awn=new THREE.Mesh(new THREE.BoxGeometry(1.8,0.06,1.1),mat3('#e6e2d6',0.7));awn.position.y=1.25;awn.rotation.z=0.08;g.add(awn);
+        for(let i=0;i<3;i++){const post=new THREE.Mesh(new THREE.BoxGeometry(0.06,1.2,0.06),mat3('#3b4046',0.6));post.position.set(-0.75+i*0.75,0.6,0.45);g.add(post);}
+        g.rotation.y=rand()*Math.PI*2;world.add(g);}
+    }
     for(let i=0;i<3;i++){const sp=take();if(!sp)continue;const g=new THREE.Group();g.position.set(sp.x,0,sp.z);
       g.add(box3(1.2,0.5,0.6,'#8d6436',0,0.27,0,0.9));
       const canopy=box3(1.4,0.06,0.8,i%2?'#c9503a':'#3f7a8f',0,1.55,0,0.8);canopy.rotation.z=0.06;g.add(canopy);
