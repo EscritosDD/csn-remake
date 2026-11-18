@@ -23,6 +23,8 @@ director. Los triangulos y llamadas salen de `window.__csn3d`.
 | Campana - Mision 4 (El puente) | `skirmish04` | 78280 | 557 | [png](capturas/CAM_M4_3d.png) |
 | Campana - Mision 5 (Ultima guardia, 5v5) | `warehouse` | 39748 | 625 | [png](capturas/CAM_M5_3d.png) |
 | Campana - Mision 6 (El convoy, escolta 5v5) | `cruce` | 78780 | 649 | [png](capturas/CAM_M6_3d.png) |
+| Almacen industrial (baliza) | `warehouse` | 33290 | 549 | [png](capturas/ALM_3d.png) |
+| Patio de contenedores (baliza) | `yard` | 33006 | 550 | [png](capturas/PAT_3d.png) |
 
 Notas:
 - Los mapas de codigo (skirmish01/02/07) usan losas, por eso tienen menos
