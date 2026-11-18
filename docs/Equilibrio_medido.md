@@ -126,3 +126,14 @@ Conclusion: el unico desvio que se repite es el de Dominacion, de un 55 %
 hacia B, coherente con la iniciativa del segundo jugador en un mapa de
 cobertura densa; el resto esta dentro de lo razonable. La decision de
 diseno (iniciativa alterna) sigue pendiente del jugador.
+
+
+## Muestra grande de Baliza Skirmish_03 (30 partidas)
+
+| Modo - mapa | A | B | n | Lectura |
+|---|---|---|---|---|
+| Baliza - Skirmish_03 | **15** | **15** | 30 | **50/50**, 13,0 rondas de media |
+
+El 65 % A de las muestras de 10 era ruido: con 30 partidas queda
+equilibrada. Se confirma la norma: no dar un modo por sesgado con menos de
+30 partidas.
