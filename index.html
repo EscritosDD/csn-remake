@@ -844,7 +844,7 @@ body[data-state="playing"]{padding-bottom:112px}
             <div class="viewer-status" id="viewerStatus">Selecciona un personaje o un arma.</div>
           </div>
           <div class="viewer-meta">
-            <div><h2 id="viewerName" style="margin:0">Modelo 3D</h2><p class="sub" id="viewerDescription" style="margin:4px 0 0">La textura aplicada aparece junto al modelo.</p><p class="sub tiny" id="viewerAssetInfo" style="margin:2px 0 0"></p></div>
+            <div><h2 id="viewerName" style="margin:0">Modelo 3D</h2><p class="sub" id="viewerDescription" style="margin:4px 0 0">La textura aplicada aparece junto al modelo.</p></div>
             <img class="viewer-texture" id="viewerTexture" alt="Textura del modelo" hidden/>
           </div>
           <label class="viewer-zoom">Zoom <input id="viewerZoom" type="range" min="1" max="2.5" step="0.05" value="1" aria-label="Zoom del modelo"/></label>
@@ -7644,32 +7644,28 @@ $('#guerraCountdown').textContent=fmtCountdown(msToNextSaturday());
     frameRequested:false,models:{roles:{},weapons:{}},textures:{}
   };
   const viewerOutfits=['base','decon','deerhunter','deltaforce','halloween','rambo','spetsnaz','veteran'];
-  /* Galería completa: los 35 personajes son ORIG_CAST + OWN_CAST. El modelo
-     va por rol (REAL.byRole), no por personaje; los cinco originales sin
-     cuerpo de rol estándar usan el rol más cercano y el resto se deduce
-     de ROLE_BODY. No existen las tres entradas Meshy sueltas: esos tres
-     diseños ya son las mallas de clase de Francotirador, Artillero y Espía. */
-  const VIEWER_ROLE_FALLBACK={
-    'Riot Medic':'Médico','Megan McNick':'Ingeniero','Carlito Grosso':'Ingeniero',
-    'Riot Engineer':'Ingeniero','Commander (F)':'Capitán'
-  };
-  const viewerCharacters=ORIG_CAST.concat(OWN_CAST).map((character,index)=>{
-    const role=character.role||VIEWER_ROLE_FALLBACK[character.name]||ROLE_BODY[character.body]||'Capitán';
-    return {
-      key:(character.own?'own':'original')+':'+String(index+1).padStart(2,'0'),
-      label:character.name,name:character.name,role,bio:character.bio||'',
-      outfit:character.outfit||'',body:character.body,
-      file:(ROLE_MODEL_FILES[role]||'soldier')+'.obj',
-      own:!!character.own
-    };
-  });
+  const viewerCharacters=[
+    {key:'original:01',label:'Modelo 01',file:'soldier.obj'},
+    ...Object.entries(ROLE_MODEL_FILES)
+      .filter(([role])=>!['Francotirador','Artillero','Espía'].includes(role))
+      .map(([role,file],index)=>({
+      key:'original:'+String(index+5).padStart(2,'0'),
+      label:'Modelo '+String(index+5).padStart(2,'0'),
+      role,file:file+'.obj'
+    })),
+    {key:'own:09',label:'Diseño Meshy 09',role:'Francotirador',mesh:'Francotirador'},
+    {key:'own:10',label:'Diseño Meshy 10',role:'Artillero',mesh:'Artillero'},
+    {key:'own:11',label:'Diseño Meshy 11',role:'Espía',mesh:'Espia'}
+  ];
   viewerCharacters.forEach(entry=>{
-    entry.skins=[
-      {key:'native',label:'Skin 01 · textura de clase'},
-      ...viewerOutfits.map((skin,index)=>({
-        key:skin,label:'Skin '+String(index+2).padStart(2,'0')+' · '+skin+'.png'
-      }))
-    ];
+    entry.skins=entry.mesh
+      ?[{key:'own',label:'Textura Meshy'}]
+      :[
+        ...(entry.role?[{key:'native',label:'Skin 01 · textura propia'}]:[]),
+        ...viewerOutfits.map((skin,index)=>({
+          key:skin,label:'Skin '+String(index+1+(entry.role?1:0)).padStart(2,'0')+' · '+skin+'.png'
+        }))
+      ];
   });
   const viewerWeaponFiles=[
     'AssaultRifle','Rifle','Pistol','SniperRifle_weapon','Shotgun','RPG','Crossbow',
@@ -7775,7 +7771,7 @@ $('#guerraCountdown').textContent=fmtCountdown(msToNextSaturday());
     const platformRadius=Math.max(0.35,Math.max(size.x,size.z)*0.72);
     viewer.platform.scale.set(platformRadius,platformRadius,1);
     viewer.platform.position.y=-size.y/2-0.035;
-    viewer.baseDistance=Math.max(size.x,size.y,size.z)*(model.userData.meshy?4.8:2.5);
+    viewer.baseDistance=Math.max(size.x,size.y,size.z)*(model.userData.meshy||model.userData.staticRole?4.8:2.5);
     updateCamera();
     resize();
     viewer.renderer.render(viewer.scene,viewer.camera);
@@ -7790,18 +7786,10 @@ $('#guerraCountdown').textContent=fmtCountdown(msToNextSaturday());
     list.style.display=viewer.kind==='weapons'?'flex':'none';
     if(viewer.kind==='roles'){
       characterSelect.replaceChildren();
-      [
-        {label:'Personajes del original',entries:viewerCharacters.filter(entry=>!entry.own)},
-        {label:'Personajes propios',entries:viewerCharacters.filter(entry=>entry.own)}
-      ].forEach(group=>{
-        const optgroup=document.createElement('optgroup');
-        optgroup.label=group.label;
-        group.entries.forEach(entry=>{
-          const option=document.createElement('option');
-          option.value=entry.key;option.textContent=entry.label;
-          optgroup.appendChild(option);
-        });
-        characterSelect.appendChild(optgroup);
+      viewerCharacters.forEach(entry=>{
+        const option=document.createElement('option');
+        option.value=entry.key;option.textContent=entry.label;
+        characterSelect.appendChild(option);
       });
       characterSelect.value=viewer.name;
       const entry=viewerCharacters.find(item=>item.key===viewer.name)||viewerCharacters[0];
@@ -7826,17 +7814,82 @@ $('#guerraCountdown').textContent=fmtCountdown(msToNextSaturday());
       ?viewerCharacters.find(item=>item.key===key)
       :viewerWeaponFiles.includes(key)?{label:key,file:key}:null;
     if(!entry)throw new Error('El modelo seleccionado no pertenece al catálogo del visor.');
-    const skin=kind==='roles'?entry.skins[Math.min(viewer.skinIndex,entry.skins.length-1)]:null;
-    document.getElementById('viewerName').textContent=entry.name||entry.label;
+    document.getElementById('viewerName').textContent=entry.label;
     document.getElementById('viewerDescription').textContent=kind==='roles'
-      ?'Rol: '+entry.role+'. '+(entry.bio||'')
-      :'Arma del arsenal ('+viewerWeaponFiles.length+' modelos).';
-    document.getElementById('viewerAssetInfo').textContent=kind==='roles'
-      ?'Modelo '+entry.file+' · '+(skin?skin.label:'')+(entry.outfit?' · vestuario: '+entry.outfit:'')
+      ?(entry.mesh?'Diseño Meshy independiente · '+entry.mesh+'.':'Malla '+entry.file+' · '+entry.skins[Math.min(viewer.skinIndex,entry.skins.length-1)].label+'.')
       :'Malla y textura del arsenal · '+entry.file+'.obj';
     texturePreview.hidden=true;
     texturePreview.removeAttribute('src');
-    return {entry,skin};
+    return {entry,skin:kind==='roles'?entry.skins[Math.min(viewer.skinIndex,entry.skins.length-1)]:null};
+  }
+  function parseViewerOBJ(text,rig){
+    const vertices=[],uvs=[],normals=[],positions=[],outUvs=[],outNormals=[],skinIndices=[],skinWeights=[];
+    const resolveIndex=(index,length)=>index<0?length+index:index-1;
+    for(const line of text.split(/\r?\n/)){
+      const parts=line.trim().split(/\s+/);
+      if(parts[0]==='v')vertices.push([+parts[1],+parts[2],+parts[3]]);
+      else if(parts[0]==='vt')uvs.push([+parts[1],+parts[2]]);
+      else if(parts[0]==='vn')normals.push([+parts[1],+parts[2],+parts[3]]);
+      else if(parts[0]==='f'){
+        const face=parts.slice(1).map(token=>{
+          const indices=token.split('/');
+          return {
+            v:resolveIndex(+indices[0],vertices.length),
+            uv:indices[1]?resolveIndex(+indices[1],uvs.length):-1,
+            n:indices[2]?resolveIndex(+indices[2],normals.length):-1
+          };
+        });
+        for(let i=1;i<face.length-1;i++){
+          for(const corner of [face[0],face[i],face[i+1]]){
+            const vertex=vertices[corner.v],uv=uvs[corner.uv],normal=normals[corner.n];
+            if(!vertex)throw new Error('El OBJ Meshy contiene una cara inválida.');
+            const boneIndices=rig.skinIndex[corner.v],boneWeights=rig.skinWeight[corner.v];
+            if(!boneIndices||!boneWeights||boneIndices.length!==4||boneWeights.length!==4)
+              throw new Error('El rig Meshy no contiene pesos para todos los vértices.');
+            positions.push(vertex[0],vertex[1],vertex[2]);
+            outUvs.push(uv?uv[0]:0,uv?uv[1]:0);
+            if(normal)outNormals.push(normal[0],normal[1],normal[2]);
+            skinIndices.push(...boneIndices);
+            skinWeights.push(...boneWeights);
+          }
+        }
+      }
+    }
+    if(!positions.length)throw new Error('El OBJ Meshy no contiene caras.');
+    const geometry=new THREE.BufferGeometry();
+    geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));
+    geometry.setAttribute('uv',new THREE.Float32BufferAttribute(outUvs,2));
+    if(outNormals.length===positions.length)geometry.setAttribute('normal',new THREE.Float32BufferAttribute(outNormals,3));
+    else geometry.computeVertexNormals();
+    geometry.setAttribute('skinIndex',new THREE.Float32BufferAttribute(skinIndices,4));
+    geometry.setAttribute('skinWeight',new THREE.Float32BufferAttribute(skinWeights,4));
+    geometry.computeBoundingBox();
+    return geometry;
+  }
+  async function loadViewerMeshy(entry){
+    const base='assets/personajes_propios/'+entry.mesh;
+    const [response,rigResponse,texture]=await Promise.all([
+      fetch(base+'.obj'),fetch(base+'_rig.json'),
+      new Promise((resolve,reject)=>{
+        new THREE.TextureLoader().load(base+'_tex.png',resolve,undefined,reject);
+      })
+    ]);
+    if(!response.ok)throw new Error('No se pudo cargar el OBJ Meshy de '+entry.mesh+'.');
+    if(!rigResponse.ok)throw new Error('No se pudo cargar el rig Meshy de '+entry.mesh+'.');
+    texture.colorSpace=THREE.SRGBColorSpace;
+    const [objText,rig]=await Promise.all([response.text(),rigResponse.json()]);
+    const geometry=parseViewerOBJ(objText,rig);
+    geometry.deleteAttribute('skinIndex');
+    geometry.deleteAttribute('skinWeight');
+    const model=new THREE.Group();
+    const mesh=new THREE.Mesh(geometry,new THREE.MeshStandardMaterial({
+      map:texture,roughness:0.85,metalness:0.02,transparent:false,opacity:1,depthWrite:true,
+      side:THREE.DoubleSide
+    }));
+    mesh.castShadow=true;
+    model.add(mesh);
+    model.userData.meshy=true;
+    return model;
   }
   function makeViewerRiggedModel(geometry,data,texture,options={}){
     const model=new THREE.Group();
@@ -7875,6 +7928,7 @@ $('#guerraCountdown').textContent=fmtCountdown(msToNextSaturday());
   async function makeViewerOriginal(entry,skin){
     const source=entry.role?REAL.byRole[entry.role]:REAL;
     let texture=skin.key==='native'?source.tex:null;
+    if(skin.key==='base'&&!entry.role)texture=source.tex;
     const texturePath='assets/soldier/outfits/'+skin.key+'.png';
     if(!texture&&viewer.textures[texturePath])texture=viewer.textures[texturePath];
     if(!texture){
@@ -7885,10 +7939,25 @@ $('#guerraCountdown').textContent=fmtCountdown(msToNextSaturday());
       texture.colorSpace=THREE.SRGBColorSpace;
       viewer.textures[texturePath]=texture;
     }
-    const meshyRoles=['Francotirador','Artillero','Espía'];
-    const model=makeViewerRiggedModel(source.geo.clone(),source.data,texture,{
-      meshy:meshyRoles.includes(entry.role),idleRole:entry.role
-    });
+    if(entry.role){
+      const geometry=source.geo.clone();
+      geometry.deleteAttribute('skinIndex');
+      geometry.deleteAttribute('skinWeight');
+      geometry.computeVertexNormals();
+      const mesh=new THREE.Mesh(geometry,new THREE.MeshStandardMaterial({
+        map:texture,roughness:0.85,metalness:0.02,transparent:false,opacity:1,depthWrite:true,
+        side:THREE.DoubleSide
+      }));
+      mesh.castShadow=true;
+      const model=new THREE.Group();
+      model.scale.setScalar(1.15);
+      const spin=new THREE.Group();spin.rotation.y=Math.PI/2;model.add(spin);
+      const tilt=new THREE.Group();tilt.rotation.x=-Math.PI/2;spin.add(tilt);
+      mesh.scale.setScalar(0.95);tilt.add(mesh);
+      model.userData.staticRole=true;
+      return model;
+    }
+    const model=makeViewerRiggedModel(source.geo.clone(),source.data,texture);
     model.scale.setScalar(1.15);
     const mesh=model.userData.mesh3;
     model.remove(mesh);
@@ -7926,14 +7995,18 @@ $('#guerraCountdown').textContent=fmtCountdown(msToNextSaturday());
       const modelKey=kind==='roles'?name+'|'+skin.key:name;
       let model=viewer.models[kind][modelKey];
       if(!model&&kind==='roles'){
-        const started=Date.now();
-        while((!REAL.ready||(entry.role&&!(REAL.byRole&&REAL.byRole[entry.role])))&&Date.now()-started<10000){
-          if(token!==viewer.selection)return;
-          await wait(100);
+        if(entry.mesh){
+          model=await loadViewerMeshy(entry);
+        }else{
+          const started=Date.now();
+          while((!REAL.ready||(entry.role&&!(REAL.byRole&&REAL.byRole[entry.role])))&&Date.now()-started<10000){
+            if(token!==viewer.selection)return;
+            await wait(100);
+          }
+          if(!REAL.ready||(entry.role&&!(REAL.byRole&&REAL.byRole[entry.role])))
+            throw new Error('El modelo original todavía no está disponible.');
+          model=await makeViewerOriginal(entry,skin);
         }
-        if(!REAL.ready||(entry.role&&!(REAL.byRole&&REAL.byRole[entry.role])))
-          throw new Error('El modelo original todavía no está disponible.');
-        model=await makeViewerOriginal(entry,skin);
         viewer.models.roles[modelKey]=model;
       }else if(!model){
         const cacheKey=viewerWeaponCacheKey(entry.file);
@@ -7951,6 +8024,9 @@ $('#guerraCountdown').textContent=fmtCountdown(msToNextSaturday());
       }
       if(token!==viewer.selection)return;
       mount(model);
+      document.getElementById('viewerDescription').textContent=kind==='roles'
+        ?(model.userData.meshy?'Malla OBJ y textura Meshy en pose del modelo · '+skin.label+'.':'Malla '+entry.file+' · '+skin.label+'.')
+        :'Malla y textura del arsenal · '+entry.file+'.obj';
     }catch(error){
       if(token===viewer.selection)setStatus('No se pudo mostrar el modelo: '+error.message,true);
     }

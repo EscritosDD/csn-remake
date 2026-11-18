@@ -72,18 +72,3 @@ navegador devuelve al modelo del IPA sin tocar nada, y captura para Z.ai.
 Rig ajustado a mano: mover las posiciones de hueso a las articulaciones
 reales de cada diseño (el pipeline usa fracciones humanoides estándar).
 Con capturas de frente/perfil de cada modelo se afinan en una iteración.
-
-## Visor 3D de galería (nov 2026)
-
-El visor del juego ya no muestra entradas sueltas de «Diseño Meshy 09–11»:
-esos tres diseños son exactamente las mallas de clase de Francotirador,
-Artillero y Espía en `assets/soldier/`. La galería completa son los 35
-personajes de `ORIG_CAST` + `OWN_CAST`, con nombre, rol y biografía; el
-modelo se elige por rol (`REAL.byRole[rol]`) y la pose de reposo `idle2h`
-se aplica a todos mediante el esqueleto base. Las texturas son la de clase
-o alguna de las 8 de `assets/soldier/outfits/`.
-
-`assets/personajes_propios/` se conserva como fuente/respaldo de las
-capturas originales de Meshy, pero el visor no carga desde ahí: unificar
-el origen evita duplicados y garantiza que lo mostrado es lo que realmente
-usa la partida.
