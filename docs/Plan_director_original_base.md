@@ -183,9 +183,10 @@ prueba que lo demuestra y se puede re-verificar con
 - [x] **Armeria con el catalogo del original**: 37 armas con datos reales y
   las 42 habilidades con su icono en dos pestanas. Prueba:
   `docs/Catalogo_habilidades_original.md` · `assets/ui/ability/`.
-- [x] **13 tableros y 6 misiones jugables** con geometria real del IPA o
-  propia, props por tema y ambiente. Prueba: [galeria 3D](Capturas_3D.md) ·
-  `bench/boards.js` (13/13).
+- [x] **19 tableros y 6 misiones jugables**: 13 jugables (8 Skirmish con
+  geometria real del IPA + 5 propios) y 6 tableros propios de campana, con
+  props por tema y ambiente. Prueba: [galeria 3D](Capturas_3D.md) ·
+  `bench/boards.js` (19/19).
 - [x] **Personajes diferenciados**: 7 cuerpos por clase del IPA (malla, rig y
   textura propios), complexion real, tocados, acentos de silueta, pecho del
   rol, banda de nacion, emblema y equipo enemigo teñido. Prueba:

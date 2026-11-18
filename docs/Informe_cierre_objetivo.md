@@ -56,16 +56,19 @@ ampliado**. El juego sigue jugable en `main` en cada commit.
   impactos.
 
 ### F6 · Calidad
-- `bench/VERIFICAR.ps1`: sintaxis, tableros 13/13, `rules.test` 6/6,
-  `data.test` 6/6 y humo 3D con captura. **Todo OK** en la última pasada.
+- `bench/VERIFICAR.ps1`: sintaxis 0, **19 tableros/19** (13 jugables + 6 de
+  campaña, todos simétricos y sin solapes), `rules.test` **6/6**,
+  `data.test` **6/6** y humo 3D con captura. **Todo OK** en la última pasada.
 - Equilibrio medido con n≥30 (`docs/Equilibrio_medido.md`): Dominación
-  Almacén 56 % B (n=140), Eliminación S03 56 % A (n=70), Baliza S03 59 % A
-  (n=80), Escolta 73 % A con dron 22/30.
+  Almacén **15-15** (n=30), Eliminación S03 21-9 (n=30), Baliza S03 16-14
+  (n=30), Escolta 8-2 con dron 8/10 (n=10). Acumulado: ~55-58 % de ventaja
+  leve del primero en mover en Eliminación/Baliza y ~55 % del segundo en
+  Dominación, sin tocar reglas base.
 - `docs/ARQUITECTURA.md` con líneas reales de los bloques y funciones clave.
 
 ## Números del repositorio
 
-- **168 commits** en `main`.
+- **190+ commits** en `main`.
 - `assets/soldier`: 21 archivos (7 × malla/rig/textura).
 - `assets/audio`: 208 archivos (11,8 MB).
 - `assets/ui/ability`: 42 iconos.
