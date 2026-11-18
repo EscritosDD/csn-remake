@@ -40,6 +40,9 @@ Para medir equilibrio: `node bench/harness.js <modo> <mapa> <partidas> 4`
 con n<30.
 
 Para capturar: `node _capture_all.mjs <mapa|campana:N> <prefijo> [ms]`.
+**Si cambias una imagen o un asset, borra el perfil de captura**
+(`_chrome_*`) antes: el navegador cachea y la captura miente (nos pasó con
+el arte de la portada).
 Captura 3D y solo baja a 2D si la 3D no arranca. Con la ventana tapada Chrome
 estrangula el render: usar `Page.bringToFront` (ya está en el script).
 
