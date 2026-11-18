@@ -993,16 +993,19 @@ const BODIES={
    CSN los usa como nombre y personalidad de cada soldado; el rol es nuestro
    (la clase real del original vive en un enum ofuscado y no se puede leer). */
 const CHARACTERS=[
- {name:'Hipster Dave',role:'Artillero',bio:'Artillero de barrio con más pegada que puntería fina.'},
- {name:'Sneaky Pete',role:'Espía',bio:'Espía que camina por donde nadie mira.'},
- {name:'Sister Florence',role:'Médico',bio:'Médica de combate que reza mientras cose heridas.'},
- {name:'Archie Fletcher',role:'Ingeniero',bio:'Ingeniero de trincheras: torreta y mina antes que fusil.'},
- {name:'Ivan Tkilya',role:'Artillero',bio:'Veterano de artillería con la mano pesada.'},
- {name:'Mme La Hacque',role:'Comando',bio:'Comando de operaciones grises y voz de mando.'},
- {name:'Soap',role:'Comando',bio:'Comando de asalto: entra primero, pregunta después.'},
- {name:'Riot Medic',role:'Médico',bio:'Médico antidisturbios, acostumbrado al fuego cruzado.'},
- {name:'Big Time Taschmann',role:'Capitán',bio:'Capitán que mueve la escuadra con una orden.'},
- {name:'Megan McNick',role:'Francotirador',bio:'Francotiradora de tiro largo y paciencia infinita.'}
+ /* Los 7 jugables del original (ORIG_CAST, play:true): un personaje por rol.
+    La lista antigua tenía los roles equivocados (Hipster Dave como Artillero,
+    Big Time Taschmann como Capitán, no jugables como Archie Fletcher, Mme La
+    Hacque, Soap, Riot Medic y Megan McNick con rol) y dejaba fuera a Riot
+    Agent (Comando) y a Commander (M) (Capitán), así que en partida los
+    soldados llevaban el nombre equivocado. */
+ {name:'Hipster Dave',role:'Francotirador',bio:'Gafas verdes, pelo naranja y un fusil enorme. Cara de enfado permanente.'},
+ {name:'Ivan Tkilya',role:'Artillero',bio:'Pesado de manual: donde se planta, hay que rodearlo.'},
+ {name:'Sneaky Pete',role:'Espía',bio:'Nadie le vio llegar; nadie le vio irse.'},
+ {name:'Sister Florence',role:'Médico',bio:'Reza por ti y luego te cose la herida.'},
+ {name:'Big Time Taschmann',role:'Ingeniero',bio:'Maza más alta que su torso y sonrisa de oreja a oreja.'},
+ {name:'Riot Agent',role:'Comando',bio:'Antidisturbios: escudo primero, preguntas después.'},
+ {name:'Commander (M)',role:'Capitán',bio:'Manda con la voz y con el ejemplo.'}
 ];
 function characterForRole(role,slot){const list=CHARACTERS.filter(c=>c.role===role);return list.length?list[slot%list.length]:null;}
 const ROLES={
@@ -5465,8 +5468,6 @@ function makeRealSoldier3(un){
      interruptor se trasponen antes de montar el esqueleto. */
   if(window.__transposeBind)inverses.forEach(m=>m.transpose());
   const skeleton=new THREE.Skeleton(skinBones,inverses);
-  const tint=un.skin==='nacion'?new THREE.Color(c.uni).lerp(new THREE.Color(0xffffff),0.62):new THREE.Color(0xffffff);
-  tint.lerp(new THREE.Color(c.role),0.24);
   /* Material cartoon: rampa de 4 pasos en el canal de luz (MeshToonMaterial)
      para el look cel del original, con la textura real del IPA. Si algo
      fallara, se queda el material estándar de siempre. */
@@ -5495,7 +5496,9 @@ function makeRealSoldier3(un){
   }
   if(un.skin==='clase'&&ROLES[un.role]){mat.color.copy(new THREE.Color(ROLES[un.role].color)).lerp(new THREE.Color('#ffffff'),0.30);}
   if(un.team==='B'){mat.color.lerp(new THREE.Color('#c95338'),0.22);}
-  mat.color.copy(tint);
+  /* El color lo ponen las ramas de skin de arriba (nación, estándar, clase,
+     camuflaje) y el tinte rojo del equipo B: no se sobrescribe aquí, porque
+     un mat.color.copy(tint) final anulaba todas esas skins. */
   /* Diagnostico: window.__noSkin monta la geometria como malla normal para
      separar un problema de geometria/parseo de uno de skinning. */
   const mesh=window.__noSkin?new THREE.Mesh(RD.geo,mat):new THREE.SkinnedMesh(RD.geo,mat);
