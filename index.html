@@ -5314,7 +5314,7 @@ function makeRealSoldier3(un){
   const tilt=new THREE.Group();tilt.rotation.x=-Math.PI/2;spin.add(tilt);
   /* Las mallas de clase siguen en investigacion (ver docs/Examen §5): se
      activan con window.__classModels=true; por defecto, malla base + uniforme. */
-  const RD=(window.__classModels&&REAL.byRole&&REAL.byRole[un.role])||REAL;
+  const RD=(!window.__forceBaseModel&&REAL.byRole&&REAL.byRole[un.role])||REAL;
   const roleTex=RD.tex||(REAL.texByRole&&REAL.texByRole[un.role])||REAL.tex;
   const data=RD.data;
   const bones=data.bones.map(b=>{
@@ -5361,10 +5361,12 @@ function makeRealSoldier3(un){
   if(un.skin==='clase'&&ROLES[un.role]){mat.color.copy(new THREE.Color(ROLES[un.role].color)).lerp(new THREE.Color('#ffffff'),0.30);}
   if(un.team==='B'){mat.color.lerp(new THREE.Color('#c95338'),0.22);}
   mat.color.copy(tint);
-  const mesh=new THREE.SkinnedMesh(RD.geo,mat);
+  /* Diagnostico: window.__noSkin monta la geometria como malla normal para
+     separar un problema de geometria/parseo de uno de skinning. */
+  const mesh=window.__noSkin?new THREE.Mesh(RD.geo,mat):new THREE.SkinnedMesh(RD.geo,mat);
   mesh.castShadow=true;mesh.frustumCulled=false;
   mesh.add(bones[0]);
-  mesh.bind(skeleton,new THREE.Matrix4());
+  if(mesh.isSkinnedMesh)mesh.bind(skeleton,new THREE.Matrix4());
   tilt.add(mesh);
   const gun=makeGunProp3(un);gun.position.set(0.14,0.62,-0.02);g.add(gun);attachRealGun(un,gun);
   /* Mochila de rol, construida en código a la espalda (el frente del grupo
@@ -6003,7 +6005,11 @@ function renderRealSprite(un){
   if(!REAL.ready||!initRealSpriteRenderer())return null;
   let grp=null;
   try{
-    grp=makeRealSoldier3(un);
+    /* El retrato/sprite se sigue fotografiando con la malla base: su camara
+       y encuadre estan calibrados para ella y las mallas de clase tienen
+       proporciones distintas. */
+    const _fb=window.__forceBaseModel;window.__forceBaseModel=true;
+    try{grp=makeRealSoldier3(un);}finally{window.__forceBaseModel=_fb;}
     /* Fuera el disco de bando, el anillo de energía y el anillo de
        selección: en la vista clásica los dibuja el propio tablero bajo
        los pies del sprite, igual que hacía con los de Argon. */
