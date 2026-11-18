@@ -4859,6 +4859,15 @@ let ROLE_SCALES={};
    RIG BASE: los clips se aplican por indice (pack.bones[i] -> bones[i]),
    asi que compartir el orden es lo que los hace compatibles. Cada clase
    conserva sus proporciones reales; la escala la normaliza ROLE_SCALES. */
+/* === MODELOS PROPIOS DE DANI (Meshy AI, nov 2026) =================
+   Tres diseños nuevos sustituyen la malla del IPA en su clase (mismo
+   nombre de fichero, mismo pipeline del rig: OBJ con X ya invertida,
+   20 huesos en el orden del rig base, skinning por proximidad y
+   boneInverses autoconstantes). Decimados de 125k-232k a 4.000 tris:
+   Heavy_Gunner->Artillero, Shadow_Sentinel->Espia,
+   Ghillie_Guardian->Francotirador. VER VISUALMENTE (zai no ve 3D):
+   checklist en docs/Modelos_propios_Meshy.md. Si algo falla:
+   window.__forceBaseModel=true devuelve al modelo del IPA. */
 const ROLE_MODEL_FILES={'Francotirador':'Francotirador','Artillero':'Artillero','Espía':'Espia','Médico':'Medico','Ingeniero':'Ingeniero','Comando':'Comando','Capitán':'Capitan'};
 const ROLE_OUTFIT_FILES={'Francotirador':'veteran','Artillero':'deerhunter','Espía':'spetsnaz','Médico':'decon','Ingeniero':'rambo','Comando':'deltaforce','Capitán':'base'};
 function loadRealSoldier(){
