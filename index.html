@@ -5317,7 +5317,7 @@ function makeRealSoldier3(un){
   /* Malla de clase por rol. El Comando (Agent_Heavy) tiene un skin de 17
      huesos cuya bind no cuadra (boneWorld x boneInverse != I) y sale como un
      blob: de momento usa la malla base con su uniforme. */
-  const CLASS_MODEL_SKIP={'Comando':1};
+  const CLASS_MODEL_SKIP={};
   const RD=(!window.__forceBaseModel&&!CLASS_MODEL_SKIP[un.role]&&REAL.byRole&&REAL.byRole[un.role])||REAL;
   const roleTex=RD.tex||(REAL.texByRole&&REAL.texByRole[un.role])||REAL.tex;
   const data=RD.data;
