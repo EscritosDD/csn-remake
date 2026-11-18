@@ -53,7 +53,7 @@ integridad de datos (`data.test.js`) y humo 3D en navegador con captura.
 
 - [Arquitectura](docs/ARQUITECTURA.md) — estructura, funciones con su línea y reglas de edición.
 - [Plan director](docs/§§docs/historico/Plan_director_original_base.md) — fases, criterios y estado.
-- [Catálogo de habilidades del original](docs/Catalogo_habilidades_original.md) — las 44 con su estado.
+- [Catálogo de habilidades del original](docs/Catalogo_habilidades_original.md) — las 52 con su estado.
 - [Capturas 3D](docs/Capturas_3D.md) — los 13 mapas y las 6 misiones.
 - [Equilibrio medido](docs/Equilibrio_medido.md) — cifras por modo×mapa.
 - [Informe CSN vs original](docs/Informe_CSN_vs_original.md) — 16 áreas con fuentes.
