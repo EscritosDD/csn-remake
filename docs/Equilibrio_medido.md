@@ -109,3 +109,20 @@ rondas). Con **40 partidas** el resultado es concluyente:
 Conclusion: Dominacion en Almacen esta equilibrada; lo que parecia sesgo
 era ruido de muestras pequenas. Para las proximas mediciones se usara
 n >= 30 en los modos que se quieran dar por cerrados.
+
+
+## Muestras agrupadas de la ronda de cierre (n=110 dominacion)
+
+Sumando todas las muestras tomadas en las rondas del objetivo:
+
+| Modo - mapa | A | B | n | Lectura |
+|---|---|---|---|---|
+| Dominacion - Almacen | 49 | 61 | 110 | 55 % B: sesgo leve, no concluyente |
+| Eliminacion - Almacen | 25 | 25 | 50 | 50/50 |
+| Baliza - Skirmish_03 | 26 | 14 | 40 | 65 % A |
+| Escolta - Almacen | 22 | 8 | 30 | 73 % A (dron entregado 22/30) |
+
+Conclusion: el unico desvio que se repite es el de Dominacion, de un 55 %
+hacia B, coherente con la iniciativa del segundo jugador en un mapa de
+cobertura densa; el resto esta dentro de lo razonable. La decision de
+diseno (iniciativa alterna) sigue pendiente del jugador.
