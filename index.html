@@ -401,6 +401,11 @@ body[data-state="playing"] .actionBar{display:flex}
 body[data-state="playing"]{padding-bottom:112px}
 .actionBar .actions{display:flex;gap:8px;margin:0;width:100%}
 .actionBar .actions button{flex:0 0 186px;min-width:0}
+/* Boton «saltar al final» de la barra: en moviles/pantalla estrecha los
+   186 px fijos desbordan y el ultimo boton queda fuera sin pista. Un
+   degradado lateral avisa de que hay mas acciones desplazandose. */
+.actionBar .actions{scrollbar-width:thin}
+.actionBar::after{content:'';position:sticky;right:0;top:0;flex:0 0 14px;min-width:14px;height:100%;background:linear-gradient(90deg,transparent,var(--panel));pointer-events:none;margin-left:-14px;z-index:1}
 .actionBar>p{width:100%}
 .chapter-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:12px}
 .chapter-card{display:flex;flex-direction:column}
@@ -7078,7 +7083,9 @@ window.addEventListener('keydown',e=>{
   if(k==='escape'){if(G.actionMode!=='move'){G.actionMode='move';updateUI();draw();}return;}
   if(k==='z'){e.preventDefault();undoLastMove();return;}
   const actMap={'1':'shoot','2':'pistol','3':'grenade','4':'overwatch','5':'special'};
-  if(actMap[k]){const btn=document.querySelector('#unitCard [data-act="'+actMap[k]+'"]');if(btn&&!btn.disabled){btn.click();btn.blur();}return;}
+  /* Desde la barra inferior (T2) los botones viven en #actionBar, no en
+     #unitCard: sin este selector doble, los atajos [1]-[5] quedaban mudos. */
+  if(actMap[k]){const btn=document.querySelector('#actionBar [data-act="'+actMap[k]+'"]')||document.querySelector('#unitCard [data-act="'+actMap[k]+'"]');if(btn&&!btn.disabled){btn.click();btn.blur();}return;}
   if(T3&&T3.cam&&VIEW_MODE==='3d'){
     if(k==='q')T3.cam.yaw-=0.38;
     else if(k==='e')T3.cam.yaw+=0.38;
