@@ -73,9 +73,21 @@ Engineer, Commander). **Requiere resolver el skinning + animación** (ver §5).
 - Pendiente menor: comparar el HUD con capturas del original lado a lado.
 
 ### T3 · Mapas
-- Revisar **escala de props** sueltos (algunos contenedores parecen grandes).
-- Revisar la **densidad del anillo exterior** en los 13 tableros con captura.
-- Añadir prop propio a los temas que aún comparten rama (`terminal`/`depot`).
+- **[F7, hecho]** Anillo exterior: los props ya no invaden la cuadrícula
+  jugable (antes 46 lo hacían en 12 de 13 tableros); perímetro de
+  cuadrado semilado 7,4 y `terminal` con prop propio (autobús de dos
+  pisos, marquesina y tótem). Ver §12 F7.
+- **[F7, queda]** Revisar **escala de props** con captura: el examen decía
+  "algunos contenedores parecen grandes"; medido: el contenedor del remake
+  mide 2,64 m (un ISO real 6,06 m) — la mitad, coherente con la escala
+  global del diorama (1 casilla = 1,62 m). Decisión de Dani: si en captura
+  sigue pareciendo grande, subirlo a ISO real (con sweep para que no roce).
+- **[F7, queda]** Revisar la **densidad del anillo exterior** en los 13
+  tableros con captura: el original no da número comparable (su geometría
+  es una sola malla conectada, medida con `scripts/f7_ipa_cluster.py`);
+  los números del remake para el cotejo: Almacén 15, Patio 12, Plaza 11,
+  Embarcadero 14, S03 26, S04 26, Depósito 22, Andenes 30, Mercado 10,
+  Terminal 26, Rotonda 28, Cruce 30, Astillero 26 props.
 
 ### T4 · Campaña
 Las 6 misiones ya tienen tablero propio (`campana01..06`) y se juegan en el
@@ -313,5 +325,6 @@ covers 4/4 · weapons 4/4 · meshes 5/5).
 | F4 | `5ae371e` | `bench/weapons.test.js` (4) y `bench/meshes.test.js` (5): la receta §11 como aserciones (rigs en orden del rig base, OBJ válidos, clips con huesos conocidos…) | — |
 | F5 | — | `docs/historico/README.md`: índice de vigencia; examen corregido (§10 Comando ya resuelto con rig de 20 huesos) y ARQUITECTURA (19 tableros) | — |
 | F6 | — | Mejoras de HUD solo verificables con capturas: ver §4 T2 | — |
+| F7 | — | **T3 mapas (parcial, medido en Chromium+SwiftShader)**: (1) el anillo exterior de props iba sobre un *círculo* r 7,6-8,5 y **46 props invadían la cuadrícula jugable en 12 de 13 tableros** (la esquina del cuadrado 12×12 queda a r 8,49; los props de las diagonales caían dentro). Ahora van sobre el *perímetro* de un cuadrado de semilado 7,4: **13/13 tableros con 0 intrusos** (`scripts/f7_ring_audit.mjs`, medición de bbox de cada prop contra [-6,6]²). (2) `terminal` ya tiene prop propio: autobús londinense de dos pisos a escala real medida (Routemaster 11 m = 6,8 casillas; 1 casilla = 1,62 m, soldado = 1,08), tangente al anillo + marquesina y tótem. (3) La grúa del dock mira hacia fuera (su gancho caía sobre la esquina). Escala de contenedor del remake: 2,64 m vs ISO 6,06 m — mitad, pero coherente con la escala del soldado; **decisión de Dani con capturas** | Revisar densidad con captura (los números medidos: 10-30 props/tablero); si el look cuadra, bajar contenedor a ISO real |
 - Carátulas 3D para las seis armas sin arte original (lanzacohetes y
   lanzagranadas).
