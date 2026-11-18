@@ -1794,7 +1794,7 @@ function damage(target,dmg,srcLabel){
   const expl=/explos|M67|salpicadura|barril|RPG|AT4|M72|M203|M32/i.test(srcLabel||'');
   target._hitKind=expl?'expl':(/M249|M240|PKM|MG3/.test(srcLabel||'')?'burst':'bullet');
   /* Impacto seco del original (bala), solo en dano no explosivo. */
-  if(!expl){try{auPlay('sfx/weapons/bullet_hit_0'+(1+Math.floor(Math.random()*2))+'.mp3',0.3);}catch(e){}}
+  if(!expl){try{auPlay('sfx/weapons/bullet_hit_0'+(1+Math.floor(Math.random()*2))+'.mp3',0.25);}catch(e){}}
   if(target.hp<=0&&target._deathT==null){target._deathT=FX.t;target._deathKind=expl?'expl':'bullet';}
   if(target.x!=null){fxFloat(target.x,target.y,'−'+dmg,'#ffd9d2');fxBurst(target.x,target.y,7,'#ffb199');}
   log(srcLabel+' hace <b>'+dmg+'</b> de daño a '+target.role+' ('+target.team+'). Le quedan '+Math.max(0,target.hp)+' PV.');
@@ -2001,7 +2001,7 @@ function auPlay(path,vol,loop){if(!soundOn)return null;try{const a=new Audio(AU_
 const DMR_WEAPONS=['M110 SASS','Mk 14 EBR','SVD Dragunov','Mk 14'];
 function auWeapon(cat,weaponName){
   if(weaponName&&DMR_WEAPONS.includes(weaponName)){auPlay('sfx/weapons/semiautorifle_fire.mp3',0.5);return;}
-  const f=WEAPON_SFX[cat];if(f)auPlay('sfx/weapons/'+f+'.mp3',0.5);
+  const f=WEAPON_SFX[cat];if(f)auPlay('sfx/weapons/'+f+'.mp3',0.45);
 }
 function auVoice(un,ev,vol){
   if(!un||!un.role)return;
@@ -2011,7 +2011,7 @@ function auVoice(un,ev,vol){
   if(!folder)return;
   auPlay('voice/'+folder+'/'+ev+'.mp3',vol==null?0.5:vol);
 }
-function auAmbient(theme){if(AU_AMBIENT){try{AU_AMBIENT.pause();}catch(e){}AU_AMBIENT=null;}const f=auPlay('ambient/'+theme+'/amb0.mp3',0.22,true);AU_AMBIENT=f;}
+function auAmbient(theme){if(AU_AMBIENT){try{AU_AMBIENT.pause();}catch(e){}AU_AMBIENT=null;}const f=auPlay('ambient/'+theme+'/amb0.mp3',0.20,true);AU_AMBIENT=f;}
 /* Musica del original: siete temas de partida del IPA, uno al azar por
    partida, en bucle y a volumen bajo. */
 const MUSIC_TRACKS=['game_subtle_01','game_subtle_02','game_subtle_03','game_subtle_04','game_subtle_05','game_subtle_06','game_subtle_07'];
@@ -2020,7 +2020,7 @@ function auMusicStart(){
   if(!soundOn)return;
   auMusicStop();
   const t=MUSIC_TRACKS[Math.floor(Math.random()*MUSIC_TRACKS.length)];
-  AU_MUSIC=auPlay('music/'+t+'.mp3',0.18,true);
+  AU_MUSIC=auPlay('music/'+t+'.mp3',0.15,true);
 }
 function auMusicStop(){if(AU_MUSIC){try{AU_MUSIC.pause();}catch(e){}AU_MUSIC=null;}}
 function auStopAmbient(){if(AU_AMBIENT){try{AU_AMBIENT.pause();}catch(e){}AU_AMBIENT=null;}}
@@ -7095,7 +7095,7 @@ function renderBarracks(){
     '<div class="panel" style="margin-top:12px"><h2>Arsenal · '+Object.keys(WEAPONS).length+' armas</h2>'+
     catOrder.map(c=>'<p class="sub" style="margin:6px 0 0"><b>'+c+'</b>: '+byCat[c].join(' · ')+'</p>').join('')+
     '</div>'+
-    '<div class="panel" style="margin-top:12px"><h2>Desbloqueos</h2><p class="sub" style="margin:0">Skins: <b>Estándar</b> y <b>Nación</b> (ambas sin pasivas). Monedas: <b>🪙 '+coinsGet()+'</b> (25 por victoria contra la IA). Armas: todas disponibles en la configuración de partida.</p></div>';
+    '<div class="panel" style="margin-top:12px"><h2>Desbloqueos</h2><p class="sub" style="margin:0">Skins: <b>Estándar</b>, <b>Camuflaje</b>, <b>Clase</b> y <b>Nación</b> (ninguna tiene pasivas). Monedas: <b>🪙 '+coinsGet()+'</b> (25 por victoria contra la IA). Armas: todas disponibles en la configuración de partida.</p></div>';
 }
 function openBarracks(){renderBarracks();showScreen('scr-barracks');}
 /* ---- Menu estilo original (F6): entradas directas y monedas ---- */
