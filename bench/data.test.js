@@ -30,13 +30,13 @@ test('12 naciones con personalidad propia', () => {
   for (const p of pers) assert.ok(p.length > 2, 'personalidad vacia');
 });
 
-test('reparto: 17 personajes del original y 12 propios', () => {
+test('reparto: 17 personajes del original y 18 propios', () => {
   const orig = block('const ORIG_CAST=[', '];');
   const own = block('const OWN_CAST=[', '];');
   const nOrig = (orig.match(/\{name:'/g) || []).length;
   const nOwn = (own.match(/\{name:'/g) || []).length;
   assert.equal(nOrig, 17, 'deben ser 17 personajes del IPA');
-  assert.equal(nOwn, 12, 'deben ser 12 personajes propios');
+  assert.equal(nOwn, 18, 'deben ser 18 personajes propios');
   for (const m of own.matchAll(/role:'([^']+)'/g)) {
     assert.ok(['Francotirador', 'Artillero', 'Espía', 'Médico', 'Ingeniero', 'Comando', 'Capitán'].includes(m[1]), 'rol invalido: ' + m[1]);
   }
@@ -64,7 +64,7 @@ test('6 misiones de campana con mapa, objetivo y formato validos', () => {
 test('cada personaje tiene su voz extraida', () => {
   const map = block('const CHAR_VOICE={', '};');
   const pairs = [...map.matchAll(/'([^']+)':'([^']+)'/g)];
-  assert.ok(pairs.length >= 29, 'deben estar los 17 del original y los 12 propios');
+  assert.ok(pairs.length >= 35, 'deben estar los 17 del original y los 18 propios');
   for (const [, name, slug] of pairs) {
     for (const ev of ['select', 'confirm', 'pain', 'death', 'firing', 'thanks']) {
       const f = path.join(ROOT, 'assets', 'audio', 'voice', slug, ev + '.mp3');
