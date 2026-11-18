@@ -21,7 +21,7 @@ No vale abrirlo como archivo (`file://`): el juego carga assets por HTTP.
 ## Verificar que todo está sano
 
 ```
-powershell -ExecutionPolicy Bypass -File bench\VERIFICAR.ps1
+powershell -ExecutionPolicy Bypass -File bench\bench/VERIFICAR.ps1
 ```
 
 Hace cinco comprobaciones y devuelve 0 si todo pasa: sintaxis del script,
@@ -37,7 +37,7 @@ integridad de datos (`data.test.js`) y humo 3D en navegador con captura.
 | `assets/audio/` | **195 clips del original**: armas, voces por personaje, ambiente por mapa, música y habilidades. |
 | `assets/maps/` | Geometría de los 8 Skirmish del IPA y sus atlas. |
 | `assets/ui/` | Retratos, naciones, modos, iconos de habilidad del original, logo y arte de la portada. |
-| `bench/` | Verificación: `VERIFICAR.ps1`, `check-syntax.js`, `boards.js`, `rules.test.js`, `data.test.js`, `harness.js`. |
+| `bench/` | Verificación: `bench/VERIFICAR.ps1`, `check-syntax.js`, `boards.js`, `rules.test.js`, `data.test.js`, `harness.js`. |
 | `docs/` | Diseño, arquitectura, equilibrio medido, catálogo de habilidades, capturas 3D y planes. |
 | `referencia_original/` | Código descompilado y datos del original (solo lectura, referencia). |
 

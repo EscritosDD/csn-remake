@@ -170,13 +170,13 @@ prueba que lo demuestra y se puede re-verificar con
 
 - [x] **Portada del original**: arte del splash y logo RAD SOLDIERS sobre el
   titular, y el 3D en vivo debajo. Prueba:
-  [captura](capturas/PORTADA.png) · `assets/ui/rad_logo.png` · `portada_arte.png`.
+  captura (captura no incluida en el repo; ver `docs/Capturas_3D.md`) · `assets/ui/rad_logo.png` · `portada_arte.png`.
 - [x] **Titulo con las entradas del original y monedas**: Quick game, Play
   online, Challenges, Expansions, Cuartel y Armeria, con monedas en el chip.
   Prueba: `#origMenu` y `renderNationChip()`.
 - [x] **Campana por capitulos**: 3 capitulos, 6 misiones, progreso x/y,
   candados y arte de icono. Prueba: `renderCampaignPanel()` y
-  [captura de la mision 6](capturas/CAM_M6_3d.png).
+  captura de la mision 6 (captura no incluida en el repo; ver `docs/Capturas_3D.md`).
 - [x] **Cuartel con el reparto**: 17 personajes del original + 18 propios,
   agrupados por clase, con bio, selector de personaje por rol y las cuatro
   skins. Prueba: `renderBarracks()` · `data.test.js`.

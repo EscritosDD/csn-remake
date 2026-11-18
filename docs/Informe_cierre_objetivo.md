@@ -23,7 +23,7 @@ ampliado**. El juego sigue jugable en `main` en cada commit.
 - Props nuevos construidos en código: contenedores, grúas, carretilla
   elevadora, caseta de obra, búnker, cabina de Londres, semáforo, noray,
   máquina expendedora, banco, quiosco, puesto de fruta, montacargas…
-- **20 capturas 3D** en `docs/capturas/` y tabla en `docs/Capturas_3D.md`.
+- **20 capturas 3D** en `docs/capturas/` (ya retiradas del repo) y tabla en `docs/Capturas_3D.md`.
 
 ### F3 · Interfaz
 - Portada con el **arte y el logo del RAD Soldiers original** (splash

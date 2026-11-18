@@ -1,3 +1,5 @@
+> **Nota de alcance:** este documento es histórico. Cita arte y material del original que vive fuera del repositorio (carpeta `_original/`), y capturas que no se guardan aquí por tamaño. No son enlaces rotos: son referencias al material de trabajo local.
+
 # Dirección de arte — CSN
 
 Guía visual para que el juego se parezca a RAD Soldiers. El prototipo actual usa soldados dibujados por código; este documento define el arte que los sustituye.
@@ -56,7 +58,7 @@ Las variantes de nación de la v1 se hacen tiñendo estos sprites por código co
 - Todo el arte vive en `files/arte/` dentro de la carpeta del proyecto.
 
 
-## Imágenes de aistudio (`public/assets/aistudio/`)
+## Imágenes de aistudio (`public/assets/aistudio/` (retirado del repo))
 
 Tres borradores de interfaz generados con IA (`image_13b112b1.png`,
 860x485; `image_26054cf1.png` y `image_5061c313.png`, ~500x333; paleta

@@ -168,7 +168,7 @@ clips por nombre de hueso con una tabla de correspondencia.
 **Prueba de extremo a extremo** (navegador headless, 0 errores): nación →
 menú → Challenges (6 misiones, 1 disponible) → misión 1 → setup de campaña →
 lanzar → partida en 3D (`theme:"plaza"`, 8 unidades, barra con 8 acciones).
-Capturas: `docs/capturas/E2E_CAMPANA.png` y `docs/capturas/UI_HUD_barra.png`.
+Las capturas de esa prueba no se guardan en el repo; se regeneran con `node _capture_all.mjs` (ver `docs/Capturas_3D.md`).
 
 
 ## 9. Mallas de clase: RESUELTO (causa raíz: triangle strip)

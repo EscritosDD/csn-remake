@@ -1,3 +1,5 @@
+> **Nota de alcance:** este documento es histórico. Cita arte y material del original que vive fuera del repositorio (carpeta `_original/`), y capturas que no se guardan aquí por tamaño. No son enlaces rotos: son referencias al material de trabajo local.
+
 # Plan de operación — CSN, remake de RAD Soldiers
 
 Plan para reconstruir el juego sin liarnos ni dar vueltas. Una fase a la vez; no se abre la siguiente sin cerrar la anterior. Dani solo hace tres cosas: pegar los prompts en Argon, traer los SVG que devuelva y jugar cuando la estética esté. Todo lo demás lo hago yo.

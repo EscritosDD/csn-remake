@@ -1,3 +1,5 @@
+> **Nota de alcance:** este documento es histórico. Cita arte y material del original que vive fuera del repositorio (carpeta `_original/`), y capturas que no se guardan aquí por tamaño. No son enlaces rotos: son referencias al material de trabajo local.
+
 # Prompts para Gemini Argon — arte SVG de CSN
 
 **Vigente: la v4, en `Estetica_original.md` §7 (16/11, ~06:11).** Es la versión medida del original: proporciones exactas de la malla (cabeza 1/5, arma 76 % de la altura), paleta y moldes. La v3 de abajo queda como historial; no pegarla.

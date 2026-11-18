@@ -1,3 +1,5 @@
+> **Nota de alcance:** este documento es histórico. Cita arte y material del original que vive fuera del repositorio (carpeta `_original/`), y capturas que no se guardan aquí por tamaño. No son enlaces rotos: son referencias al material de trabajo local.
+
 # Auditoría independiente de CSN — DeepSeek Harness
 
 **Fecha:** 17/11/2026 · **Alcance:** Fase 1 (repo contra docs y contra el código real). La Fase 2 (comparación contra el original descargado de archive.org) queda pendiente y se marca en su sección.

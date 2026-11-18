@@ -1,3 +1,5 @@
+> **Nota de alcance:** este documento es histórico. Cita arte y material del original que vive fuera del repositorio (carpeta `_original/`), y capturas que no se guardan aquí por tamaño. No son enlaces rotos: son referencias al material de trabajo local.
+
 # Informe de sesión y plan de arte completo para Muse
 
 Fecha: 17 nov 2026 (sesión nocturna). Autor: el agente (DeepSeek Harness).

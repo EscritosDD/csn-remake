@@ -1,3 +1,5 @@
+> **Nota de alcance:** este documento es histórico. Cita arte y material del original que vive fuera del repositorio (carpeta `_original/`), y capturas que no se guardan aquí por tamaño. No son enlaces rotos: son referencias al material de trabajo local.
+
 # Referencia del RAD Soldiers original — auditoría para CSN
 
 Documento de referencia para el remake CSN, sacado del código descompilado del juego original (Assembly-CSharp, build de Unity 4.2, Chrome/iOS 2014) y de sus archivos `.assets`. No es una copia: el arte y el código de CSN siguen siendo originales por decisión del proyecto. Esto sirve para que los números y las estructuras de CSN se acerquen a los reales donde convenga.

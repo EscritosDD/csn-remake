@@ -24,7 +24,7 @@ botones quedó generado pero sin usar.
 - `assets/ui/` — 7 retratos de rol, 12 insignias de nación, 4 de modo,
   3 botones, panel, logo y favicon.
 - `assets/three.min.js` y `assets/argon-soldiers.svg` — extraídos del HTML.
-- `public/assets/aistudio/` — 3 imágenes (huérfanas, ver 4.2).
+- `public/assets/aistudio/` (retirado del repo) — 3 imágenes (huérfanas, ver 4.2).
 - `bench/rules.test.js` — suite nueva (6 pruebas).
 - `server.js`, `package.json`, `package-lock.json` — para Gemini Studio.
 - `index.html` — reescritura grande: HUD 3D, retratos, personalidad por rol,
@@ -81,7 +81,7 @@ No existe ningún archivo nuevo en `docs/` con el informe CSN-contra-original
 (punto por punto, tres columnas, con fuentes). El único documento nuevo es
 la suite de pruebas.
 
-### 4.2 Las 3 imágenes de aistudio — HUÉRFANAS
+### 4.2 Las 3 imágenes de aistudio — HUÉRFANAS (ya retiradas del repo) (ya retiradas del repo)
 `public/assets/aistudio/image_13b112b1.png`, `image_26054cf1.png`,
 `image_5061c313.png` existen, pero **ninguna está referenciada en
 `index.html`** (0 coincidencias). El encargo pedía integrarlas o explicar

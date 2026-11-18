@@ -1,3 +1,5 @@
+> **Nota de alcance:** este documento es histórico. Cita arte y material del original que vive fuera del repositorio (carpeta `_original/`), y capturas que no se guardan aquí por tamaño. No son enlaces rotos: son referencias al material de trabajo local.
+
 # Vacíos y Argon — qué falta del original y qué le pedimos a Argon
 
 Documento de trabajo vivo. Dani lo pidió el 16/11/2026 (~06:13): ir apuntando los vacíos y las cosas en las que Argon puede ayudar, trabajar de la mano de él y ser exigente.

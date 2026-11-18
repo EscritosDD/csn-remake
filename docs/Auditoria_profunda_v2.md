@@ -1,3 +1,5 @@
+> **Nota:** las capturas que cita este documento no se guardan en el repositorio; se regeneran con `node _capture_all.mjs` (ver `docs/Capturas_3D.md`).
+
 # Auditoría profunda v2 y plan exigente (ronda de corrección)
 
 Auditoría hecha **mirando el juego de cerca** (capturas con cámara acercada a
@@ -63,5 +65,5 @@ cerca: el soldado se ve de pie, con casco, mochila, arma y uniforme.
 ## Estado verificado de esta fase
 
 - `VERIFICAR.ps1`: sintaxis 0, 19/19 tableros, reglas 6/6, datos 6/6, humo 3D.
-- Capturas de cerca (`AUDIT_UNIT_role.png`) y de tablero (`AUD_FIX1_3d.png`).
+- Capturas de cerca (la captura de cerca de una unidad) y de tablero (la captura del tablero completo).
 - Commit `1fe168c` empujado a `main`.

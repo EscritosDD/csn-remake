@@ -1,3 +1,5 @@
+> **Nota de alcance:** este documento es histórico. Cita arte y material del original que vive fuera del repositorio (carpeta `_original/`), y capturas que no se guardan aquí por tamaño. No son enlaces rotos: son referencias al material de trabajo local.
+
 # Estética del RAD Soldiers original — auditoría visual para CSN
 
 Cómo construyeron los personajes y los mapas del original, medido en sus archivos. Esto es la lógica de construcción, no sus archivos: el arte de CSN sigue siendo original, nada de sus texturas, modelos ni audio va al juego. Cada cifra cita su fuente (archivo `.assets`, prefab o `.cs`).

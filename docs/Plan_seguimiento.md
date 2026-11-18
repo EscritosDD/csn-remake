@@ -107,4 +107,4 @@ banda 70/30 del plan.
 - **F5**: 195 clips del original (armas, voces por personaje, ambiente por mapa,
   musica de partida, habilidades), camara de accion y sacudida.
 - **F6**: `VERIFICAR.ps1` con sintaxis, 19 tableros, reglas 6/6, datos 6/6 y humo
-  3D; equilibrio medido con n>=30; 26 capturas 3D en `docs/capturas/`.
+  3D; equilibrio medido con n>=30; 26 capturas 3D (que ya no se guardan en el repo), que ya no se guarda en el repo.

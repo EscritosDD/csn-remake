@@ -1,3 +1,5 @@
+> **Nota de alcance:** este documento es histórico. Cita arte y material del original que vive fuera del repositorio (carpeta `_original/`), y capturas que no se guardan aquí por tamaño. No son enlaces rotos: son referencias al material de trabajo local.
+
 # Desarrollo continuo de CSN — prompt de trabajo autónomo
 
 *Escrito el 16/11/2026 a petición de Dani: desarrollar el remake sin que él tenga que estar pendiente. Este archivo es la instrucción que se ejecuta en cada ronda.*
