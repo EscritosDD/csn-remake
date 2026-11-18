@@ -17,6 +17,8 @@ director. Los triangulos y llamadas salen de `window.__csn3d`.
 | Skirmish_01 - La plaza | `plaza` | 33488 | 567 | [png](capturas/R6_skirmish01_3d.png) |
 | Skirmish_02 - El embarcadero | `dock` | 33392 | 564 | [png](capturas/R6_skirmish02_3d.png) |
 | Skirmish_07 - El mercado | `market` | 33272 | 562 | [png](capturas/R6_skirmish07_3d.png) |
+| Campana - Mision 1 (Almacen) | `warehouse` | 33282 | 543 | [png](capturas/CAM_M1_3d.png) |
+| Campana - Mision 3 (Londres) | `skirmish03` | 81076 | 566 | [png](capturas/CAM_M3B_3d.png) |
 
 Notas:
 - Los mapas de codigo (skirmish01/02/07) usan losas, por eso tienen menos
@@ -24,3 +26,11 @@ Notas:
 - Las capturas se han verificado con `units:8` (escuadras completas) y con
   `vistaClasica:"skip"`: son 3D, no la vista clasica.
 - La vista 2D es una alternativa accesible y no se usa como verificacion.
+
+## Campana en 3D
+
+Las dos capturas de campana se tomaron arrancando la mision desde el
+capturador (`node _capture_all.mjs campana:2 CAM_M3B`), que hace
+`openSetup('campana',N)` y pulsa el boton de jugar. Verificado con
+`units:8` y `vistaClasica:"skip"`; el HUD muestra la ronda, el mapa, el
+modo y la dificultad de la mision.

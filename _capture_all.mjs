@@ -23,7 +23,15 @@ await send("Page.navigate", { url: "http://127.0.0.1:8000/" }); await sleep(3000
 try { await send("Page.bringToFront"); } catch (e) {}
 await ev("localStorage.setItem('radsoldiers_nation','es');location.reload();"); await sleep(10000);
 try { await send("Page.bringToFront"); } catch (e) {}
-await ev(`window.quickStart('${mapId}')`); await sleep(waitMs);
+/* mapId puede ser un mapa (quickStart) o campana:N para una mision. */
+if (/^campana:\d+$/.test(mapId)) {
+  const mi = mapId.split(":")[1];
+  await ev(`openSetup('campana',${mi})`); await sleep(1500);
+  await ev("(function(){const b=document.getElementById('launchBtn');if(b){b.click();return 1}return 0})()");
+} else {
+  await ev(`window.quickStart('${mapId}')`);
+}
+await sleep(waitMs);
 let state = await ev("JSON.stringify(window.__csn3d)");
 /* Reintento: si la 3D no arranco por rAF estrangulado, traer la ventana al
    frente y esperar otro par de segundos antes de rendirse. */
