@@ -15,6 +15,12 @@ __pycache__/
 _extract/
 *.log
 
+# Capturas de documentacion (se generan localmente con _capture_all.mjs, no van al repo)
+docs/capturas/
+
+# Borradores de interfaz de aistudio (no los usa el juego)
+public/assets/aistudio/
+
 # Sistema
 .DS_Store
 Thumbs.db
