@@ -7643,7 +7643,32 @@ $('#guerraCountdown').textContent=fmtCountdown(msToNextSaturday());
     kind:'roles',name:'',skinIndex:0,idleActor:null,idleClipKey:'idle2h',
     frameRequested:false,models:{roles:{},weapons:{}},textures:{},bodyGeo:{}
   };
-  const viewerOutfits=['base','decon','deerhunter','deltaforce','halloween','rambo','spetsnaz','veteran'];
+  /* Skins por cuerpo: cada cuerpo tiene solo sus variantes de outfit
+     (archivos *_d.png del original, en assets/soldier/cast/). Las 8
+     skins genéricas de antes eran outfits de Soldier_Light y no casan
+     con los demás cuerpos (UV incompatible: una textura va mapeada a
+     un cuerpo concreto), así que ya no se usan. Dos cuerpos se
+     comparten de verdad en el original (un solo .obj por cuerpo):
+     Sneaky Pete y Mme La Hacque comparten Agent_Light, y Sister
+     Florence y Textbook Kate comparten Medic; se distinguen por su
+     textura principal. Archie Fletcher usa el cuerpo Rambo
+     (Soldier_Light_Rambo.obj, de su bundle ArchieFletcherOutfits),
+     una malla distinta de la de Hipster Dave (Soldier_Light.obj). */
+  const VIEWER_BODY_SKINS={
+    'Soldier_Light':['Soldier_Light_d.png','Soldier_Light_Decon_d.png','Soldier_Light_DeltaForce_d.png','Soldier_Light_Halloween_d.png','Soldier_Light_Spetsnaz_d.png','Soldier_Light_Veteran_d.png'],
+    'Soldier_Light_Rambo':['Soldier_Light_Rambo_d.png','Soldier_Light_Rambo_Decon_d.png','Soldier_Light_Rambo_DeerHunter_d.png','Soldier_Light_Rambo_Veteran_d.png'],
+    'Soldier_Heavy':['Soldier_heavy_d.png','Soldier_heavy_GermanSpecialForces_d.png','Soldier_Heavy_Decon_d.png','Soldier_Heavy_Veteran_d.png'],
+    'Agent_Light':['Agent_light_d.png','Agent_light_Decon_d.png','Agent_light_JewelThief_d.png','Agent_light_Veteran_d.png'],
+    'Agent_Heavy':['Agent_Heavy_d.png','Agent_Heavy_Decon_d.png','Agent_Heavy_Skin1_d.png','Agent_Heavy_Veteran_d.png'],
+    'Medic':['Medic_d.png','Medic_Decon_d.png','Medic_Halloween_d.png','Medic_Rescue_d.png','Medic_Spetsnaz_d.png','Medic_Veteran_d.png'],
+    'Medic_therapist':['Medic_Therapist_d.png','Medic_Therapist_Decon_d.png','Medic_Therapist_Surgeon_d.png','Medic_Therapist_Veteran_d.png'],
+    'Engineer':['Engineer_d.png','Engineer_Decon_d.png','Engineer_Halloween_d.png','Engineer_Spetsnaz_d.png','Engineer_Veteran_d.png'],
+    'Engineer_Light':['Engineer_Light_d.png','Engineer_Light_Decon_d.png','Engineer_Light_Trinity_d.png','Engineer_Light_Veteran_d.png'],
+    'Engineer_Heavy':['Engineer_Heavy2_d.png','Engineer_Heavy_Decon_d.png','Engineer_Heavy_EOD_d.png','Engineer_Heavy_Veteran_d.png'],
+    'Engineer (RiotCop)':['Engineer_RiotCop_d.png','Engineer_RiotCop_Decon_d.png','Engineer_RiotCop_Skin1_d.png','Engineer_RiotCop_Veteran_d.png'],
+    'Commander':['Commander_d.png','Commander_African_d.png','Commander_Asian_d.png','Commander_Latino_d.png'],
+    'Commander_F':['Commander_F_d.png','Commander_F_African_d.png','Commander_F_Asian_d.png','Commander_F_Latino_d.png']
+  };
   /* Personajes del original (ORIG_CAST, sin Soap ni Spud: repetirían el
      soldado genérico, mismo cuerpo Soldier_Light y misma textura base).
      Cada personaje muestra la malla de su cuerpo (body) y su textura
@@ -7676,6 +7701,7 @@ $('#guerraCountdown').textContent=fmtCountdown(msToNextSaturday());
      soldado genérico (REAL), según VIEWER_BODY_ROLE. */
   const VIEWER_BODY_FILE={
     'Soldier_Heavy':'Soldier_Heavy.obj',
+    'Soldier_Light_Rambo':'Soldier_Light_Rambo.obj',
     'Agent_Light':'Agent_Light.obj',
     'Medic_therapist':'Medic_therapist_1248v.obj',
     'Engineer_Light':'Engineer_Light.obj',
@@ -7683,16 +7709,22 @@ $('#guerraCountdown').textContent=fmtCountdown(msToNextSaturday());
     'Engineer (RiotCop)':'Engineer_RiotCop.obj',
     'Commander_F':'CommanderF.obj'
   };
+  /* Archie Fletcher usa el cuerpo Rambo (su bundle es
+     ArchieFletcherOutfits): ORIG_CAST lo pone como Soldier_Light,
+     pero su malla es Soldier_Light_Rambo.obj, distinta de la de
+     Hipster Dave. */
+  const VIEWER_BODY_OVERRIDE={'Archie Fletcher':'Soldier_Light_Rambo'};
   const VIEWER_BODY_ROLE={'Medic':'Médico','Engineer':'Ingeniero','Agent_Heavy':'Comando','Commander':'Capitán'};
   const viewerCharacters=[
     ...ORIG_CAST.filter(c=>c.name!=='Soap'&&c.name!=='Spud').map((character,index)=>{
       const role=character.role||VIEWER_ROLE_FALLBACK[character.name]||'';
-      const bodyFile=VIEWER_BODY_FILE[character.body]||'';
-      const bodyRole=VIEWER_BODY_ROLE[character.body]||'';
+      const body=VIEWER_BODY_OVERRIDE[character.name]||character.body;
+      const bodyFile=VIEWER_BODY_FILE[body]||'';
+      const bodyRole=VIEWER_BODY_ROLE[body]||'';
       return {
         key:'original:'+String(index+1).padStart(2,'0'),
         label:character.name,name:character.name,role,bio:character.bio||'',
-        body:character.body,bodyFile,bodyRole,
+        body,bodyFile,bodyRole,
         outfit:VIEWER_CAST_TEXTURE[character.name]||'',
         file:bodyFile||(bodyRole?ROLE_MODEL_FILES[bodyRole]+'.obj':'soldier.obj')
       };
@@ -7702,14 +7734,14 @@ $('#guerraCountdown').textContent=fmtCountdown(msToNextSaturday());
     {key:'own:11',label:'Diseño Meshy 11',role:'Espía',mesh:'Espia'}
   ];
   viewerCharacters.forEach(entry=>{
-    entry.skins=entry.mesh
-      ?[{key:'own',label:'Textura Meshy'}]
-      :[
-        ...(entry.outfit?[{key:'cast',label:'Textura propia · '+entry.outfit}]:[]),
-        ...viewerOutfits.map((skin,index)=>({
-          key:skin,label:'Skin '+String(index+1+(entry.outfit?1:0)).padStart(2,'0')+' · '+skin+'.png'
-        }))
-      ];
+    if(entry.mesh){entry.skins=[{key:'own',label:'Textura Meshy'}];return;}
+    const variants=VIEWER_BODY_SKINS[entry.body]||[];
+    const ordered=entry.outfit
+      ?[entry.outfit,...variants.filter(file=>file!==entry.outfit)]
+      :variants;
+    entry.skins=ordered.map((file,index)=>({
+      key:'cast:'+file,label:'Skin '+String(index+1).padStart(2,'0')+' · '+file
+    }));
   });
   const viewerWeaponFiles=[
     'AssaultRifle','Rifle','Pistol','SniperRifle_weapon','Shotgun','RPG','Crossbow',
@@ -8016,8 +8048,8 @@ $('#guerraCountdown').textContent=fmtCountdown(msToNextSaturday());
       source=REAL;
     }
     let texture=null;
-    if(skin.key==='cast'&&entry.outfit){
-      const texturePath='assets/soldier/cast/'+entry.outfit;
+    if(skin.key&&skin.key.indexOf('cast:')===0){
+      const texturePath='assets/soldier/cast/'+skin.key.slice(5);
       if(viewer.textures[texturePath])texture=viewer.textures[texturePath];
       else{
         texture=await new Promise((resolve,reject)=>{
@@ -8029,23 +8061,13 @@ $('#guerraCountdown').textContent=fmtCountdown(msToNextSaturday());
     }else if(skin.key==='native'&&source){
       texture=source.tex;
     }
-    if(!texture){
-      const texturePath='assets/soldier/outfits/'+skin.key+'.png';
-      if(viewer.textures[texturePath])texture=viewer.textures[texturePath];
-      else{
-        texture=await new Promise((resolve,reject)=>{
-          new THREE.TextureLoader().load(texturePath,resolve,undefined,reject);
-        });
-        texture.colorSpace=THREE.SRGBColorSpace;
-        viewer.textures[texturePath]=texture;
-      }
-    }
     if(!texture)throw new Error('El modelo no tiene una textura disponible.');
-    /* Solo el soldado genérico sin rol usa el modelo con esqueleto y
-       pose de reposo (el único que la tiene sin descabalarse). Todos
-       los demás son malla estática: forzar animatable en todos es lo
-       que descabaló los modelos. */
-    if(!entry.bodyFile&&!entry.bodyRole&&!entry.role){
+    /* Solo el cuerpo Soldier_Light del repo (Hipster Dave, el soldado
+       genérico) usa el modelo con esqueleto y pose de reposo (el único
+       que la tiene sin descabalarse). Todos los demás son malla
+       estática: forzar animatable en todos es lo que descabaló los
+       modelos. */
+    if(!entry.bodyFile&&!entry.bodyRole){
       const model=makeViewerRiggedModel(source.geo.clone(),source.data,texture);
       model.scale.setScalar(1.15);
       const mesh=model.userData.mesh3;
