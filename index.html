@@ -918,7 +918,40 @@ function roleLook(role){return ROLE_LOOK[role]||{s:[1,1,1],silueta:'',pose:null}
    soldado sigue saliendo del modelo, porque ahí es un cuerpo entero
    en su pose, no un busto. */
 const ROLE_PORTRAIT={'Francotirador':'retrato_francotirador.png','Artillero':'retrato_artillero.png','Espía':'retrato_espia.png','Médico':'retrato_medico.png','Ingeniero':'retrato_ingeniero.png','Comando':'retrato_comando.png','Capitán':'retrato_capitan.png'};
-function rolePortraitURL(role){const f=ROLE_PORTRAIT[role];return f?('assets/ui/'+f):null;}
+/* Retrato del rol: se renderiza del MODELO REAL del juego (chibi, con su
+   uniforme) para que toda la interfaz hable el mismo idioma visual. El PNG
+   pintado queda solo como respaldo mientras carga el modelo. */
+const PORTRAIT_CACHE={};
+function rolePortraitURL(role){
+  try{
+    if(PORTRAIT_CACHE[role])return PORTRAIT_CACHE[role];
+    if(REAL.ready&&typeof realSpriteUnit==='function'&&typeof renderRealSprite==='function'){
+      const r=ROLES[role];
+      if(r){
+        const skin=myNation?'nacion':'estandar';
+        const u=realSpriteUnit(role,r.weapons[0],skin,myNation);
+        const e=renderRealSprite(u);
+        if(e&&e.url){
+          /* Busto: recorte de la parte alta del render de cuerpo entero. */
+          const im=new Image();
+          im.onload=()=>{
+            try{
+              const cv=document.createElement('canvas');cv.width=128;cv.height=128;
+              const cx=cv.getContext('2d');
+              const sw=im.width*0.72, sh=im.height*0.40;
+              cx.drawImage(im, im.width*0.14, im.height*0.05, sw, sh, 0, 0, 128, 128);
+              PORTRAIT_CACHE[role]=cv.toDataURL('image/png');
+            }catch(err){PORTRAIT_CACHE[role]=e.url;}
+          };
+          im.src=e.url;
+          PORTRAIT_CACHE[role]=e.url;
+          return e.url;
+        }
+      }
+    }
+  }catch(e){}
+  const f=ROLE_PORTRAIT[role];return f?('assets/ui/'+f):null;
+}
 
 /* ================= STATE ================= */
 const $=s=>document.querySelector(s);
@@ -7114,7 +7147,7 @@ function renderAbilityCatalog(){
 function renderBarracks(){
   const el=document.getElementById('barrContent'),nt=document.getElementById('barrNation');
   if(!el)return;
-  if(nt)nt.innerHTML=myNation?('<b>'+myNation.name+'</b>'+(myNation.pers?' · '+myNation.pers.name+' — '+myNation.pers.desc:'')+' · 🪙 '+coinsGet()+' · skins: Estándar, Clase y Nación'):('Sin nación elegida · 🪙 '+coinsGet());
+  if(nt)nt.innerHTML=myNation?('<b>'+myNation.name+'</b>'+(myNation.pers?' · '+myNation.pers.name+' — '+myNation.pers.desc:'')+' · 🪙 '+coinsGet()+' · skins: Estándar, Camuflaje, Clase y Nación'):('Sin nación elegida · 🪙 '+coinsGet());
   const roles=Object.keys(ROLES);
   const catOrder=[];const byCat={};
   Object.entries(WEAPONS).forEach(([name,w])=>{if(!byCat[w.cat]){byCat[w.cat]=[];catOrder.push(w.cat);}byCat[w.cat].push(name+' ('+w.dmg+'/'+w.rng+')');});
