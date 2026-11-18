@@ -602,12 +602,14 @@ button img.ab-ico{width:18px;height:18px;vertical-align:-3px;margin-right:6px;bo
         <label class="f">Skin de tu escuadra (solo aspecto, sin pasivas)</label>
         <div class="seg" id="skinSegA">
           <button data-skin="estandar">Estándar · genérica</button>
+          <button data-skin="clase">Clase · color del rol</button>
           <button data-skin="nacion" class="on">Nación · bandera y emblema</button>
         </div>
         <div id="skinBWrap" style="display:none">
           <label class="f">Skin de la escuadra del Jugador 2</label>
           <div class="seg" id="skinSegB">
             <button data-skin="estandar">Estándar · genérica</button>
+          <button data-skin="clase">Clase · color del rol</button>
             <button data-skin="nacion" class="on">Nación · bandera y emblema</button>
           </div>
         </div>
@@ -796,6 +798,7 @@ function flagArtHTML(n,sm){
    Las skins futuras sí darán pasivas pequeñas. */
 const SKINS={
  estandar:{name:'Estándar',desc:'El soldado genérico: uniforme verde oliva liso, sin colores de nación ni emblema. Sin pasiva.',uniform:'#66704f',vest:null,helmet:'#59613f',badge:null},
+ clase:{name:'Clase',desc:'Uniforme teñido con el color de la clase del soldado (cada rol, su color). Sin pasiva.',uniform:null,vest:null,helmet:null,badge:null},
  nacion:{name:'Nación',desc:'Los colores de la bandera de tu nación en el uniforme y el casco, con el emblema de sus fuerzas armadas en el pecho. Sin pasiva.',uniform:null,vest:null,helmet:null,badge:'nation'}
 };
 
@@ -4481,9 +4484,10 @@ function emblemTexture(nation){
 }
 function soldierColors3(un){
   const isNat=un.skin==='nacion';
+  const isClass=un.skin==='clase';
   const nc=un.nation?un.nation.colors:['#66704f','#3e4630','#59613f'];
   return {
-    uni:isNat?nc[0]:SKINS.estandar.uniform,
+    uni:isNat?nc[0]:(isClass?(ROLES[un.role]?ROLES[un.role].color:SKINS.estandar.uniform):SKINS.estandar.uniform),
     helm:isNat?((nc[2]==='#FFFFFF'||nc[2]===nc[0])?shadeHex(nc[0],-25):nc[2]):SKINS.estandar.helmet,
     band:isNat?nc[1]:'#3e4630',
     team:un.team==='A'?'#387EC9':'#C95338',
@@ -4989,6 +4993,7 @@ function makeRealSoldier3(un){
   }
   /* Equipo enemigo: el uniforme se tine calido para que no se confunda con
      el tuyo ni de espaldas. El bando A conserva el color natural. */
+  if(un.skin==='clase'&&ROLES[un.role]){mat.color.copy(new THREE.Color(ROLES[un.role].color)).lerp(new THREE.Color('#ffffff'),0.30);}
   if(un.team==='B'){mat.color.lerp(new THREE.Color('#c95338'),0.22);}
   mat.color.copy(tint);
   const mesh=new THREE.SkinnedMesh(RD.geo,mat);
