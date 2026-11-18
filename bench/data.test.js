@@ -61,10 +61,10 @@ test('6 misiones de campana con mapa, objetivo y formato validos', () => {
   }
 });
 
-test('cada personaje del original tiene su voz extraida', () => {
+test('cada personaje tiene su voz extraida', () => {
   const map = block('const CHAR_VOICE={', '};');
   const pairs = [...map.matchAll(/'([^']+)':'([^']+)'/g)];
-  assert.equal(pairs.length, 17, 'deben ser 17 voces de personaje');
+  assert.ok(pairs.length >= 29, 'deben estar los 17 del original y los 12 propios');
   for (const [, name, slug] of pairs) {
     for (const ev of ['select', 'confirm', 'pain', 'death', 'firing', 'thanks']) {
       const f = path.join(ROOT, 'assets', 'audio', 'voice', slug, ev + '.mp3');
