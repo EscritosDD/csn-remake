@@ -5425,7 +5425,8 @@ function makeRealSoldier3(un){
   /* La complexion ya la trae cada modelo del original (Soldier_Light,
      Soldier_Heavy, Agent, Medic, Engineer, Commander): no se escala nada. */
   /* la malla de clase trae su propia escala (ROLE_SCALES); la base usa 0,95 */
-  mesh.scale.setScalar(RD===REAL?0.95:(ROLE_SCALES&&ROLE_SCALES[un.role])||0.95);
+  /* la escala de clase va horneada en la geometria y en las bind poses */
+  mesh.scale.setScalar(0.95);
 
   /* Tocados por rol sobre la malla real, colgados del hueso Head: su Z
      local es el arriba del IPA, así que el grupo gira para que su +Y
