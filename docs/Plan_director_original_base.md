@@ -164,33 +164,44 @@ pasa. Es el comando que deben usar las IAs que sigan el proyecto.
 
 ## 4. Criterio de «base reconocible» (checklist final)
 
-- [x] Título con las 4 entradas del original, monedas en el chip y accesos
-  directos (Quick, Online, Challenges, Expansions, Cuartel, Armería).
-- [x] Campaña por capítulos con arte de icono, progreso x/y y candados
-  (3 capítulos, 6 misiones).
-- [x] Barracas/Cuartel con los 24 personajes (17 del original + 7 propios),
-  su clase, su traje y selector de personaje por rol.
-- [x] 8 mapas Skirmish reales + 6 misiones de campaña jugables, con capturas
-  2D y 3D de todos.
-- [x] 44 habilidades catalogadas con su icono del IPA en la Armería
-  (42 iconos extraídos; 19 con equivalente en juego).
-- [x] HUD con retratos, vida/energía, daño previsto, arco de vida y tabla de
-  resultados (vivos/daño/derribos).
-- [x] Audio del IPA: armas por categoría, voces por rol, ambiente por mapa
-  y sonidos de habilidad.
-- [x] Estética compacta cartoon en todas las pantallas (tarjetas a 2 líneas,
-  mapas plegados, títulos cortos).
+Estado a la ronda 41 del objetivo automatico. Cada casilla apunta a la
+prueba que lo demuestra y se puede re-verificar con
+`powershell -File bench/VERIFICAR.ps1`.
 
-Pendiente para las siguientes rondas: campaña reconstruida con los prefabs
-del original (los niveles del IPA son prefabs de gameplay, la geometría de
-campaña venía del servidor), más variantes de skin y capturas de campaña.
+- [x] **Portada del original**: arte del splash y logo RAD SOLDIERS sobre el
+  titular, y el 3D en vivo debajo. Prueba:
+  [captura](capturas/PORTADA.png) · `assets/ui/rad_logo.png` · `portada_arte.png`.
+- [x] **Titulo con las entradas del original y monedas**: Quick game, Play
+  online, Challenges, Expansions, Cuartel y Armeria, con monedas en el chip.
+  Prueba: `#origMenu` y `renderNationChip()`.
+- [x] **Campana por capitulos**: 3 capitulos, 6 misiones, progreso x/y,
+  candados y arte de icono. Prueba: `renderCampaignPanel()` y
+  [captura de la mision 6](capturas/CAM_M6_3d.png).
+- [x] **Cuartel con el reparto**: 17 personajes del original + 18 propios,
+  agrupados por clase, con bio, selector de personaje por rol y las cuatro
+  skins. Prueba: `renderBarracks()` · `data.test.js`.
+- [x] **Armeria con el catalogo del original**: 37 armas con datos reales y
+  las 42 habilidades con su icono en dos pestanas. Prueba:
+  `docs/Catalogo_habilidades_original.md` · `assets/ui/ability/`.
+- [x] **13 tableros y 6 misiones jugables** con geometria real del IPA o
+  propia, props por tema y ambiente. Prueba: [galeria 3D](Capturas_3D.md) ·
+  `bench/boards.js` (13/13).
+- [x] **Personajes diferenciados**: 7 cuerpos por clase del IPA (malla, rig y
+  textura propios), complexion real, tocados, acentos de silueta, pecho del
+  rol, banda de nacion, emblema y equipo enemigo teñido. Prueba:
+  `assets/soldier/` · `makeRealSoldier3()` · `soldier_scales.json`.
+- [x] **HUD con retratos, vida/energia, daño previsto y arco de vida** en 3D y
+  clasica, con tabla de resultados (vivos/daño/derribos) y la escuadra.
+  Prueba: `updateUI()` · `endGame()`.
+- [x] **Audio del original**: 195 clips (armas por categoria y arma, voces por
+  personaje, ambiente por mapa, musica y habilidades). Prueba:
+  `assets/audio/` · `auPlay/auVoice/auMusicStart`.
+- [x] **Estetica compacta**: tarjetas a 2 lineas, mapas plegados, reglas
+  plegables, configuracion en una linea, sin parrafos en la interfaz.
+- [x] **Verificacion en un comando** y datos a prueba de deriva
+  (`data.test.js`): 0 errores de sintaxis, 13/13 tableros, 6/6 reglas,
+  6/6 datos y humo 3D con captura.
 
-
-## Aviso tecnico: insertar props por tema
-
-En `buildThemedProps3` las ramas son una cadena `if(theme==='x'){ ... } else if...`.
-Al anadir un bloque nuevo ANTES de una rama existente, hay que CERRAR el
-bloque nuevo con su propia llave: es el error que mas veces ha aparecido
-(quiosco de la plaza, noray, semaforo y cabina del puente). Regla practica:
-todo bloque `if(theme===...){` que se inserte debe terminar en `}` antes de
-la linea original, y `node bench/check-syntax.js` lo detecta al instante.
+Pendiente fuera del alcance de codigo: la campana con geometria propia del
+original (los niveles venian del servidor y no estan en el IPA) y la
+sustitucion de los assets del IPA por arte propio antes de publicar.
