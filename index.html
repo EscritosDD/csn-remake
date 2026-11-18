@@ -1730,6 +1730,7 @@ function startGame(squadA,squadB){
   /* Al jugar se retira la portada: el 3D ocupa la pantalla. */
   try{const hp=document.querySelector('#scr-play .hero');if(hp)hp.style.display='none';const mp=document.getElementById('menuArea');if(mp)mp.style.display='none';}catch(e){}
   try{auAmbient(G.map.theme);}catch(e){}
+  try{auMusicStart();}catch(e){}
   setTurnSeed(1,'A');
   squadA.forEach((d,i)=>G.units.push(makeUnit('A',d,i,myNation,setup.skinA)));
   squadB.forEach((d,i)=>G.units.push(makeUnit('B',d,i,rivalNation,setup.opp==='local'?setup.skinB:'nacion')));
@@ -1998,6 +1999,17 @@ function auVoice(un,ev,vol){
   auPlay('voice/'+folder+'/'+ev+'.mp3',vol==null?0.5:vol);
 }
 function auAmbient(theme){if(AU_AMBIENT){try{AU_AMBIENT.pause();}catch(e){}AU_AMBIENT=null;}const f=auPlay('ambient/'+theme+'/amb0.mp3',0.22,true);AU_AMBIENT=f;}
+/* Musica del original: siete temas de partida del IPA, uno al azar por
+   partida, en bucle y a volumen bajo. */
+const MUSIC_TRACKS=['game_subtle_01','game_subtle_02','game_subtle_03','game_subtle_04','game_subtle_05','game_subtle_06','game_subtle_07'];
+let AU_MUSIC=null;
+function auMusicStart(){
+  if(!soundOn)return;
+  auMusicStop();
+  const t=MUSIC_TRACKS[Math.floor(Math.random()*MUSIC_TRACKS.length)];
+  AU_MUSIC=auPlay('music/'+t+'.mp3',0.18,true);
+}
+function auMusicStop(){if(AU_MUSIC){try{AU_MUSIC.pause();}catch(e){}AU_MUSIC=null;}}
 function auStopAmbient(){if(AU_AMBIENT){try{AU_AMBIENT.pause();}catch(e){}AU_AMBIENT=null;}}
 function renderSoundBtn(){const b=document.getElementById('soundBtn');if(b)b.textContent=soundOn?'🔊 Sonido: sí':'🔇 Sonido: no';}
 /* ---- M18 · GRANADA DE HUMO (solo el Espía) ----
@@ -2549,7 +2561,7 @@ function endGame(winner,reason){
 }
 function showModal(html){$('#modalBox').innerHTML=html;$('#modal').classList.add('on');}
 function closeModal(){$('#modal').classList.remove('on');}
-function backToMenu(){try{auStopAmbient();}catch(e){}try{const hp=document.querySelector('#scr-play .hero');if(hp)hp.style.display='';}catch(e){}$('#gameArea').style.display='none';$('#setupArea').style.display='none';$('#menuArea').style.display='block';G=null;document.body.dataset.state='menu';refreshGuerra();renderNationChip();if(typeof renderCampaignPanel==='function')renderCampaignPanel();}
+function backToMenu(){try{auStopAmbient();}catch(e){}try{auMusicStop();}catch(e){}try{const hp=document.querySelector('#scr-play .hero');if(hp)hp.style.display='';}catch(e){}$('#gameArea').style.display='none';$('#setupArea').style.display='none';$('#menuArea').style.display='block';G=null;document.body.dataset.state='menu';refreshGuerra();renderNationChip();if(typeof renderCampaignPanel==='function')renderCampaignPanel();}
 $('#quitBtn').onclick=()=>{showModal('<h2>¿Abandonar la partida?</h2><p>Se perderá el progreso de esta partida. Tu nación y tu marcador de Guerra de Naciones no se tocan.</p><div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px"><button class="btn danger big" onclick="closeModal();backToMenu()">Sí, abandonar</button><button class="btn big" onclick="closeModal()">Seguir jugando</button></div>');};
 
 function endTurn(){
@@ -2619,7 +2631,7 @@ function endTurn(){
   }
 }
 $('#endTurnBtn').onclick=endTurn;
-$('#soundBtn').onclick=()=>{soundOn=!soundOn;try{lsSet(LS_SOUND,soundOn?'1':'0');}catch(e){}renderSoundBtn();if(soundOn)sfx('turn');toast(soundOn?'Sonido activado: disparos, explosiones y avisos, sintetizados en el momento y sin archivos.':'Sonido desactivado.');};
+$('#soundBtn').onclick=()=>{soundOn=!soundOn;try{lsSet(LS_SOUND,soundOn?'1':'0');}catch(e){}renderSoundBtn();if(soundOn)sfx('turn');try{if(!soundOn){auMusicStop();auStopAmbient();}else if(G&&G.units&&G.units.length){auMusicStart();auAmbient(G.map.theme);}}catch(e){}toast(soundOn?'Sonido activado: disparos, explosiones y avisos, sintetizados en el momento y sin archivos.':'Sonido desactivado.');};
 renderSoundBtn();
 
 /* ---- AI ---- */
