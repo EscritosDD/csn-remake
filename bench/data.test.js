@@ -46,8 +46,8 @@ test('reparto: 17 personajes del original y 18 propios', () => {
 test('tres skins y todas sin pasivas', () => {
   const b = block('const SKINS={', '};');
   const keys = [...b.matchAll(/\n ([a-z]+):\{name:/g)].map(m => m[1]);
-  assert.deepEqual(keys.sort(), ['clase', 'estandar', 'nacion'], 'skins: ' + keys.join(','));
-  assert.equal((b.match(/Sin pasiva/g) || []).length, 3, 'las tres skins dicen "Sin pasiva"');
+  assert.deepEqual(keys.sort(), ['camuflaje', 'clase', 'estandar', 'nacion'], 'skins: ' + keys.join(','));
+  assert.equal((b.match(/Sin pasiva/g) || []).length, 4, 'las cuatro skins dicen "Sin pasiva"');
 });
 
 test('6 misiones de campana con mapa, objetivo y formato validos', () => {
