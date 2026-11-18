@@ -396,6 +396,12 @@ body[data-state="setup"] #scr-play .hero{display:none}
 .menuCol{display:flex;flex-direction:column;gap:8px;max-width:420px;margin:8px auto 0}
 .menuCol .btn{text-align:left;justify-content:flex-start;padding:11px 14px;font-size:15px}
 .menuCol .btn .sub{font-size:12px}
+.actionBar{display:none;gap:10px;overflow-x:auto;align-items:stretch;position:fixed;left:0;right:0;bottom:0;z-index:60;padding:10px 16px;background:var(--panel);border-top:2px solid var(--line);box-shadow:0 -6px 18px rgba(0,0,0,.28)}
+body[data-state="playing"] .actionBar{display:flex}
+body[data-state="playing"]{padding-bottom:112px}
+.actionBar .actions{display:flex;gap:8px;margin:0;width:100%}
+.actionBar .actions button{flex:0 0 186px;min-width:0}
+.actionBar>p{width:100%}
 </style>
 </head>
 <body>
@@ -3556,7 +3562,18 @@ function updateUI(){
    (u.role==='Espía'?'<button data-act="sweep" class="'+(G.actionMode==='sweep'?'on':'')+'" '+(isTurn&&(u.sweeps||0)>0?'':'disabled')+'><img class="ab-ico" src="assets/ui/ability/CharAbility_13_Detection_Aura_alpha.png" alt=""/>Barrido detector<small>'+SWEEP_COST+' ⚡ · radio '+SWEEP_RANGE+' · quedan '+(u.sweeps||0)+' · revela invisibles</small></button>':'')+
    (effMode(G)==='escolta'&&G.drone&&G.drone.alive&&u.team==='A'?'<button data-act="guide" class="'+(G.actionMode==='drone'?'on':'')+'" '+(isTurn&&dist(u,G.drone)<=1&&u.energy>=2&&G.drone.movesLeft>0?'':'disabled')+'>🤖 Guiar dron · 2 ⚡<small>Mueve el dron 1 casilla · quedan '+G.drone.movesLeft+' guiados esta ronda · tienes que estar pegado a él — luego toca la casilla destino junto al dron</small></button>':'')+
    '</div>'+(u.team!==G.turn?'<p class="sub" style="margin-top:8px">Este soldado es del bando rival: podrás actuar con él en su turno'+(G.opp==='ia'?' (lo mueve la IA)':'')+'.</p>':'');
-  card.querySelectorAll('[data-act]').forEach(b=>b.onclick=()=>{
+  /* Tooltip de cada accion y traslado del bloque a la barra inferior. */
+  try{card.querySelectorAll('.actions button').forEach(b=>{const t=(b.getAttribute('title')||'');const txt=b.textContent.replace(/\s+/g,' ').trim();b.title=(t?t+' — ':'')+txt;});}catch(e){}
+  try{
+    const bar=document.getElementById('actionBar');
+    const acts=card.querySelector('.actions');
+    if(bar){
+      bar.innerHTML='';
+      if(acts)bar.appendChild(acts);
+      else bar.innerHTML='<p class="sub" style="margin:0">Selecciona un soldado para ver sus acciones.</p>';
+    }
+  }catch(e){}
+  document.querySelectorAll('[data-act]').forEach(b=>b.onclick=()=>{
     const act=b.dataset.act;
     if(act==='shoot'){G.actionMode='shoot';toast('Toca a un enemigo en alcance para disparar con '+u.weapon+'. Pasa el cursor sobre él para ver la puntería.');}
     if(act==='pistol'){G.actionMode='pistol';toast('Toca a un enemigo a 3 casillas o menos para disparar la M9.');}
@@ -6558,7 +6575,6 @@ function updateUnitHuds3D(w,h){
       const el=document.createElement('div');el.className='gl-unit-hud';
       el.innerHTML='<div class="gl-hp-pill"><span class="gl-hp-dot"></span><div class="gl-hp-track"><div class="gl-hp-fill"></div></div></div><div class="gl-unit-tag" style="display:none"></div>';
       host.appendChild(el);
-  try{card.querySelectorAll('.actions button').forEach(b=>{const t=(b.getAttribute('title')||'');const txt=b.textContent.replace(/\s+/g,' ').trim();b.title=(t?t+' — ':'')+txt;});}catch(e){}
       rec={el:el,dot:el.querySelector('.gl-hp-dot'),fill:el.querySelector('.gl-hp-fill'),tagEl:el.querySelector('.gl-unit-tag'),lastSig:''};
       T3.hudPool.set(key,rec);
     }
@@ -7173,6 +7189,17 @@ function renderAbilityCatalog(){
   }).join('');
 }
 
+/* Barra inferior de acciones: el bloque de botones sale de la tarjeta y se
+   coloca bajo el tablero, a lo ancho, como el HUD del original. */
+(function(){
+  try{
+    const ga=document.getElementById('gameArea');
+    if(ga&&!document.getElementById('actionBar')){
+      const bar=document.createElement('div');bar.id='actionBar';bar.className='actionBar';
+      ga.appendChild(bar);
+    }
+  }catch(e){}
+})();
 /* Tooltip completo de las acciones del HUD: el detalle queda en una linea
    con puntos suspensivos y el texto entero aparece al pasar el raton. */
 document.addEventListener('mouseover',e=>{
