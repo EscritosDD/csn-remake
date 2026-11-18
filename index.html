@@ -700,7 +700,11 @@ details.rule p{margin:6px 0 0;font-size:12.5px;line-height:1.45}
     </div>
     <div class="filters" id="arsFilters"></div>
     <div class="arsenal-grid" id="arsenalGrid"></div>
-    <div class="panel" style="margin-top:14px">
+    <div class="seg" id="armTabSeg" style="margin:10px 0 0">
+      <button data-armtab="armas" class="on">Armas</button>
+      <button data-armtab="habilidades">Habilidades del original</button>
+    </div>
+    <div class="panel" id="abilityPanel" style="margin-top:14px;display:none">
       <h2>Catálogo del original · 44 habilidades</h2>
       <p class="sub" style="margin:0 0 8px">Iconos reales del IPA. Las marcadas «en juego» tienen equivalente en CSN; las demás son huecos a cubrir.</p>
       <div id="abilityCatalog" class="ab-catalog"></div>
@@ -5768,6 +5772,15 @@ function buildThemedProps3(world,theme){
       const c=new THREE.Mesh(new THREE.BoxGeometry(1.5,0.18,0.18),mat3('#8a6f1c',0.6));c.position.set(0,3.1,0);g.add(c);world.add(g);}}
     for(let i=0;i<2;i++)lamp();
   } else if(theme==='platform'||theme==='rotonda'||theme==='cruce'){
+    if(theme==='platform'){
+      /* Maquina expendedora del anden: cuerpo, cristal y botones. */
+      const spV=take();
+      if(spV){const g=new THREE.Group();g.position.set(spV.x,0,spV.z);
+        const body=new THREE.Mesh(new THREE.BoxGeometry(0.8,1.6,0.55),mat3('#a4432f',0.7));body.position.y=0.8;body.castShadow=true;g.add(body);
+        const glass=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.9,0.06),mat3('#8fd8ff',0.25));glass.position.set(0,1.1,0.3);g.add(glass);
+        const btn=new THREE.Mesh(new THREE.BoxGeometry(0.3,0.16,0.05),mat3('#e8c84e',0.5));btn.position.set(0,0.55,0.3);g.add(btn);
+        g.rotation.y=rand()*Math.PI*2;world.add(g);}
+    }
     if(theme==='cruce'){
       /* Semaforo de calle: poste y caja con tres luces. */
       const spS=take();
@@ -6937,6 +6950,15 @@ const ABILITY_IMPL={
   'CharAbility_07_Caltrops_alpha':'Minas',
   'CharAbility_33_Nail_Mines_alpha':'Claymore'
 };
+/* Pestañas de la Armeria: armas (filtros y rejilla) o catalogo. */
+function armTab(which){
+  const esArmas=which!=='habilidades';
+  document.querySelectorAll('#armTabSeg button').forEach(x=>x.classList.toggle('on',x.dataset.armtab===(esArmas?'armas':'habilidades')));
+  const f=document.getElementById('arsFilters'),g=document.getElementById('arsenalGrid'),ap=document.getElementById('abilityPanel');
+  if(f)f.style.display=esArmas?'':'none';
+  if(g)g.style.display=esArmas?'':'none';
+  if(ap)ap.style.display=esArmas?'none':'';
+}
 function renderAbilityCatalog(){
   const el=document.getElementById('abilityCatalog');if(!el)return;
   el.innerHTML=ABILITY_CATALOG.map(a=>{
@@ -7003,7 +7025,8 @@ function tutHide(){const b=document.getElementById('tutBubble');if(b)b.style.dis
   const e=document.getElementById('mnuExpansions');if(e)e.onclick=()=>toast('Expansiones: aún no hay contenido descargable. El arte propio y las skins llegan por fases.');
   const bk=document.getElementById('mnuBarracks');if(bk)bk.onclick=openBarracks;
   document.addEventListener('change',(e)=>{const t=e.target;if(t&&t.dataset&&t.dataset.charrole){CHAR_PREFS=loadChars();CHAR_PREFS[t.dataset.charrole]=t.value;saveChars(CHAR_PREFS);toast('Personaje de '+t.dataset.charrole+': '+t.value+'.');}});
-  const ar=document.getElementById('mnuArmory');if(ar)ar.onclick=()=>showScreen('scr-arsenal');
+  const ar=document.getElementById('mnuArmory');if(ar)ar.onclick=()=>{showScreen('scr-arsenal');armTab('armas');};
+  document.querySelectorAll('#armTabSeg button').forEach(b=>b.onclick=()=>armTab(b.dataset.armtab));
   const bb=document.getElementById('barrBack');if(bb)bb.onclick=()=>showScreen('scr-play');
   coinsSet(coinsGet());
   renderAbilityCatalog();
