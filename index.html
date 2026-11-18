@@ -826,6 +826,7 @@ body[data-state="playing"]{padding-bottom:112px}
       <div class="seg" id="viewerKinds" aria-label="Tipo de modelo">
         <button type="button" class="on" data-kind="roles">Personajes</button>
         <button type="button" data-kind="weapons">Armas</button>
+        <button type="button" data-kind="props">Objetos</button>
       </div>
       <div class="viewer-layout">
         <div class="viewer-character-controls" id="viewerCharacterControls">
@@ -844,7 +845,7 @@ body[data-state="playing"]{padding-bottom:112px}
             <div class="viewer-status" id="viewerStatus">Selecciona un personaje o un arma.</div>
           </div>
           <div class="viewer-meta">
-            <div><h2 id="viewerName" style="margin:0">Modelo 3D</h2><p class="sub" id="viewerDescription" style="margin:4px 0 0">La textura aplicada aparece junto al modelo.</p><p class="sub" id="viewerAssetInfo" style="margin:4px 0 0"></p></div>
+            <div><h2 id="viewerName" style="margin:0">Modelo 3D</h2><p class="sub" id="viewerDescription" style="margin:4px 0 0">La textura aplicada aparece junto al modelo.</p><p class="sub" id="viewerAssetInfo" style="margin:4px 0 0"></p><div id="viewerAbilities" style="margin:8px 0 0"></div></div>
             <img class="viewer-texture" id="viewerTexture" alt="Textura del modelo" hidden/>
           </div>
           <label class="viewer-zoom">Zoom <input id="viewerZoom" type="range" min="1" max="2.5" step="0.05" value="1" aria-label="Zoom del modelo"/></label>
@@ -7365,29 +7366,123 @@ const ORIG_CAST=[
  {name:'Commander (F)',body:'Commander_F',outfit:'Commander_F / Latino / Asian / African',role:'',bio:'Misma autoridad, otro acento.',play:false}
 ];
 
-/* ---- Catalogo de las 44 habilidades del original (F1/F3) ---- */
+/* ---- Habilidades por personaje del original (Fase 1) ----
+   Fuente: las bios cortas de cada personaje en Characters.assetbundle
+   (UnityRaw, legible), donde cada bio nombra sus dos habilidades. Las
+   habilidades son de la CLASE (UnitClass.Abilities[]); cada personaje
+   usa las de su clase y el jugador elegía cuáles llevaba a la partida
+   (SelectedAbilities[]). Los nombres entre paréntesis son los nombres
+   reales del personaje en el original (Sister Florence es Angela Merci,
+   Riot Medic es Gus Marx, Riot Agent es Juan DaCova, Riot Engineer es
+   Dee Hatlacker, Commander (M) es Rick Rickson y Commander (F) es Lida
+   Eroica). Los dos capitanes no tienen habilidades concretas en el
+   material legible: su bio dice solo «una amplia variedad de habilidades
+   ofensivas y de apoyo» y el código confirma una selección aparte de
+   habilidades de comandante. 'obj' enlaza con ABILITY_OBJECTS. */
+const CHARACTER_ABILITIES={
+ 'Hipster Dave':[
+  {icon:'CharAbility_43_Support_Fire_alpha',n:'Fuego de apoyo',d:'Dispara contra el enemigo que se mueve para proteger a los compañeros.',obj:null},
+  {icon:'CharAbility_14_Frag_Grenade_alpha',n:'Granada de fragmentación',d:'Granada con daño en área.',obj:null}],
+ 'Archie Fletcher':[
+  {icon:'CharAbility_43_Support_Fire_alpha',n:'Fuego de apoyo',d:'Dispara contra el enemigo que se mueve para proteger a los compañeros.',obj:null},
+  {icon:'CharAbility_49_crossbow_alpha',n:'Ballesta explosiva',d:'Ballesta con daño en área.',obj:null}],
+ 'Soap':[
+  {icon:'CharAbility_43_Support_Fire_alpha',n:'Fuego de apoyo',d:'Dispara contra el enemigo que se mueve para proteger a los compañeros.',obj:null},
+  {icon:'CharAbility_35_Remote_Charge_alpha',n:'Carga remota',d:'Carga C4 oculta por control remoto.',obj:'charge'}],
+ 'Spud':[
+  {icon:'CharAbility_43_Support_Fire_alpha',n:'Fuego de apoyo',d:'Dispara contra el enemigo que se mueve para proteger a los compañeros.',obj:null},
+  {icon:'CharAbility_48_bazooka_alpha',n:'Lanzacohetes',d:'Cohete con daño en área de radio amplio.',obj:null}],
+ 'Ivan Tkilya':[
+  {icon:'CharAbility_43_Support_Fire_alpha',n:'Fuego de apoyo',d:'Dispara contra el enemigo que se mueve para proteger a los compañeros.',obj:null},
+  {icon:'CharAbility_09_Concussion_Grenade_alpha',n:'Granada de concusión',d:'Reduce la energía de enemigos y desplegables.',obj:null}],
+ 'Mme La Hacque':[
+  {icon:'CharAbility_17_Ghost_alpha',n:'Fantasma',d:'Invisible durante 3 turnos.',obj:null},
+  {icon:'CharAbility_46_UAV_alpha',n:'UAV',d:'Dron explorador por control remoto que explota.',obj:'uav'}],
+ 'Sneaky Pete':[
+  {icon:'CharAbility_17_Ghost_alpha',n:'Fantasma',d:'Invisible durante 3 turnos.',obj:null},
+  {icon:'CharAbility_19_Headshot_alpha',n:'Tiro a la cabeza',d:'Crítico garantizado.',obj:null}],
+ 'Sister Florence':[
+  {icon:'CharAbility_30_Medkit_alpha',n:'Botiquín',d:'Cura a un compañero.',obj:null},
+  {icon:'CharAbility_20_Healing_Aura_alpha',n:'Aura curativa',d:'Cura a varios compañeros en un área.',obj:null}],
+ 'Riot Medic':[
+  {icon:'CharAbility_30_Medkit_alpha',n:'Botiquín',d:'Cura a un compañero.',obj:null},
+  {icon:'CharAbility_52_WaterCannon_alpha',n:'Cañón de agua',d:'Chorro que empuja a los enemigos.',obj:null}],
+ 'Textbook Kate':[
+  {icon:'CharAbility_30_Medkit_alpha',n:'Botiquín',d:'Cura a un compañero.',obj:null},
+  {icon:'CharAbility_15_Gas_Grenade_alpha',n:'Granada de gas',d:'Envenena a los enemigos.',obj:null}],
+ 'Big Time Taschmann':[
+  {icon:'CharAbility_16_Gatling_Turret_alpha',n:'Torreta Gatling',d:'Torreta desplegable.',obj:'gatling'},
+  {icon:'CharAbility_45_Toolkit_alpha',n:'Reparar',d:'Repara los desplegables aliados.',obj:null}],
+ 'Megan McNick':[
+  {icon:'CharAbility_27_Landmines_alpha',n:'Minas',d:'Minas ocultas desplegables.',obj:'mine'},
+  {icon:'CharAbility_45_Toolkit_alpha',n:'Reparar',d:'Repara los desplegables aliados.',obj:null}],
+ 'Carlito Grosso':[
+  {icon:'CharAbility_37_Rocket_Turret_alpha',n:'Torreta de cohetes',d:'Torreta de cohetes desplegable.',obj:'rocket'},
+  {icon:'CharAbility_45_Toolkit_alpha',n:'Reparar',d:'Repara los desplegables aliados.',obj:null}],
+ 'Riot Agent':[
+  {icon:'CharAbility_17_Ghost_alpha',n:'Fantasma',d:'Invisible durante 3 turnos.',obj:null},
+  {icon:'CharAbility_50_Molotov_alpha',n:"Flamin' Nora",d:'Granada incendiaria: daña a todos los enemigos en un radio de 3 casillas. Sin icono propio extraído; usa el de Molotov, el incendiario más cercano.',obj:null}],
+ 'Riot Engineer':[
+  {icon:'CharAbility_51_RiotShield_alpha',n:'Shield-O-Bot',d:'Robot escudo por control remoto. Sin icono propio extraído; usa el de Escudo antidisturbios, el desplegable de escudo más cercano.',obj:'shieldbot'},
+  {icon:'CharAbility_45_Toolkit_alpha',n:'Reparar',d:'Repara los desplegables aliados.',obj:null}],
+ 'Commander (M)':[],
+ 'Commander (F)':[]
+};
+/* Drones y objetos que usan las habilidades. Solo la caja de botín
+   tiene modelo y textura extraídos del original (CommCrate, con
+   TreasureCrate_d.png); las torretas, el UAV, las minas, la carga y el
+   Shield-O-Bot se descargaban del servidor como prefabs y no hay ninguna
+   malla suya en el material extraído, así que no se inventa ninguna:
+   el visor muestra su icono y lo dice. */
+const ABILITY_OBJECTS={
+ 'uav':{name:'UAV',icon:'CharAbility_46_UAV_alpha',model:null,note:'Dron explorador. Modelo 3D no extraído del original (se descargaba del servidor).'},
+ 'gatling':{name:'Torreta Gatling',icon:'CharAbility_16_Gatling_Turret_alpha',model:null,note:'Torreta desplegable. Modelo 3D no extraído del original (se descargaba del servidor).'},
+ 'rocket':{name:'Torreta de cohetes',icon:'CharAbility_37_Rocket_Turret_alpha',model:null,note:'Torreta desplegable. Modelo 3D no extraído del original (se descargaba del servidor).'},
+ 'mine':{name:'Mina',icon:'CharAbility_27_Landmines_alpha',model:null,note:'Mina oculta. Modelo 3D no extraído del original (se descargaba del servidor).'},
+ 'charge':{name:'Carga remota',icon:'CharAbility_35_Remote_Charge_alpha',model:null,note:'Carga C4 oculta. Modelo 3D no extraído del original (se descargaba del servidor).'},
+ 'shieldbot':{name:'Shield-O-Bot',icon:'CharAbility_51_RiotShield_alpha',model:null,note:'Robot escudo por control remoto. Modelo 3D no extraído del original (se descargaba del servidor).'},
+ 'crate':{name:'Caja de botín',icon:'PlayerAbility_06_Health_Crate_alpha',model:'CommCrate_124tri.obj',tex:'TreasureCrate_d.png',note:'Caja de comandante / botín (CommCrate).'}
+};
+/* Habilidades de caja del comandante (PlayerAbility, no de un personaje
+   concreto): crean cajas en el mapa (salud, munición, analgésicos,
+   espíritu de equipo). La caja es el único objeto con modelo y textura
+   extraídos; se ve en el visor como objeto. */
+const COMMANDER_CRATE_ABILITIES=[
+ {icon:'PlayerAbility_06_Health_Crate_alpha',n:'Caja de salud',d:'Crea una caja de salud en el mapa.',obj:'crate'},
+ {icon:'PlayerAbility_08_Improved_Ammo_alpha',n:'Caja de munición',d:'Crea una caja de munición de alta velocidad.',obj:'crate'},
+ {icon:'PlayerAbility_10_Pain_Killers_alpha',n:'Caja de analgésicos',d:'Crea una caja de analgésicos.',obj:'crate'},
+ {icon:'PlayerAbility_11_Team_Spirit_alpha',n:'Caja de espíritu de equipo',d:'Crea una caja de espíritu de equipo.',obj:'crate'}
+];
+
+/* ---- Catalogo de las 52 habilidades del original (F1/F3 + Fase 1) ---- */
 const ABILITY_CATALOG=[
   {f:'CharAbility_00_walkshoot_alpha',n:'walkshoot'},
   {f:'CharAbility_01_Adrenaline_alpha',n:'Adrenaline'},
   {f:'CharAbility_03_AR_Specialization_alpha',n:'AR Specialization'},
   {f:'CharAbility_04_Armour_Piercing_alpha',n:'Armour Piercing'},
+  {f:'CharAbility_05_Backlash_Aura_alpha',n:'Backlash Aura'},
   {f:'CharAbility_06_Backstab_alpha',n:'Backstab'},
   {f:'CharAbility_07_Caltrops_alpha',n:'Caltrops'},
   {f:'CharAbility_08_Charm_alpha',n:'Charm'},
   {f:'CharAbility_09_Concussion_Grenade_alpha',n:'Concussion Grenade'},
   {f:'CharAbility_10_Da_Boot_alpha',n:'Da Boot'},
   {f:'CharAbility_11_Dead_Eye_Aura_alpha',n:'Dead Eye Aura'},
+  {f:'CharAbility_12_Deployable_Cover_alpha',n:'Deployable Cover'},
   {f:'CharAbility_13_Detection_Aura_alpha',n:'Detection Aura'},
   {f:'CharAbility_14_Frag_Grenade_alpha',n:'Frag Grenade'},
   {f:'CharAbility_15_Gas_Grenade_alpha',n:'Gas Grenade'},
+  {f:'CharAbility_16_Gatling_Turret_alpha',n:'Gatling Turret'},
   {f:'CharAbility_17_Ghost_alpha',n:'Ghost'},
   {f:'CharAbility_18_Hack_alpha',n:'Hack'},
+  {f:'CharAbility_19_Headshot_alpha',n:'Headshot'},
+  {f:'CharAbility_20_Healing_Aura_alpha',n:'Healing Aura'},
   {f:'CharAbility_21_Healing_Grenade_alpha',n:'Healing Grenade'},
   {f:'CharAbility_22_Health_Buff_Aura_alpha',n:'Health Buff Aura'},
   {f:'CharAbility_23_HMG_Specialization_alpha',n:'HMG Specialization'},
   {f:'CharAbility_24_Juggernaut_alpha',n:'Juggernaut'},
   {f:'CharAbility_25_Juggernaut_Passive_alpha',n:'Juggernaut Passive'},
   {f:'CharAbility_26_Kinetic_Animal_alpha',n:'Kinetic Animal'},
+  {f:'CharAbility_27_Landmines_alpha',n:'Landmines'},
   {f:'CharAbility_28_Last_Stand_alpha',n:'Last Stand'},
   {f:'CharAbility_29_Last_Stand_Aura_alpha',n:'Last Stand Aura'},
   {f:'CharAbility_30_Medkit_alpha',n:'Medkit'},
@@ -7395,7 +7490,9 @@ const ABILITY_CATALOG=[
   {f:'CharAbility_32_Metabolism_alpha',n:'Metabolism'},
   {f:'CharAbility_33_Nail_Mines_alpha',n:'Nail Mines'},
   {f:'CharAbility_34_Pistol_Specialization_alpha',n:'Pistol Specialization'},
+  {f:'CharAbility_35_Remote_Charge_alpha',n:'Remote Charge'},
   {f:'CharAbility_36_Revive_alpha',n:'Revive'},
+  {f:'CharAbility_37_Rocket_Turret_alpha',n:'Rocket Turret'},
   {f:'CharAbility_38_Rush_Aura_alpha',n:'Rush Aura'},
   {f:'CharAbility_39_Shotgun_Specialization_alpha',n:'Shotgun Specialization'},
   {f:'CharAbility_40_Slayer_alpha',n:'Slayer'},
@@ -7404,10 +7501,12 @@ const ABILITY_CATALOG=[
   {f:'CharAbility_43_Support_Fire_alpha',n:'Support Fire'},
   {f:'CharAbility_44_Swarm_Aura_alpha',n:'Swarm Aura'},
   {f:'CharAbility_45_Toolkit_alpha',n:'Toolkit'},
+  {f:'CharAbility_46_UAV_alpha',n:'UAV'},
   {f:'CharAbility_47_Vampire_alpha',n:'Vampire'},
   {f:'CharAbility_48_bazooka_alpha',n:'bazooka'},
   {f:'CharAbility_49_crossbow_alpha',n:'crossbow'},
   {f:'CharAbility_50_Molotov_alpha',n:'Molotov'},
+  {f:'CharAbility_51_RiotShield_alpha',n:'RiotShield'},
   {f:'CharAbility_52_WaterCannon_alpha',n:'WaterCannon'}
 ];
 const ABILITY_IMPL={
@@ -7641,7 +7740,7 @@ $('#guerraCountdown').textContent=fmtCountdown(msToNextSaturday());
     renderer:null,scene:null,camera:null,spin:null,platform:null,
     baseDistance:3,drag:null,lastFrame:0,selection:0,
     kind:'roles',name:'',skinIndex:0,idleActor:null,idleClipKey:'idle2h',
-    frameRequested:false,models:{roles:{},weapons:{}},textures:{},bodyGeo:{}
+    frameRequested:false,models:{roles:{},weapons:{},props:{}},textures:{},bodyGeo:{}
   };
   /* Skins por cuerpo: cada cuerpo tiene solo sus variantes de outfit
      (archivos *_d.png del original, en assets/soldier/cast/). Las 8
@@ -7749,6 +7848,48 @@ $('#guerraCountdown').textContent=fmtCountdown(msToNextSaturday());
     'Knife','Katana','WoodAxe','MP5K','Chainsaw','Minigun','BaseballBat_SOURCE',
     'SpikedClub_weapon','FragGrenade'
   ];
+  /* Objetos del original con modelo y textura extraídos: solo la caja de
+     botín (CommCrate). Las torretas, el UAV, las minas, la carga y el
+     Shield-O-Bot no tienen malla en el material extraído (se descargaban
+     del servidor), así que no hay entradas suyas aquí: sus habilidades
+     muestran el icono y lo dicen. La variante de 180 triángulos es la
+     misma caja (sin verificar si es la rota o la abierta). */
+  const viewerPropFiles=[
+    {key:'CommCrate_124tri',label:'Caja de botín',file:'CommCrate_124tri.obj',tex:'TreasureCrate_d.png'},
+    {key:'CommCrate_180tri',label:'Caja de botín (variante)',file:'CommCrate_180tri.obj',tex:'TreasureCrate_d.png'}
+  ];
+  /* Ficha de habilidades de un personaje: icono, nombre y descripción;
+     si la habilidad usa un dron u objeto, lo dice y, si tiene modelo
+     (solo la caja), ofrece verlo. */
+  function abilityCardHTML(ability){
+    const obj=ability.obj?ABILITY_OBJECTS[ability.obj]:null;
+    const objLine=obj
+      ?'<br><span class="sub">Objeto: '+obj.name+'. '+(obj.model
+        ?'<button type="button" data-viewer-prop="CommCrate_124tri" style="text-decoration:underline;cursor:pointer">Ver en 3D</button>'
+        :obj.note)+'</span>'
+      :'';
+    return '<div class="ab-card on" style="display:flex;gap:8px;align-items:center;text-align:left"><img src="assets/ui/ability/'+ability.icon+'.png" alt="" style="width:34px;height:34px;flex:none"/><span><b>'+ability.n+'</b><br><small>'+ability.d+objLine+'</small></span></div>';
+  }
+  function renderViewerAbilities(entry){
+    const box=document.getElementById('viewerAbilities');
+    if(!box)return;
+    if(entry&&entry.mesh){box.innerHTML='<p class="sub" style="margin:0">Diseño propio de Dani: sin habilidades del original.</p>';return;}
+    if(!entry||!entry.name){box.innerHTML='';return;}
+    const list=CHARACTER_ABILITIES[entry.name];
+    if(list===undefined){box.innerHTML='';return;}
+    if(!list.length){
+      box.innerHTML='<p class="sub" style="margin:0"><b>Habilidades:</b> el Capitán tenía una selección aparte de habilidades de comandante; las concretas no están en el material legible del original.</p>';
+      return;
+    }
+    box.innerHTML='<p class="sub" style="margin:0 0 6px"><b>Habilidades del original:</b></p>'+list.map(abilityCardHTML).join('');
+    box.querySelectorAll('[data-viewer-prop]').forEach(button=>{
+      button.onclick=()=>{
+        document.querySelectorAll('#viewerKinds button').forEach(item=>item.classList.toggle('on',item.dataset.kind==='props'));
+        viewer.kind='props';viewer.skinIndex=0;
+        selectModel('props',button.dataset.viewerProp);
+      };
+    });
+  }
   const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
   function setStatus(message,visible){
     status.textContent=message;
@@ -7859,7 +8000,7 @@ $('#guerraCountdown').textContent=fmtCountdown(msToNextSaturday());
     const controls=document.getElementById('viewerCharacterControls');
     const characterSelect=document.getElementById('viewerCharacterSelect');
     controls.style.display=viewer.kind==='roles'?'grid':'none';
-    list.style.display=viewer.kind==='weapons'?'flex':'none';
+    list.style.display=viewer.kind==='roles'?'none':'flex';
     if(viewer.kind==='roles'){
       characterSelect.replaceChildren();
       viewerCharacters.forEach(entry=>{
@@ -7875,7 +8016,9 @@ $('#guerraCountdown').textContent=fmtCountdown(msToNextSaturday());
       document.getElementById('viewerSkinNext').disabled=entry.skins.length<2;
       return;
     }
-    const entries=viewerWeaponFiles.map(file=>({key:file,label:file,file}));
+    const entries=viewer.kind==='props'
+      ?viewerPropFiles.map(prop=>({key:prop.key,label:prop.label,file:prop.file}))
+      :viewerWeaponFiles.map(file=>({key:file,label:file,file}));
     list.innerHTML='';
     entries.forEach(entry=>{
       const button=document.createElement('button');
@@ -7888,22 +8031,50 @@ $('#guerraCountdown').textContent=fmtCountdown(msToNextSaturday());
   function showModelInfo(kind,key){
     const entry=kind==='roles'
       ?viewerCharacters.find(item=>item.key===key)
-      :viewerWeaponFiles.includes(key)?{label:key,file:key}:null;
+      :kind==='props'
+        ?viewerPropFiles.find(item=>item.key===key)
+        :viewerWeaponFiles.includes(key)?{label:key,file:key}:null;
     if(!entry)throw new Error('El modelo seleccionado no pertenece al catálogo del visor.');
     document.getElementById('viewerName').textContent=entry.name||entry.label;
     document.getElementById('viewerDescription').textContent=kind==='roles'
       ?(entry.mesh
         ?'Diseño Meshy independiente · '+entry.mesh+'.'
         :'Rol: '+(entry.role||'—')+'. '+(entry.bio||''))
-      :'Malla y textura del arsenal · '+entry.file+'.obj';
+      :kind==='props'
+        ?'Caja de comandante / botín del original: la crean las habilidades de caja del comandante (salud, munición, analgésicos, espíritu de equipo).'
+        :'Malla y textura del arsenal · '+entry.file+'.obj';
     document.getElementById('viewerAssetInfo').textContent=kind==='roles'
       ?(entry.mesh
         ?('Malla '+entry.mesh+'.obj · Textura Meshy.')
         :('Malla '+entry.file+' · '+(entry.outfit?('Textura '+entry.outfit):entry.skins[Math.min(viewer.skinIndex,entry.skins.length-1)].label)+'.'))
-      :'';
+      :kind==='props'
+        ?('Malla '+entry.file+' · Textura '+entry.tex+'.')
+        :'';
     texturePreview.hidden=true;
     texturePreview.removeAttribute('src');
+    renderViewerAbilities(kind==='roles'?entry:null);
     return {entry,skin:kind==='roles'?entry.skins[Math.min(viewer.skinIndex,entry.skins.length-1)]:null};
+  }
+  /* Carga un objeto (prop) del original: OBJ estático con su textura,
+     misma rotación Z-arriba que las mallas de soldado. */
+  async function loadViewerProp(entry){
+    const path='assets/props/'+entry.file;
+    if(viewer.bodyGeo[path])return viewer.bodyGeo[path];
+    const text=await fetch(path).then(r=>{if(!r.ok)throw new Error('No se pudo cargar el objeto '+entry.file);return r.text();});
+    let count=0;
+    for(const line of text.split('\n')){if(line.startsWith('v '))count++;}
+    const skin={skinIndex:new Array(count*4).fill(0),skinWeight:new Array(count*4).fill(0)};
+    const geo=parseOBJ3(text,skin);
+    geo.deleteAttribute('skinIndex');
+    geo.deleteAttribute('skinWeight');
+    geo.computeVertexNormals();
+    geo.computeBoundingBox();
+    const size=new THREE.Vector3();
+    geo.boundingBox.getSize(size);
+    const max=Math.max(size.x,size.y,size.z)||1;
+    if(max!==1)geo.scale(1/max,1/max,1/max);
+    viewer.bodyGeo[path]=geo;
+    return geo;
   }
   function parseViewerOBJ(text,rig){
     const vertices=[],uvs=[],normals=[],positions=[],outUvs=[],outNormals=[],skinIndices=[],skinWeights=[];
@@ -8137,6 +8308,29 @@ $('#guerraCountdown').textContent=fmtCountdown(msToNextSaturday());
           model=await makeViewerOriginal(entry,skin);
         }
         viewer.models.roles[modelKey]=model;
+      }else if(!model&&kind==='props'){
+        const geo=await loadViewerProp(entry);
+        const texturePath='assets/props/'+entry.tex;
+        let texture=viewer.textures[texturePath];
+        if(!texture){
+          texture=await new Promise((resolve,reject)=>{
+            new THREE.TextureLoader().load(texturePath,resolve,undefined,reject);
+          });
+          texture.colorSpace=THREE.SRGBColorSpace;
+          viewer.textures[texturePath]=texture;
+        }
+        const mesh=new THREE.Mesh(geo.clone(),new THREE.MeshStandardMaterial({
+          map:texture,roughness:0.85,metalness:0.02,transparent:false,opacity:1,depthWrite:true,
+          side:THREE.DoubleSide
+        }));
+        mesh.castShadow=true;
+        model=new THREE.Group();
+        model.scale.setScalar(1.15);
+        const spin=new THREE.Group();spin.rotation.y=Math.PI/2;model.add(spin);
+        const tilt=new THREE.Group();tilt.rotation.x=-Math.PI/2;spin.add(tilt);
+        mesh.scale.setScalar(0.95);tilt.add(mesh);
+        model.userData.staticRole=true;
+        viewer.models.props[name]=model;
       }else if(!model){
         const cacheKey=viewerWeaponCacheKey(entry.file);
         if(!GUN_MESH_CACHE[cacheKey]){
@@ -8155,7 +8349,9 @@ $('#guerraCountdown').textContent=fmtCountdown(msToNextSaturday());
       mount(model);
       document.getElementById('viewerAssetInfo').textContent=kind==='roles'
         ?(model.userData.meshy?'Malla OBJ y textura Meshy en pose del modelo · '+skin.label+'.':'Malla '+entry.file+' · '+skin.label+'.')
-        :'Malla y textura del arsenal · '+entry.file+'.obj';
+        :kind==='props'
+          ?('Malla '+entry.file+' · Textura '+entry.tex+'.')
+          :'Malla y textura del arsenal · '+entry.file+'.obj';
     }catch(error){
       if(token===viewer.selection)setStatus('No se pudo mostrar el modelo: '+error.message,true);
     }
@@ -8165,7 +8361,7 @@ $('#guerraCountdown').textContent=fmtCountdown(msToNextSaturday());
     resize();
     const kindButton=document.querySelector('#viewerKinds button.on');
     viewer.kind=kindButton?kindButton.dataset.kind:'roles';
-    const names=viewer.kind==='roles'?viewerCharacters.map(entry=>entry.key):viewerWeaponFiles;
+    const names=viewer.kind==='roles'?viewerCharacters.map(entry=>entry.key):viewer.kind==='props'?viewerPropFiles.map(entry=>entry.key):viewerWeaponFiles;
     selectModel(viewer.kind,names.includes(viewer.name)?viewer.name:names[0]);
     if(!viewer.frameRequested){viewer.frameRequested=true;requestAnimationFrame(frame);}
   }
@@ -8186,7 +8382,7 @@ $('#guerraCountdown').textContent=fmtCountdown(msToNextSaturday());
       document.querySelectorAll('#viewerKinds button').forEach(item=>item.classList.toggle('on',item===button));
       viewer.kind=button.dataset.kind;
       viewer.skinIndex=0;
-      const names=viewer.kind==='roles'?viewerCharacters.map(entry=>entry.key):viewerWeaponFiles;
+      const names=viewer.kind==='roles'?viewerCharacters.map(entry=>entry.key):viewer.kind==='props'?viewerPropFiles.map(entry=>entry.key):viewerWeaponFiles;
       selectModel(viewer.kind,names[0]);
     };
   });
