@@ -31,7 +31,10 @@ director. Los triangulos y llamadas salen de `window.__csn3d`.
 | Almacen industrial (baliza) | `warehouse` | 33290 | 549 | [png](capturas/ALM_3d.png) |
 | Campana mision 1 (tablero propio) | `plaza` | 32846 | 542 | [png](capturas/CAM_N1.png) |
 | Campana mision 4 (tablero propio) | `warehouse` | 32374 | 518 | [png](capturas/CAM_N4.png) |
+| Campana mision 2 (tablero propio) | `market` | 30946 | 523 | [png](capturas/CAM_N2.png) |
+| Campana mision 3 (tablero propio) | `dock` | 32534 | 503 | [png](capturas/CAM_N3.png) |
 | Campana mision 5 (tablero propio, 5v5) | `yard` | 38864 | 601 | [png](capturas/CAM_N5.png) |
+| Campana mision 6 (El convoy, escolta 5v5) | `dock` | 40006 | 617 | [png](capturas/CAM_N6.png) |
 | Patio de contenedores (baliza) | `yard` | 33006 | 550 | [png](capturas/PAT_3d.png) |
 
 Notas:
@@ -59,3 +62,6 @@ layout unico y simetria 180 comprobada por `bench/boards.js` (19 tableros en
 total). Las tres capturas de campaña de la tabla se tomaron arrancando la
 mision desde el capturador (`campana:N`); las seis se han jugado ademas en el
 motor con `bench/harness.js` (12 partidas, sin fallos).
+
+Las seis misiones de campana estan capturadas en 3D sobre su tablero propio
+(misiones 1 a 6 en `CAM_N1.png` ... `CAM_N6.png`).

@@ -16,8 +16,10 @@ ampliado**. El juego sigue jugable en `main` en cada commit.
 ### F2 · Mapas
 - **8 Skirmish con geometría real del IPA** + 3 mapas de código, todos con
   props por tema, cielo propio y ambiente.
-- **6 misiones de campaña** (la 6.ª, El convoy, escolta 5v5 con dron) en 3
-  capítulos con candados y progreso.
+- **6 misiones de campaña** en **seis tableros propios** (campana01..06,
+  layouts únicos y simétricos 180), en 3 capítulos con candados y progreso;
+  la 6.ª, El convoy, es escolta 5v5 con dron. Las seis se jugaron en el
+  motor (12 partidas sin fallos).
 - Props nuevos construidos en código: contenedores, grúas, carretilla
   elevadora, caseta de obra, búnker, cabina de Londres, semáforo, noray,
   máquina expendedora, banco, quiosco, puesto de fruta, montacargas…
