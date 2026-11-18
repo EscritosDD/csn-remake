@@ -4926,6 +4926,16 @@ function makeGunProp3(un){
     piece(0.05,0.09,0.05,gripC,gl*0.28,-0.085,0);
     piece(0.035,0.05,0.03,metal,gl*0.66,0.05,0);
   }
+  /* Detalles de silueta de las armas nuevas: mira, bipode, cargador y asa
+     para que cada arma se distinga de su categoria de un vistazo. */
+  if(un.weapon==='PSG-1'){piece(0.18,0.05,0.05,metal,gl*0.5,0.07,0);piece(0.06,0.05,0.05,dark,gl*0.5,0.105,0);}
+  else if(un.weapon==='Mk 14 EBR'){piece(0.14,0.045,0.045,metal,gl*0.5,0.075,0);}
+  else if(un.weapon==='Browning M2'){piece(0.05,0.07,0.02,dark,gl*0.62,-0.05,0.035);piece(0.05,0.07,0.02,dark,gl*0.62,-0.05,-0.035);}
+  else if(un.weapon==='KRISS Vector'){piece(0.09,0.13,0.045,dark,gl*0.42,-0.095,0);}
+  else if(un.weapon==='FAMAS'){piece(0.13,0.04,0.04,metal,gl*0.55,0.075,0);}
+  else if(un.weapon==='G36C'){piece(0.10,0.04,0.035,dark,gl*0.5,0.07,0);}
+  else if(un.weapon==='Mossberg 500'){piece(0.16,0.05,0.05,dark,gl*0.35,-0.02,0);}
+  else if(un.weapon==='Mk 19'){piece(0.15,0.15,0.15,dark,gl*0.42,-0.02,0);}
   const flash=new THREE.Mesh(new THREE.SphereGeometry(0.055,8,8),new THREE.MeshBasicMaterial({color:0xffd76a,transparent:true,opacity:0}));
   flash.position.set(gl+0.04,0.01,0);gun.add(flash);gun.userData.flash=flash;
   /* Escala compacta y proporcional a la silueta del rol: el soldado real
