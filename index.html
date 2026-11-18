@@ -5011,6 +5011,10 @@ function makeRealSoldier3(un){
   else if(un.role==='Espía'){pack.add(box3(0.02,0.3,0.02,'#2b2b2e',0,0.28,0.1,0.5));}
   else if(un.role==='Comando'){pack.add(box3(0.1,0.08,0.26,'#3a3f2a',0.02,0.14,0,0.6));}
   g.add(pack);
+  /* Skin de nacion: banda de la mochila con el segundo color de la bandera. */
+  if(un.skin==='nacion'&&un.nation&&un.nation.colors&&un.nation.colors[1]){
+    try{g.add(box3(0.02,0.10,0.27,un.nation.colors[1],-0.28,0.86,0,0.6));}catch(e){}
+  }
   /* Pecho del color del rol, franja del color de la nacion y hombreras del
      color del equipo: a distancia se leen la clase y el bando de un vistazo,
      encima de la silueta del tocado y de la mochila. */
