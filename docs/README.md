@@ -10,6 +10,7 @@ Qué hay aquí y para qué sirve. Si vienes nuevo, lee en este orden.
 | [ARQUITECTURA.md](ARQUITECTURA.md) | Dónde está cada bloque del código (funciones y líneas reales) y las trampas al editar |
 | [Equilibrio_medido.md](Equilibrio_medido.md) | Cifras de balance por modo y mapa, con n y metodología |
 | [Catalogo_habilidades_original.md](Catalogo_habilidades_original.md) | Las 44 habilidades del original y su estado en CSN |
+| [COMO_TRABAJAR_CON_ZAI.md](COMO_TRABAJAR_CON_ZAI.md) | Flujo con rama de pruebas: aplicar patch, verlo, promoverlo a main o descartarlo |
 | [Prompt_arranque_Z.ai.md](Prompt_arranque_Z.ai.md) | **Prompt listo para pegar** si el trabajo lo retoma otra IA (reglas de la casa y tareas priorizadas) |
 
 ## Diseño y referencia
