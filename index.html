@@ -392,6 +392,10 @@ body[data-state="setup"] #scr-play .hero{display:none}
 .barrack-info h3{margin:0 0 2px;font-size:15px}
 .barrack-sel{width:100%;margin-top:6px;font-size:12px}
 .barrack-info .tiny{font-size:11px;margin:4px 0 0;color:var(--muted)}
+.menuOrigen{max-width:560px;margin-left:auto;margin-right:auto;text-align:center}
+.menuCol{display:flex;flex-direction:column;gap:8px;max-width:420px;margin:8px auto 0}
+.menuCol .btn{text-align:left;justify-content:flex-start;padding:11px 14px;font-size:15px}
+.menuCol .btn .sub{font-size:12px}
 </style>
 </head>
 <body>
@@ -424,7 +428,7 @@ body[data-state="setup"] #scr-play .hero{display:none}
           <button class="btn big" id="quickSmokeBtn">💨 Probar el humo M18 · 5 contra 5 con Espía</button>
           <button class="btn big" id="quickFlashBtn">✸ Probar la aturdidora M84 · tu Comando seleccionado</button>
         </div>
-        <p class="sub" style="margin:10px 0 0">Partida rápida sin pasar por la configuración: Captura de baliza, 4 contra 4 contra la IA, con la escuadra de siempre. El botón del humo despliega en cambio un 5 contra 5 con un Espía en cada escuadra y el tuyo ya seleccionado, para comprobar la cortina M18 dentro de la partida: lánzala entre tu Espía y el enemigo, y el indicador de puntería marcará «Sin tiro · humo M18» a través de ella. El botón de la M84 despliega el 4 contra 4 de siempre con tu Comando ya seleccionado y sus 2 aturdidoras listas, para comprobar el fogonazo dentro de la partida. Si todavía no has confirmado tu nación, primero elígela aquí abajo.</p>
+        <p class="sub" style="margin:8px 0 0">Entra directo a una partida de baliza 4v4 contra la IA con la escuadra de siempre; los botones de humo y aturdidora abren variantes con Espía y Comando.</p>
       </div></div>
     <div class="warn"><b>⚠ Elección permanente:</b> la nación se elige <b>una sola vez</b> y <b>no se puede cambiar después</b>. Queda guardada en este dispositivo. Piénsalo bien antes de confirmar.</div>
     <div class="nation-grid" id="nationGrid"></div>
@@ -449,9 +453,9 @@ body[data-state="setup"] #scr-play .hero{display:none}
     <div id="menuArea">
       <div id="demoSlotPlay"></div>
       <!-- Menu estilo original: entradas directas y monedas -->
-      <div class="panel" id="origMenu" style="margin-top:16px">
+      <div class="panel menuOrigen" id="origMenu" style="margin-top:16px">
         <h2>Menú</h2>
-        <div class="grid3" style="margin-top:8px">
+        <div class="menuCol" style="margin-top:8px">
           <button class="btn primary" id="mnuQuick">⚡ Quick game<small class="sub">Partida rápida en el Almacén</small></button>
           <button class="btn" id="mnuOnline">🌐 Play online<small class="sub">Sin servidor: IA o dos jugadores en local</small></button>
           <button class="btn" id="mnuChallenges">🏆 Challenges<small class="sub">Operación Londres · 6 misiones</small></button>
