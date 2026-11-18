@@ -877,6 +877,9 @@ details.info .info-body b{color:var(--ink)}
             <span class="viewer-skin-name" id="viewerSkinName"></span>
             <button type="button" id="viewerSkinNext" aria-label="Skin siguiente">›</button>
           </div>
+          <label id="viewerWeaponLabel" style="grid-column:1/-1">Arma
+            <select id="viewerWeaponSelect" aria-label="Equipar arma al personaje"></select>
+          </label>
         </div>
         <div class="viewer-character-controls" id="viewerPieceControls" style="display:none">
           <label>Mapa
@@ -8145,7 +8148,7 @@ const MAP_PIECES=[
   const viewer={
     renderer:null,scene:null,camera:null,spin:null,platform:null,
     baseDistance:3,drag:null,lastFrame:0,selection:0,
-    kind:'roles',name:'',skinIndex:0,idleActor:null,idleClipKey:'idle2h',
+    kind:'roles',name:'',skinIndex:0,weapon:'',idleActor:null,idleClipKey:'idle2h',
     frameRequested:false,models:{roles:{},weapons:{},props:{},pieces:{}},textures:{},bodyGeo:{},pieceMap:'Skirmish_03'
   };
   /* Skins por cuerpo: cada cuerpo tiene solo sus variantes de outfit
@@ -8220,6 +8223,20 @@ const MAP_PIECES=[
      Hipster Dave. */
   const VIEWER_BODY_OVERRIDE={'Archie Fletcher':'Soldier_Light_Rambo'};
   const VIEWER_BODY_ROLE={'Medic':'Médico','Engineer':'Ingeniero','Agent_Heavy':'Comando','Commander':'Capitán'};
+  /* Armas por rol: las del propio juego (ROLES[rol].weapons, las que ofrece
+     el setup de partida). Cada rol solo puede equipar las suyas: las de
+     francotirador no las lleva cualquiera. Se listan los nombres CSN; la
+     malla sale de WEAPON_MESH_FILE. Los personajes sin rol no tienen armas. */
+  const VIEWER_ROLE_WEAPONS={};
+  if(typeof ROLES!=='undefined'&&typeof WEAPON_MESH_FILE!=='undefined'){
+    Object.keys(ROLES).forEach(role=>{
+      VIEWER_ROLE_WEAPONS[role]=(ROLES[role].weapons||[]).filter(w=>WEAPON_MESH_FILE[w]);
+    });
+  }
+  /* Frente de los diseños Meshy (medido en su OBJ: la cara mira a +Z salvo
+     el Artillero, que mira a -Z). El arma debe apuntar hacia el frente del
+     modelo, no siempre a +X como en los del IPA. */
+  const VIEWER_MESHY_FRONT={Francotirador:1,Espia:1,Artillero:-1};
   const viewerCharacters=[
     ...ORIG_CAST.filter(c=>c.name!=='Soap'&&c.name!=='Spud').map((character,index)=>{
       const role=character.role||VIEWER_ROLE_FALLBACK[character.name]||'';
@@ -8373,6 +8390,10 @@ const MAP_PIECES=[
     const corner=new THREE.Vector3();
     model.traverse(object=>{
       if(!object.isMesh||!object.geometry)return;
+      /* El arma equipada no entra en el encuadre: si contara, el cañón
+         desplazaría el centro y el soldado quedaría descentrado. */
+      let p=object.parent;
+      while(p&&p!==model){if(p.userData&&p.userData.isViewerGun)return;p=p.parent;}
       const geometry=object.geometry;
       if(!geometry.boundingBox)geometry.computeBoundingBox();
       if(!geometry.boundingBox)return;
@@ -8422,6 +8443,23 @@ const MAP_PIECES=[
       document.getElementById('viewerSkinName').textContent=skin.label;
       document.getElementById('viewerSkinPrev').disabled=entry.skins.length<2;
       document.getElementById('viewerSkinNext').disabled=entry.skins.length<2;
+      /* Selector de arma: solo las del rol del personaje. Sin rol o sin
+         armas, se oculta (el personaje se ve sin arma, como hasta ahora). */
+      const weaponSelect=document.getElementById('viewerWeaponSelect');
+      const weaponLabel=document.getElementById('viewerWeaponLabel');
+      const roleWeapons=(entry.role&&VIEWER_ROLE_WEAPONS[entry.role])||[];
+      if(viewer.weapon&&!roleWeapons.includes(viewer.weapon))viewer.weapon='';
+      weaponSelect.replaceChildren();
+      const noneOption=document.createElement('option');
+      noneOption.value='';noneOption.textContent='Sin arma';
+      weaponSelect.appendChild(noneOption);
+      roleWeapons.forEach(weapon=>{
+        const option=document.createElement('option');
+        option.value=weapon;option.textContent=weapon;
+        weaponSelect.appendChild(option);
+      });
+      weaponSelect.value=viewer.weapon||'';
+      weaponLabel.style.display=roleWeapons.length?'':'none';
       return;
     }
     if(viewer.kind==='pieces'){
@@ -8480,9 +8518,10 @@ const MAP_PIECES=[
             ?(entry.orig.cat+' · Roles: '+entry.orig.roles+' · '+entry.orig.dims[0]+' × '+entry.orig.dims[1]+' × '+entry.orig.dims[2]+(entry.orig.uses.length?(' · Usada por: '+entry.orig.uses.join(', ')):'' ))
             :'Malla y textura del arsenal · '+entry.file+'.obj';
     document.getElementById('viewerAssetInfo').textContent=kind==='roles'
-      ?(entry.mesh
+      ?((entry.mesh
         ?('Malla '+entry.mesh+'.obj · Textura Meshy.')
         :('Malla '+entry.file+' · '+(entry.outfit?('Textura '+entry.outfit):entry.skins[Math.min(viewer.skinIndex,entry.skins.length-1)].label)+'.'))
+        +(viewer.weapon?(' Arma: '+viewer.weapon+' ('+((WEAPONS_ORIGINAL[WEAPON_MESH_FILE[viewer.weapon]]||{}).name||WEAPON_MESH_FILE[viewer.weapon])+').'):''))
       :kind==='props'
         ?('Malla '+entry.file+' · Textura '+entry.tex+'.')
         :kind==='pieces'
@@ -8745,6 +8784,53 @@ const MAP_PIECES=[
     }
     return key;
   }
+  /* Equipa el arma del visor al personaje: la coloca en su mano con la
+     lógica del juego (la del original: el arma va en la posición de
+     agarre del grupo de la unidad, (0.14,0.62,-0.02), con la culata en
+     el origen y el cañón hacia el frente). El cargador es el mismo que
+     usa la partida (GUN_MESH_CACHE + makeRealGun3), así que la malla y
+     la textura son las del arma real. En los diseños Meshy el frente es
+     +Z o -Z (no +X como en los del IPA), así que el arma se gira para
+     apuntar hacia donde mira el modelo. Si el personaje no tiene arma
+     equipada, se quita la que hubiera. Es idempotente: si el arma
+     correcta ya está puesta, no hace nada. */
+  async function syncViewerGun(model,entry,token){
+    const wanted=viewer.weapon||'';
+    const current=(model.userData&&model.userData.viewerGunWeapon)||'';
+    if(current===wanted)return;
+    if(model.userData&&model.userData.viewerGun){
+      model.remove(model.userData.viewerGun);
+      model.userData.viewerGun=null;
+      model.userData.viewerGunWeapon='';
+    }
+    if(!wanted)return;
+    const meshFile=WEAPON_MESH_FILE[wanted];
+    if(!meshFile)return;
+    const cacheKey=viewerWeaponCacheKey(meshFile);
+    if(!GUN_MESH_CACHE[cacheKey]){
+      const started=Date.now();
+      while(GUN_MESH_CACHE[cacheKey]===null&&Date.now()-started<10000){
+        if(token!==viewer.selection)return;
+        await wait(100);
+      }
+      if(GUN_MESH_CACHE[cacheKey]===false)throw new Error('No se pudo cargar la malla de esta arma.');
+      if(!GUN_MESH_CACHE[cacheKey])throw new Error('La carga de la malla tardó demasiado.');
+    }
+    const holder=GUN_MESH_CACHE[cacheKey].clone(true);
+    const gunGroup=new THREE.Group();
+    gunGroup.userData.isViewerGun=true;
+    if(entry.mesh){
+      const front=VIEWER_MESHY_FRONT[entry.mesh]||1;
+      gunGroup.position.set(0,0.62,front*0.14);
+      gunGroup.rotation.y=front>0?-Math.PI/2:Math.PI/2;
+    }else{
+      gunGroup.position.set(0.14,0.62,-0.02);
+    }
+    gunGroup.add(holder);
+    model.add(gunGroup);
+    model.userData.viewerGun=gunGroup;
+    model.userData.viewerGunWeapon=wanted;
+  }
   async function selectModel(kind,name){
     viewer.kind=kind;viewer.name=name;
     const token=++viewer.selection;
@@ -8833,6 +8919,11 @@ const MAP_PIECES=[
         viewer.models.weapons[name]=model;
       }
       if(token!==viewer.selection)return;
+      if(kind==='roles'){
+        try{await syncViewerGun(model,entry,token);}
+        catch(error){setStatus('No se pudo equipar el arma: '+error.message,true);}
+        if(token!==viewer.selection)return;
+      }
       mount(model);
       document.getElementById('viewerAssetInfo').textContent=kind==='roles'
         ?(model.userData.meshy?'Malla OBJ y textura Meshy en pose del modelo · '+skin.label+'.':'Malla '+entry.file+' · '+skin.label+'.')
@@ -8856,7 +8947,12 @@ const MAP_PIECES=[
   }
   document.getElementById('viewerCharacterSelect').onchange=event=>{
     viewer.skinIndex=0;
+    viewer.weapon='';
     selectModel('roles',event.target.value);
+  };
+  document.getElementById('viewerWeaponSelect').onchange=event=>{
+    viewer.weapon=event.target.value||'';
+    selectModel('roles',viewer.name);
   };
   document.getElementById('viewerPieceMapSelect').onchange=event=>{
     viewer.pieceMap=event.target.value;
