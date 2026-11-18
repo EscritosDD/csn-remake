@@ -402,6 +402,12 @@ body[data-state="playing"]{padding-bottom:112px}
 .actionBar .actions{display:flex;gap:8px;margin:0;width:100%}
 .actionBar .actions button{flex:0 0 186px;min-width:0}
 .actionBar>p{width:100%}
+.chapter-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:12px}
+.chapter-card{display:flex;flex-direction:column}
+.ch-top{display:flex;gap:10px;align-items:center;margin-bottom:10px}
+.ch-bar{height:6px;background:var(--panel2);border-radius:4px;overflow:hidden;margin-top:5px;border:1px solid var(--line)}
+.ch-bar i{display:block;height:100%;background:var(--amber)}
+.chapter-card .campaign-mission{width:100%}
 </style>
 </head>
 <body>
@@ -1132,22 +1138,23 @@ document.querySelectorAll('#diffSeg button').forEach(b=>b.onclick=()=>{if(setup.
 function renderCampaignPanel(){
   const c=loadCampaign();
   const prog=document.getElementById('campaignProgress');
-  if(prog)prog.innerHTML=c.done?'Operación completada. Puedes reiniciarla o seguir jugando misiones sueltas desde aquí.':('Progreso: <b>'+c.next+' de '+CAMPAIGN_MISSIONS.length+'</b> misiones superadas'+(c.vet&&c.vet.length?(' · Veterania por posición: '+c.vet.map((v,i)=>'Pos. '+(i+1)+': +'+(v*25)+' PV / +'+v+' ⚡').join(' · ')):' · Sin veterania todavía: sobrevive a la primera misión.'));
+  if(prog)prog.innerHTML=c.done?'Operación completada. Puedes reiniciarla o repetir misiones.':('Progreso: <b>'+c.next+' de '+CAMPAIGN_MISSIONS.length+'</b> misiones superadas'+(c.vet&&c.vet.length?(' · Veterania por posición: '+c.vet.map((v,i)=>'Pos. '+(i+1)+': +'+(v*25)+' PV').join(' · ')):' · Sin veterania todavía.'));
   const list=document.getElementById('campaignList');if(!list)return;
-  list.innerHTML='';
-  /* Campaña por CAPITULOS, como el original: icono de capitulo, progreso
-     y misiones con candado del IPA cuando toca. */
+  /* Selección de capítulos: tres tarjetas con arte, progreso y sus
+     misiones dentro, como el original. */
   const CHAPTERS=[
     {name:'Capítulo 1 · Primer contacto',icon:'assets/ui/modo_eliminacion.png',from:0,to:1},
     {name:'Capítulo 2 · Londres en llamas',icon:'assets/ui/modo_dominacion.png',from:2,to:3},
     {name:'Capítulo 3 · La última guardia',icon:'assets/ui/modo_eliminacion.png',from:4,to:5}
   ];
-  CHAPTERS.forEach((ch,ci)=>{
-    const head=document.createElement('div');
-    head.className='chapter-head';
+  list.className='chapter-grid';
+  list.innerHTML='';
+  CHAPTERS.forEach(ch=>{
+    const total=ch.to-ch.from+1;
     const doneN=CAMPAIGN_MISSIONS.slice(ch.from,ch.to+1).filter((m,i)=>c.done||(ch.from+i)<c.next).length;
-    head.innerHTML='<img class="ch-ico" src="'+ch.icon+'" alt=""/><span style="flex:1"><b>'+ch.name+'</b></span><span class="mono" style="color:var(--muted);font-size:12px">'+doneN+'/'+(ch.to-ch.from+1)+'</span>';
-    list.appendChild(head);
+    const card=document.createElement('div');card.className='panel chapter-card';
+    const pct=total?Math.round(doneN/total*100):0;
+    card.innerHTML='<div class="ch-top"><img class="ch-ico" src="'+ch.icon+'" alt=""/><div style="flex:1"><b>'+ch.name+'</b><div class="ch-bar"><i style="width:'+pct+'%"></i></div></div><span class="mono" style="color:var(--muted);font-size:12px">'+doneN+'/'+total+'</span></div>';
     for(let i=ch.from;i<=ch.to;i++){
       const m=CAMPAIGN_MISSIONS[i];
       const state=c.done||i<c.next?'done':(i===c.next?'current':'locked');
@@ -1155,10 +1162,12 @@ function renderCampaignPanel(){
       b.innerHTML='<span class="mission-num">'+(state==='done'?'✓':(i+1))+'</span><span style="flex:1"><b>Misión '+(i+1)+' · '+m.title+(state==='done'?' · superada':state==='current'?' · siguiente':' · bloqueada')+'</b><p>'+m.brief+'</p></span>'+(state==='locked'?'<span class="ch-lock" aria-hidden="true">🔒</span>':'');
       b.disabled=state==='locked';
       b.onclick=()=>{if(state!=='locked')openSetup('campana',i);};
-      list.appendChild(b);
+      card.appendChild(b);
     }
+    list.appendChild(card);
   });
 }
+
 function openSetup(mode,missionIdx){
   if(mode==='guerra'&&!isWeekend()){toast('Guerra de Naciones solo se juega sábado y domingo.');return;}
   setup.mode=mode;
@@ -7263,7 +7272,12 @@ function tutHide(){const b=document.getElementById('tutBubble');if(b)b.style.dis
 (function wireOrigMenu(){
   const q=document.getElementById('mnuQuick');if(q)q.onclick=()=>quickStart('almacen');
   const o=document.getElementById('mnuOnline');if(o)o.onclick=()=>toast('Sin servidor de partidas: el online del original no está disponible. Juega contra la IA o a dos jugadores en local.');
-  const c=document.getElementById('mnuChallenges');if(c)c.onclick=()=>{const b=document.querySelector('[data-start="campana"]');if(b)b.click();else toast('La campaña está en la portada, más abajo.');};
+  /* Challenges abre la seleccion de capitulos; desde ahi se elige mision. */
+  const c=document.getElementById('mnuChallenges');if(c)c.onclick=()=>{
+    const p=document.getElementById('campaignPanel');
+    if(p){p.style.display='block';renderCampaignPanel();p.scrollIntoView({behavior:'smooth',block:'center'});}
+    else{const b=document.querySelector('[data-start="campana"]');if(b)b.click();}
+  };
   const e=document.getElementById('mnuExpansions');if(e)e.onclick=()=>toast('Expansiones: aún no hay contenido descargable. El arte propio y las skins llegan por fases.');
   const bk=document.getElementById('mnuBarracks');if(bk)bk.onclick=openBarracks;
   document.addEventListener('change',(e)=>{const t=e.target;if(t&&t.dataset&&t.dataset.charrole){CHAR_PREFS=loadChars();CHAR_PREFS[t.dataset.charrole]=t.value;saveChars(CHAR_PREFS);toast('Personaje de '+t.dataset.charrole+': '+t.value+'.');}});
