@@ -91,3 +91,20 @@ banda 70/30 del plan.
   habilidades) y camara que acompaña al disparo con sacudida.
 - **F6 calidad**: bateria por ronda (sintaxis 0, tableros 13/13, rules.test
   6/6, harness con n>=30 en los modos cerrados, headless y capturas 3D).
+
+
+## Cierre del objetivo automatico (rondas 1-47)
+
+- **F1**: 42 iconos y catalogo de las 44 habilidades (`docs/Catalogo_habilidades_original.md`).
+- **F2**: 8 Skirmish reales + 3 mapas de codigo + **6 tableros propios de campana**
+  (19 tableros, todos simetricos y sin solapes) con props por tema, cielo y ambiente.
+- **F3**: portada con el arte y logo del original, menu, campana por capitulos,
+  Armeria en dos pestanas, Cuartel por clases con 35 personajes, resultados con
+  tabla y escuadra, reglas y fichas plegables, configuracion en una linea.
+- **F4**: 7 modelos por clase del IPA, 18 propios + 17 del original con bio y voz,
+  cuatro skins (Estandar, Camuflaje, Clase, Nacion) con tinte, casco, mochila y
+  emblema; enemigo teñido.
+- **F5**: 195 clips del original (armas, voces por personaje, ambiente por mapa,
+  musica de partida, habilidades), camara de accion y sacudida.
+- **F6**: `VERIFICAR.ps1` con sintaxis, 19 tableros, reglas 6/6, datos 6/6 y humo
+  3D; equilibrio medido con n>=30; 26 capturas 3D en `docs/capturas/`.

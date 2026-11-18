@@ -153,3 +153,20 @@ mover (~56-59 % A) y Dominacion una ventaja leve del segundo (~56 % B).
 Todo dentro del margen de una muestra de este tamano; no se toca ninguna
 regla base. Escolta es asimetrica por diseno (el atacante tiene el dron) y
 ya no se pierde al 100 % como al principio.
+
+
+## Bateria final de cierre (ronda 47, n=30 por modo)
+
+| Modo - mapa | A | B | n | Sesgo |
+|---|---|---|---|---|
+| Dominacion - Almacen | **15** | **15** | 30 | 50/50 |
+| Eliminacion - Skirmish_03 | 21 | 9 | 30 | 70 % A |
+| Baliza - Skirmish_03 | 16 | 14 | 30 | 53 % A |
+| Escolta - Almacen | 8 | 2 | 10 | 80 % A (dron 8/10) |
+
+Acumulando todas las muestras del objetivo: Dominacion ~55 % B, Eliminacion
+~58 % A, Baliza ~57 % A, Escolta ~75 % A. El unico desvio que se mantiene con
+muestras grandes es el de Eliminacion (ventaja del primero en mover) y el de
+Escolta (asimetria de diseno: el atacante lleva el dron). Ninguno justifica
+tocar dano, vida o costes; la iniciativa alterna sigue siendo decision del
+jugador.
