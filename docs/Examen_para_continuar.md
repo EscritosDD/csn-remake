@@ -100,6 +100,16 @@ desarrollo**.
    skinned no se dibujaba (se veían solo las piezas de equipo).
 3. La malla base del IPA (Soldier_Light) con su rig horneado sí funciona.
 
+**Datos concretos de los clips** (`assets/soldier_clips.json`): 22 clips, cada
+uno con `dur`, `loop`, `rot` (por **nombre de hueso**: tiempos `t` y
+cuaterniones `q`) y `root` (desplazamiento), más `rootScale: 0.5122`. Es decir:
+**animan rotaciones por nombre + un desplazamiento de raíz**, no posiciones de
+huesos; las posiciones vienen del rig. Por eso un rig distinto debería poder
+animarse con los mismos clips… pero el resultado se colapsa, así que el
+sospechoso es la **conversión de espacio** (los clips están en el espacio
+Z-up del juego y los rigs de clase, derivados de bind poses, no coinciden en
+convención con lo que espera el retargeting).
+
 **Hipótesis para quien lo retome**: los clips de `assets/soldier_clips.json`
 fueron horneados para un esqueleto concreto (nombres y orden de huesos) y
 aplican **rotaciones absolutas por nombre**; las mallas de clase tienen
