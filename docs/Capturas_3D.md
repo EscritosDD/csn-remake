@@ -11,10 +11,10 @@ director. Los triangulos y llamadas salen de `window.__csn3d`.
 
 | Mapa | id | Triangulos | Llamadas | Captura |
 |---|---|---|---|---|
-| Skirmish_03 - Londres | `skirmish03` | 78868 | 539 | [png](capturas/REAL_skirmish_3d.png) |
-| Skirmish_05 - El deposito | `depot` | 64769 | 530 | [png](capturas/REAL_skirmish05_3d.png) |
+| Skirmish_03 - Londres | `skirmish03` | 79040 | 558 | [png](capturas/REAL_skirmish_3d.png) |
+| Skirmish_05 - El deposito | `depot` | 65069 | 555 | [png](capturas/REAL_skirmish05_3d.png) |
 | Skirmish_08 - La terminal | `terminal` | 80871 | 504 | [png](capturas/REAL_skirmish08_3d.png) |
-| Skirmish_11 - El astillero | `astillero` | 73311 | 554 | [png](capturas/REAL_skirmish11_3d.png) |
+| Skirmish_11 - El astillero | `astillero` | 73551 | 574 | [png](capturas/REAL_skirmish11_3d.png) |
 | Skirmish_06 - Los andenes | `platform` | 70239 | 556 | [png](capturas/REAL_skirmish06_3d.png) |
 | Skirmish_09 - La rotonda | `rotonda` | 72139 | 546 | [png](capturas/REAL_skirmish09_3d.png) |
 | Skirmish_04 - El puente | `skirmish04` | 78088 | 544 | [png](capturas/R4_sk04_3d.png) |
