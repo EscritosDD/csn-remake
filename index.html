@@ -6846,6 +6846,12 @@ const OWN_CAST=[
  {name:'Engranaje',body:'Engineer',outfit:'Especialista en torretas',role:'Ingeniero',play:true,own:true},
  {name:'Centella',body:'Agent_Heavy',outfit:'Reacción rápida',role:'Comando',play:true,own:true}
 ];
+const CLASS_LABEL={'Soldier_Light':'Soldado ligero','Soldier_Heavy':'Soldado pesado','Agent_Light':'Agente ligero','Medic':'Médico','Engineer':'Ingeniero','Engineer_Light':'Ingeniero ligero','Agent_Heavy':'Agente pesado','Commander':'Comandante','Medic_therapist':'Médico (terapia)','Engineer_Heavy':'Ingeniero pesado','Engineer (RiotCop)':'Ingeniero antidisturbios','Commander_F':'Comandante (F)'};
+const CLASS_ORDER=['Soldier_Light','Soldier_Heavy','Agent_Light','Medic','Engineer','Agent_Heavy','Commander'];
+function CAST_BODIES(){
+  const seen=[];OWN_CAST.concat(ORIG_CAST).forEach(c=>{if(!seen.includes(c.body))seen.push(c.body);});
+  return seen.sort((a,b)=>{const ia=CLASS_ORDER.indexOf(a),ib=CLASS_ORDER.indexOf(b);return (ia<0?99:ia)-(ib<0?99:ib);});
+}
 const ROLE_BODY={'Francotirador':'Soldier_Light','Artillero':'Soldier_Heavy','Espía':'Agent_Light','Médico':'Medic','Ingeniero':'Engineer','Comando':'Agent_Heavy','Capitán':'Commander'};
 function charsForRole(role){const b=ROLE_BODY[role];return OWN_CAST.filter(c=>c.body===b).concat(ORIG_CAST.filter(c=>c.body===b));}
 const ORIG_CAST=[
@@ -6949,9 +6955,15 @@ function renderBarracks(){
   Object.entries(WEAPONS).forEach(([name,w])=>{if(!byCat[w.cat]){byCat[w.cat]=[];catOrder.push(w.cat);}byCat[w.cat].push(name+' ('+w.dmg+'/'+w.rng+')');});
   CHAR_PREFS=loadChars();
   el.innerHTML=
-    '<div class="panel" style="margin-top:12px"><h2>Reparto · '+(OWN_CAST.length+ORIG_CAST.length)+' personajes</h2><p class="sub" style="margin:0 0 6px">Los personajes del IPA con su clase y su traje. Los marcados en ámbar son jugables ahora.</p><div class="grid3" style="margin-top:8px">'+
-    OWN_CAST.concat(ORIG_CAST).map(c=>'<div class="panel" style="'+(c.play?'border-color:var(--amber)':'opacity:.75')+'"><b style="font-size:13px">'+(c.own?'★ ':'')+c.name+'</b><p class="sub" style="margin:2px 0 0;font-size:11px">'+c.body+' · '+c.outfit+'</p>'+(c.play?'<span class="tag amber" style="margin-top:4px">jugable · '+c.role+(c.own?' · propio':'')+'</span>':'<span class="tag" style="margin-top:4px">pendiente</span>')+'</div>').join('')+
-    '</div></div>'+
+    '<div class="panel" style="margin-top:12px"><h2>Reparto · '+(OWN_CAST.length+ORIG_CAST.length)+' personajes</h2><p class="sub" style="margin:0 0 6px">Agrupados por clase; en ámbar los jugables ahora.</p>'+
+    CAST_BODIES().map(body=>{
+      const list=OWN_CAST.concat(ORIG_CAST).filter(c=>c.body===body);
+      if(!list.length)return '';
+      return '<h3 style="margin:12px 0 4px;font-size:14px">'+(CLASS_LABEL[body]||body)+' <span class="sub" style="font-size:12px">· '+list.length+'</span></h3><div class="grid3">'+
+        list.map(c=>'<div class="panel" style="'+(c.play?'border-color:var(--amber)':'opacity:.75')+'"><b style="font-size:13px">'+(c.own?'★ ':'')+c.name+'</b><p class="sub" style="margin:2px 0 0;font-size:11px">'+c.body+' · '+c.outfit+'</p>'+(c.play?'<span class="tag amber" style="margin-top:4px">jugable · '+c.role+(c.own?' · propio':'')+'</span>':'<span class="tag" style="margin-top:4px">pendiente</span>')+'</div>').join('')+
+        '</div>';
+    }).join('')+
+    '</div>'+
     '<div class="panel" style="margin-top:12px"><h2>Tropas · '+roles.length+' roles</h2><div class="grid3" style="margin-top:8px">'+
     roles.map(r=>{const ch=CHARACTERS.find(c=>c.role===r);const body=BODIES[ROLES[r].body];
       const opts=charsForRole(r);
