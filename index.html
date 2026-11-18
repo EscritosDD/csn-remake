@@ -144,9 +144,12 @@ canvas#board{width:100%;height:auto;display:block;border-radius:6px;touch-action
 .epips{display:flex;gap:4px;margin:6px 0;flex-wrap:wrap}
 .epips i{width:20px;height:10px;border-radius:3px;background:var(--amber);display:block}
 .epips i.off{background:var(--bg2);border:1px solid var(--line)}
-.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:10px}
+.actions button{min-width:0}
+.unit-card{overflow-x:hidden}
+html,body{overflow-x:hidden}
 .actions button{background:var(--panel2);border:1.5px solid var(--line);color:var(--ink);border-radius:8px;padding:10px 8px;font-weight:700;font-size:14px;text-align:left}
-.actions button small{display:block;font-weight:500;color:var(--muted);font-size:12px}
+.actions button small{display:block;font-weight:500;color:var(--muted);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .actions button.on{border-color:var(--amber);box-shadow:0 0 0 1.5px var(--amber)}
 .actions button:disabled{opacity:.4}
 .roster{display:flex;flex-direction:column;gap:6px}
@@ -216,7 +219,7 @@ canvas#board{border-radius:10px;box-shadow:0 0 0 2px rgba(0,0,0,.45), inset 0 0 
 .hpbar i.low{background:linear-gradient(180deg,#ff9a8a,#e5484d)}
 .epips i{height:12px;border-radius:4px;box-shadow:inset 0 -3px 0 rgba(0,0,0,.25)}
 .epips i.off{box-shadow:none}
-.actions button{border-width:2px;border-radius:10px;box-shadow:0 3px 0 rgba(0,0,0,.20)}
+.actions button{border-width:2px;border-radius:10px;box-shadow:0 3px 0 rgba(0,0,0,.20);padding:8px 8px;font-size:13px}
 .actions button:active{transform:translateY(2px);box-shadow:none}
 .roster button{border-width:1.5px}
 .log{border-width:2px;border-radius:12px}
@@ -944,8 +947,8 @@ function rolePortraitURL(role){
             try{
               const cv=document.createElement('canvas');cv.width=128;cv.height=128;
               const cx=cv.getContext('2d');
-              const sw=im.width*0.72, sh=im.height*0.40;
-              cx.drawImage(im, im.width*0.14, im.height*0.05, sw, sh, 0, 0, 128, 128);
+              const sw=im.width*0.62, sh=im.height*0.38;
+              cx.drawImage(im, im.width*0.19, im.height*0.16, sw, sh, 0, 0, 128, 128);
               PORTRAIT_CACHE[role]=cv.toDataURL('image/png');
             }catch(err){PORTRAIT_CACHE[role]=e.url;}
           };
@@ -6543,6 +6546,7 @@ function updateUnitHuds3D(w,h){
       const el=document.createElement('div');el.className='gl-unit-hud';
       el.innerHTML='<div class="gl-hp-pill"><span class="gl-hp-dot"></span><div class="gl-hp-track"><div class="gl-hp-fill"></div></div></div><div class="gl-unit-tag" style="display:none"></div>';
       host.appendChild(el);
+  try{card.querySelectorAll('.actions button').forEach(b=>{const t=(b.getAttribute('title')||'');const txt=b.textContent.replace(/\s+/g,' ').trim();b.title=(t?t+' — ':'')+txt;});}catch(e){}
       rec={el:el,dot:el.querySelector('.gl-hp-dot'),fill:el.querySelector('.gl-hp-fill'),tagEl:el.querySelector('.gl-unit-tag'),lastSig:''};
       T3.hudPool.set(key,rec);
     }
@@ -7157,6 +7161,12 @@ function renderAbilityCatalog(){
   }).join('');
 }
 
+/* Tooltip completo de las acciones del HUD: el detalle queda en una linea
+   con puntos suspensivos y el texto entero aparece al pasar el raton. */
+document.addEventListener('mouseover',e=>{
+  const b=e.target&&e.target.closest?e.target.closest('.actions button'):null;
+  if(b&&!b.title){b.title=b.textContent.replace(/\s+/g,' ').trim();}
+},{passive:true});
 /* ---- Cuartel (F9): tropas, skins, arsenal y desbloqueos ---- */
 function renderBarracks(){
   const el=document.getElementById('barrContent'),nt=document.getElementById('barrNation');
