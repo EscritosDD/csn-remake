@@ -5119,6 +5119,40 @@ const WEAPON_COVER_BY_FILE={
   'BaseballBat_SOURCE':'item_weapon_04_Baseball___bat_alpha','SpikedClub_weapon':'item_weapon_spikedclub_alpha',
   'Chainsaw':'item_large_weapon_chainsaw_alpha'
 };
+/* Catálogo de las 23 armas del original (fase 3): nombre original del juego
+   (de la carátula item_weapon_* cuando existe; si no, nombre limpio de la
+   malla), modelo .obj, textura propia (nombre original en index.json y
+   tamaño), dimensiones medidas de la caja (x, y, z en unidades del .obj,
+   Z arriba), vértices, carátula, armas de CSN que usan la malla y roles.
+   Las texturas son las del IPA (index.json); las dimensiones se midieron
+   del .obj. La carátula 09 (M16A2) existe en el original pero no está
+   asignada a ninguna malla del repo; la 11 (Jackhammer) tiene carátula
+   pero su malla no está entre las 23 extraídas. */
+const WEAPONS_ORIGINAL={
+ 'AssaultRifle':{name:'Semi Auto Rifle',tex:'AssaultRifle_d',texSize:[256,256],dims:[0.776,0.108,0.3],verts:201,cover:'item_weapon_14_Semi_Auto_Rifle_alpha',cat:'Fusiles de asalto',uses:['M4A1','HK416','G36C','FAMAS'],roles:'Comando, Capitán, Espía'},
+ 'Rifle':{name:'Semi Auto Rifle',tex:'Rifle_d',texSize:[256,256],dims:[0.945,0.085,0.229],verts:405,cover:'item_weapon_14_Semi_Auto_Rifle_alpha',cat:'Fusiles de asalto',uses:['AK-12','FN SCAR-L'],roles:'Comando',note:'Comparte la carátula 14 con AssaultRifle; la carátula 09 (M16A2) no está asignada a ninguna malla.'},
+ 'Pistol':{name:'M9',tex:'Pistol_d',texSize:[128,128],dims:[0.86,0.148,0.603],verts:196,cover:'item_weapon_06_M9_alpha',cat:'Pistolas',uses:['M9','Glock 17'],roles:'todos (secundaria)'},
+ 'SniperRifle_weapon':{name:'Sniper Rifle 1',tex:'SniperRifle_d',texSize:[256,256],dims:[1.13,0.186,0.293],verts:583,cover:'item_weapon_12_Sniper_Rifle_1_alpha',cat:'Francotirador',uses:['M40','M24 SWS','SVD Dragunov','PSG-1'],roles:'Francotirador, Comando'},
+ 'Shotgun':{name:'Shotgun',tex:'Shotgun_d',texSize:[256,256],dims:[0.711,0.096,0.257],verts:210,cover:'item_weapon_10_shotgun_alpha',cat:'Escopetas',uses:['Remington 870','Mossberg 500'],roles:'Comando, Espía, Ingeniero'},
+ 'RPG':{name:'RPG',tex:'RPG_d',texSize:[256,256],dims:[0.752,0.385,0.259],verts:254,cover:null,cat:'Lanzacohetes / Lanzagranadas',uses:['RPG-7','AT4','M72 LAW','M203','M32 MGL','Mk 19'],roles:'Artillero, Comando, Ingeniero',note:'Sin carátula en el original.'},
+ 'Crossbow':{name:'Crossbow',tex:'Crossbow_d',texSize:[256,256],dims:[0.911,0.629,0.281],verts:696,cover:null,cat:'—',uses:[],roles:'sin asignar en el arsenal de CSN',note:'Sin carátula en el original; arma del original sin equivalente en CSN.'},
+ 'SledgeHammer':{name:'Sledgehammer',tex:'SledgeHammer_d',texSize:[256,256],dims:[0.284,0.176,1.02],verts:98,cover:'item_weapon_02_Sledgehammer_alpha',cat:'Cuerpo a cuerpo',uses:[],roles:'sin asignar en el arsenal de CSN'},
+ 'Uzi':{name:'Uzi',tex:'Uzi_d',texSize:[128,128],dims:[0.467,0.052,0.386],verts:195,cover:'item_weapon_08_Uzi_alpha',cat:'Subfusiles',uses:['MP7','FN P90'],roles:'Espía, Comando'},
+ 'Revolver':{name:'Ruger',tex:'Revolver_d',texSize:[128,128],dims:[1.086,0.272,0.674],verts:137,cover:'item_weapon_07_Ruger_alpha',cat:'Pistolas',uses:['M1911','Desert Eagle'],roles:'todos (secundaria), Comando, Capitán'},
+ 'RiotShotgun':{name:'Riot Shotgun',tex:'RiotShotgun_d',texSize:[256,256],dims:[0.663,0.089,0.202],verts:204,cover:'item_weapon_17_RiotShotgun_alpha',cat:'Escopetas',uses:['Benelli M4'],roles:'Comando'},
+ 'M95':{name:'Sniper Rifle 2',tex:'M95_d',texSize:[256,256],dims:[1.247,0.276,0.307],verts:620,cover:'item_weapon_13_Sniper_Rifle_2_alpha',cat:'Francotirador',uses:['M110 SASS','AW50','Barrett M82','Mk 14 EBR'],roles:'Francotirador'},
+ 'LightMachineGun':{name:'Light Machine Gun',tex:'LightMachineGun_d',texSize:[256,256],dims:[0.917,0.281,0.446],verts:246,cover:'item_weapon_15_Light_Machine_Gun_alpha',cat:'Ametralladoras',uses:['M249 SAW','M240B','PKM','MG3','Browning M2'],roles:'Artillero'},
+ 'Molotov':{name:'Molotov',tex:'Molotov_d',texSize:[64,64],dims:[0.248,0.188,0.43],verts:51,cover:null,cat:'Consumible',uses:[],roles:'sin asignar en el arsenal de CSN',note:'Sin carátula en el original.'},
+ 'Knife':{name:'Knife',tex:'knife_d',texSize:[128,128],dims:[0.119,0.038,0.497],verts:114,cover:'item_weapon_05_knife_alpha',cat:'Cuerpo a cuerpo',uses:[],roles:'sin asignar en el arsenal de CSN'},
+ 'Katana':{name:'Katana',tex:'katana_d',texSize:[128,128],dims:[0.322,0.244,2.39],verts:142,cover:'item_weapon_03_Katana_alpha',cat:'Cuerpo a cuerpo',uses:[],roles:'sin asignar en el arsenal de CSN'},
+ 'WoodAxe':{name:'Axe',tex:'WoodAxe_d',texSize:[128,128],dims:[0.313,0.068,0.854],verts:126,cover:'item_weapon_01_axe_alpha',cat:'Cuerpo a cuerpo',uses:[],roles:'sin asignar en el arsenal de CSN'},
+ 'MP5K':{name:'MP5K',tex:'MP5K_d',texSize:[128,128],dims:[0.393,0.08,0.271],verts:204,cover:'item_weapon_18_mp5k_alpha',cat:'Subfusiles',uses:['MP5','UMP45','KRISS Vector'],roles:'Espía, Comando'},
+ 'Chainsaw':{name:'Chainsaw',tex:'Chainsaw_d',texSize:[256,256],dims:[0.311,0.286,0.877],verts:334,cover:'item_large_weapon_chainsaw_alpha',cat:'Cuerpo a cuerpo',uses:[],roles:'sin asignar en el arsenal de CSN'},
+ 'Minigun':{name:'Minigun',tex:'Minigun_d',texSize:[256,256],dims:[0.849,0.419,0.402],verts:527,cover:'item_weapon_16_minigun_alpha',cat:'Torreta (emplazamiento)',uses:['M134 Minigun'],roles:'Ingeniero (torreta)'},
+ 'BaseballBat_SOURCE':{name:'Baseball Bat',tex:'BaseballBat_d',texSize:[128,128],dims:[0.118,0.098,0.963],verts:179,cover:'item_weapon_04_Baseball___bat_alpha',cat:'Cuerpo a cuerpo',uses:[],roles:'sin asignar en el arsenal de CSN'},
+ 'SpikedClub_weapon':{name:'Spiked Club',tex:'SpikedClub_d',texSize:[128,128],dims:[0.34,0.971,0.359],verts:331,cover:'item_weapon_spikedclub_alpha',cat:'Cuerpo a cuerpo',uses:[],roles:'sin asignar en el arsenal de CSN'},
+ 'FragGrenade':{name:'Frag Grenade',tex:'FragGrenade_d',texSize:[64,64],dims:[0.142,0.122,0.194],verts:123,cover:null,cat:'Consumible',uses:['Granada de fragmentación'],roles:'todos (consumible)',note:'Sin carátula en el original.'}
+};
 const WEAPON_THUMB_CACHE={};
 let _wThumbR=null;
 function renderWeaponThumb(weapon){
@@ -8346,7 +8380,7 @@ const MAP_PIECES=[
     }
     const entries=viewer.kind==='props'
       ?viewerPropFiles.map(prop=>({key:prop.key,label:prop.label,file:prop.file}))
-      :viewerWeaponFiles.map(file=>({key:file,label:file,file}));
+      :viewerWeaponFiles.map(file=>({key:file,label:(WEAPONS_ORIGINAL[file]||{}).name||file,file}));
     list.innerHTML='';
     entries.forEach(entry=>{
       const button=document.createElement('button');
@@ -8363,7 +8397,7 @@ const MAP_PIECES=[
         ?viewerPropFiles.find(item=>item.key===key)
         :kind==='pieces'
           ?MAP_PIECES.find(item=>item.k===key)
-          :viewerWeaponFiles.includes(key)?{label:key,file:key}:null;
+          :viewerWeaponFiles.includes(key)?{label:(WEAPONS_ORIGINAL[key]||{}).name||key,name:(WEAPONS_ORIGINAL[key]||{}).name||key,file:key,orig:WEAPONS_ORIGINAL[key]||null}:null;
     if(!entry)throw new Error('El modelo seleccionado no pertenece al catálogo del visor.');
     document.getElementById('viewerName').textContent=entry.name||entry.label||entry.l;
     document.getElementById('viewerDescription').textContent=kind==='roles'
@@ -8374,7 +8408,9 @@ const MAP_PIECES=[
         ?'Caja de comandante / botín del original: la crean las habilidades de caja del comandante (salud, munición, analgésicos, espíritu de equipo).'
         :kind==='pieces'
           ?'Pieza de '+entry.m+' · '+entry.s[0]+' × '+entry.s[1]+' × '+entry.s[2]+' unidades (1 unidad = 1 casilla).'
-          :'Malla y textura del arsenal · '+entry.file+'.obj';
+          :entry.orig
+            ?(entry.orig.cat+' · Roles: '+entry.orig.roles+' · '+entry.orig.dims[0]+' × '+entry.orig.dims[1]+' × '+entry.orig.dims[2]+(entry.orig.uses.length?(' · Usada por: '+entry.orig.uses.join(', ')):'' ))
+            :'Malla y textura del arsenal · '+entry.file+'.obj';
     document.getElementById('viewerAssetInfo').textContent=kind==='roles'
       ?(entry.mesh
         ?('Malla '+entry.mesh+'.obj · Textura Meshy.')
@@ -8383,7 +8419,9 @@ const MAP_PIECES=[
         ?('Malla '+entry.file+' · Textura '+entry.tex+'.')
         :kind==='pieces'
           ?('Malla '+entry.f+' · Textura T_Atlas_01_D.png (atlas compartido).')
-          :'';
+          :entry.orig
+            ?('Malla '+entry.file+'.obj · Textura '+entry.orig.tex+'.png ('+entry.orig.texSize[0]+'×'+entry.orig.texSize[1]+') · '+entry.orig.verts+' vértices · '+(entry.orig.cover?('Carátula: '+entry.orig.cover+'.'):('Sin carátula en el original.')))
+            :'';
     texturePreview.hidden=true;
     texturePreview.removeAttribute('src');
     renderViewerAbilities(kind==='roles'?entry:null);
