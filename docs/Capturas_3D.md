@@ -18,7 +18,11 @@ director. Los triangulos y llamadas salen de `window.__csn3d`.
 | Skirmish_02 - El embarcadero | `dock` | 33392 | 564 | [png](capturas/R6_skirmish02_3d.png) |
 | Skirmish_07 - El mercado | `market` | 33272 | 562 | [png](capturas/R6_skirmish07_3d.png) |
 | Campana - Mision 1 (Almacen) | `warehouse` | 33282 | 543 | [png](capturas/CAM_M1_3d.png) |
+| Campana - Mision 2 (Patio) | `yard` | 32998 | 547 | [png](capturas/CAM_M2_3d.png) |
 | Campana - Mision 3 (Londres) | `skirmish03` | 81076 | 566 | [png](capturas/CAM_M3B_3d.png) |
+| Campana - Mision 4 (El puente) | `skirmish04` | 78280 | 557 | [png](capturas/CAM_M4_3d.png) |
+| Campana - Mision 5 (Ultima guardia, 5v5) | `warehouse` | 39748 | 625 | [png](capturas/CAM_M5_3d.png) |
+| Campana - Mision 6 (El convoy, escolta 5v5) | `cruce` | 78780 | 649 | [png](capturas/CAM_M6_3d.png) |
 
 Notas:
 - Los mapas de codigo (skirmish01/02/07) usan losas, por eso tienen menos
@@ -34,3 +38,6 @@ capturador (`node _capture_all.mjs campana:2 CAM_M3B`), que hace
 `openSetup('campana',N)` y pulsa el boton de jugar. Verificado con
 `units:8` y `vistaClasica:"skip"`; el HUD muestra la ronda, el mapa, el
 modo y la dificultad de la mision.
+
+La mision 6 se captura con 10 unidades (5 contra 5) y el dron de escolta
+en juego: confirma que el objetivo escolta funciona dentro de la campana.
