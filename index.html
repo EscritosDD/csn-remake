@@ -4764,32 +4764,36 @@ function parseOBJ3(txt,skin){
    huesos y su textura de uniforme del IPA (Soldier_Light/Heavy, Agent_Light/
    Heavy, Medic, Engineer, Commander). Si un rol falla, cae al modelo base. */
 let ROLE_SCALES={};
-const ROLE_MODEL_FILES={'Francotirador':'Francotirador','Artillero':'Artillero','Espía':'Espia','Médico':'Medico','Ingeniero':'Ingeniero','Comando':'Comando','Capitán':'Capitan'};
+/* Uniformes DEL ORIGINAL por clase, sobre la malla del soldado que ya
+   funcionaba (Soldier_Light). Las texturas de las otras mallas del IPA
+   (Heavy, Agent, Medico...) no se usan aqui: sus esqueletos se extrajeron
+   pero el sistema de animacion horneado no las reproduce bien (ver
+   docs/ARQUITECTURA.md). */
+const ROLE_OUTFIT_FILES={'Francotirador':'veteran','Artillero':'deerhunter','Espía':'spetsnaz','Médico':'decon','Ingeniero':'rambo','Comando':'deltaforce','Capitán':'base'};
 function loadRealSoldier(){
   if(typeof THREE==='undefined')return;
-  REAL.byRole=REAL.byRole||{};
+  REAL.texByRole={};
   fetch('assets/soldier_scales.json').then(r=>r.json()).then(sc=>{ROLE_SCALES=sc||{};}).catch(()=>{});
   fetch('assets/soldier_clips.json').then(r=>{if(!r.ok)throw new Error('clips');return r.json();}).then(pack=>{CLIPLIB.pack=pack;CLIPLIB.ready=true;}).catch(()=>{});
-  const loadOne=(role,file)=>Promise.all([
-    fetch('assets/soldier/'+file+'.obj').then(r=>{if(!r.ok)throw new Error('obj');return r.text();}),
-    fetch('assets/soldier/'+file+'_rig.json').then(r=>{if(!r.ok)throw new Error('rig');return r.json();}),
-    new Promise((res,rej)=>{new THREE.TextureLoader().load('assets/soldier/'+file+'_tex.png',res,undefined,rej);})
-  ]).then(([objTxt,data,tex])=>{
-    tex.colorSpace=THREE.SRGBColorSpace;
-    const geo=parseOBJ3(objTxt,data);
-    REAL.byRole[role]={data:data,geo:geo,tex:tex};
-    if(role==='Francotirador'||!REAL.ready){REAL.data=data;REAL.geo=geo;REAL.tex=tex;REAL.ready=true;}
-    return role;
-  }).catch(()=>null);
-  Promise.all(Object.entries(ROLE_MODEL_FILES).map(([role,file])=>loadOne(role,file))).then(list=>{
-    const n=list.filter(Boolean).length;
-    if(n){
-      if(typeof buildSpriteStrip==='function')buildSpriteStrip();
-      if(typeof rebuildDemo==='function')rebuildDemo();
-      if(G&&T3&&VIEW_MODE==='3d')build3DWorld();
-      if(G)draw();
-    }
+  const texLoad=(file)=>new Promise(res=>{
+    new THREE.TextureLoader().load('assets/soldier/outfits/'+file+'.png',t=>{t.colorSpace=THREE.SRGBColorSpace;res(t);},undefined,()=>res(null));
   });
+  Promise.all([
+    fetch('assets/soldier.obj').then(r=>{if(!r.ok)throw new Error('obj');return r.text();}),
+    fetch('assets/soldier_rig.json').then(r=>{if(!r.ok)throw new Error('rig');return r.json();}),
+    texLoad('base').then(t=>t)
+  ]).then(([objTxt,data,baseTex])=>{
+    REAL.data=data;REAL.geo=parseOBJ3(objTxt,data);REAL.tex=baseTex||null;REAL.ready=true;
+    return Promise.all(Object.entries(ROLE_OUTFIT_FILES).map(([role,file])=>
+      file==='base'?Promise.resolve([role,baseTex]):texLoad(file).then(t=>[role,t])
+    ));
+  }).then(pairs=>{
+    (pairs||[]).forEach(([role,t])=>{if(t)REAL.texByRole[role]=t;});
+    if(typeof buildSpriteStrip==='function')buildSpriteStrip();
+    if(typeof rebuildDemo==='function')rebuildDemo();
+    if(G&&T3&&VIEW_MODE==='3d')build3DWorld();
+    if(G)draw();
+  }).catch(()=>{});
 }
 loadRealSoldier();
 /* ================= SKIRMISH DEL IPA: 03 Y 04 REALES =================
@@ -5066,7 +5070,8 @@ function makeRealSoldier3(un){
   const lk=roleLook(un.role);
   spin.scale.set(lk.s[0],lk.s[1],lk.s[2]);
   const tilt=new THREE.Group();tilt.rotation.x=-Math.PI/2;spin.add(tilt);
-  const RD=(REAL.byRole&&REAL.byRole[un.role])||REAL;
+  const RD=REAL;
+  const roleTex=(REAL.texByRole&&REAL.texByRole[un.role])||REAL.tex;
   const data=RD.data;
   const bones=data.bones.map(b=>{
     const bone=new THREE.Bone();bone.name=b.name;
@@ -5093,7 +5098,7 @@ function makeRealSoldier3(un){
     gradTex=new THREE.CanvasTexture(gc);
     gradTex.minFilter=THREE.NearestFilter;gradTex.magFilter=THREE.NearestFilter;
   }catch(e){}
-  const mat=gradTex?new THREE.MeshToonMaterial({map:RD.tex,gradientMap:gradTex}):new THREE.MeshStandardMaterial({map:RD.tex,roughness:0.85,metalness:0.02});
+  const mat=gradTex?new THREE.MeshToonMaterial({map:roleTex,gradientMap:gradTex}):new THREE.MeshStandardMaterial({map:roleTex,roughness:0.85,metalness:0.02});
   /* Skin de NACION: el uniforme se tine con el color de la bandera
      (multiplicado sobre la textura del original, sin taparla). */
   if(un.skin==='nacion'&&un.nation&&un.nation.colors){
@@ -5139,9 +5144,9 @@ function makeRealSoldier3(un){
   /* Pecho del color del rol, franja del color de la nacion y hombreras del
      color del equipo: a distancia se leen la clase y el bando de un vistazo,
      encima de la silueta del tocado y de la mochila. */
-  g.add(box3(0.035,0.30,0.30,c.role,0.145,0.74,0,0.75));
-  g.add(box3(0.04,0.055,0.312,((un.skin==='nacion'&&un.nation)?un.nation.colors[1]:'#2e3226'),0.148,0.915,0,0.6));
-  [-1,1].forEach(sd=>{g.add(box3(0.17,0.075,0.13,c.team,0,0.90,0.185*sd,0.8));});
+  g.add(box3(0.024,0.20,0.21,c.role,0.145,0.74,0,0.75));
+  g.add(box3(0.028,0.035,0.222,((un.skin==='nacion'&&un.nation)?un.nation.colors[1]:'#2e3226'),0.147,0.865,0,0.6));
+  [-1,1].forEach(sd=>{g.add(box3(0.11,0.045,0.085,c.team,0,0.885,0.185*sd,0.8));});
   /* Acentos de silueta por clase sobre la mochila: se distinguen de
      espaldas y a distancia sin tocar los modelos del IPA. */
   const acc=(w,h,d,col,x,y,z,rough)=>{try{g.add(box3(w,h,d,col,x,y,z,rough));}catch(e){}};
@@ -5170,7 +5175,7 @@ function makeRealSoldier3(un){
      estrecho y bajo, francotirador alto y fino, capitan erguido. */
   /* La complexion ya la trae cada modelo del original (Soldier_Light,
      Soldier_Heavy, Agent, Medic, Engineer, Commander): no se escala nada. */
-  mesh.scale.setScalar(0.95*((ROLE_SCALES&&ROLE_SCALES[un.role])||1));
+  mesh.scale.setScalar(0.95); /* malla base del IPA: escala unica */
 
   /* Tocados por rol sobre la malla real, colgados del hueso Head: su Z
      local es el arriba del IPA, así que el grupo gira para que su +Y
@@ -6527,9 +6532,12 @@ function updateUnitHuds3D(w,h){
   }
   T3.hudPool.forEach((rec,k)=>{if(!seen.has(k)){rec.el.remove();T3.hudPool.delete(k);}});
 }
+/* Enganche de diagnostico: permite a las herramientas de captura acercar la
+   camara para revisar modelos (no afecta al juego). */
+try{window.__csnCam={get cam(){return T3&&T3.cam;},get t3(){return T3;}};}catch(e){}
 function resetCam3D(){
   if(!T3||!T3.cam)return;
-  T3.cam.yaw=-0.34;T3.cam.dist=14.8;T3.cam.panX=0;T3.cam.panZ=0.35;
+  T3.cam.yaw=-0.34;T3.cam.dist=11.6;T3.cam.panX=0;T3.cam.panZ=0.35;
 }
 function init3D(){
   if(T3)return true;
@@ -6600,14 +6608,14 @@ function init3D(){
   cvEl.addEventListener('mouseleave',()=>{hoverTile=null;});
   cvEl.addEventListener('wheel',e=>{
     e.preventDefault();
-    camState.dist=Math.max(9.5,Math.min(22,camState.dist+e.deltaY*0.01));
+    camState.dist=Math.max(7.5,Math.min(22,camState.dist+e.deltaY*0.01));
   },{passive:false});
   document.querySelectorAll('.gl-controls button[data-cam]').forEach(btn=>{
     btn.onclick=()=>{
       const act=btn.dataset.cam;
       if(act==='rotL')camState.yaw-=0.38;
       else if(act==='rotR')camState.yaw+=0.38;
-      else if(act==='zoomIn')camState.dist=Math.max(9.5,camState.dist-1.8);
+      else if(act==='zoomIn')camState.dist=Math.max(7.5,camState.dist-1.8);
       else if(act==='zoomOut')camState.dist=Math.min(22,camState.dist+1.8);
       else if(act==='reset')resetCam3D();
       btn.blur();
