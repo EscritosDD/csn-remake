@@ -5057,7 +5057,13 @@ let _wThumbR=null;
 function renderWeaponThumb(weapon){
   if(WEAPON_THUMB_CACHE[weapon]!==undefined)return WEAPON_THUMB_CACHE[weapon];
   const file=WEAPON_MESH_FILE[weapon]; const holder=GUN_MESH_CACHE[weapon];
-  if(!file||!holder){WEAPON_THUMB_CACHE[weapon]=null;return null;}
+  /* null = malla todavia cargando: no cachear (si no, el reintento
+     del catalogo leeria este null como fallo definitivo y nunca
+     volveria a intentarlo). false = carga fallida, sin mas reintentos. */
+  if(!file||holder===false){WEAPON_THUMB_CACHE[weapon]=null;return null;}
+  if(!holder)return null;
+  /* sin textura aun: esperarla para que la caratula no salga gris */
+  if(!holder.userData||!holder.userData.texReady)return null;
   try{
     if(!_wThumbR){
       _wThumbR=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});
@@ -5124,7 +5130,7 @@ function makeRealGun3(weapon){
     const k=target/long;
     const mat=new THREE.MeshStandardMaterial({color:0x9a9a9a,roughness:0.72,metalness:0.25});
     const texLoad=new THREE.TextureLoader();
-    texLoad.load('assets/weapons/'+file+'_tex.png',t=>{t.colorSpace=THREE.SRGBColorSpace;mat.map=t;mat.color.set(0xffffff);mat.needsUpdate=true;},undefined,()=>{});
+    texLoad.load('assets/weapons/'+file+'_tex.png',t=>{t.colorSpace=THREE.SRGBColorSpace;mat.map=t;mat.color.set(0xffffff);mat.needsUpdate=true;if(GUN_MESH_CACHE[weapon])GUN_MESH_CACHE[weapon].userData.texReady=true;},undefined,()=>{if(GUN_MESH_CACHE[weapon])GUN_MESH_CACHE[weapon].userData.texReady=true;});
     const mesh=new THREE.Mesh(geo,mat);
     /* malla en Z arriba -> Y arriba; centrada en el centro de su caja */
     const c=new THREE.Vector3(); bb.getCenter(c);
@@ -7075,7 +7081,15 @@ function buildArsenal(){
     g.appendChild(d);
     if(!cover){
       const img=d.querySelector('.wcoverWrap');
-      const tryThumb=()=>{const u=renderWeaponThumb(name)||(makeRealGun3(name),renderWeaponThumb(name));if(u&&img){img.innerHTML='<img class="wcover" src="'+u+'" alt="">';}else{setTimeout(tryThumb,700);}};
+      /* Reintento con fin: la malla puede seguir cargando (el render
+         devuelve null sin cachear), pero si la carga fallo definitivamente
+         (false en la cache) o ya hay demasiados intentos, se para. */
+      let tries=0;
+      const tryThumb=()=>{
+        const u=renderWeaponThumb(name)||(makeRealGun3(name),renderWeaponThumb(name));
+        if(u&&img){img.innerHTML='<img class="wcover" src="'+u+'" alt="">';}
+        else if(++tries<40&&GUN_MESH_CACHE[name]!==false){setTimeout(tryThumb,700);}
+      };
       setTimeout(tryThumb,500);
     }
   });
