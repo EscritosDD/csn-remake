@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
 <meta name="color-scheme" content="dark light"/>
 <link rel="icon" href="assets/ui/favicon.ico" sizes="any"/>
-<link rel="icon" type="image/png" href="assets/ui/favicon.png"/>
+<link rel="icon" type="image/png" href="assets/ui/icono_original.png"/>
+<link rel="apple-touch-icon" href="assets/ui/icono_original.png"/>
 <title>CSN — Chess Soldier Nation · Táctica por turnos</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
@@ -326,7 +327,10 @@ canvas#board{border-radius:10px;box-shadow:0 0 0 2px rgba(0,0,0,.45), inset 0 0 
 .nation-art{width:100%;max-width:148px;height:auto;display:block;align-self:center}
 /* Pantalla de carga (F7) */
 #bootScreen{position:fixed;inset:0;z-index:130;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 40%,#1c2620,#0f1310 70%)}
-#bootScreen .bootBox{width:min(420px,84vw);text-align:center}
+#bootScreen{background:radial-gradient(circle at 50% 30%,#232a20,#12150f 70%)!important}
+#bootScreen .bootBox{width:min(420px,84vw);text-align:center;position:relative;z-index:2}
+#bootScreen .bootArt{position:absolute;inset:0;background:url('assets/ui/portada_arte.png') center/cover no-repeat;opacity:.28;filter:saturate(.9)}
+#bootScreen .bootBox img{width:min(260px,62vw)}
 #bootScreen img{width:min(320px,70vw);filter:drop-shadow(0 6px 18px rgba(0,0,0,.5))}
 .bootBar{height:10px;border-radius:6px;background:rgba(255,255,255,.12);margin:18px 0 10px;overflow:hidden}
 .bootBar i{display:block;height:100%;width:5%;background:linear-gradient(90deg,#f2b234,#39c2d7);border-radius:6px;transition:width .18s}
@@ -6947,6 +6951,6 @@ loadSkirmishTop('skirmish03');loadSkirmishTop('skirmish04');
 })();
 $('#guerraCountdown').textContent=fmtCountdown(msToNextSaturday());
 </script>
-<div id="bootScreen"><div class="bootBox"><img src="assets/ui/logo_csn.png" alt="CSN"/><div class="bootBar"><i id="bootFill"></i></div><p class="sub" id="bootMsg" style="color:#cfd6c8">Cargando el tablero, los soldados y los mapas…</p></div></div>
+<div id="bootScreen"><div class="bootArt"></div><div class="bootBox"><img src="assets/ui/logo_csn.png" alt="CSN"/><div class="bootBar"><i id="bootFill"></i></div><p class="sub" id="bootMsg" style="color:#cfd6c8">Cargando el tablero, los soldados y los mapas…</p></div></div>
 </body>
 </html>
