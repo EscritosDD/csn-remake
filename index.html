@@ -2000,8 +2000,12 @@ function spendEnergy(u,n){u.energy-=n;}
 /* Clip de disparo del original según el arma usada (vista 3D): la pistola
    va a una mano y cada familia de arma tiene el suyo en el IPA. */
 function fireClipFor(weaponName){
-  if(weaponName===PISTOL)return 'fire1h';
   const cat=(WEAPONS[weaponName]||{}).cat;
+  /* Todas las pistolas usan el clip de una mano, no solo la M9: antes
+     solo la M9 (PISTOL) caía en fire1h y las demás pistolas (Glock,
+     M1911, Desert Eagle…) usaban el clip de dos manos. */
+  if(cat==='Pistolas')return 'fire1h';
+  if(cat==='Cuerpo a cuerpo')return 'fireMelee';
   if(cat==='Ametralladoras')return 'fireMini';
   if(cat==='Francotirador')return 'fireHeavy';
   if(cat==='Lanzacohetes'||cat==='Lanzagranadas')return 'fireShoulder';
@@ -2097,6 +2101,11 @@ function tryShoot(shooter,target,weaponName,multiplier,opts){
     }
     if(crit&&target.x!=null)fxFloat(target.x,target.y-0.25,'¡CRÍTICO!','#ffd94d');
     if(w.aoe&&target.x!=null&&typeof fx3Explosion==='function')fx3Explosion(target.x,target.y,'expl');
+    /* Impacto del cohete (RPG/AT4/M72): el lanzamiento ya sonó con
+       rocketlauncher_fire y el impacto lleva su propio sonido del
+       original. Los lanzagranadas no lo necesitan: su cluster_explode
+       ya suena al disparar. */
+    if(w.aoe&&w.cat==='Lanzacohetes'&&target.x!=null)try{auPlay('sfx/weapons/launcher_explode.mp3',0.55);}catch(e){}
     if(w.aoe&&target.role){G.units.filter(u=>u.alive&&u!==target&&cheb(u,target)<=1).forEach(u=>damage(u,Math.round(dmg*0.45),shooter.role+' · salpicadura'));if(G.drone&&G.drone.alive&&target!==G.drone&&cheb(G.drone,target)<=1)damage(G.drone,Math.round(dmg*0.45),shooter.role+' · salpicadura');explodeNear(target);}
     if(w.supp&&target.alive&&!target.isDrone){target.suppressed=true;log(target.role+' queda suprimido: −2 de energía en su siguiente turno.');}
   } else {
@@ -2233,8 +2242,17 @@ function auPlay(path,vol,loop){if(!soundOn)return null;try{const a=new Audio(AU_
 const DMR_WEAPONS=['M110 SASS','Mk 14 EBR','SVD Dragunov','Mk 14'];
 function auWeapon(cat,weaponName){
   if(weaponName&&DMR_WEAPONS.includes(weaponName)){auPlay('sfx/weapons/semiautorifle_fire.mp3',0.5);return;}
+  /* La ballesta tiene su propio sonido en el original; no está en el
+     arsenal de CSN, pero si se equipa (visor o rol futuro) suena el suyo. */
+  if(weaponName==='Crossbow'){auPlay('sfx/weapons/crossbow_fire.mp3',0.5);return;}
   const f=WEAPON_SFX[cat];if(f)auPlay('sfx/weapons/'+f+'.mp3',0.45);
 }
+/* Clic de interfaz del original: un toque corto en cada botón. Un solo
+   oyente delegado lo cubre todo (menú, partida, visor, ajustes) sin tocar
+   cada botón a mano; respeta el interruptor de sonido porque auPlay ya lo
+   comprueba. */
+function auClick(){auPlay('sfx/ui/ui_click.mp3',0.35);}
+try{document.addEventListener('click',function(e){try{if(e.target&&e.target.closest&&e.target.closest('button'))auClick();}catch(err){}});}catch(e){}
 function auVoice(un,ev,vol){
   if(!un||!un.role)return;
   let folder=null;
@@ -2504,7 +2522,7 @@ function checkMines(u){
   if(!m||m.team===u.team)return;
   G.lastMoveUndo=null;
   G.mines=G.mines.filter(mm=>mm!==m);
-  FX.shake=9;sfx('boom');fxBurst(u.x,u.y,16,'#ffb03a');fxFloat(u.x,u.y,'💥','#ffe1a8');if(typeof fx3Explosion==='function')fx3Explosion(u.x,u.y,'expl');
+  FX.shake=9;try{auPlay('sfx/weapons/landmine_explode.mp3',0.6);}catch(e){}fxBurst(u.x,u.y,16,'#ffb03a');fxFloat(u.x,u.y,'💥','#ffe1a8');if(typeof fx3Explosion==='function')fx3Explosion(u.x,u.y,'expl');
   log('💥 ¡'+u.role+' ('+u.team+') pisa la Claymore M18A1 colocada en ('+(u.x+1)+','+(u.y+1)+')! La mina se consume en la explosión.');
   damage(u,MINE_DMG,'La explosión de la Claymore M18A1');
   checkWin();
@@ -2877,7 +2895,7 @@ function endTurn(){
   }
 }
 $('#endTurnBtn').onclick=endTurn;
-$('#soundBtn').onclick=()=>{soundOn=!soundOn;try{lsSet(LS_SOUND,soundOn?'1':'0');}catch(e){}renderSoundBtn();if(soundOn)sfx('turn');try{if(!soundOn){auMusicStop();auStopAmbient();}else if(G&&G.units&&G.units.length){auMusicStart();auAmbient(G.map.theme);}}catch(e){}toast(soundOn?'Sonido activado: disparos, explosiones y avisos, sintetizados en el momento y sin archivos.':'Sonido desactivado.');};
+$('#soundBtn').onclick=()=>{soundOn=!soundOn;try{lsSet(LS_SOUND,soundOn?'1':'0');}catch(e){}renderSoundBtn();if(soundOn)sfx('turn');try{if(!soundOn){auMusicStop();auStopAmbient();}else if(G&&G.units&&G.units.length){auMusicStart();auAmbient(G.map.theme);}}catch(e){}toast(soundOn?'Sonido activado: disparos, ambiente y música del original.':'Sonido desactivado.');};
 renderSoundBtn();
 
 /* ---- AI ---- */
@@ -5866,7 +5884,8 @@ function sampleClipPos(tr,t,out){
 function driveClipSoldier(un,mesh,t,moving){
   if(window.__noClips)return; /* diagnostico: reposo puro */
   const ud=mesh.userData,pack=CLIPLIB.pack,clips=pack.clips,ts=t/1000;
-  const stance=(WEAPONS[un.weapon]&&WEAPONS[un.weapon].cat==='Pistolas')?'1h':'2h';
+  const wcat=WEAPONS[un.weapon]&&WEAPONS[un.weapon].cat;
+  const stance=wcat==='Pistolas'?'1h':wcat==='Cuerpo a cuerpo'?'Melee':'2h';
   let key=null,ct=0;
   if(!un.alive){
     key=un._deathKind==='expl'?'deathExpl':'death';
@@ -5881,17 +5900,23 @@ function driveClipSoldier(un,mesh,t,moving){
        interrumpían a los 1,4 s y el soldado volvía al reposo a mitad de
        la animación de fuego y recuperación del original. */
     key=un._fireKey||'fire2h';ct=(t-un._shootT)/1000;
-  } else if(un._hitT!=null&&clips[un._hitKind==='expl'?'hitExpl':(un._hitKind==='burst'?'hitBurst':'hit')]&&(t-un._hitT)<clips[un._hitKind==='expl'?'hitExpl':(un._hitKind==='burst'?'hitBurst':'hit')].dur*1000){
-    key=un._hitKind==='expl'?'hitExpl':(un._hitKind==='burst'?'hitBurst':'hit');ct=(t-un._hitT)/1000;
+  } else if(un._hitT!=null&&clips[(wcat==='Cuerpo a cuerpo')?'hitMelee':(un._hitKind==='expl'?'hitExpl':(un._hitKind==='burst'?'hitBurst':'hit'))]&&(t-un._hitT)<clips[(wcat==='Cuerpo a cuerpo')?'hitMelee':(un._hitKind==='expl'?'hitExpl':(un._hitKind==='burst'?'hitBurst':'hit'))].dur*1000){
+    key=(wcat==='Cuerpo a cuerpo')?'hitMelee':(un._hitKind==='expl'?'hitExpl':(un._hitKind==='burst'?'hitBurst':'hit'));ct=(t-un._hitT)/1000;
   } else if(G&&G.over&&G.winner===un.team){
     key='victory';ct=(ts+ud.clipPhase)%clips.victory.dur;
   } else if(moving||un._turning){
     /* Girando sin desplazarse también suena el clip de paso, un poco más
-       lento: es el pasito de ajuste del giro, porque el IPA no trae un
-       clip de giro propio que reproducir. */
+       lento: es el pasito de ajuste del giro. Los clips de giro del
+       original (turn1h/turn2h/turnMelee, 90° y 180°) están en el paquete,
+       pero el giro se sigue resolviendo en código porque es continuo
+       hacia cualquier orientación, no solo en cuartos de vuelta. */
     key='walk'+stance;ct=((moving?ts:ts*0.85)+ud.clipPhase)%clips[key].dur;
   } else {
-    key=(stance==='2h'&&(Math.floor(ts/11)+un.id)%4===0)?'idle2h2':'idle'+stance;
+    /* Reposo por postura: cada postura alterna su segundo reposo una de
+       cada cuatro veces (2h idle2h2, 1h idle1h2, cuerpo a cuerpo
+       idleMelee2), como hace el original con sus dos reposos por arma. */
+    const idleAlt={ '2h':'idle2h2', '1h':'idle1h2', 'Melee':'idleMelee2' }[stance];
+    key=((Math.floor(ts/11)+un.id)%4===0&&clips[idleAlt])?idleAlt:'idle'+stance;
     ct=(ts+ud.clipPhase)%clips[key].dur;
   }
   const clip=clips[key];
@@ -6037,7 +6062,7 @@ function initRealSpriteRenderer(){
    retroceso aún no ha hundido la postura). La pistola es la excepción:
    su clip levanta el brazo con el culatazo y el apunte asentado, con el
    brazo ya extendido hacia delante, llega al segundo. */
-const SPRITE_AIM_CT={fire2h:0.40,fireBurst:0.35,fireHeavy:0.45,fireMini:0.35,fireShoulder:0.60,fire1h:1.00};
+const SPRITE_AIM_CT={fire2h:0.40,fireBurst:0.35,fireHeavy:0.45,fireMini:0.35,fireShoulder:0.60,fire1h:1.00,fireMelee:0.30,fire1hHeavy:0.45};
 /* Deja el soldado en un fotograma concreto de un clip, muestreando
    ese instante las veces que haga falta hasta que la interpolación
    sobre curQ converge, igual que hace driveClipSoldier fotograma a
