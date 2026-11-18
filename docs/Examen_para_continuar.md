@@ -18,8 +18,8 @@ Estado actual (verificado, no prometido):
 | Tableros | 19, todos simétricos 180° y sin solapes (`bench/boards.js`) |
 | Datos (personajes, naciones, skins, misiones, voces) | 6/6 (`bench/data.test.js`) |
 | 3D | `window.__csn3d` con `units:8` y `geo:true` en todos los mapas |
-| Soldados | **Un solo cuerpo del IPA (Soldier_Light) con 7 uniformes del original**; las 7 mallas de clase están extraídas pero **no se pueden usar todavía** (ver §5) |
-| Interfaz | Portada con arte/logo del original, menú, campaña por capítulos, Cuartel, Armería, setup en rejilla, HUD compacto |
+| Soldados | **Un solo cuerpo del IPA (Soldier_Light) con 7 uniformes del original** y proporciones por clase (ROLE_LOOK 0,84-1,30); las 7 mallas de clase están extraídas pero **no se pueden usar todavía** (ver §5) |
+| Interfaz | Portada centrada con logo del original, menú en columna, campaña por capítulos con arte y progreso, Cuartel visual, Armería en pestañas, setup en rejilla y HUD con **barra inferior de acciones** |
 | Audio | 195 clips del IPA (armas, voces por personaje, ambiente, música) |
 
 ## 2. Cómo se ejecuta y se verifica (obligatorio antes y después de tocar)
@@ -64,13 +64,13 @@ Hoy las 7 clases comparten cuerpo y cambian de uniforme. El objetivo real es
 que cada clase tenga su cuerpo (Soldier_Heavy, Agent_Light/Heavy, Medic,
 Engineer, Commander). **Requiere resolver el skinning + animación** (ver §5).
 
-### T2 · Interfaz del original, segunda pasada
-- HUD: mover las acciones a una **barra inferior** con iconos grandes y el
-  detalle en tooltip (ahora es una tarjeta lateral).
-- Cuartel: la ficha de personaje debe ser **visual** (retrato grande + stats),
-  no una tarjeta de texto.
-- Portada: probar la composición del original (logo grande centrado, menú
-  debajo, soldados a los lados).
+### T2 · Interfaz del original — hecha en la tanda de corrección
+- **HUD**: acciones en una **barra inferior fija** (icono + etiqueta + detalle).
+- **Cuartel**: pantalla visual de tropas con retrato del modelo.
+- **Portada**: logo grande centrado, menú en columna, demo después.
+- **Campaña**: selección de capítulos en tarjetas con arte y progreso.
+- **Retratos**: renderizados del modelo real.
+- Pendiente menor: comparar el HUD con capturas del original lado a lado.
 
 ### T3 · Mapas
 - Revisar **escala de props** sueltos (algunos contenedores parecen grandes).
@@ -142,3 +142,30 @@ clips por nombre de hueso con una tabla de correspondencia.
 - Captura 3D (o de la pantalla tocada) que **demuestre** el cambio.
 - Si toca reglas: harness con n≥30 y tabla actualizada.
 - Commit empujado a `main`.
+
+
+## 8. Tanda de corrección (rondas 1-14) — qué se arregló y con qué prueba
+
+| Commit | Qué |
+|---|---|
+| `1fe168c` | Soldados visibles otra vez: malla del IPA + uniformes del original, escala 0,95, equipo proporcionado |
+| `9a22ce2` | `docs/Auditoria_profunda_v2.md` con hallazgos y plan |
+| `a9b749f` | Retratos de la UI renderizados del modelo real |
+| `ffac286` | Pantalla de crear partida reestructurada |
+| `a508f87` | HUD compacto, sin desbordes, tooltips |
+| `84d42a5` | Unidades a 1,15 y busto del retrato |
+| `03007f6` | Este examen |
+| `51943a5` | Cuartel visual |
+| `e97527b` | Props del anillo al 74 % y más lejos |
+| `ceb1ff7` | Portada centrada con el logo del original |
+| `bcd3dbb` | Menú en columna |
+| `2af6db8` | Menú antes del demo |
+| `d7ba435` | Datos de los clips de animación en §5 |
+| `32545b4` | Jerga de proyecto fuera de la UI |
+| `c1b8b46` | Barra inferior de acciones |
+| `d5d4432` | Campaña como selección de capítulos |
+
+**Prueba de extremo a extremo** (navegador headless, 0 errores): nación →
+menú → Challenges (6 misiones, 1 disponible) → misión 1 → setup de campaña →
+lanzar → partida en 3D (`theme:"plaza"`, 8 unidades, barra con 8 acciones).
+Capturas: `docs/capturas/E2E_CAMPANA.png` y `docs/capturas/UI_HUD_barra.png`.
