@@ -372,6 +372,9 @@ button img.ab-ico{width:18px;height:18px;vertical-align:-3px;margin-right:6px;bo
 .heroOrigen em{color:var(--amber)}
 .heroLogo{height:74px;margin:0 0 8px;filter:drop-shadow(0 4px 8px rgba(0,0,0,.55))}
 @media(max-width:640px){.heroLogo{height:44px}.heroOrigen{min-height:150px}}
+details.rule>summary{cursor:pointer;font-weight:700;font-size:13px;padding:4px 0}
+details.rule[open]>summary{color:var(--amber)}
+details.rule p{margin:6px 0 0;font-size:12.5px;line-height:1.45}
 </style>
 </head>
 <body>
@@ -6896,6 +6899,20 @@ function tutHide(){const b=document.getElementById('tutBubble');if(b)b.style.dis
   const bb=document.getElementById('barrBack');if(bb)bb.onclick=()=>showScreen('scr-play');
   coinsSet(coinsGet());
   renderAbilityCatalog();
+  /* Reglas plegables: el muro de texto de "Como se juega" pasa a 23
+     resumenes de una linea que se abren al tocar (F9). */
+  try{
+    document.querySelectorAll('.howto > div').forEach(d=>{
+      if(d.dataset.plegado)return;d.dataset.plegado='1';
+      const t=d.querySelector('b');const ps=Array.from(d.querySelectorAll('p'));
+      const det=document.createElement('details');det.className='rule';
+      const sum=document.createElement('summary');
+      sum.innerHTML=t?t.innerHTML:'Regla';
+      det.appendChild(sum);
+      ps.forEach(p=>det.appendChild(p));
+      d.innerHTML='';d.appendChild(det);
+    });
+  }catch(e){}
 })();
 /* Pantalla de carga: se cierra cuando el soldado real está listo (o a los 9 s). */
 (function bootScreen(){
