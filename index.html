@@ -1831,7 +1831,7 @@ function tryShoot(shooter,target,weaponName,multiplier,opts){
   if(!freeCost)spendEnergy(shooter,w.cost);shooter.hasShot=true;if(shooter.invisible){shooter.invisible=false;log('La invisibilidad del Espía se rompe al disparar.');}
   if(w.once)shooter.onceUsed=true;
   const f=angleToFacing(target.x-shooter.x,target.y-shooter.y);if(f!=null)shooter.facing=f;
-  shooter._shootT=FX.t;shooter._shootW=weaponName;shooter._fireKey=fireClipFor(weaponName);auWeapon(w.cat);if(Math.random()<0.3)auVoice(shooter,'firing',0.4);
+  shooter._shootT=FX.t;shooter._shootW=weaponName;shooter._fireKey=fireClipFor(weaponName);auWeapon(w.cat,weaponName);if(Math.random()<0.3)auVoice(shooter,'firing',0.4);
   if(target.x!=null){
     fxTracer(shooter,target);fxBurst(shooter.x,shooter.y,3,'#ffe9a8');
     if(typeof fx3Shot==='function')fx3Shot(shooter,target,w.cat);
@@ -1998,7 +1998,11 @@ const CHAR_VOICE={'Hipster Dave':'Hipster_Dave','Archie Fletcher':'Archie_Fletch
 const VOICE_FILES={'Francotirador':'Francotirador','Artillero':'Artillero','Espía':'Espia','Médico':'Medico','Ingeniero':'Ingeniero','Comando':'Comando','Capitán':'Capitan'};
 let AU_AMBIENT=null;
 function auPlay(path,vol,loop){if(!soundOn)return null;try{const a=new Audio(AU_BASE+path);a.volume=vol==null?0.6:vol;if(loop)a.loop=true;a.play().catch(()=>{});return a;}catch(e){return null;}}
-function auWeapon(cat){const f=WEAPON_SFX[cat];if(f)auPlay('sfx/weapons/'+f+'.mp3',0.5);}
+const DMR_WEAPONS=['M110 SASS','Mk 14 EBR','SVD Dragunov','Mk 14'];
+function auWeapon(cat,weaponName){
+  if(weaponName&&DMR_WEAPONS.includes(weaponName)){auPlay('sfx/weapons/semiautorifle_fire.mp3',0.5);return;}
+  const f=WEAPON_SFX[cat];if(f)auPlay('sfx/weapons/'+f+'.mp3',0.5);
+}
 function auVoice(un,ev,vol){
   if(!un||!un.role)return;
   let folder=null;
@@ -5798,6 +5802,15 @@ function buildThemedProps3(world,theme){
       g.rotation.y=rand()*Math.PI*2;world.add(g);}
     const spC=take();
     if(spC){const m=new THREE.Mesh(new THREE.BoxGeometry(2.2,0.9,1.1),mat3('#a4432f',0.8));m.position.set(spC.x,0.45,spC.z);m.rotation.z=0.42;m.rotation.y=rand()*Math.PI;m.castShadow=true;world.add(m);}
+  }
+  if(theme==='depot'){
+    /* Montacargas: mastil alto y plataforma con palet. */
+    const spMk=take();
+    if(spMk){const g=new THREE.Group();g.position.set(spMk.x,0,spMk.z);
+      const mast=new THREE.Mesh(new THREE.BoxGeometry(0.14,2.4,0.14),mat3('#3b4046',0.6));mast.position.y=1.2;mast.castShadow=true;g.add(mast);
+      const plat=new THREE.Mesh(new THREE.BoxGeometry(1.0,0.1,0.5),mat3('#8a7a3a',0.75));plat.position.y=1.2;g.add(plat);
+      const pal=new THREE.Mesh(new THREE.BoxGeometry(0.9,0.22,0.45),mat3('#8d6436',0.85));pal.position.y=1.36;g.add(pal);
+      g.rotation.y=rand()*Math.PI*2;world.add(g);}
   }
   if(theme==='terminal'||theme==='depot'||theme==='yard'||theme==='astillero'){
     const cols=['#3f6f8f','#a4432f','#c9a227','#3f7a52'];
