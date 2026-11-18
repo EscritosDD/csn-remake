@@ -1796,6 +1796,7 @@ function explodeBarrel(b,srcLabel){
 function tryShoot(shooter,target,weaponName,multiplier,opts){
   opts=opts||{};
   if(G)G._dmgTeam=shooter.team;
+  if(G&&target&&target.x!=null)G._camFocus={x:target.x,y:target.y,until:Date.now()+2600};
   const w=WEAPONS[weaponName];
   const freeCost=!!opts.freeCost;
   if(!freeCost&&shooter.energy<w.cost){toast('Energía insuficiente: '+weaponName+' cuesta '+w.cost+' ⚡.');return false;}
@@ -6404,6 +6405,15 @@ window.__render3D=function(){
   if(_keysHeld['s']||_keysHeld['arrowdown']){c.panZ=Math.min(5.5,c.panZ+Math.cos(c.yaw)*panSp);c.panX=Math.min(5.5,c.panX+Math.sin(c.yaw)*panSp);}
   if(_keysHeld['a']||_keysHeld['arrowleft']){c.panX=Math.max(-5.5,c.panX-Math.cos(c.yaw)*panSp);c.panZ=Math.min(5.5,c.panZ+Math.sin(c.yaw)*panSp);}
   if(_keysHeld['d']||_keysHeld['arrowright']){c.panX=Math.min(5.5,c.panX+Math.cos(c.yaw)*panSp);c.panZ=Math.max(-5.5,c.panZ-Math.sin(c.yaw)*panSp);}
+  /* La camara acompaña el disparo: se desliza hacia donde ocurre la accion
+     (tambien en turnos de la IA) y vuelve a quedarse quieta despues. */
+  if(G&&G._camFocus&&Date.now()<G._camFocus.until){
+    const fx=Math.max(-5.5,Math.min(5.5,w2cx(G._camFocus.x)));
+    const fz=Math.max(-5.5,Math.min(5.5,w2cx(G._camFocus.y)));
+    const k=Math.min(1,dt*1.7);
+    c.panX+=(fx-c.panX)*k;
+    c.panZ+=(fz-c.panZ)*k;
+  }
   const damp=REDUCED_MOTION?1:(1-Math.exp(-10*dt));
   c.curYaw+=(c.yaw-c.curYaw)*damp;
   c.curDist+=(c.dist-c.curDist)*damp;
