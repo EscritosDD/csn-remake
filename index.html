@@ -7348,6 +7348,7 @@ const ABILITY_CATALOG=[
   {f:'CharAbility_01_Adrenaline_alpha',n:'Adrenaline'},
   {f:'CharAbility_03_AR_Specialization_alpha',n:'AR Specialization'},
   {f:'CharAbility_04_Armour_Piercing_alpha',n:'Armour Piercing'},
+  {f:'CharAbility_05_Backlash_Aura_alpha',n:'Backlash Aura'},
   {f:'CharAbility_06_Backstab_alpha',n:'Backstab'},
   {f:'CharAbility_07_Caltrops_alpha',n:'Caltrops'},
   {f:'CharAbility_08_Charm_alpha',n:'Charm'},
@@ -7359,6 +7360,7 @@ const ABILITY_CATALOG=[
   {f:'CharAbility_15_Gas_Grenade_alpha',n:'Gas Grenade'},
   {f:'CharAbility_17_Ghost_alpha',n:'Ghost'},
   {f:'CharAbility_18_Hack_alpha',n:'Hack'},
+  {f:'CharAbility_20_Healing_Aura_alpha',n:'Healing Aura'},
   {f:'CharAbility_21_Healing_Grenade_alpha',n:'Healing Grenade'},
   {f:'CharAbility_22_Health_Buff_Aura_alpha',n:'Health Buff Aura'},
   {f:'CharAbility_23_HMG_Specialization_alpha',n:'HMG Specialization'},
@@ -7403,7 +7405,14 @@ const ABILITY_IMPL={
   'CharAbility_42_Sniper_Rifle_Specialization_alpha':'Tiro certero',
   'CharAbility_23_HMG_Specialization_alpha':'Supresión',
   'CharAbility_07_Caltrops_alpha':'Minas',
-  'CharAbility_33_Nail_Mines_alpha':'Claymore'
+  'CharAbility_33_Nail_Mines_alpha':'Claymore',
+  /* F3 · equivalencias ya existentes en el motor, ahora declaradas:
+     el catalogo decia "pendiente" de cosas que ya estaban jugando. */
+  'CharAbility_05_Backlash_Aura_alpha':'Cobertura desplegable',
+  'CharAbility_38_Rush_Aura_alpha':'Teletransporte',
+  'CharAbility_44_Swarm_Aura_alpha':'Bomba de abejas',
+  'CharAbility_08_Charm_alpha':'Tranquilizante',
+  'CharAbility_48_bazooka_alpha':'Lanzacohetes (catálogo de armas)'
 };
 /* Pestañas de la Armeria: armas (filtros y rejilla) o catalogo. */
 function armTab(which){
@@ -7418,7 +7427,11 @@ function renderAbilityCatalog(){
   const el=document.getElementById('abilityCatalog');if(!el)return;
   el.innerHTML=ABILITY_CATALOG.map(a=>{
     const imp=ABILITY_IMPL[a.f];
-    return '<div class="ab-card'+(imp?' on':'')+'"><img src="assets/ui/ability/'+a.f+'.png" alt=""/><b>'+a.n+'</b><small>'+(imp?('en juego · '+imp):'pendiente')+'</small></div>';
+    /* 05 y 20 no tienen icono en el IPA (nunca lo tuvieron): respaldo
+       al icono mas cercano para que la ficha no quede rota. */
+    const fallbackIcon={'CharAbility_05_Backlash_Aura_alpha':'CharAbility_24_Juggernaut_alpha','CharAbility_20_Healing_Aura_alpha':'CharAbility_30_Medkit_alpha'};
+    const icon=fallbackIcon[a.f]||a.f;
+    return '<div class="ab-card'+(imp?' on':'')+'"><img src="assets/ui/ability/'+icon+'.png" alt=""/><b>'+a.n+'</b><small>'+(imp?('en juego · '+imp):'pendiente')+'</small></div>';
   }).join('');
 }
 

@@ -9,10 +9,10 @@ Iconos extraídos en `assets/ui/ability/`.
 | 01 | Adrenaline | sí | — | pendiente |
 | 03 | AR Specialization | sí | — | pendiente |
 | 04 | Armour Piercing | sí | — | pendiente |
-| 05 | Backlash Aura | **falta icono** | Cobertura desplegable | implementada (equivalente) |
+| 05 | Backlash Aura | **falta icono** (respaldo: Juggernaut) | Cobertura desplegable | implementada (equivalente) |
 | 06 | Backstab | sí | — | pendiente |
 | 07 | Caltrops | sí | Minas/claymore | implementada |
-| 08 | Charm | sí | — | pendiente |
+| 08 | Charm | sí | Tranquilizante del Espía | implementada (equivalente) |
 | 09 | Concussion Grenade | sí | Aturdidora M84 | implementada |
 | 10 | Da Boot | sí | — | pendiente |
 | 11 | Dead Eye Aura | sí | — | pendiente |
@@ -21,7 +21,7 @@ Iconos extraídos en `assets/ui/ability/`.
 | 15 | Gas Grenade | sí | Granada de gas | implementada |
 | 17 | Ghost | sí | Invisibilidad del Espía | implementada |
 | 18 | Hack | sí | — | pendiente |
-| 20 | Healing Aura | **falta icono** | — | pendiente |
+| 20 | Healing Aura | **falta icono** (respaldo: Medkit) | Curación del Médico (a un aliado) | implementada (equivalente) |
 | 21 | Healing Grenade | sí | — | pendiente |
 | 22 | Health Buff Aura | sí | — | pendiente |
 | 23 | HMG Specialization | sí | Supresión | implementada |
@@ -45,16 +45,18 @@ Iconos extraídos en `assets/ui/ability/`.
 | 44 | Swarm Aura | sí | Bomba de abejas | implementada |
 | 45 | Toolkit | sí | Kit de herramientas | implementada |
 | 47 | Vampire | sí | — | pendiente |
-| 48 | Bazooka | sí | — | pendiente |
+| 48 | Bazooka | sí | Lanzacohetes (catálogo de armas: RPG-7/AT4/M72) | implementada (equivalente) |
 | 49 | Crossbow | sí | — | pendiente |
 | 50 | MolotovCocktail | sí | Cóctel molotov | implementada |
 | 52 | WaterCannon | sí | Cañón de agua | implementada |
 
 ## Resumen
 
+- **Entradas**: las 44 del original en el catálogo del juego (05 y 20 añadidas
+  en F3; su icono no existe en el IPA y muestran un respaldo).
 - **Iconos**: 42 de 44 extraídos (faltan 05:Backlash Aura, 20:Healing Aura).
-- **Implementadas o con equivalente**: 19.
-- **Pendientes**: 25.
+- **Implementadas o con equivalente**: 23.
+- **Pendientes**: 21.
 
 ## Nota
 
