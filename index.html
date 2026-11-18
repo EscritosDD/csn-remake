@@ -6723,7 +6723,12 @@ const OWN_CAST=[
  {name:'Alfiler',body:'Medic',outfit:'Sanitario de trinchera',role:'Médico',play:true,own:true},
  {name:'Tuerca',body:'Engineer',outfit:'Manitas de campaña',role:'Ingeniero',play:true,own:true},
  {name:'Faro',body:'Agent_Heavy',outfit:'Punta de lanza',role:'Comando',play:true,own:true},
- {name:'Brújula',body:'Commander',outfit:'Mando de campo',role:'Capitán',play:true,own:true}
+ {name:'Brújula',body:'Commander',outfit:'Mando de campo',role:'Capitán',play:true,own:true},
+ {name:'Yunque',body:'Soldier_Heavy',outfit:'Asalto pesado CSN',role:'Artillero',play:true,own:true},
+ {name:'Gacela',body:'Agent_Light',outfit:'Exploradora CSN',role:'Espía',play:true,own:true},
+ {name:'Bisturí',body:'Medic',outfit:'Cirujana de campaña',role:'Médico',play:true,own:true},
+ {name:'Llave',body:'Engineer',outfit:'Zapadora CSN',role:'Ingeniero',play:true,own:true},
+ {name:'Trueno',body:'Agent_Heavy',outfit:'Asalto CSN',role:'Comando',play:true,own:true}
 ];
 const ROLE_BODY={'Francotirador':'Soldier_Light','Artillero':'Soldier_Heavy','Espía':'Agent_Light','Médico':'Medic','Ingeniero':'Engineer','Comando':'Agent_Heavy','Capitán':'Commander'};
 function charsForRole(role){const b=ROLE_BODY[role];return OWN_CAST.filter(c=>c.body===b).concat(ORIG_CAST.filter(c=>c.body===b));}
