@@ -184,3 +184,13 @@ pasa. Es el comando que deben usar las IAs que sigan el proyecto.
 Pendiente para las siguientes rondas: campaña reconstruida con los prefabs
 del original (los niveles del IPA son prefabs de gameplay, la geometría de
 campaña venía del servidor), más variantes de skin y capturas de campaña.
+
+
+## Aviso tecnico: insertar props por tema
+
+En `buildThemedProps3` las ramas son una cadena `if(theme==='x'){ ... } else if...`.
+Al anadir un bloque nuevo ANTES de una rama existente, hay que CERRAR el
+bloque nuevo con su propia llave: es el error que mas veces ha aparecido
+(quiosco de la plaza, noray, semaforo y cabina del puente). Regla practica:
+todo bloque `if(theme===...){` que se inserte debe terminar en `}` antes de
+la linea original, y `node bench/check-syntax.js` lo detecta al instante.
