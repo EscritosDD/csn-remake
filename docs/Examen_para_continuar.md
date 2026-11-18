@@ -171,9 +171,33 @@ lanzar → partida en 3D (`theme:"plaza"`, 8 unidades, barra con 8 acciones).
 Capturas: `docs/capturas/E2E_CAMPANA.png` y `docs/capturas/UI_HUD_barra.png`.
 
 
-## 9. Mallas de clase: lo que se ha descubierto (ronda de armas + modelos)
+## 9. Mallas de clase: RESUELTO (causa raíz: triangle strip)
 
-Estado: **siguen sin usarse**, pero ya no es un misterio. Todo el código está
+**La causa raíz del destrozo de las mallas era el decodificador de índices.**
+`MeshHandler.m_IndexBuffer` del IPA devuelve un **triangle strip** (p. ej. 2923
+índices con parejas repetidas de costura), no una lista de triángulos. Al
+agruparlo de tres en tres salían 974 triángulos con 480 degenerados y la malla
+se veía como fragmentos negros. Decodificándolo como strip (invertir el orden
+en los índices impares y saltar degenerados) salen **1456 triángulos**, los
+mismos que la malla base que ya funcionaba.
+
+Con eso, las siete mallas de clase se regeneran con:
+
+1. strip → triángulos;
+2. **orden de huesos del rig base** (los clips se aplican por índice);
+3. **escala horneada** en vértices y bind poses (factor 1/k en las inversas),
+   de modo que todas usan `mesh.scale = 0,95`;
+4. OBJ con la **X ya invertida** (porque `parseOBJ3` la niega);
+5. `bone.scale` en el juego y retargeting por delta de los clips.
+
+Las mallas de clase están **activas por defecto**; el retrato/sprite se sigue
+fotografiando con la malla base. Solo el **Comando** (Agent_Heavy, skin de 17
+huesos, bind con escala 2,5) sigue sin cuadrar y va con la malla base
+(`CLASS_MODEL_SKIP`).
+
+### Historia anterior (para no repetir callejones sin salida)
+
+Estado: **RESUELTO** (ronda 8 de esta tanda). Todo el código está
 hecho y probado; se activa con `window.__classModels=true` y por defecto
 queda la malla base con su uniforme.
 

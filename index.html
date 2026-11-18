@@ -5314,7 +5314,11 @@ function makeRealSoldier3(un){
   const tilt=new THREE.Group();tilt.rotation.x=-Math.PI/2;spin.add(tilt);
   /* Las mallas de clase siguen en investigacion (ver docs/Examen §5): se
      activan con window.__classModels=true; por defecto, malla base + uniforme. */
-  const RD=(!window.__forceBaseModel&&REAL.byRole&&REAL.byRole[un.role])||REAL;
+  /* Malla de clase por rol. El Comando (Agent_Heavy) tiene un skin de 17
+     huesos cuya bind no cuadra (boneWorld x boneInverse != I) y sale como un
+     blob: de momento usa la malla base con su uniforme. */
+  const CLASS_MODEL_SKIP={'Comando':1};
+  const RD=(!window.__forceBaseModel&&!CLASS_MODEL_SKIP[un.role]&&REAL.byRole&&REAL.byRole[un.role])||REAL;
   const roleTex=RD.tex||(REAL.texByRole&&REAL.texByRole[un.role])||REAL.tex;
   const data=RD.data;
   const bones=data.bones.map(b=>{
