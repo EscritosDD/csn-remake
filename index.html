@@ -118,7 +118,7 @@ nav.tabs button.on{background:var(--amber);border-color:var(--amber);color:#1913
 .seg button.on{background:var(--amber);border-color:var(--amber);color:#1a1302}
 label.f{display:block;font-size:12.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin:14px 0 6px}
 select{width:100%;background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:9px 10px;font-family:inherit;font-size:15px}
-.squad-row{display:grid;grid-template-columns:34px 1fr 1fr;gap:8px;align-items:center;padding:9px 0;border-bottom:1px dashed var(--line)}
+.squad-row{display:grid;grid-template-columns:26px 34px minmax(120px,1fr) minmax(150px,1.2fr) minmax(80px,auto);gap:8px;align-items:center;padding:9px 0;border-bottom:1px dashed var(--line)}
 .squad-row:last-child{border-bottom:none}
 .slot-num{width:30px;height:30px;border-radius:50%;background:var(--bg2);border:1px solid var(--line);display:grid;place-items:center;font-weight:700;font-size:13px}
 .role-dot{width:12px;height:12px;border-radius:50%;display:inline-block;margin-right:6px;vertical-align:-1px}
@@ -361,7 +361,7 @@ button img.ab-ico{width:18px;height:18px;vertical-align:-3px;margin-right:6px;bo
 .res-row.head{background:var(--panel2);font-weight:700;border-top:none}
 .res-row span{text-align:center}
 .squad-row .sq-ico{width:34px;height:34px;border-radius:8px;background:#1d221c;object-fit:cover}
-.squad-row .sq-char{font-size:11px;color:var(--muted);grid-column:2/-1;margin-top:-2px}
+.squad-row .sq-char{font-size:11.5px;color:var(--ink);font-weight:600}
 .heroOrigen{position:relative;overflow:hidden;border-radius:16px;padding:18px 22px;min-height:190px}
 .heroFondo{position:absolute;inset:0;background-size:cover;background-position:right center;opacity:.85}
 .heroVelo{position:absolute;inset:0;background:linear-gradient(90deg,rgba(16,18,14,.97) 26%,rgba(16,18,14,.86) 46%,rgba(16,18,14,.35) 78%,rgba(16,18,14,.15))}
@@ -375,6 +375,13 @@ button img.ab-ico{width:18px;height:18px;vertical-align:-3px;margin-right:6px;bo
 details.rule>summary{cursor:pointer;font-weight:700;font-size:13px;padding:4px 0}
 details.rule[open]>summary{color:var(--amber)}
 details.rule p{margin:6px 0 0;font-size:12.5px;line-height:1.45}
+.seg.mapGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:6px}
+.seg.mapGrid button{text-align:left;font-size:12.5px;padding:8px 10px}
+.setupHead{display:flex;gap:12px;align-items:center;margin-bottom:10px}
+.setupHead img{width:74px;height:74px;border-radius:12px;background:#1d221c;object-fit:cover;border:1.5px solid var(--line)}
+.setupHead h2{margin:0}
+.setupHead p{margin:2px 0 0;max-width:70ch}
+body[data-state="setup"] #scr-play .hero{display:none}
 </style>
 </head>
 <body>
@@ -564,23 +571,22 @@ details.rule p{margin:6px 0 0;font-size:12.5px;line-height:1.45}
     <!-- SETUP -->
     <div id="setupArea" style="display:none;margin-top:18px">
       <div class="panel">
-        <h2 id="setupTitle">Configurar partida</h2>
-        <p class="sub" id="setupSub"></p>
+        <div class="setupHead"><img id="setupArt" src="assets/ui/modo_eliminacion.png" alt=""/><div><h2 id="setupTitle">Configurar partida</h2><p class="sub" id="setupSub"></p></div></div>
         <label class="f">Mapa</label>
-        <div class="seg" id="mapSeg">
-          <button data-map="almacen" class="on">Almacén industrial · el de siempre</button>
-          <button data-map="patio">Patio de contenedores · entorno industrial</button>
-          <button data-map="skirmish01">Skirmish_01 · Londres · la plaza · nuevo en código</button>
-          <button data-map="skirmish02">Skirmish_02 · Londres · el embarcadero · nuevo en código</button>
-          <button data-map="skirmish">Skirmish_03 · Londres · geometría real del IPA</button>
-          <button data-map="skirmish04">Skirmish_04 · Londres · el puente · geometría real del IPA</button>
-          <button data-map="skirmish05">Skirmish_05 · Londres · el depósito · geometría real del IPA</button>
-          <button data-map="skirmish06">Skirmish_06 · Londres · los andenes · geometría real del IPA</button>
-          <button data-map="skirmish07">Skirmish_07 · Londres · el mercado · nuevo en código</button>
-          <button data-map="skirmish08">Skirmish_08 · Londres · la terminal · geometría real del IPA</button>
-          <button data-map="skirmish09">Skirmish_09 · Londres · la rotonda · geometría real del IPA</button>
-          <button data-map="skirmish10">Skirmish_10 · Londres · el cruce · geometría real del IPA</button>
-          <button data-map="skirmish11">Skirmish_11 · Londres · el astillero · geometría real del IPA</button>
+        <div class="seg mapGrid" id="mapSeg">
+          <button data-map="almacen" class="on" title="Almacén industrial, el de siempre">Almacén</button>
+          <button data-map="patio" title="Patio de contenedores">Patio</button>
+          <button data-map="skirmish01" title="Skirmish_01 · Londres · la plaza (nuevo en código)">S01 · La plaza</button>
+          <button data-map="skirmish02" title="Skirmish_02 · Londres · el embarcadero (nuevo en código)">S02 · Embarcadero</button>
+          <button data-map="skirmish" title="Skirmish_03 · Londres · geometría real del IPA">S03 · Londres</button>
+          <button data-map="skirmish04" title="Skirmish_04 · el puente · geometría real del IPA">S04 · El puente</button>
+          <button data-map="skirmish05" title="Skirmish_05 · el depósito · geometría real del IPA">S05 · El depósito</button>
+          <button data-map="skirmish06" title="Skirmish_06 · los andenes · geometría real del IPA">S06 · Andenes</button>
+          <button data-map="skirmish07" title="Skirmish_07 · el mercado (nuevo en código)">S07 · El mercado</button>
+          <button data-map="skirmish08" title="Skirmish_08 · la terminal · geometría real del IPA">S08 · La terminal</button>
+          <button data-map="skirmish09" title="Skirmish_09 · la rotonda · geometría real del IPA">S09 · La rotonda</button>
+          <button data-map="skirmish10" title="Skirmish_10 · el cruce · geometría real del IPA">S10 · El cruce</button>
+          <button data-map="skirmish11" title="Skirmish_11 · el astillero · geometría real del IPA">S11 · El astillero</button>
         </div>
         <label class="f">Formato de escuadra</label>
         <div class="seg" id="fmtSeg">
@@ -591,12 +597,12 @@ details.rule p{margin:6px 0 0;font-size:12.5px;line-height:1.45}
         <div id="campaignBanner" style="display:none;background:color-mix(in srgb, var(--amber) 12%, var(--panel2));border:1.5px solid var(--amber);border-radius:10px;padding:12px 14px;margin-bottom:6px"></div>
         <label class="f">Dificultad de la IA</label>
         <div class="seg" id="diffSeg">
-          <button data-diff="recluta">Recluta · IA más floja (−15% daño, sin veterania)</button>
-          <button data-diff="normal" class="on">Normal · la de siempre</button>
-          <button data-diff="veterano">Veterano · IA con +1 ⚡, cura y va a por los objetivos</button>
-          <button data-diff="elite">Élite · IA con +2 ⚡, +25 PV, +15% daño, cura y revive</button>
+          <button data-diff="recluta" title="IA más floja: −15% daño, sin veterania">Recluta</button>
+          <button data-diff="normal" class="on" title="La IA de siempre">Normal</button>
+          <button data-diff="veterano" title="IA con +1 ⚡, cura y va a por los objetivos">Veterano</button>
+          <button data-diff="elite" title="IA con +2 ⚡, +25 PV, +15% daño, cura y revive">Élite</button>
         </div>
-        <p class="sub" style="margin:6px 0 0">La dificultad solo afecta a la IA (no en partidas a dos jugadores) y se aplica igual en Dominación y en la campaña, donde cada misión trae la suya fijada.</p>
+        <p class="sub" style="margin:6px 0 0;font-size:12px">Solo afecta a la IA; la campaña trae la suya fijada.</p>
         <label class="f">Rival</label>
         <div class="seg" id="oppSeg">
           <button data-opp="ia" class="on">Contra la IA</button>
@@ -1151,6 +1157,7 @@ function openSetup(mode,missionIdx){
   document.body.dataset.state='setup';
   const titles={eliminacion:'Eliminación',baliza:'Captura de baliza',guerra:'Guerra de Naciones',dominacion:'Dominación',campana:'Campaña · Operación Londres',escolta:'Escolta del dron'};
   $('#setupTitle').textContent='Configurar partida · '+(titles[mode]||mode);
+  try{const art=$('#setupArt');if(art){const files={eliminacion:'modo_eliminacion',baliza:'modo_baliza',guerra:'modo_baliza',dominacion:'modo_dominacion',escolta:'modo_escolta',campana:'modo_eliminacion'};art.src='assets/ui/'+(files[mode]||'modo_eliminacion')+'.png';}}catch(e){}
   $('#setupSub').textContent=mode==='guerra'
     ? 'Evento de fin de semana: '+myNation.name+' contra '+setup.rivalNation.name+' (IA). 4 contra 4, captura de baliza.'
     : mode==='dominacion' ? 'Dominación: tres zonas (Depósito, Centro y Muelle), primero a 10 puntos.'
@@ -1209,7 +1216,14 @@ function buildSquads(){
   const rivalName=setup.mode==='guerra'?setup.rivalNation.name:(setup.opp==='ia'?'la IA':'Jugador 2');
   $('#squadBLabel').textContent='Escuadra rival · '+rivalName;
   squadRows('squadB','B');
-  $('#squadBWrap').style.opacity=(setup.opp==='ia'&&setup.mode!=='guerra')?'.85':'1';
+  const bw=$('#squadBWrap');
+  if(bw){
+    const soloIA=(setup.opp==='ia'&&setup.mode!=='guerra');
+    bw.style.opacity='1';
+    /* Contra la IA no se enseña la escuadra rival: la pantalla queda para
+       la tuya, como en el original. */
+    bw.style.display=soloIA?'none':'';
+  }
 }
 function readSquad(team){
   const out=[];
