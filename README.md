@@ -39,7 +39,7 @@ integridad de datos (`data.test.js`) y humo 3D en navegador con captura.
 | `assets/ui/` | Retratos, naciones, modos, iconos de habilidad del original, logo y arte de la portada. |
 | `bench/` | Verificación: `bench/VERIFICAR.ps1`, `check-syntax.js`, `boards.js`, `rules.test.js`, `data.test.js`, `harness.js`. |
 | `docs/` | Diseño, arquitectura, equilibrio medido, catálogo de habilidades, capturas 3D y planes. |
-| `referencia_original/` | Código descompilado y datos del original (solo lectura, referencia). |
+| `_referencia_original/` (fuera del repo) | Código descompilado y datos del original (solo lectura, referencia). No se versiona. |
 
 ## Herramientas de medida
 
@@ -52,7 +52,7 @@ integridad de datos (`data.test.js`) y humo 3D en navegador con captura.
 ## Documentos clave
 
 - [Arquitectura](docs/ARQUITECTURA.md) — estructura, funciones con su línea y reglas de edición.
-- [Plan director](docs/Plan_director_original_base.md) — fases, criterios y estado.
+- [Plan director](docs/§§docs/historico/Plan_director_original_base.md) — fases, criterios y estado.
 - [Catálogo de habilidades del original](docs/Catalogo_habilidades_original.md) — las 44 con su estado.
 - [Capturas 3D](docs/Capturas_3D.md) — los 13 mapas y las 6 misiones.
 - [Equilibrio medido](docs/Equilibrio_medido.md) — cifras por modo×mapa.
@@ -72,3 +72,19 @@ de cualquier publicación.
 Sin licencia decidida por ahora (`all rights reserved`). La decisión sobre el
 código propio queda pendiente de Dani; los assets del original no son
 licenciables.
+
+
+## Estructura del repositorio
+
+```
+index.html            el juego completo (un solo archivo)
+assets/               mallas, texturas, audio, iconos y geometria de mapas
+bench/                verificacion y pruebas (VERIFICAR.ps1, rules, datos, tableros, harness)
+docs/                 documentacion (indice en docs/README.md)
+docs/historico/       planes y auditorias de sesiones anteriores
+tools/                utilidades sueltas (servidor node, package.json)
+_capture_all.mjs      generador de capturas 3D
+```
+
+El material de referencia del IPA (`referencia_original/`) **no se versiona**:
+vive fuera del repo, en `D:\Juegos\CSN\_referencia_original`.

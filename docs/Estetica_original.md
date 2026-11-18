@@ -184,7 +184,7 @@ Los prefabs de los mapas de batalla (sacos, muros, barriles, torretas, cajas, co
 
 ### Cómo se colocan las cosas (del código)
 
-- Las coberturas son direccionales por borde de casilla, con matriz precalculada para todos los pares atacante-defensor (`CoverMap.cs`, ver Referencia_original.md).
+- Las coberturas son direccionales por borde de casilla, con matriz precalculada para todos los pares atacante-defensor (`CoverMap.cs`, ver docs/historico/Referencia_original.md).
 - Los puntos de aparición guardan su distancia precalculada a la zona de captura (`SpawnPointComponent.cs`).
 - Cada nivel trae prefabs de jugabilidad, geometría, iluminación, audio, efectos, fuera de límites, recorte, mapa de coberturas, mapa de visibilidad, lightmaps e icono (`BuildManifestLevelData.cs`). Algunos niveles son solo para un jugador.
 - La cámara de cada nivel puede cambiar color de fondo, luz ambiental y niebla (`CameraSettingsOverride.cs`).
@@ -193,7 +193,7 @@ Los prefabs de los mapas de batalla (sacos, muros, barriles, torretas, cajas, co
 
 ## 5. Cámara y presentación
 
-### Cámara (cifras auditadas, ver Referencia_original.md)
+### Cámara (cifras auditadas, ver docs/historico/Referencia_original.md)
 
 Inclinación 40–60°, distancia 6–11, FOV 30–45°, zoom por defecto 0,5 → **50°, 8,5 de distancia, FOV 37,5°**, yaw inicial 335°, giro libre 360°, ventana jugable del 70 %. En las capturas se ve exactamente eso: vista cenital inclinada, ligeramente girada, con el norte arriba a la izquierda.
 

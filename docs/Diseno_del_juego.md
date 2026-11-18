@@ -8,7 +8,7 @@ Documento de diseño del remake. El original es RAD Soldiers (Splash Damage / Wa
 
 Dos escuadras de soldados se enfrentan por turnos en una cuadrícula, cada soldado con su rol, su arma real y su especial, y se gana eliminando al rival o aguantando cinco turnos en la baliza.
 
-## Reglas centrales (del original, verificadas en su código descompilado; ver Referencia_original.md)
+## Reglas centrales (del original, verificadas en su código descompilado; ver docs/historico/Referencia_original.md)
 
 - **Turnos alternos.** Juega un bando entero y luego el otro, como en el ajedrez. Cada soldado actúa en el turno de su bando.
 - **Energía y vida por tipo de cuerpo, no por rol.** Ligero: 200 de vida, 12 de energía, 1 por casilla (12 casillas por turno). Medio: 250 de vida, 14 de energía, 2 por casilla (7 casillas). Pesado: 300 de vida, 18 de energía, 3 por casilla (6 casillas). El que más aguanta es el que menos anda, como en el original. Disparar cuesta lo que indique el arma y usar el especial cuesta lo suyo, todo de la misma reserva.

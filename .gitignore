@@ -24,3 +24,6 @@ public/assets/aistudio/
 # Sistema
 .DS_Store
 Thumbs.db
+
+# Material de referencia del IPA (vive fuera del repo, en D:\Juegos\CSN\_referencia_original)
+referencia_original/

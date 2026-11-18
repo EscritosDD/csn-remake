@@ -11,7 +11,7 @@ Cada entrada tiene dos bloques separados y nunca se mezclan:
 
 ## Escala de juego (propuesta)
 
-Para que las cifras sean coherentes entre sí, todas las propuestas usan la misma escala, tomada del original y verificada en su código descompilado (ver Referencia_original.md):
+Para que las cifras sean coherentes entre sí, todas las propuestas usan la misma escala, tomada del original y verificada en su código descompilado (ver docs/historico/Referencia_original.md):
 
 - **Vida base de un soldado:** según el tipo de cuerpo, no por rol: Ligero 200, Medio 250, Pesado 300.
 - **Energía por turno:** Ligero 12, Medio 14, Pesado 18. Moverse una casilla cuesta 1 de energía para el Ligero, 2 para el Medio y 3 para el Pesado. Disparar cuesta lo que indique cada arma.
