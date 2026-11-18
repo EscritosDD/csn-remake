@@ -2566,11 +2566,12 @@ function endGame(winner,reason){
   const survivors=G.units.filter(u=>u.alive).map(u=>u.role+' ('+u.team+', '+u.hp+' PV)').join(' · ')||'Sin supervivientes.';
   const ST=G.stats||{A:{dmg:0,kills:0},B:{dmg:0,kills:0}};
   const aliveN=t=>G.units.filter(u=>u.alive&&u.team===t).length;
+  const squadLine='<p class="sub" style="margin:8px 0 0;font-size:12px">Tu escuadra: '+G.units.filter(u=>u.team==='A'&&!u.isDrone).map(u=>charNameFor(u.role)+' ('+u.role+', '+(SKINS[u.skin]?SKINS[u.skin].name:'Estándar')+')').join(' · ')+'</p>';
   const resTable='<div class="res-table"><div class="res-row head"><span>Bando</span><span>Vivos</span><span>Daño</span><span>Derribos</span></div>'+
     ['A','B'].map(t=>'<div class="res-row"><span>'+(t==='A'?'Tú':'Rival')+'</span><span>'+aliveN(t)+'</span><span>'+ST[t].dmg+'</span><span>'+ST[t].kills+'</span></div>').join('')+'</div>';
   const won=(winner==='A'),lbl=(winner==='A'?'VICTORIA':winner==='draw'?'EMPATE':'DERROTA');
   const modeArt=effMode(G)==='dominacion'?'modo_dominacion':effMode(G)==='escolta'?'modo_escolta':effMode(G)==='baliza'?'modo_baliza':'modo_eliminacion';
-  showModal('<div class="endWrap '+(won?'win':'lose')+'"><div class="endBanner">'+lbl+'</div><img class="endArt" src="assets/ui/'+modeArt+'.png" alt=""/><h2>'+title+'</h2><p><b>'+reason+'</b></p>'+extra+'<p class="sub">Partida de '+G.round+' rondas. Supervivientes: '+survivors+'</p>'+resTable+'<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px">'+campaignButtons+'<button class="btn primary big" onclick="closeModal();backToMenu()">Volver al menú</button>'+(G.mode==='campana'?'':'<button class="btn big" onclick="closeModal();openSetup(G.mode)">Revancha</button>')+'</div></div>');
+  showModal('<div class="endWrap '+(won?'win':'lose')+'"><div class="endBanner">'+lbl+'</div><img class="endArt" src="assets/ui/'+modeArt+'.png" alt=""/><h2>'+title+'</h2><p><b>'+reason+'</b></p>'+extra+'<p class="sub">Partida de '+G.round+' rondas. Supervivientes: '+survivors+'</p>'+resTable+squadLine+'<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px">'+campaignButtons+'<button class="btn primary big" onclick="closeModal();backToMenu()">Volver al menú</button>'+(G.mode==='campana'?'':'<button class="btn big" onclick="closeModal();openSetup(G.mode)">Revancha</button>')+'</div></div>');
 }
 function showModal(html){$('#modalBox').innerHTML=html;$('#modal').classList.add('on');}
 function closeModal(){$('#modal').classList.remove('on');}
@@ -5816,7 +5817,14 @@ function buildThemedProps3(world,theme){
     const cols=['#3f6f8f','#a4432f','#c9a227','#3f7a52'];
     for(let i=0;i<5;i++)boxp(2.2,1.1,1.0,cols[i%4],null);
     for(let i=0;i<3;i++)boxp(0.7,0.12,0.9,'#8d6436','crate');
-    if(theme==='astillero'){for(let i=0;i<2;i++){const sp=take();if(!sp)continue;const g=new THREE.Group();g.position.set(sp.x,0,sp.z);
+    if(theme==='astillero'){
+    /* Pila de contenedores apilados en dos alturas. */
+    const spP=take();
+    if(spP){const g=new THREE.Group();g.position.set(spP.x,0,spP.z);
+      const a=new THREE.Mesh(new THREE.BoxGeometry(2.2,1.0,1.1),mat3('#3f6f8f',0.8));a.position.y=0.5;a.castShadow=true;g.add(a);
+      const b=new THREE.Mesh(new THREE.BoxGeometry(2.2,1.0,1.1),mat3('#a4432f',0.8));b.position.y=1.5;b.rotation.y=0.12;g.add(b);
+      g.rotation.y=rand()*Math.PI*2;world.add(g);}
+    for(let i=0;i<2;i++){const sp=take();if(!sp)continue;const g=new THREE.Group();g.position.set(sp.x,0,sp.z);
       const a=new THREE.Mesh(new THREE.BoxGeometry(0.22,3.2,0.22),mat3('#c9a227',0.6));a.position.set(-0.45,1.6,0);a.castShadow=true;g.add(a);
       const b=new THREE.Mesh(new THREE.BoxGeometry(0.22,3.2,0.22),mat3('#c9a227',0.6));b.position.set(0.45,1.6,0);b.castShadow=true;g.add(b);
       const c=new THREE.Mesh(new THREE.BoxGeometry(1.5,0.18,0.18),mat3('#8a6f1c',0.6));c.position.set(0,3.1,0);g.add(c);world.add(g);}}
