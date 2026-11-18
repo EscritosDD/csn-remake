@@ -5326,6 +5326,9 @@ function makeRealSoldier3(un){
   data.bones.forEach((b,i)=>{if(b.parent>=0)bones[b.parent].add(bones[i]);});
   const skinBones=data.skinBones.map(i=>bones[i]);
   const inverses=data.boneInverses.map(a=>new THREE.Matrix4().set(a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8],a[9],a[10],a[11],a[12],a[13],a[14],a[15]));
+  /* Diagnostico: las bind poses del IPA pueden venir en columnas. Con este
+     interruptor se trasponen antes de montar el esqueleto. */
+  if(window.__transposeBind)inverses.forEach(m=>m.transpose());
   const skeleton=new THREE.Skeleton(skinBones,inverses);
   const tint=un.skin==='nacion'?new THREE.Color(c.uni).lerp(new THREE.Color(0xffffff),0.62):new THREE.Color(0xffffff);
   tint.lerp(new THREE.Color(c.role),0.24);
