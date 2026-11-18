@@ -947,8 +947,8 @@ function rolePortraitURL(role){
             try{
               const cv=document.createElement('canvas');cv.width=128;cv.height=128;
               const cx=cv.getContext('2d');
-              const sw=im.width*0.62, sh=im.height*0.38;
-              cx.drawImage(im, im.width*0.19, im.height*0.16, sw, sh, 0, 0, 128, 128);
+              const sw=im.width*0.76, sh=im.height*0.44;
+              cx.drawImage(im, im.width*0.12, im.height*0.08, sw, sh, 0, 0, 128, 128);
               PORTRAIT_CACHE[role]=cv.toDataURL('image/png');
             }catch(err){PORTRAIT_CACHE[role]=e.url;}
           };
@@ -5083,6 +5083,7 @@ function makeGunProp3(un){
 function makeRealSoldier3(un){
   const c=soldierColors3(un);
   const g=new THREE.Group();
+  g.scale.setScalar(1.15); /* soldados un poco mas grandes que una casilla, como el original */
   /* Arco de vida en el suelo (verde el jugador, azul el rival): media luna
      por PV con drawRange sobre un anillo de 64 segmentos. */
   const hpArc=new THREE.Mesh(new THREE.RingGeometry(0.44,0.54,64,1,0,Math.PI*2),new THREE.MeshBasicMaterial({color:un.team==='A'?0x4fdc6e:0x4f8fe0,transparent:true,opacity:0.92,side:THREE.DoubleSide,depthWrite:false}));
