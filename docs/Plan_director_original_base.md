@@ -149,6 +149,19 @@ usa para capturas si el 3D no arranca. `_capture_all.mjs` captura 3D por
 defecto y la 2D únicamente con `--2d` o como respaldo; la verificación de
 cada fase se hace con `__csn3d.geo` y capturas 3D.
 
+## 3.quater Verificacion en un solo comando
+
+```powershell
+powershell -ExecutionPolicy Bypass -File bench\VERIFICAR.ps1
+```
+
+Hace las cinco comprobaciones: sintaxis del script inline, 13 tableros
+(simetria y solapes), reglas del motor (`rules.test.js`), integridad de datos
+(`data.test.js`: 12 naciones con personalidad, 17+12 personajes, 3 skins,
+6 misiones, voces y los 7 modelos por clase) y humo 3D en navegador
+(`_capture_all.mjs`, exige unidades y captura la imagen). Devuelve 0 si todo
+pasa. Es el comando que deben usar las IAs que sigan el proyecto.
+
 ## 4. Criterio de «base reconocible» (checklist final)
 
 - [x] Título con las 4 entradas del original, monedas en el chip y accesos
