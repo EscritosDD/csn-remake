@@ -5693,6 +5693,7 @@ function sampleClipPos(tr,t,out){
   return out;
 }
 function driveClipSoldier(un,mesh,t,moving){
+  if(window.__noClips)return; /* diagnostico: reposo puro */
   const ud=mesh.userData,pack=CLIPLIB.pack,clips=pack.clips,ts=t/1000;
   const stance=(WEAPONS[un.weapon]&&WEAPONS[un.weapon].cat==='Pistolas')?'1h':'2h';
   let key=null,ct=0;
