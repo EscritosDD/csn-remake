@@ -5766,6 +5766,15 @@ function buildThemedProps3(world,theme){
       const c=new THREE.Mesh(new THREE.BoxGeometry(1.5,0.18,0.18),mat3('#8a6f1c',0.6));c.position.set(0,3.1,0);g.add(c);world.add(g);}}
     for(let i=0;i<2;i++)lamp();
   } else if(theme==='platform'||theme==='rotonda'||theme==='cruce'){
+    if(theme==='cruce'){
+      /* Semaforo de calle: poste y caja con tres luces. */
+      const spS=take();
+      if(spS){const g=new THREE.Group();g.position.set(spS.x,0,spS.z);
+        const post=new THREE.Mesh(new THREE.BoxGeometry(0.1,2.2,0.1),mat3('#2f343a',0.6));post.position.y=1.1;post.castShadow=true;g.add(post);
+        const box=new THREE.Mesh(new THREE.BoxGeometry(0.26,0.62,0.24),mat3('#1d2126',0.6));box.position.y=2.1;g.add(box);
+        [['#d94040',2.28],['#e8c84e',2.10],['#4fbf6a',1.92]].forEach(([c,y])=>{const l=new THREE.Mesh(new THREE.CylinderGeometry(0.055,0.055,0.06,10),mat3(c,0.4));l.rotation.x=Math.PI/2;l.position.set(0,y,0.13);g.add(l);});
+        g.rotation.y=rand()*Math.PI*2;world.add(g);}
+    }
     for(let i=0;i<4;i++){const sp=take();if(!sp)continue;const bench=box3(1.1,0.16,0.34,'#7d5a34',sp.x,0.42,sp.z,0.9);const back=box3(1.1,0.3,0.08,'#8d6436',sp.x,0.62,sp.z+0.13,0.9);world.add(bench);world.add(back);}
     for(let i=0;i<3;i++)lamp();
     for(let i=0;i<2;i++)cylp(0.3,0.5,'#5c5346');
@@ -5810,6 +5819,13 @@ function buildThemedProps3(world,theme){
     const water=new THREE.Mesh(new THREE.CylinderGeometry(0.78,0.78,0.06,16),mat3('#3f6f8f',0.35));water.position.y=0.31;g.add(water);
     const jet=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.09,0.9,8),mat3('#7f9fb4',0.4));jet.position.y=0.75;g.add(jet);
     world.add(g);}}
+  if(theme==='dock'){const spB=take();if(spB){
+      const g=new THREE.Group();g.position.set(spB.x,0,spB.z);
+      const b1=new THREE.Mesh(new THREE.CylinderGeometry(0.16,0.2,0.5,10),mat3('#3b4046',0.75));b1.position.y=0.25;b1.castShadow=true;g.add(b1);
+      const cap=new THREE.Mesh(new THREE.CylinderGeometry(0.22,0.22,0.08,10),mat3('#3b4046',0.7));cap.position.y=0.52;g.add(cap);
+      const rope=new THREE.Mesh(new THREE.TorusGeometry(0.24,0.045,8,14),mat3('#c9b48a',0.85));rope.rotation.x=Math.PI/2;rope.position.y=0.12;g.add(rope);
+      world.add(g);}
+  }
   if(theme==='dock'){const sp=take();if(sp){const g=new THREE.Group();g.position.set(sp.x,0,sp.z);
     const a=new THREE.Mesh(new THREE.BoxGeometry(0.28,3.4,0.28),mat3('#c9a227',0.6));a.position.set(0,1.7,0);a.castShadow=true;g.add(a);
     const b=new THREE.Mesh(new THREE.BoxGeometry(1.9,0.2,0.2),mat3('#8a6f1c',0.6));b.position.set(0.85,3.3,0);b.castShadow=true;g.add(b);
