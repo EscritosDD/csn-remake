@@ -5320,6 +5320,7 @@ function makeRealSoldier3(un){
   const bones=data.bones.map(b=>{
     const bone=new THREE.Bone();bone.name=b.name;
     bone.position.fromArray(b.pos);bone.quaternion.fromArray(b.quat);
+    if(b.scale)bone.scale.fromArray(b.scale);
     return bone;
   });
   data.bones.forEach((b,i)=>{if(b.parent>=0)bones[b.parent].add(bones[i]);});
@@ -5410,6 +5411,10 @@ function makeRealSoldier3(un){
     }
   }
   const bindLocal=data.bones.map(b=>new THREE.Quaternion(b.quat[0],b.quat[1],b.quat[2],b.quat[3]));
+  /* Retargeting: si este cuerpo es una malla de clase, su reposo no es el
+     del rig base con el que se hornearon los clips. Se aplica el clip como
+     DELTA:  q = rest_clase * (rest_base^-1 * q_clip). */
+  const baseRestQ=(RD!==REAL&&REAL.data&&REAL.data.bones)?REAL.data.bones.map(b=>new THREE.Quaternion(b.quat[0],b.quat[1],b.quat[2],b.quat[3])):null;
   const bindWorldQ=[];
   data.bones.forEach((b,i)=>{bindWorldQ[i]=b.parent>=0?bindWorldQ[b.parent].clone().multiply(bindLocal[i]):bindLocal[i].clone();});
   const byName={};data.bones.forEach((b,i)=>{byName[b.name]=i;});
@@ -5496,7 +5501,7 @@ function makeRealSoldier3(un){
       }
     }
   }
-  g.userData={real:true,body:null,segs:segs,selRing:selRing,baseMesh:base,contactSh:contactSh,baseChev:chev,bones:bones,mesh3:mesh,gun:gun,bindLocal:bindLocal,bindWorldQ:bindWorldQ,byName:byName,curQ:bindLocal.map(q=>q.clone()),curRootP:new THREE.Vector3(),walkPh:Math.random()*6.28,bindPos:data.bones.map(b=>new THREE.Vector3(b.pos[0],b.pos[1],b.pos[2])),curDelta:new THREE.Vector3(),clipPhase:Math.random()*10};
+  g.userData={real:true,body:null,segs:segs,selRing:selRing,baseMesh:base,contactSh:contactSh,baseChev:chev,bones:bones,mesh3:mesh,gun:gun,bindLocal:bindLocal,baseRestQ:baseRestQ,isClassRig:!!baseRestQ,bindWorldQ:bindWorldQ,byName:byName,curQ:bindLocal.map(q=>q.clone()),curRootP:new THREE.Vector3(),walkPh:Math.random()*6.28,bindPos:data.bones.map(b=>new THREE.Vector3(b.pos[0],b.pos[1],b.pos[2])),curDelta:new THREE.Vector3(),clipPhase:Math.random()*10};
   return g;
 }
 /* Si la librería three.js no llega a cargar (sin red, CDN caído), el juego
@@ -5723,6 +5728,7 @@ function driveClipSoldier(un,mesh,t,moving){
      peso smoothstep del tiempo transcurrido. Sin cambio de clave no
      hay fundido y el muestreo es el de siempre. */
   let prevClip=null,prevCt=0,blendW=1;
+const _cqDelta=new THREE.Quaternion();
   if(ud._clipKey!==key){
     /* Los impactos entran sin fundido (ver la nota de la cabecera):
        su primer tramo ya es el latigazo, y retenerlo lo concentra. */
@@ -5762,6 +5768,10 @@ function driveClipSoldier(un,mesh,t,moving){
       if(ptr)sampleClipQuat(ptr,prevCt,_cq2);else _cq2.copy(ud.bindLocal[i]);
       _cq2.slerp(_cq,blendW);
       _cq.copy(_cq2);
+    }
+    if(ud.isClassRig&&ud.baseRestQ&&ud.baseRestQ[i]&&tr){
+      _cqDelta.copy(ud.baseRestQ[i]).invert().multiply(_cq);
+      _cq.copy(ud.bindLocal[i]).multiply(_cqDelta);
     }
     ud.curQ[i].slerp(_cq,k);
     ud.bones[i].quaternion.copy(ud.curQ[i]);
