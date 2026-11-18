@@ -1,0 +1,94 @@
+{
+ "AssaultRifle": {
+  "verts": 201,
+  "tex": "AssaultRifle_d"
+ },
+ "Rifle": {
+  "verts": 405,
+  "tex": "Rifle_d"
+ },
+ "Pistol": {
+  "verts": 196,
+  "tex": "Pistol_d"
+ },
+ "SniperRifle_weapon": {
+  "verts": 583,
+  "tex": "SniperRifle_d"
+ },
+ "Shotgun": {
+  "verts": 210,
+  "tex": "Shotgun_d"
+ },
+ "RPG": {
+  "verts": 254,
+  "tex": "RPG_d"
+ },
+ "Crossbow": {
+  "verts": 696,
+  "tex": "Crossbow_d"
+ },
+ "SledgeHammer": {
+  "verts": 98,
+  "tex": "SledgeHammer_d"
+ },
+ "Uzi": {
+  "verts": 195,
+  "tex": "Uzi_d"
+ },
+ "Revolver": {
+  "verts": 137,
+  "tex": "Revolver_d"
+ },
+ "RiotShotgun": {
+  "verts": 204,
+  "tex": "RiotShotgun_d"
+ },
+ "M95": {
+  "verts": 620,
+  "tex": "M95_d"
+ },
+ "LightMachineGun": {
+  "verts": 246,
+  "tex": "LightMachineGun_d"
+ },
+ "Molotov": {
+  "verts": 51,
+  "tex": "Molotov_d"
+ },
+ "Knife": {
+  "verts": 114,
+  "tex": "knife_d"
+ },
+ "Katana": {
+  "verts": 142,
+  "tex": "katana_d"
+ },
+ "WoodAxe": {
+  "verts": 126,
+  "tex": "WoodAxe_d"
+ },
+ "MP5K": {
+  "verts": 204,
+  "tex": "MP5K_d"
+ },
+ "Chainsaw": {
+  "verts": 334,
+  "tex": "Chainsaw_d"
+ },
+ "Minigun": {
+  "verts": 527,
+  "tex": "Minigun_d"
+ },
+ "BaseballBat_SOURCE": {
+  "verts": 179,
+  "tex": "BaseballBat_d"
+ },
+ "SpikedClub_weapon": {
+  "verts": 331,
+  "tex": "SpikedClub_d"
+ },
+ "FragGrenade": {
+  "verts": 123,
+  "tex": "FragGrenade_d"
+ }
+}

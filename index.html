@@ -408,6 +408,8 @@ body[data-state="playing"]{padding-bottom:112px}
 .ch-bar{height:6px;background:var(--panel2);border-radius:4px;overflow:hidden;margin-top:5px;border:1px solid var(--line)}
 .ch-bar i{display:block;height:100%;background:var(--amber)}
 .chapter-card .campaign-mission{width:100%}
+.wcoverWrap{height:104px;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 55%,#2b3128,#171a15);border-radius:9px;margin-bottom:8px;overflow:hidden}
+.wcover{max-width:92%;max-height:96px;object-fit:contain;mix-blend-mode:screen;filter:drop-shadow(0 4px 8px rgba(0,0,0,.5))}
 </style>
 </head>
 <body>
@@ -5006,6 +5008,146 @@ function makeDrone3(){
   g.userData={rotors:rotors,light:light};
   return g;
 }
+/* ================= ARMAS REALES DEL ORIGINAL (F14) =================
+   Las 23 mallas de armas extraidas del IPA (assets/weapons/*.obj + su
+   textura) se cargan y se colocan en el mismo anclaje que el arma
+   procedural: grupo con el canon hacia +X. Las mallas vienen en Z arriba,
+   asi que el grupo se gira -90 grados en X y se escala por categoria. */
+const WEAPON_MESH_FILE={
+  'M4A1':'AssaultRifle','AK-12':'Rifle','HK416':'AssaultRifle','FN SCAR-L':'Rifle','G36C':'AssaultRifle','FAMAS':'Rifle',
+  'MP7':'Uzi','MP5':'MP5K','FN P90':'Uzi','UMP45':'MP5K','KRISS Vector':'MP5K',
+  'M249 SAW':'LightMachineGun','M240B':'LightMachineGun','PKM':'LightMachineGun','MG3':'LightMachineGun','Browning M2':'LightMachineGun',
+  'M40':'SniperRifle_weapon','M24 SWS':'SniperRifle_weapon','M110 SASS':'M95','SVD Dragunov':'SniperRifle_weapon',
+  'AW50':'M95','Barrett M82':'M95','Mk 14 EBR':'M95','PSG-1':'SniperRifle_weapon',
+  'Remington 870':'Shotgun','Benelli M4':'RiotShotgun','Mossberg 500':'Shotgun',
+  'RPG-7':'RPG','AT4':'RPG','M72 LAW':'RPG',
+  'M203':'RPG','M32 MGL':'RPG','Mk 19':'RPG',
+  'M9':'Pistol','Glock 17':'Pistol','M1911':'Revolver','Desert Eagle':'Revolver'
+};
+const WEAPON_LEN={'Fusiles de asalto':0.54,'Subfusiles':0.36,'Ametralladoras':0.64,'Francotirador':0.72,
+  'Escopetas':0.50,'Lanzacohetes':0.74,'Lanzagranadas':0.52,'Pistolas':0.21};
+/* Caratulas de la Armeria: el arte item_weapon_* del original cuando existe
+   para la malla, y si no un render del propio modelo 3D. */
+const WEAPON_COVER_BY_FILE={
+  'AssaultRifle':'item_weapon_14_Semi_Auto_Rifle_alpha','Rifle':'item_weapon_14_Semi_Auto_Rifle_alpha',
+  'Uzi':'item_weapon_08_Uzi_alpha','MP5K':'item_weapon_18_mp5k_alpha',
+  'LightMachineGun':'item_weapon_15_Light_Machine_Gun_alpha','Minigun':'item_weapon_16_minigun_alpha',
+  'SniperRifle_weapon':'item_weapon_12_Sniper_Rifle_1_alpha','M95':'item_weapon_13_Sniper_Rifle_2_alpha',
+  'Shotgun':'item_weapon_10_shotgun_alpha','RiotShotgun':'item_weapon_17_RiotShotgun_alpha',
+  'Pistol':'item_weapon_06_M9_alpha','Revolver':'item_weapon_07_Ruger_alpha',
+  'Knife':'item_weapon_05_knife_alpha','Katana':'item_weapon_03_Katana_alpha',
+  'WoodAxe':'item_weapon_01_axe_alpha','SledgeHammer':'item_weapon_02_Sledgehammer_alpha',
+  'BaseballBat_SOURCE':'item_weapon_04_Baseball___bat_alpha','SpikedClub_weapon':'item_weapon_spikedclub_alpha',
+  'Chainsaw':'item_large_weapon_chainsaw_alpha'
+};
+const WEAPON_THUMB_CACHE={};
+let _wThumbR=null;
+function renderWeaponThumb(weapon){
+  if(WEAPON_THUMB_CACHE[weapon]!==undefined)return WEAPON_THUMB_CACHE[weapon];
+  const file=WEAPON_MESH_FILE[weapon]; const holder=GUN_MESH_CACHE[weapon];
+  if(!file||!holder){WEAPON_THUMB_CACHE[weapon]=null;return null;}
+  try{
+    if(!_wThumbR){
+      _wThumbR=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});
+      _wThumbR.setSize(192,128);_wThumbR.setClearColor(0x20241e,1);
+    }
+    const sc=new THREE.Scene();
+    sc.add(new THREE.HemisphereLight(0xffffff,0x404840,1.5));
+    const dl=new THREE.DirectionalLight(0xffffff,2.2);dl.position.set(2,3,2);sc.add(dl);
+    const g=holder.clone(true);
+    const bb=new THREE.Box3().setFromObject(g);const size=new THREE.Vector3();bb.getSize(size);const c=new THREE.Vector3();bb.getCenter(c);
+    const maxd=Math.max(size.x,size.y,size.z,0.01);
+    g.position.set(-c.x,-c.y,-c.z);
+    const wrap=new THREE.Group();wrap.add(g);wrap.scale.setScalar(1.9/maxd);
+    wrap.rotation.y=-0.7;wrap.rotation.x=0.25;
+    sc.add(wrap);
+    const cam=new THREE.PerspectiveCamera(38,192/128,0.01,50);cam.position.set(0,0.35,1.7);cam.lookAt(0,0,0);
+    _wThumbR.render(sc,cam);
+    const url=_wThumbR.domElement.toDataURL('image/png');
+    WEAPON_THUMB_CACHE[weapon]=url;return url;
+  }catch(e){WEAPON_THUMB_CACHE[weapon]=null;return null;}
+}
+function weaponCoverURL(weapon){
+  const file=WEAPON_MESH_FILE[weapon];
+  const art=file&&WEAPON_COVER_BY_FILE[file];
+  if(art)return 'assets/weapons/covers/'+art+'.png';
+  return null;
+}
+const GUN_MESH_CACHE={};
+function parseOBJStatic(txt){
+  const pos=[],uv=[],nor=[],idx=[],mapV={},mapVT={},mapVN={};
+  const lines=txt.split('\n');
+  for(const ln of lines){
+    if(!ln||ln[0]==='#')continue;
+    const p=ln.split(/\s+/);
+    if(p[0]==='v'){pos.push(+p[1],+p[2],+p[3]);}
+    else if(p[0]==='vt'){uv.push(+p[1],+p[2]);}
+    else if(p[0]==='vn'){nor.push(+p[1],+p[2],+p[3]);}
+    else if(p[0]==='f'){
+      for(let k=1;k<p.length;k++){
+        const q=p[k].split('/');
+        const vi=parseInt(q[0],10)-1; if(isNaN(vi)||vi<0)continue;
+        let a=mapV[vi];
+        if(a===undefined){a=pos.length/3;mapV[vi]=a;pos.push(pos[vi*3],pos[vi*3+1],pos[vi*3+2]);}
+        idx.push(a);
+      }
+    }
+  }
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+  g.computeVertexNormals();
+  return g;
+}
+function makeRealGun3(weapon){
+  const file=WEAPON_MESH_FILE[weapon]; if(!file)return null;
+  const cached=GUN_MESH_CACHE[weapon]; if(cached!==undefined)return cached;
+  GUN_MESH_CACHE[weapon]=null; /* cargando */
+  fetch('assets/weapons/'+file+'.obj').then(r=>{if(!r.ok)throw new Error('obj');return r.text();}).then(txt=>{
+    const geo=parseOBJStatic(txt);
+    geo.computeBoundingBox();
+    const bb=geo.boundingBox, size=new THREE.Vector3(); bb.getSize(size);
+    const long=Math.max(size.x,size.z,0.001);
+    const cat=(WEAPONS[weapon]||{}).cat||'Fusiles de asalto';
+    const target=WEAPON_LEN[cat]||0.6;
+    const k=target/long;
+    const mat=new THREE.MeshStandardMaterial({color:0x9a9a9a,roughness:0.72,metalness:0.25});
+    const texLoad=new THREE.TextureLoader();
+    texLoad.load('assets/weapons/'+file+'_tex.png',t=>{t.colorSpace=THREE.SRGBColorSpace;mat.map=t;mat.color.set(0xffffff);mat.needsUpdate=true;},undefined,()=>{});
+    const mesh=new THREE.Mesh(geo,mat);
+    /* malla en Z arriba -> Y arriba; centrada en el centro de su caja */
+    const c=new THREE.Vector3(); bb.getCenter(c);
+    /* la culata queda en el origen: el canon sale hacia +X. El holder ya
+       esta escalado por k, asi que el desplazamiento va sin escalar. */
+    mesh.position.set(-bb.min.x,-c.z,-c.y);
+    const holder=new THREE.Group();
+    holder.add(mesh);
+    holder.scale.setScalar(k);
+    holder.rotation.x=-Math.PI/2;
+    GUN_MESH_CACHE[weapon]=holder;
+    if(gunSwapWaiters[weapon]){gunSwapWaiters[weapon].forEach(fn=>{try{fn(holder);}catch(e){}});gunSwapWaiters[weapon]=[];}
+  }).catch(()=>{GUN_MESH_CACHE[weapon]=false;});
+  return null;
+}
+const gunSwapWaiters={};
+function attachRealGun(un,gun){
+  const apply=(holder)=>{
+    if(!gun||!gun.parent)return;
+    try{
+      const keep=[];
+      gun.children.forEach(ch=>{if(ch.userData&&ch.userData.isFlash)keep.push(ch);else ch.visible=false;});
+      const g2=holder.clone(true);
+      g2.userData={isRealGun:true};
+      gun.add(g2);
+      if(gun.userData.flash){const cat=(WEAPONS[un.weapon]||{}).cat||'Fusiles de asalto';gun.userData.flash.position.x=(WEAPON_LEN[cat]||0.6)*0.96;gun.userData.flash.position.y=0;}
+    }catch(e){}
+  };
+  const holder=makeRealGun3(un.weapon);
+  if(holder)apply(holder);
+  else{
+    if(!gunSwapWaiters[un.weapon])gunSwapWaiters[un.weapon]=[];
+    gunSwapWaiters[un.weapon].push(apply);
+  }
+}
 function makeGunProp3(un){
   /* El arma del original es la mitad de la silueta (70-80 % de la altura
      del soldado): cada categoría tiene la suya, de la pistola corta y
@@ -5206,7 +5348,7 @@ function makeRealSoldier3(un){
   mesh.add(bones[0]);
   mesh.bind(skeleton,new THREE.Matrix4());
   tilt.add(mesh);
-  const gun=makeGunProp3(un);gun.position.set(0.16,0.68,-0.02);g.add(gun);
+  const gun=makeGunProp3(un);gun.position.set(0.14,0.62,-0.02);g.add(gun);attachRealGun(un,gun);
   /* Mochila de rol, construida en código a la espalda (el frente del grupo
      es +X, por donde sale el arma): es lo que distingue a cada rol de un
      vistazo sobre la misma malla del IPA, igual que el arma de su rol. */
@@ -6888,8 +7030,14 @@ function buildArsenal(){
   Object.entries(WEAPONS).filter(([n,w])=>arsFilter==='Todas'||w.cat===arsFilter).forEach(([name,w])=>{
     const roles=ROLE_NAMES.filter(r=>ROLES[r].weapons.includes(name)).join(', ')||(w.cat==='Pistolas'?'Todos (secundaria)':'—');
     const d=document.createElement('div');d.className='weapon';
-    d.innerHTML='<span class="tag">'+w.cat+'</span><h3>'+name+'</h3><p class="real">'+w.real+'</p><div class="wstats"><div><b>'+w.dmg+'</b><span>Daño</span></div><div><b>'+w.rng+'</b><span>Casillas</span></div><div><b>'+w.cost+' ⚡</b><span>Coste</span></div><div><b style="font-size:12px;padding-top:4px">'+roles.split(',')[0]+'</b><span>Rol</span></div></div><p class="note">'+w.note+(w.once?' <b>Un solo uso por partida.</b>':'')+(w.aoe?' Daño en área.':'')+'</p>';
+    const cover=weaponCoverURL(name);
+    d.innerHTML='<div class="wcoverWrap">'+(cover?('<img class="wcover" src="'+cover+'" alt="" loading="lazy">'):'')+'</div><span class="tag">'+w.cat+'</span><h3>'+name+'</h3><p class="real">'+w.real+'</p><div class="wstats"><div><b>'+w.dmg+'</b><span>Daño</span></div><div><b>'+w.rng+'</b><span>Casillas</span></div><div><b>'+w.cost+' ⚡</b><span>Coste</span></div><div><b style="font-size:12px;padding-top:4px">'+roles.split(',')[0]+'</b><span>Rol</span></div></div><p class="note">'+w.note+(w.once?' <b>Un solo uso por partida.</b>':'')+(w.aoe?' Daño en área.':'')+'</p>';
     g.appendChild(d);
+    if(!cover){
+      const img=d.querySelector('.wcoverWrap');
+      const tryThumb=()=>{const u=renderWeaponThumb(name)||(makeRealGun3(name),renderWeaponThumb(name));if(u&&img){img.innerHTML='<img class="wcover" src="'+u+'" alt="">';}else{setTimeout(tryThumb,700);}};
+      setTimeout(tryThumb,500);
+    }
   });
   const rt=$('#rolesTable');rt.innerHTML=ROLE_NAMES.map(r=>{const bd=BODIES[ROLES[r].body];return '<div style="display:flex;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line);flex-wrap:wrap;align-items:center"><span class="role-dot" style="background:'+ROLES[r].color+';margin-top:5px"></span>'+(rolePortraitURL(r)?'<img class="role-thumb" src="'+rolePortraitURL(r)+'" alt="Retrato del '+r+'"/>':'')+'<b style="min-width:120px">'+r+'</b><span class="mono" style="font-size:13.5px">'+bd.name+' · '+roleLook(r).silueta+' · '+bd.hp+' PV · '+bd.energy+' ⚡ · mover '+bd.moveCost+' ⚡/casilla</span><span style="flex:1;min-width:220px" class="sub">'+ROLES[r].desc+' Armas: '+ROLES[r].weapons.join(', ')+'.</span></div>';}).join('');
 }
