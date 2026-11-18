@@ -254,20 +254,19 @@ cuerpo distinto del original, pero se leen como siete soldados distintos.
 
 ### El Comando: lo que se sabe
 
-`Agent_Heavy` trae **17 huesos y 17 bind poses** (los recuentos cuadran), pero la
-cadena derivada de sus bind poses no las reproduce: el error de
-`boneWorld × boneInverse` es **3,6 en la cabeza** (en las otras seis clases es
-0,00000). Se probaron orden de huesos, espejo X, escala horneada, `bone.scale`,
-transposición de bind poses, `bindMatrix` de la malla, normalización de la
-escala global del esqueleto y retargeting por delta. Todos fallan solo en esta
-malla, así que el problema está en los datos del IPA para ese personaje, no en
-el cargador.
+`Agent_Heavy` trajo originalmente **17 huesos y 17 bind poses**, cuya cadena
+derivada no las reproducía (error de `boneWorld × boneInverse` de **3,6 en la
+cabeza**; en las otras seis clases, 0,00000). Se probaron orden de huesos,
+espejo X, escala horneada, `bone.scale`, transposición de bind poses,
+`bindMatrix` de la malla, normalización de la escala global del esqueleto y
+retargeting por delta. Todos fallaban solo en esta malla, así que el problema
+estaba en los datos del IPA para ese personaje.
 
-**Vías que quedan**: (a) hornear su esqueleto con el pipeline que produjo
-`assets/soldier_rig.json`; (b) usar su malla **sin skinning** en pose fija
-(sólida, pero sin animación de miembros) y animarla con un truco de
-transformación del grupo; (c) dejarlo con la malla base, que es el estado
-actual.
+**Resuelto en la ronda 8** (§11, receta completa): el rig del Comando fue
+reextraído **en el orden de huesos del rig base** y con `boneInverses`
+autoconstantes, y hoy su rig trae **20 huesos** como las demás clases
+(`CLASS_MODEL_SKIP` está vacío: el Comando usa su malla de clase). Verificado
+por `bench/meshes.test.js`.
 
 
 ## 11. Receta definitiva de las 7 mallas de clase (cerrado)
@@ -299,5 +298,20 @@ Ingeniero, Artillero, Espía, Capitán).
 
 - Confirmar de cerca Espía y Capitán y, si su silueta no cuadra, suavizar
   `ROLE_LOOK` (la proporción extra puede exagerar el cuerpo real).
+
+## 12. Tanda Z.ai (18 nov 2026, rama `zai/fases-1-6`)
+
+Rama de trabajo sin tocar `main`. Un commit por fase, batería completa
+tras cada una (sintaxis 0 · tableros 19/19 · reglas 6/6 · datos 6/6 ·
+covers 4/4 · weapons 4/4 · meshes 5/5).
+
+| Fase | Commit | Qué | Deja pendiente |
+|---|---|---|---|
+| F1 | `c0c7194` | Arreglado el bug de las carátulas de respaldo: la caché de `renderWeaponThumb` quedaba envenenada con `null` mientras la malla cargaba y las 6 armas de la malla RPG (RPG-7, AT4, M72 LAW, M203, M32 MGL, Mk 19) nunca mostraban miniatura 3D en una visita fresca a la Armería. Ahora `null`=cargando (no se cachea), `false`=fallo definitivo; tope de reintentos; la miniatura espera la textura (`texReady`). Test `bench/covers.test.js` | Captura de la Armería con las 6 carátulas visibles (Chrome de Dani) |
+| F2 | `93cf93e` | `ROLE_LOOK_SOFT` medida contra las mallas de clase reales (`scripts/f2_proporciones.py`): el look vigente estaba afinado para la era de cuerpo único y quedaba descompensado (Artillero +44 % de fondo; Espía/Capitán/Comando −24..−41 % de enjutos). Tabla corregida con recorte [0,80,1,35], **conmutada con `window.__softLook=true`, off por defecto** | Captura on/off lado a lado; si cuadra, dejarla por defecto |
+| F3 | `ed8730b` | Catálogo de habilidades a **44/44** (añade Backlash Aura y Healing Aura, sin icono en el IPA: respaldo Juggernaut/Medkit) y `ABILITY_IMPL` de 16 a 21: cobertura desplegable=Backlash Aura, teletransporte=Rush Aura, bomba de abejas=Swarm Aura, tranquilizante=Charm, lanzacohetes=bazooka. Sin tocar reglas ni balance | — |
+| F4 | `5ae371e` | `bench/weapons.test.js` (4) y `bench/meshes.test.js` (5): la receta §11 como aserciones (rigs en orden del rig base, OBJ válidos, clips con huesos conocidos…) | — |
+| F5 | — | `docs/historico/README.md`: índice de vigencia; examen corregido (§10 Comando ya resuelto con rig de 20 huesos) y ARQUITECTURA (19 tableros) | — |
+| F6 | — | Mejoras de HUD solo verificables con capturas: ver §4 T2 | — |
 - Carátulas 3D para las seis armas sin arte original (lanzacohetes y
   lanzagranadas).

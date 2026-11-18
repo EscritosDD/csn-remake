@@ -95,10 +95,12 @@ estaticos (`python -m http.server 8000`) y se abre en el navegador.
 powershell -ExecutionPolicy Bypass -File bench\VERIFICAR.ps1
 ```
 
-Sintaxis (0 errores), 13 tableros (simetria y solapes), `rules.test.js`
-(6/6), `data.test.js` (6/6) y humo 3D en navegador. El balance se mide con
-`bench/harness.js <modo> <mapa> <partidas> <formato>` y las capturas con
-`_capture_all.mjs`.
+Sintaxis (0 errores), los **19 tableros** (13 jugables + 6 de campaña:
+simetría y solapes), `rules.test.js` (6/6), `data.test.js` (6/6) y humo 3D
+en navegador. Tests de la tanda Z.ai (F4): `covers.test.js` (carátulas),
+`weapons.test.js` (37 armas) y `meshes.test.js` (7 mallas + rigs + clips).
+El balance se mide con `bench/harness.js <modo> <mapa> <partidas>
+<formato>` y las capturas con `_capture_all.mjs`.
 
 ## Reglas de edicion que han costado errores
 
