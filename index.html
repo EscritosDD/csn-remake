@@ -358,6 +358,16 @@ button img.ab-ico{width:18px;height:18px;vertical-align:-3px;margin-right:6px;bo
 .res-row span{text-align:center}
 .squad-row .sq-ico{width:34px;height:34px;border-radius:8px;background:#1d221c;object-fit:cover}
 .squad-row .sq-char{font-size:11px;color:var(--muted);grid-column:2/-1;margin-top:-2px}
+.heroOrigen{position:relative;overflow:hidden;border-radius:16px;padding:18px 22px;min-height:190px}
+.heroFondo{position:absolute;inset:0;background-size:cover;background-position:right center;opacity:.85}
+.heroVelo{position:absolute;inset:0;background:linear-gradient(90deg,rgba(16,18,14,.97) 26%,rgba(16,18,14,.86) 46%,rgba(16,18,14,.35) 78%,rgba(16,18,14,.15))}
+.heroContenido{position:relative;max-width:640px}
+.heroOrigen h1{color:#f7f1e3;text-shadow:0 2px 8px rgba(0,0,0,.55)}
+.heroOrigen p{color:#d8d2c2}
+.heroOrigen b{color:#ffffff}
+.heroOrigen em{color:var(--amber)}
+.heroLogo{height:74px;margin:0 0 8px;filter:drop-shadow(0 4px 8px rgba(0,0,0,.55))}
+@media(max-width:640px){.heroLogo{height:44px}.heroOrigen{min-height:150px}}
 </style>
 </head>
 <body>
@@ -402,9 +412,14 @@ button img.ab-ico{width:18px;height:18px;vertical-align:-3px;margin-right:6px;bo
 
   <!-- ============ MAIN / PLAY ============ -->
   <section class="screen" id="scr-play">
-    <div class="hero">
+    <div class="hero heroOrigen">
+      <div class="heroFondo" style="background-image:url('assets/ui/portada_arte.png')"></div>
+      <div class="heroVelo"></div>
+      <div class="heroContenido">
+      <img class="heroLogo" src="assets/ui/rad_logo.png" alt="RAD Soldiers, el original de 2012"/>
       <h1>Ajedrez con <em>fusiles de verdad</em></h1>
 <p>Ajedrez por turnos con <b>fusiles de verdad</b>: dos escuadras, energía, cobertura direccional y armas reales. Elige nación, monta tu escuadra y a jugar.</p>
+      </div>
     </div>
 
     <div id="menuArea">
