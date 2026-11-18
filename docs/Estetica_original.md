@@ -279,3 +279,12 @@ LISTA DE VERIFICACIÓN ANTES DE ENTREGAR: cada soldado mide 200 px de alto; la c
 ```
 
 **Segundo prompt (objetos del mapa + logo, para después):** se redacta cuando los 7 soldados estén aprobados; usará los mismos moldes (textura pintada, contorno grueso, colores saturados, medidas de `CommCrate` 0,675 y anillo 0,71 de diámetro).
+
+
+## Nota: bios de personaje en CSN
+
+El original **no trae bios escritas** en el IPA (solo nombres, trajes, voces y
+paletas). Las bios de los 17 personajes que muestra el Cuartel de CSN son
+**redaccion propia inspirada en los rasgos documentados** de esta pagina
+(Hipster Dave y sus gafas verdes, Taschmann y su maza, Sister Florence y su
+papel de medica, etc.); no son canon del original.

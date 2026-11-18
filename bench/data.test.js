@@ -38,6 +38,7 @@ test('reparto: 17 personajes del original y 18 propios', () => {
   assert.equal(nOrig, 17, 'deben ser 17 personajes del IPA');
   assert.equal(nOwn, 18, 'deben ser 18 personajes propios');
   assert.equal((own.match(/bio:'/g) || []).length, 18, 'cada personaje propio debe tener bio');
+  assert.equal((orig.match(/bio:'/g) || []).length, 17, 'cada personaje del original debe tener bio');
   for (const m of own.matchAll(/role:'([^']+)'/g)) {
     assert.ok(['Francotirador', 'Artillero', 'Espía', 'Médico', 'Ingeniero', 'Comando', 'Capitán'].includes(m[1]), 'rol invalido: ' + m[1]);
   }

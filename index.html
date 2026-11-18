@@ -6967,23 +6967,23 @@ function CAST_BODIES(){
 const ROLE_BODY={'Francotirador':'Soldier_Light','Artillero':'Soldier_Heavy','Espía':'Agent_Light','Médico':'Medic','Ingeniero':'Engineer','Comando':'Agent_Heavy','Capitán':'Commander'};
 function charsForRole(role){const b=ROLE_BODY[role];return OWN_CAST.filter(c=>c.body===b).concat(ORIG_CAST.filter(c=>c.body===b));}
 const ORIG_CAST=[
- {name:'Hipster Dave',body:'Soldier_Light',outfit:'Soldier_Light_d / DeltaForce / Veteran',role:'Francotirador',play:true},
- {name:'Archie Fletcher',body:'Soldier_Light',outfit:'Rambo / DeerHunter',role:'',play:false},
- {name:'Soap',body:'Soldier_Light',outfit:'Soldier_Light (base)',role:'',play:false},
- {name:'Spud',body:'Soldier_Light',outfit:'Soldier_Light (base)',role:'',play:false},
- {name:'Ivan Tkilya',body:'Soldier_Heavy',outfit:'Soldier_heavy / GermanSpecialForces',role:'Artillero',play:true},
- {name:'Mme La Hacque',body:'Agent_Light',outfit:'Agent_light / JewelThief',role:'',play:false},
- {name:'Sneaky Pete',body:'Agent_Light',outfit:'Agent_light (base)',role:'Espía',play:true},
- {name:'Sister Florence',body:'Medic',outfit:'Medic / Medic_Rescue',role:'Médico',play:true},
- {name:'Riot Medic',body:'Medic_therapist',outfit:'Medic_therapist',role:'',play:false},
- {name:'Textbook Kate',body:'Medic',outfit:'Medic (variante)',role:'',play:false},
- {name:'Big Time Taschmann',body:'Engineer',outfit:'Engineer / Spetsnaz',role:'Ingeniero',play:true},
- {name:'Megan McNick',body:'Engineer_Light',outfit:'Engineer_Light / Trinity',role:'',play:false},
- {name:'Carlito Grosso',body:'Engineer_Heavy',outfit:'Engineer_Heavy / EOD',role:'',play:false},
- {name:'Riot Agent',body:'Agent_Heavy',outfit:'Agent_Heavy / Skin1',role:'Comando',play:true},
- {name:'Riot Engineer',body:'Engineer (RiotCop)',outfit:'Engineer_RiotCop',role:'',play:false},
- {name:'Commander (M)',body:'Commander',outfit:'Commander / Latino / Asian / African',role:'Capitán',play:true},
- {name:'Commander (F)',body:'Commander_F',outfit:'Commander_F / Latino / Asian / African',role:'',play:false}
+ {name:'Hipster Dave',body:'Soldier_Light',outfit:'Soldier_Light_d / DeltaForce / Veteran',role:'Francotirador',bio:'Gafas verdes, pelo naranja y un fusil enorme. Cara de enfado permanente.',play:true},
+ {name:'Archie Fletcher',body:'Soldier_Light',outfit:'Rambo / DeerHunter',role:'',bio:'Rambo de mercadillo: cinta en la cabeza y más valor que puntería.',play:false},
+ {name:'Soap',body:'Soldier_Light',outfit:'Soldier_Light (base)',role:'',bio:'El nombre que todos recuerdan y nadie explica.',play:false},
+ {name:'Spud',body:'Soldier_Light',outfit:'Soldier_Light (base)',role:'',bio:'Patata de nombre, roca de aguante.',play:false},
+ {name:'Ivan Tkilya',body:'Soldier_Heavy',outfit:'Soldier_heavy / GermanSpecialForces',role:'Artillero',bio:'Pesado de manual: donde se planta, hay que rodearlo.',play:true},
+ {name:'Mme La Hacque',body:'Agent_Light',outfit:'Agent_light / JewelThief',role:'',bio:'Elegancia francesa con un cuchillo en la bota.',play:false},
+ {name:'Sneaky Pete',body:'Agent_Light',outfit:'Agent_light (base)',role:'Espía',bio:'Nadie le vio llegar; nadie le vio irse.',play:true},
+ {name:'Sister Florence',body:'Medic',outfit:'Medic / Medic_Rescue',role:'Médico',bio:'Reza por ti y luego te cose la herida.',play:true},
+ {name:'Riot Medic',body:'Medic_therapist',outfit:'Medic_therapist',role:'',bio:'Casco antidisturbios y camilla blindada.',play:false},
+ {name:'Textbook Kate',body:'Medic',outfit:'Medic (variante)',role:'',bio:'Se sabe el manual de memoria; por eso dispara mejor.',play:false},
+ {name:'Big Time Taschmann',body:'Engineer',outfit:'Engineer / Spetsnaz',role:'Ingeniero',bio:'Maza más alta que su torso y sonrisa de oreja a oreja.',play:true},
+ {name:'Megan McNick',body:'Engineer_Light',outfit:'Engineer_Light / Trinity',role:'',bio:'Ingeniera de Trinity: torretas antes que palabras.',play:false},
+ {name:'Carlito Grosso',body:'Engineer_Heavy',outfit:'Engineer_Heavy / EOD',role:'',bio:'Siempre vuelve con el blindaje puesto.',play:false},
+ {name:'Riot Agent',body:'Agent_Heavy',outfit:'Agent_Heavy / Skin1',role:'Comando',bio:'Antidisturbios: escudo primero, preguntas después.',play:true},
+ {name:'Riot Engineer',body:'Engineer (RiotCop)',outfit:'Engineer_RiotCop',role:'',bio:'Convierte una calle en una fortaleza en tres turnos.',play:false},
+ {name:'Commander (M)',body:'Commander',outfit:'Commander / Latino / Asian / African',role:'Capitán',bio:'Manda con la voz y con el ejemplo.',play:true},
+ {name:'Commander (F)',body:'Commander_F',outfit:'Commander_F / Latino / Asian / African',role:'',bio:'Misma autoridad, otro acento.',play:false}
 ];
 
 /* ---- Catalogo de las 44 habilidades del original (F1/F3) ---- */
