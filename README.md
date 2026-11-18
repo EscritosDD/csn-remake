@@ -1,74 +1,25 @@
 # CSN — Chess Soldier Nation
 
-Remake jugable de **RAD Soldiers** (Splash Damage / WarChest, 2012) como juego
-web por turnos, **en 3D como el original**: escuadras de soldados con roles y
-armas reales, modos Eliminación, Captura de baliza, Dominación, Escolta y
-guerra por naciones, 13 tableros (8 Skirmish con geometría real del IPA y 5
-propios) y una campaña de 6 misiones.
+Remake de RAD Soldiers (Splash Damage / WarChest, 2012), reconstruido desde cero como juego web por turnos en 2D y 3D: escuadras de soldados con roles y armas reales, modos Eliminación, Captura de baliza, Dominación y Escolta, 13 tableros (8 Skirmish del original y 5 nuevos) y campaña.
+
+## Contenido
+
+- `index.html` — el juego completo, exportación autocontenida del artefacto web: incluye Three.js vendorizado, la malla y la textura del soldado y los mapas Skirmish_03 y Skirmish_04.
+- `assets/soldier_clips.json` — los 22 clips de animación del soldado. Es el único asset que la exportación no incrusta; el juego lo carga en tiempo de ejecución desde `assets/soldier_clips.json`.
+- `docs/` — documentos del proyecto: diseño del juego, arsenal real, referencia y estética del original, prompts de Argon, plan de operación, desarrollo continuo y auditoría independiente.
 
 ## Cómo jugar
 
-- En Windows: doble clic en `D:\Juegos\CSN\JUGAR.bat` (levanta el servidor y
-  abre el navegador).
-- O servir la carpeta con un estático y abrir `http://127.0.0.1:8000`:
+Servir la carpeta con un servidor estático (por ejemplo `python3 -m http.server`) y abrir `http://localhost:8000`. Abrirlo directamente como archivo local no basta: la carga del JSON de animaciones no funciona desde `file://` en la mayoría de navegadores.
 
-```
-python -m http.server 8000 --bind 127.0.0.1
-```
+## Aviso sobre los assets de referencia
 
-No vale abrirlo como archivo (`file://`): el juego carga assets por HTTP.
+El código y el dibujo de CSN son propios, pero `index.html` y `assets/soldier_clips.json` incrustan material extraído del IPA del original (malla y textura del soldado, geometría y texturas de Skirmish_03 y Skirmish_04, y los clips de animación) usado **solo como referencia medida**, propiedad de Splash Damage / WarChest. Ese material **no debe redistribuirse** y no puede licenciarse como propio.
 
-## Verificar que todo está sano
+## Excluido a propósito
 
-```
-powershell -ExecutionPolicy Bypass -File bench\VERIFICAR.ps1
-```
-
-Hace cinco comprobaciones y devuelve 0 si todo pasa: sintaxis del script,
-13 tableros (simetría y solapes), reglas del motor (`rules.test.js`),
-integridad de datos (`data.test.js`) y humo 3D en navegador con captura.
-
-## Qué hay dentro
-
-| Ruta | Qué es |
-|---|---|
-| `index.html` | El juego completo: interfaz, motor, escena 3D y datos (un solo archivo). |
-| `assets/soldier/` | Los **7 modelos por clase** del IPA (malla + rig + textura) y sus escalas. |
-| `assets/audio/` | **195 clips del original**: armas, voces por personaje, ambiente por mapa, música y habilidades. |
-| `assets/maps/` | Geometría de los 8 Skirmish del IPA y sus atlas. |
-| `assets/ui/` | Retratos, naciones, modos, iconos de habilidad del original, logo y arte de la portada. |
-| `bench/` | Verificación: `VERIFICAR.ps1`, `check-syntax.js`, `boards.js`, `rules.test.js`, `data.test.js`, `harness.js`. |
-| `docs/` | Diseño, arquitectura, equilibrio medido, catálogo de habilidades, capturas 3D y planes. |
-| `referencia_original/` | Código descompilado y datos del original (solo lectura, referencia). |
-
-## Herramientas de medida
-
-- **Balance**: `node bench/harness.js <modo> <mapa> <partidas> <formato 4>`
-  (Eliminación, Baliza, Dominación, Escolta). Resultados en
-  `docs/Equilibrio_medido.md` (muestras de n≥30).
-- **Capturas**: `node _capture_all.mjs <mapa|campana:N> <prefijo> [ms]`.
-  Captura en 3D y solo baja a 2D si la 3D no arranca.
-
-## Documentos clave
-
-- [Arquitectura](docs/ARQUITECTURA.md) — estructura, funciones con su línea y reglas de edición.
-- [Plan director](docs/Plan_director_original_base.md) — fases, criterios y estado.
-- [Catálogo de habilidades del original](docs/Catalogo_habilidades_original.md) — las 44 con su estado.
-- [Capturas 3D](docs/Capturas_3D.md) — los 13 mapas y las 6 misiones.
-- [Equilibrio medido](docs/Equilibrio_medido.md) — cifras por modo×mapa.
-- [Informe CSN vs original](docs/Informe_CSN_vs_original.md) — 16 áreas con fuentes.
-
-## Aviso sobre los assets del original
-
-El código y el arte propio de CSN son de Dani. El repositorio **incluye
-material extraído del IPA de RAD Soldiers** (modelos, texturas, audio, mapas,
-arte de la portada y logo) por permiso expreso del autor **solo para
-desarrollo**. Ese material es propiedad de Splash Damage / WarChest: **no se
-puede redistribuir ni licenciar** y deberá sustituirse por arte propio antes
-de cualquier publicación.
+La extracción completa del IPA del original (assets de Splash Damage, más de 100 MB) no está en este repo. Tampoco los archivos internos de trabajo (`hidden_files`) ni las claves de despliegue.
 
 ## Licencia
 
-Sin licencia decidida por ahora (`all rights reserved`). La decisión sobre el
-código propio queda pendiente de Dani; los assets del original no son
-licenciables.
+Sin licencia decidida por ahora (`all rights reserved`). La decisión sobre el código propio queda pendiente de Dani; los assets del original no son licenciables.

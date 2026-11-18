@@ -104,40 +104,22 @@ vm.runInContext(code, sandbox, { filename: 'index.html' });
 const g = sandbox.__g;
 
 // ---- Driver de partida (ambos bandos por IA, dificultad simétrica) ----
-function hpSum(team) {
-  let s = g.G.units.filter(x => x.alive && x.team === team).reduce((a, x) => a + x.hp, 0);
-  if (team === 'A' && g.G.drone && g.G.drone.alive) s += g.G.drone.hp;
-  return s;
-}
-async function playTeam(team, stats) {
-  const foe = team === 'A' ? 'B' : 'A';
+async function playTeam(team) {
   const units = g.G.units.filter(u => u.alive && u.team === team);
   for (const u of units) {
     if (g.G.over) break;
-    const dmg0 = hpSum(foe);
-    const alive0 = g.G.units.filter(x => x.alive && x.team === foe).length;
     g.G.selected = u;
     await g.aiUnitAct(u);
-    const dmg1 = hpSum(foe);
-    const alive1 = g.G.units.filter(x => x.alive && x.team === foe).length;
-    if (stats) {
-      const k = team + ':' + u.role;
-      stats[k] = stats[k] || { dmg: 0, kills: 0, acts: 0 };
-      stats[k].acts++;
-      stats[k].dmg += Math.max(0, dmg0 - dmg1);
-      stats[k].kills += Math.max(0, alive0 - alive1);
-    }
   }
 }
 async function oneGame(mode, map, fmt) {
-  const stats = {};
   g.myNation = g.NATIONS[0];
   Object.assign(g.setup, { mode, fmt, opp: 'local', rivalNation: null, skinA: 'nacion', skinB: 'nacion', map, difficulty: 'normal', campaignMission: 0 });
   g.startGame(g.mkSquad(fmt), g.mkSquad(fmt));
   let guard = 0;
   while (!g.G.over && guard++ < 400) {
     const team = g.G.turn;
-    await playTeam(team, stats);
+    await playTeam(team);
     if (g.G.over) break;
     g.endTurn();
   }
@@ -150,8 +132,6 @@ async function oneGame(mode, map, fmt) {
     dronePos: G.drone ? (G.drone.x + ',' + G.drone.y) : null,
     droneDelivered: G.drone ? G.drone.delivered : null,
     droneAlive: G.drone ? G.drone.alive : null,
-    log: G.log ? G.log.slice(-80) : null,
-    stats,
   };
 }
 
@@ -161,7 +141,6 @@ async function main() {
   const games = Math.max(1, +(process.argv[4] || 10));
   const fmt = [2, 4, 5].includes(+(process.argv[5])) ? +(process.argv[5]) : 4;
   const wins = { A: 0, B: 0, draw: 0, guard: 0 };
-  const roleTotals = {};
   let totalRounds = 0;
   console.log(`Harness IA-vs-IA · modo=${mode} mapa=${map} formato=${fmt}v${fmt} partidas=${games}`);
   for (let n = 1; n <= games; n++) {
@@ -169,20 +148,11 @@ async function main() {
     const w = r.over ? (r.winner || 'draw') : 'guard';
     wins[w] = (wins[w] || 0) + 1;
     totalRounds += r.rounds;
-    if (r.stats) for (const k in r.stats) { const t = roleTotals[k] = roleTotals[k] || { dmg: 0, kills: 0, acts: 0 }; t.dmg += r.stats[k].dmg; t.kills += r.stats[k].kills; t.acts += r.stats[k].acts; }
-    if (process.argv[6] === 'log' && r.log) {
-      const drones = r.log.filter(l => /dron|escolta|Dron|Escolta/i.test(l));
-      if (drones.length) console.log('   LOG DRON:\n    ' + drones.join('\n    '));
-    }
     console.log(`  #${String(n).padStart(3)} ${String(w).padEnd(6)} rondas=${String(r.rounds).padEnd(3)} hpA=${String(r.hpA).padEnd(4)} hpB=${String(r.hpB).padEnd(4)}${r.domA != null ? ` domA=${r.domA} domB=${r.domB}` : ''}${r.dronePos != null ? ` dron=${r.dronePos} entregado=${r.droneDelivered} vivo=${r.droneAlive}` : ''}`);
   }
   console.log('---');
   console.log(`  Victorias A: ${wins.A} · B: ${wins.B} · empates: ${wins.draw} · sin resolver: ${wins.guard || 0}`);
   console.log(`  Rondas medias por partida: ${(totalRounds / games).toFixed(1)}`);
-  if (process.argv[6] === 'roles' || process.argv[7] === 'roles') {
-    console.log('  --- efectividad por rol (dano total / kills / acciones) ---');
-    Object.entries(roleTotals).sort((a, b) => b[1].dmg - a[1].dmg).forEach(([k, v]) => console.log(`    ${k.padEnd(22)} dmg=${String(v.dmg).padEnd(6)} kills=${String(v.kills).padEnd(3)} act=${v.acts} media=${(v.dmg / Math.max(1, v.acts)).toFixed(1)}`));
-  }
 }
 
 main().then(() => process.exit(0)).catch(e => { console.error('ERROR:', e); process.exit(1); });

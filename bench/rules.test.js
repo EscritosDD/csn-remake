@@ -177,7 +177,7 @@ test('Dominacion settles only at full round completion (_domRoundDone)', () => {
   assert.equal(G.winner, 'A');
 });
 
-test('Escolta guarded drone reduces damage to 47% and wins on extraction', () => {
+test('Escolta guarded drone halves incoming damage and wins on extraction', () => {
   const api = loadEngine();
   api.myNation = api.NATIONS[0];
   Object.assign(api.setup, { mode: 'escolta', fmt: 4, opp: 'local', map: 'almacen', difficulty: 'normal' });
@@ -189,12 +189,12 @@ test('Escolta guarded drone reduces damage to 47% and wins on extraction', () =>
   api.damage(G.drone, 40, 'Prueba');
   assert.equal(unguardedStart - G.drone.hp, 40);
 
-  // Escolta pegada -> dano reducido al 47 % (regla medida en F1)
+  // Place Team A escort adjacent to drone -> -50% damage
   const guard = G.units.find(u => u.team === 'A');
   guard.x = 5; guard.y = 4;
   const guardedStart = G.drone.hp;
   api.damage(G.drone, 40, 'Prueba');
-  assert.equal(guardedStart - G.drone.hp, Math.round(40 * 0.47));
+  assert.equal(guardedStart - G.drone.hp, 20);
 
   // Guide onto extraction tile -> Team A wins immediately
   G.units.forEach(u => { if (u.team === 'B') { u.x = 11; u.y = 11; } });
