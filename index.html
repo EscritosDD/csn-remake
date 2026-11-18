@@ -410,6 +410,27 @@ body[data-state="playing"]{padding-bottom:112px}
 .chapter-card .campaign-mission{width:100%}
 .wcoverWrap{height:104px;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 55%,#2b3128,#171a15);border-radius:9px;margin-bottom:8px;overflow:hidden}
 .wcover{max-width:92%;max-height:96px;object-fit:contain;mix-blend-mode:screen;filter:drop-shadow(0 4px 8px rgba(0,0,0,.5))}
+/* ===== Visor 3D de galería ===== */
+.viewer-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;margin-top:14px}
+.viewer-character-controls{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:end;margin-top:12px}
+.viewer-character-controls label{display:grid;gap:5px;color:var(--muted);font-size:13px;font-weight:600}
+.viewer-character-controls select{width:100%;min-width:0;background:var(--panel2);border:1px solid var(--line);border-radius:8px;color:var(--ink);padding:8px 10px}
+.viewer-skin-nav{display:flex;align-items:center;gap:8px}
+.viewer-skin-nav button{min-width:42px;border:1px solid var(--line);border-radius:8px;background:var(--panel2);color:var(--ink);font-size:20px}
+.viewer-skin-nav button:disabled{opacity:.45;cursor:default}
+.viewer-skin-name{min-width:120px;text-align:center;color:var(--muted);font-size:13px}
+.viewer-list{display:flex;flex-direction:column;gap:6px;max-height:620px;overflow:auto}
+.viewer-list button{background:var(--panel2);border:1.5px solid var(--line);border-radius:8px;color:var(--ink);padding:9px 12px;text-align:left;font-weight:600}
+.viewer-list button.on{border-color:var(--amber);background:color-mix(in srgb,var(--amber) 12%,var(--panel2))}
+.viewer-stage{min-width:0}
+.viewer-canvas{position:relative;height:min(62vh,560px);min-height:320px;overflow:hidden;border:2px solid var(--line);border-radius:12px;background:radial-gradient(ellipse at 50% 40%,#30392c,#11150f 72%);touch-action:none}
+.viewer-canvas canvas{display:block;width:100%;height:100%}
+.viewer-status{position:absolute;inset:0;display:grid;place-items:center;padding:20px;text-align:center;color:var(--muted);pointer-events:none}
+.viewer-meta{display:grid;grid-template-columns:minmax(0,1fr) 120px;gap:12px;align-items:center;margin-top:10px}
+.viewer-texture{width:120px;height:76px;object-fit:contain;background:#11150f;border:1px solid var(--line);border-radius:7px}
+.viewer-zoom{display:flex;align-items:center;gap:10px;margin-top:10px;color:var(--muted);font-size:13px}
+.viewer-zoom input{flex:1;min-width:80px;accent-color:var(--amber)}
+@media(max-width:700px){.viewer-character-controls{grid-template-columns:1fr}.viewer-skin-nav{justify-content:center}.viewer-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));max-height:220px}.viewer-canvas{height:52vh;min-height:280px}.viewer-meta{grid-template-columns:minmax(0,1fr) 90px}.viewer-texture{width:90px}}
 </style>
 </head>
 <body>
@@ -419,6 +440,7 @@ body[data-state="playing"]{padding-bottom:112px}
   <nav class="tabs" id="mainTabs" style="display:none">
     <button data-tab="play" class="on">Jugar</button>
     <button data-tab="arsenal">Arsenal real</button>
+    <button data-tab="viewer">Visor 3D</button>
     <button data-tab="how">Cómo se juega</button>
   </nav>
 </div></div>
@@ -473,6 +495,7 @@ body[data-state="playing"]{padding-bottom:112px}
           <button class="btn" id="mnuChallenges">🏆 Challenges<small class="sub">Operación Londres · 6 misiones</small></button>
           <button class="btn" id="mnuExpansions">📦 Expansions<small class="sub">Contenido futuro</small></button>
           <button class="btn" id="mnuBarracks">🏰 Cuartel<small class="sub">Tropas, skins, arsenal y monedas</small></button>
+          <button class="btn" id="mnuViewer">🧊 Visor 3D<small class="sub">Personajes y armas sin entrar a una partida</small></button>
           <button class="btn" id="mnuArmory">🛠 Armería<small class="sub">Armas y catálogo de habilidades del original</small></button>
         </div>
         <p class="sub" style="margin:10px 0 0"><span class="tag amber" id="coinsTag">🪙 0</span> +25 monedas por victoria contra la IA.</p>
@@ -791,6 +814,42 @@ body[data-state="playing"]{padding-bottom:112px}
       <p class="sub" style="margin:0">Cada rol tiene su propio cuerpo, como en el original: no es el mismo soldado con otra mochila. El Artillero es un armario, el Francotirador un flaco alto, el Espía un retaco oscuro, el Ingeniero un bajito rechoncho y el Capitán el más alto de la escuadra; el tocado, el color y el arma acaban de decir quién es quién. Y cada uno tiene ya su retrato propio, el mismo que verás en su ficha durante la partida: la capucha ghillie del Francotirador, el casco de comunicaciones del Artillero, la capucha oscura del Espía, el casco blanco con cruz del Médico, el casco amarillo del Ingeniero, la gorra táctica del Comando y la gorra de plato con galón dorado del Capitán.</p>
       <div class="sprite-strip" id="spriteStrip"><p class="sub" style="grid-column:1/-1;margin:4px 0">Cargando los retratos de los roles…</p></div>
       <div id="rolesTable"></div>
+    </div>
+  </section>
+
+  <section class="screen" id="scr-viewer">
+    <div class="hero">
+      <h1>Visor <em>3D</em></h1>
+      <p>Explora los modelos y texturas del juego sin iniciar una partida. Arrastra para girar, usa la rueda o el control para acercar y alejar.</p>
+    </div>
+    <div class="panel">
+      <div class="seg" id="viewerKinds" aria-label="Tipo de modelo">
+        <button type="button" class="on" data-kind="roles">Personajes</button>
+        <button type="button" data-kind="weapons">Armas</button>
+      </div>
+      <div class="viewer-layout">
+        <div class="viewer-character-controls" id="viewerCharacterControls">
+          <label>Modelo
+            <select id="viewerCharacterSelect" aria-label="Seleccionar modelo de personaje"></select>
+          </label>
+          <div class="viewer-skin-nav" aria-label="Navegar por las skins">
+            <button type="button" id="viewerSkinPrev" aria-label="Skin anterior">‹</button>
+            <span class="viewer-skin-name" id="viewerSkinName"></span>
+            <button type="button" id="viewerSkinNext" aria-label="Skin siguiente">›</button>
+          </div>
+        </div>
+        <div class="viewer-list" id="viewerList" aria-label="Modelos disponibles"></div>
+        <div class="viewer-stage">
+          <div class="viewer-canvas" id="viewerCanvas" aria-label="Visor interactivo 3D">
+            <div class="viewer-status" id="viewerStatus">Selecciona un personaje o un arma.</div>
+          </div>
+          <div class="viewer-meta">
+            <div><h2 id="viewerName" style="margin:0">Modelo 3D</h2><p class="sub" id="viewerDescription" style="margin:4px 0 0">La textura aplicada aparece junto al modelo.</p></div>
+            <img class="viewer-texture" id="viewerTexture" alt="Textura del modelo" hidden/>
+          </div>
+          <label class="viewer-zoom">Zoom <input id="viewerZoom" type="range" min="1" max="2.5" step="0.05" value="1" aria-label="Zoom del modelo"/></label>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -7568,6 +7627,465 @@ loadSkirmishTop('skirmish03');loadSkirmishTop('skirmish04');
   else{if(saved)lsRemove(LS_NATION); showScreen('scr-nation');}
 })();
 $('#guerraCountdown').textContent=fmtCountdown(msToNextSaturday());
+</script>
+<script>
+/* ================= VISOR 3D DE GALERIA =================
+   Consume los modelos, texturas y constructores que ya usa el juego. */
+(function(){
+  const stage=document.getElementById('viewerCanvas');
+  if(!stage||typeof THREE==='undefined')return;
+  const status=document.getElementById('viewerStatus');
+  const zoomControl=document.getElementById('viewerZoom');
+  const texturePreview=document.getElementById('viewerTexture');
+  const viewer={
+    renderer:null,scene:null,camera:null,spin:null,platform:null,
+    baseDistance:3,drag:null,lastFrame:0,selection:0,
+    kind:'roles',name:'',skinIndex:0,idleActor:null,idleClipKey:'idle2h',
+    frameRequested:false,models:{roles:{},weapons:{}},textures:{}
+  };
+  const viewerOutfits=['base','decon','deerhunter','deltaforce','halloween','rambo','spetsnaz','veteran'];
+  const viewerCharacters=[
+    {key:'original:01',label:'Modelo 01',file:'soldier.obj'},
+    ...Object.entries(ROLE_MODEL_FILES).map(([role,file],index)=>({
+      key:'original:'+String(index+2).padStart(2,'0'),
+      label:'Modelo '+String(index+2).padStart(2,'0'),
+      role,file:file+'.obj'
+    })),
+    {key:'own:09',label:'Diseño Meshy 09',role:'Francotirador',mesh:'Francotirador'},
+    {key:'own:10',label:'Diseño Meshy 10',role:'Artillero',mesh:'Artillero'},
+    {key:'own:11',label:'Diseño Meshy 11',role:'Espía',mesh:'Espia'}
+  ];
+  viewerCharacters.forEach(entry=>{
+    entry.skins=entry.mesh
+      ?[{key:'own',label:'Textura Meshy'}]
+      :[
+        ...(entry.role?[{key:'native',label:'Skin 01 · textura propia'}]:[]),
+        ...viewerOutfits.map((skin,index)=>({
+          key:skin,label:'Skin '+String(index+1+(entry.role?1:0)).padStart(2,'0')+' · '+skin+'.png'
+        }))
+      ];
+  });
+  const viewerWeaponFiles=[
+    'AssaultRifle','Rifle','Pistol','SniperRifle_weapon','Shotgun','RPG','Crossbow',
+    'SledgeHammer','Uzi','Revolver','RiotShotgun','M95','LightMachineGun','Molotov',
+    'Knife','Katana','WoodAxe','MP5K','Chainsaw','Minigun','BaseballBat_SOURCE',
+    'SpikedClub_weapon','FragGrenade'
+  ];
+  const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+  function setStatus(message,visible){
+    status.textContent=message;
+    status.style.display=visible?'grid':'none';
+  }
+  function ensureRenderer(){
+    if(viewer.renderer)return true;
+    try{
+      viewer.renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+      viewer.renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+      viewer.renderer.setClearColor(0x11150f,0);
+      stage.insertBefore(viewer.renderer.domElement,status);
+      viewer.scene=new THREE.Scene();
+      viewer.scene.add(new THREE.HemisphereLight(0xe7f0d9,0x30372b,2));
+      const key=new THREE.DirectionalLight(0xffedc2,2.4);key.position.set(3,5,4);viewer.scene.add(key);
+      const fill=new THREE.DirectionalLight(0x9bb8d1,1.1);fill.position.set(-4,2,-3);viewer.scene.add(fill);
+      viewer.camera=new THREE.PerspectiveCamera(36,1,0.01,80);
+      viewer.spin=new THREE.Group();viewer.scene.add(viewer.spin);
+      viewer.platform=new THREE.Mesh(
+        new THREE.CircleGeometry(1,48),
+        new THREE.MeshStandardMaterial({color:0x30382a,roughness:0.9,metalness:0})
+      );
+      viewer.platform.rotation.x=-Math.PI/2;
+      viewer.scene.add(viewer.platform);
+      return true;
+    }catch(error){
+      setStatus('No se pudo iniciar el visor WebGL: '+error.message,true);
+      return false;
+    }
+  }
+  function updateCamera(){
+    const zoom=+(zoomControl.value||1);
+    viewer.camera.position.set(0,viewer.baseDistance*0.22,viewer.baseDistance/zoom);
+    viewer.camera.lookAt(0,0,0);
+  }
+  function resize(){
+    if(!viewer.renderer||!document.getElementById('scr-viewer').classList.contains('on'))return;
+    const width=Math.max(1,stage.clientWidth),height=Math.max(1,stage.clientHeight);
+    viewer.renderer.setSize(width,height,false);
+    viewer.camera.aspect=width/height;
+    viewer.camera.updateProjectionMatrix();
+  }
+  function frame(now){
+    if(!document.getElementById('scr-viewer').classList.contains('on')){
+      viewer.frameRequested=false;
+      return;
+    }
+    if(viewer.renderer){
+      const idle=CLIPLIB.ready&&CLIPLIB.pack&&CLIPLIB.pack.clips[viewer.idleClipKey];
+      if(viewer.idleActor&&idle)poseSpriteClip(null,viewer.idleActor,idle,(now/1000)%idle.dur,viewer.idleClipKey);
+      if(!viewer.drag&&viewer.spin&&viewer.spin.children.length)viewer.spin.rotation.y+=(now-viewer.lastFrame)/1000*0.22;
+      viewer.renderer.render(viewer.scene,viewer.camera);
+      refreshTexturePreview();
+    }
+    viewer.lastFrame=now;
+    requestAnimationFrame(frame);
+  }
+  function refreshTexturePreview(){
+    let texture=null;
+    if(viewer.spin)viewer.spin.traverse(object=>{
+      if(!texture&&object.material){
+        const mats=Array.isArray(object.material)?object.material:[object.material];
+        const mat=mats.find(item=>item.map&&item.map.image);
+        if(mat)texture=mat.map;
+      }
+    });
+    const image=texture&&texture.image;
+    const src=image&&(image.currentSrc||image.src);
+    if(src&&texturePreview.src!==src){texturePreview.src=src;texturePreview.hidden=false;}
+  }
+  function mount(model){
+    while(viewer.spin.children.length)viewer.spin.remove(viewer.spin.children[0]);
+    model.updateMatrixWorld(true);
+    const bounds=new THREE.Box3();
+    const corner=new THREE.Vector3();
+    model.traverse(object=>{
+      if(!object.isMesh||!object.geometry)return;
+      const geometry=object.geometry;
+      if(!geometry.boundingBox)geometry.computeBoundingBox();
+      if(!geometry.boundingBox)return;
+      for(let x=0;x<2;x++)for(let y=0;y<2;y++)for(let z=0;z<2;z++){
+        corner.set(x?geometry.boundingBox.max.x:geometry.boundingBox.min.x,
+          y?geometry.boundingBox.max.y:geometry.boundingBox.min.y,
+          z?geometry.boundingBox.max.z:geometry.boundingBox.min.z).applyMatrix4(object.matrixWorld);
+        bounds.expandByPoint(corner);
+      }
+    });
+    const size=new THREE.Vector3(),center=new THREE.Vector3();
+    bounds.getSize(size);bounds.getCenter(center);
+    if(!Number.isFinite(size.x)||Math.max(size.x,size.y,size.z)<0.001)throw new Error('El modelo no contiene geometría visible.');
+    model.position.sub(center);
+    viewer.spin.add(model);
+    viewer.idleActor=viewer.kind==='roles'&&model.userData.animatable?model:null;
+    viewer.idleClipKey=model.userData.idleClipKey||'idle2h';
+    viewer.spin.rotation.set(viewer.kind==='weapons'?0.25:0,-0.55,0);
+    const platformRadius=Math.max(0.35,Math.max(size.x,size.z)*0.72);
+    viewer.platform.scale.set(platformRadius,platformRadius,1);
+    viewer.platform.position.y=-size.y/2-0.035;
+    viewer.baseDistance=Math.max(size.x,size.y,size.z)*(model.userData.meshy||model.userData.staticRole?4.8:2.5);
+    updateCamera();
+    resize();
+    viewer.renderer.render(viewer.scene,viewer.camera);
+    refreshTexturePreview();
+    setStatus('',false);
+  }
+  function refreshList(){
+    const list=document.getElementById('viewerList');
+    const controls=document.getElementById('viewerCharacterControls');
+    const characterSelect=document.getElementById('viewerCharacterSelect');
+    controls.style.display=viewer.kind==='roles'?'grid':'none';
+    list.style.display=viewer.kind==='weapons'?'flex':'none';
+    if(viewer.kind==='roles'){
+      characterSelect.replaceChildren();
+      viewerCharacters.forEach(entry=>{
+        const option=document.createElement('option');
+        option.value=entry.key;option.textContent=entry.label;
+        characterSelect.appendChild(option);
+      });
+      characterSelect.value=viewer.name;
+      const entry=viewerCharacters.find(item=>item.key===viewer.name)||viewerCharacters[0];
+      const skin=entry.skins[Math.min(viewer.skinIndex,entry.skins.length-1)];
+      document.getElementById('viewerSkinName').textContent=skin.label;
+      document.getElementById('viewerSkinPrev').disabled=entry.skins.length<2;
+      document.getElementById('viewerSkinNext').disabled=entry.skins.length<2;
+      return;
+    }
+    const entries=viewerWeaponFiles.map(file=>({key:file,label:file,file}));
+    list.innerHTML='';
+    entries.forEach(entry=>{
+      const button=document.createElement('button');
+      button.type='button';button.textContent=entry.label;
+      button.classList.toggle('on',viewer.name===entry.key);
+      button.onclick=()=>selectModel(viewer.kind,entry.key);
+      list.appendChild(button);
+    });
+  }
+  function showModelInfo(kind,key){
+    const entry=kind==='roles'
+      ?viewerCharacters.find(item=>item.key===key)
+      :viewerWeaponFiles.includes(key)?{label:key,file:key}:null;
+    if(!entry)throw new Error('El modelo seleccionado no pertenece al catálogo del visor.');
+    document.getElementById('viewerName').textContent=entry.label;
+    document.getElementById('viewerDescription').textContent=kind==='roles'
+      ?(entry.mesh?'Diseño Meshy independiente · '+entry.mesh+'.':'Malla '+entry.file+' · '+entry.skins[Math.min(viewer.skinIndex,entry.skins.length-1)].label+'.')
+      :'Malla y textura del arsenal · '+entry.file+'.obj';
+    texturePreview.hidden=true;
+    texturePreview.removeAttribute('src');
+    return {entry,skin:kind==='roles'?entry.skins[Math.min(viewer.skinIndex,entry.skins.length-1)]:null};
+  }
+  function parseViewerOBJ(text,rig){
+    const vertices=[],uvs=[],normals=[],positions=[],outUvs=[],outNormals=[],skinIndices=[],skinWeights=[];
+    const resolveIndex=(index,length)=>index<0?length+index:index-1;
+    for(const line of text.split(/\r?\n/)){
+      const parts=line.trim().split(/\s+/);
+      if(parts[0]==='v')vertices.push([+parts[1],+parts[2],+parts[3]]);
+      else if(parts[0]==='vt')uvs.push([+parts[1],+parts[2]]);
+      else if(parts[0]==='vn')normals.push([+parts[1],+parts[2],+parts[3]]);
+      else if(parts[0]==='f'){
+        const face=parts.slice(1).map(token=>{
+          const indices=token.split('/');
+          return {
+            v:resolveIndex(+indices[0],vertices.length),
+            uv:indices[1]?resolveIndex(+indices[1],uvs.length):-1,
+            n:indices[2]?resolveIndex(+indices[2],normals.length):-1
+          };
+        });
+        for(let i=1;i<face.length-1;i++){
+          for(const corner of [face[0],face[i],face[i+1]]){
+            const vertex=vertices[corner.v],uv=uvs[corner.uv],normal=normals[corner.n];
+            if(!vertex)throw new Error('El OBJ Meshy contiene una cara inválida.');
+            const boneIndices=rig.skinIndex[corner.v],boneWeights=rig.skinWeight[corner.v];
+            if(!boneIndices||!boneWeights||boneIndices.length!==4||boneWeights.length!==4)
+              throw new Error('El rig Meshy no contiene pesos para todos los vértices.');
+            positions.push(vertex[0],vertex[1],vertex[2]);
+            outUvs.push(uv?uv[0]:0,uv?uv[1]:0);
+            if(normal)outNormals.push(normal[0],normal[1],normal[2]);
+            skinIndices.push(...boneIndices);
+            skinWeights.push(...boneWeights);
+          }
+        }
+      }
+    }
+    if(!positions.length)throw new Error('El OBJ Meshy no contiene caras.');
+    const geometry=new THREE.BufferGeometry();
+    geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));
+    geometry.setAttribute('uv',new THREE.Float32BufferAttribute(outUvs,2));
+    if(outNormals.length===positions.length)geometry.setAttribute('normal',new THREE.Float32BufferAttribute(outNormals,3));
+    else geometry.computeVertexNormals();
+    geometry.setAttribute('skinIndex',new THREE.Float32BufferAttribute(skinIndices,4));
+    geometry.setAttribute('skinWeight',new THREE.Float32BufferAttribute(skinWeights,4));
+    geometry.computeBoundingBox();
+    return geometry;
+  }
+  async function loadViewerMeshy(entry){
+    const base='assets/personajes_propios/'+entry.mesh;
+    const [response,rigResponse,texture]=await Promise.all([
+      fetch(base+'.obj'),fetch(base+'_rig.json'),
+      new Promise((resolve,reject)=>{
+        new THREE.TextureLoader().load(base+'_tex.png',resolve,undefined,reject);
+      })
+    ]);
+    if(!response.ok)throw new Error('No se pudo cargar el OBJ Meshy de '+entry.mesh+'.');
+    if(!rigResponse.ok)throw new Error('No se pudo cargar el rig Meshy de '+entry.mesh+'.');
+    texture.colorSpace=THREE.SRGBColorSpace;
+    const [objText,rig]=await Promise.all([response.text(),rigResponse.json()]);
+    const geometry=parseViewerOBJ(objText,rig);
+    geometry.deleteAttribute('skinIndex');
+    geometry.deleteAttribute('skinWeight');
+    const model=new THREE.Group();
+    const mesh=new THREE.Mesh(geometry,new THREE.MeshStandardMaterial({
+      map:texture,roughness:0.85,metalness:0.02,transparent:false,opacity:1,depthWrite:true,
+      side:THREE.DoubleSide
+    }));
+    mesh.castShadow=true;
+    model.add(mesh);
+    model.userData.meshy=true;
+    return model;
+  }
+  function makeViewerRiggedModel(geometry,data,texture,options={}){
+    const model=new THREE.Group();
+    const bones=data.bones.map(b=>{
+      const bone=new THREE.Bone();
+      bone.name=b.name;
+      bone.position.fromArray(b.pos);
+      bone.quaternion.fromArray(b.quat);
+      if(b.scale)bone.scale.fromArray(b.scale);
+      return bone;
+    });
+    data.bones.forEach((b,i)=>{if(b.parent>=0)bones[b.parent].add(bones[i]);});
+    const skeleton=new THREE.Skeleton(data.skinBones.map(i=>bones[i]),data.boneInverses.map(a=>new THREE.Matrix4().set(
+      a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7],
+      a[8],a[9],a[10],a[11],a[12],a[13],a[14],a[15]
+    )));
+    const mesh=new THREE.SkinnedMesh(geometry,new THREE.MeshStandardMaterial({
+      map:texture,roughness:0.85,metalness:0.02,transparent:false,opacity:1,depthWrite:true,
+      side:options.meshy?THREE.DoubleSide:THREE.FrontSide
+    }));
+    mesh.add(bones[0]);
+    mesh.bind(skeleton,new THREE.Matrix4());
+    mesh.frustumCulled=false;
+    mesh.castShadow=true;
+    model.add(mesh);
+    model.userData={
+      bones,bindLocal:data.bones.map(b=>new THREE.Quaternion(b.quat[0],b.quat[1],b.quat[2],b.quat[3])),
+      curQ:data.bones.map(b=>new THREE.Quaternion(b.quat[0],b.quat[1],b.quat[2],b.quat[3])),
+      bindPos:data.bones.map(b=>new THREE.Vector3(b.pos[0],b.pos[1],b.pos[2])),
+      curDelta:new THREE.Vector3(),mesh3:mesh,meshy:!!options.meshy,
+      animatable:true,idleClipKey:options.idleClipKey||'idle2h',idleRole:options.idleRole,
+      byName:Object.fromEntries(bones.map((bone,index)=>[bone.name,index]))
+    };
+    return model;
+  }
+  async function makeViewerOriginal(entry,skin){
+    const source=entry.role?REAL.byRole[entry.role]:REAL;
+    let texture=skin.key==='native'?source.tex:null;
+    if(skin.key==='base'&&!entry.role)texture=source.tex;
+    const texturePath='assets/soldier/outfits/'+skin.key+'.png';
+    if(!texture&&viewer.textures[texturePath])texture=viewer.textures[texturePath];
+    if(!texture){
+      if(skin.key==='native')throw new Error('El modelo no tiene una textura propia disponible.');
+      texture=await new Promise((resolve,reject)=>{
+        new THREE.TextureLoader().load(texturePath,resolve,undefined,reject);
+      });
+      texture.colorSpace=THREE.SRGBColorSpace;
+      viewer.textures[texturePath]=texture;
+    }
+    if(entry.role){
+      const geometry=source.geo.clone();
+      geometry.deleteAttribute('skinIndex');
+      geometry.deleteAttribute('skinWeight');
+      geometry.computeVertexNormals();
+      const mesh=new THREE.Mesh(geometry,new THREE.MeshStandardMaterial({
+        map:texture,roughness:0.85,metalness:0.02,transparent:false,opacity:1,depthWrite:true,
+        side:THREE.DoubleSide
+      }));
+      mesh.castShadow=true;
+      const model=new THREE.Group();
+      model.scale.setScalar(1.15);
+      const spin=new THREE.Group();spin.rotation.y=Math.PI/2;model.add(spin);
+      const tilt=new THREE.Group();tilt.rotation.x=-Math.PI/2;spin.add(tilt);
+      mesh.scale.setScalar(0.95);tilt.add(mesh);
+      model.userData.staticRole=true;
+      return model;
+    }
+    const model=makeViewerRiggedModel(source.geo.clone(),source.data,texture);
+    model.scale.setScalar(1.15);
+    const mesh=model.userData.mesh3;
+    model.remove(mesh);
+    const spin=new THREE.Group();
+    spin.rotation.y=Math.PI/2;
+    model.add(spin);
+    const tilt=new THREE.Group();
+    tilt.rotation.x=-Math.PI/2;
+    spin.add(tilt);
+    mesh.scale.setScalar(0.95);
+    tilt.add(mesh);
+    return model;
+  }
+  function viewerWeaponCacheKey(file){
+    const key='viewer:'+file;
+    if(GUN_MESH_CACHE[key]===undefined){
+      // The shared loader resolves the file synchronously; this temporary alias leaves gameplay mappings unchanged.
+      WEAPON_MESH_FILE[key]=file;
+      try{makeRealGun3(key);}
+      finally{delete WEAPON_MESH_FILE[key];}
+    }
+    return key;
+  }
+  async function selectModel(kind,name){
+    viewer.kind=kind;viewer.name=name;
+    const token=++viewer.selection;
+    refreshList();
+    let selection;
+    try{selection=showModelInfo(kind,name);}
+    catch(error){setStatus(error.message,true);return;}
+    if(!ensureRenderer())return;
+    setStatus('Cargando modelo y textura…',true);
+    try{
+      const {entry,skin}=selection;
+      const modelKey=kind==='roles'?name+'|'+skin.key:name;
+      let model=viewer.models[kind][modelKey];
+      if(!model&&kind==='roles'){
+        if(entry.mesh){
+          model=await loadViewerMeshy(entry);
+        }else{
+          const started=Date.now();
+          while((!REAL.ready||(entry.role&&!(REAL.byRole&&REAL.byRole[entry.role])))&&Date.now()-started<10000){
+            if(token!==viewer.selection)return;
+            await wait(100);
+          }
+          if(!REAL.ready||(entry.role&&!(REAL.byRole&&REAL.byRole[entry.role])))
+            throw new Error('El modelo original todavía no está disponible.');
+          model=await makeViewerOriginal(entry,skin);
+        }
+        viewer.models.roles[modelKey]=model;
+      }else if(!model){
+        const cacheKey=viewerWeaponCacheKey(entry.file);
+        if(!GUN_MESH_CACHE[cacheKey]){
+          const started=Date.now();
+          while(GUN_MESH_CACHE[cacheKey]===null&&Date.now()-started<10000){
+            if(token!==viewer.selection)return;
+            await wait(100);
+          }
+          if(GUN_MESH_CACHE[cacheKey]===false)throw new Error('No se pudo cargar la malla de esta arma.');
+          if(!GUN_MESH_CACHE[cacheKey])throw new Error('La carga de la malla tardó demasiado.');
+        }
+        model=GUN_MESH_CACHE[cacheKey].clone(true);
+        viewer.models.weapons[name]=model;
+      }
+      if(token!==viewer.selection)return;
+      mount(model);
+      document.getElementById('viewerDescription').textContent=kind==='roles'
+        ?(model.userData.meshy?'Malla OBJ y textura Meshy en pose del modelo · '+skin.label+'.':'Malla '+entry.file+' · '+skin.label+'.')
+        :'Malla y textura del arsenal · '+entry.file+'.obj';
+    }catch(error){
+      if(token===viewer.selection)setStatus('No se pudo mostrar el modelo: '+error.message,true);
+    }
+  }
+  function activate(){
+    refreshList();
+    resize();
+    const kindButton=document.querySelector('#viewerKinds button.on');
+    viewer.kind=kindButton?kindButton.dataset.kind:'roles';
+    const names=viewer.kind==='roles'?viewerCharacters.map(entry=>entry.key):viewerWeaponFiles;
+    selectModel(viewer.kind,names.includes(viewer.name)?viewer.name:names[0]);
+    if(!viewer.frameRequested){viewer.frameRequested=true;requestAnimationFrame(frame);}
+  }
+  document.getElementById('viewerCharacterSelect').onchange=event=>{
+    viewer.skinIndex=0;
+    selectModel('roles',event.target.value);
+  };
+  const stepSkin=delta=>{
+    const entry=viewerCharacters.find(item=>item.key===viewer.name);
+    if(!entry||entry.skins.length<2)return;
+    viewer.skinIndex=(viewer.skinIndex+delta+entry.skins.length)%entry.skins.length;
+    selectModel('roles',entry.key);
+  };
+  document.getElementById('viewerSkinPrev').onclick=()=>stepSkin(-1);
+  document.getElementById('viewerSkinNext').onclick=()=>stepSkin(1);
+  document.querySelectorAll('#viewerKinds button').forEach(button=>{
+    button.onclick=()=>{
+      document.querySelectorAll('#viewerKinds button').forEach(item=>item.classList.toggle('on',item===button));
+      viewer.kind=button.dataset.kind;
+      viewer.skinIndex=0;
+      const names=viewer.kind==='roles'?viewerCharacters.map(entry=>entry.key):viewerWeaponFiles;
+      selectModel(viewer.kind,names[0]);
+    };
+  });
+  zoomControl.oninput=updateCamera;
+  stage.addEventListener('wheel',event=>{
+    event.preventDefault();
+    zoomControl.value=String(Math.max(+zoomControl.min,Math.min(+zoomControl.max,+zoomControl.value+(event.deltaY<0?0.1:-0.1))));
+    updateCamera();
+  },{passive:false});
+  stage.addEventListener('pointerdown',event=>{
+    viewer.drag={x:event.clientX,y:event.clientY};
+    stage.setPointerCapture(event.pointerId);
+  });
+  stage.addEventListener('pointermove',event=>{
+    if(!viewer.drag)return;
+    const dx=event.clientX-viewer.drag.x,dy=event.clientY-viewer.drag.y;
+    viewer.drag={x:event.clientX,y:event.clientY};
+    viewer.spin.rotation.y+=dx*0.008;
+    viewer.spin.rotation.x=Math.max(-0.65,Math.min(0.65,viewer.spin.rotation.x+dy*0.006));
+  });
+  const stopDrag=()=>{viewer.drag=null;};
+  stage.addEventListener('pointerup',stopDrag);
+  stage.addEventListener('pointercancel',stopDrag);
+  const menuButton=document.getElementById('mnuViewer');
+  const tabButton=document.querySelector('#mainTabs [data-tab="viewer"]');
+  [menuButton,tabButton].forEach(button=>{
+    if(button)button.onclick=()=>{showScreen('scr-viewer');activate();};
+  });
+  window.addEventListener('resize',resize);
+})();
 </script>
 <div id="bootScreen"><div class="bootArt"></div><div class="bootBox"><img src="assets/ui/logo_csn.png" alt="CSN"/><div class="bootBar"><i id="bootFill"></i></div><p class="sub" id="bootMsg" style="color:#cfd6c8">Cargando el tablero, los soldados y los mapas…</p></div></div>
 </body>
