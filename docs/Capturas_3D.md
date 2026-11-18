@@ -29,6 +29,9 @@ director. Los triangulos y llamadas salen de `window.__csn3d`.
 | Campana - Mision 5 (Ultima guardia, 5v5) | `warehouse` | 39748 | 625 | [png](capturas/CAM_M5_3d.png) |
 | Campana - Mision 6 (El convoy, escolta 5v5) | `cruce` | 78780 | 649 | [png](capturas/CAM_M6_3d.png) |
 | Almacen industrial (baliza) | `warehouse` | 33290 | 549 | [png](capturas/ALM_3d.png) |
+| Campana mision 1 (tablero propio) | `plaza` | 32846 | 542 | [png](capturas/CAM_N1.png) |
+| Campana mision 4 (tablero propio) | `warehouse` | 32374 | 518 | [png](capturas/CAM_N4.png) |
+| Campana mision 5 (tablero propio, 5v5) | `yard` | 38864 | 601 | [png](capturas/CAM_N5.png) |
 | Patio de contenedores (baliza) | `yard` | 33006 | 550 | [png](capturas/PAT_3d.png) |
 
 Notas:
@@ -48,3 +51,11 @@ modo y la dificultad de la mision.
 
 La mision 6 se captura con 10 unidades (5 contra 5) y el dron de escolta
 en juego: confirma que el objetivo escolta funciona dentro de la campana.
+
+## Tableros propios de campana
+
+Las seis misiones de campana tienen ya tablero propio (campana01..06), con
+layout unico y simetria 180 comprobada por `bench/boards.js` (19 tableros en
+total). Las tres capturas de campaña de la tabla se tomaron arrancando la
+mision desde el capturador (`campana:N`); las seis se han jugado ademas en el
+motor con `bench/harness.js` (12 partidas, sin fallos).
