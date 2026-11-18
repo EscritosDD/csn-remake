@@ -7646,9 +7646,11 @@ $('#guerraCountdown').textContent=fmtCountdown(msToNextSaturday());
   const viewerOutfits=['base','decon','deerhunter','deltaforce','halloween','rambo','spetsnaz','veteran'];
   const viewerCharacters=[
     {key:'original:01',label:'Modelo 01',file:'soldier.obj'},
-    ...Object.entries(ROLE_MODEL_FILES).map(([role,file],index)=>({
-      key:'original:'+String(index+2).padStart(2,'0'),
-      label:'Modelo '+String(index+2).padStart(2,'0'),
+    ...Object.entries(ROLE_MODEL_FILES)
+      .filter(([role])=>!['Francotirador','Artillero','Espía'].includes(role))
+      .map(([role,file],index)=>({
+      key:'original:'+String(index+5).padStart(2,'0'),
+      label:'Modelo '+String(index+5).padStart(2,'0'),
       role,file:file+'.obj'
     })),
     {key:'own:09',label:'Diseño Meshy 09',role:'Francotirador',mesh:'Francotirador'},
