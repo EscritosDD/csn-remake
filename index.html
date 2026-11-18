@@ -1112,11 +1112,12 @@ function openSetup(mode,missionIdx){
   const titles={eliminacion:'Eliminación',baliza:'Captura de baliza',guerra:'Guerra de Naciones',dominacion:'Dominación',campana:'Campaña · Operación Londres',escolta:'Escolta del dron'};
   $('#setupTitle').textContent='Configurar partida · '+(titles[mode]||mode);
   $('#setupSub').textContent=mode==='guerra'
-    ? 'Evento de fin de semana: '+myNation.name+' contra '+setup.rivalNation.name+' (IA). Formato fijo 4 contra 4 y modo Captura de baliza. Elige los roles y las armas de tu escuadra.'
-    : mode==='dominacion' ? 'Dominación: tres zonas (Depósito, Centro y Muelle). Desde la ronda 2, al iniciar tu turno sumas 1 punto por zona que mantengas controlada y 1 punto extra si controlas las tres. Gana quien llegue a 10 puntos, tenga más al final de la ronda 15 o elimine al rival.'
-    : mode==='escolta' ? 'Escolta asimétrica: tu escuadra (Jugador 1) escolta al dron averiado desde el oeste hasta la extracción del este, guiándolo con soldados pegados a él (2 ⚡ por casilla, 2 guiados por ronda). Mientras tenga un soldado aliado pegado recibe −50 % de daño. La escuadra rival defiende: gana si destruye el dron o aguanta 15 rondas. Tu Médico puede reparar el dron con su especial. Elige mapa, formato y roles como en cualquier partida.'
-    : mode==='campana' ? CAMPAIGN_MISSIONS[setup.campaignMission].brief+' El mapa, el formato y la dificultad vienen fijados por la misión; tú eliges roles y armas.'
-    : 'Elige formato, rival y la composición de cada escuadra. Cada rol tiene sus armas permitidas y su especial, y su vida, energía y coste de movimiento van por tipo de cuerpo (ligero, medio o pesado), como en el original.';
+    ? 'Evento de fin de semana: '+myNation.name+' contra '+setup.rivalNation.name+' (IA). 4 contra 4, captura de baliza.'
+    : mode==='dominacion' ? 'Dominación: tres zonas (Depósito, Centro y Muelle), primero a 10 puntos.'
+    : mode==='escolta' ? 'Escolta: lleva el dron al este con la escolta pegada; el rival intenta pararlo.'
+    : mode==='campana' ? 'Misión '+(setup.campaignMission+1)+' · '+CAMPAIGN_MISSIONS[setup.campaignMission].title+' — mapa, formato y dificultad fijos.'
+    : 'Formato, rival y composición de cada escuadra.';
+  $('#setupSub').title=mode==='campana'?CAMPAIGN_MISSIONS[setup.campaignMission].brief:'';
   const locked=(mode==='guerra'||mode==='campana');
   document.querySelectorAll('#fmtSeg button').forEach(x=>{x.classList.toggle('on',+x.dataset.fmt===setup.fmt);x.disabled=locked;});
   document.querySelectorAll('#oppSeg button').forEach(x=>{x.classList.toggle('on',x.dataset.opp===setup.opp);x.disabled=locked;});
@@ -5100,10 +5101,15 @@ function makeRealSoldier3(un){
       helm.position.y=0.05;helm.castShadow=true;
       if(un.role==='Comando')helm.scale.y=0.62;
       gear.add(helm);
-      /* Skin de nacion: cinta del casco con el segundo color de la bandera. */
+      /* Cinta del casco: segundo color de la bandera (Nacion) o color de
+         la clase (Clase). Refuerza la lectura del bando y del rol. */
       if(un.skin==='nacion'&&un.nation&&un.nation.colors&&un.nation.colors[1]){
         const rr=un.role==='Artillero'?0.131:0.115;
         const nb=new THREE.Mesh(new THREE.CylinderGeometry(rr,rr,0.022,18),mat3(un.nation.colors[1],0.6));
+        nb.position.y=0.038;gear.add(nb);
+      } else if(un.skin==='clase'&&ROLES[un.role]){
+        const rr=un.role==='Artillero'?0.131:0.115;
+        const nb=new THREE.Mesh(new THREE.CylinderGeometry(rr,rr,0.022,18),mat3(shadeHex(ROLES[un.role].color,-20),0.55));
         nb.position.y=0.038;gear.add(nb);
       }
       if(un.role==='Médico'){
