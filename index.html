@@ -5830,6 +5830,15 @@ function buildThemedProps3(world,theme){
       const c=new THREE.Mesh(new THREE.BoxGeometry(1.5,0.18,0.18),mat3('#8a6f1c',0.6));c.position.set(0,3.1,0);g.add(c);world.add(g);}}
     for(let i=0;i<2;i++)lamp();
   } else if(theme==='platform'||theme==='rotonda'||theme==='cruce'){
+    if(theme==='cruce'){
+      /* Contenedor de obra con valla. */
+      const spCf=take();
+      if(spCf){const g=new THREE.Group();g.position.set(spCf.x,0,spCf.z);
+        const box=new THREE.Mesh(new THREE.BoxGeometry(1.8,1.1,1.0),mat3('#c9a227',0.8));box.position.y=0.55;box.castShadow=true;g.add(box);
+        const fence=new THREE.Mesh(new THREE.BoxGeometry(1.9,0.12,0.08),mat3('#e8e2d2',0.7));fence.position.set(0,1.15,0.55);g.add(fence);
+        const stripe=new THREE.Mesh(new THREE.BoxGeometry(1.8,0.14,0.02),mat3('#a4432f',0.6));stripe.position.set(0,0.75,0.51);g.add(stripe);
+        g.rotation.y=rand()*Math.PI*2;world.add(g);}
+    }
     if(theme==='rotonda'||theme==='skirmish03'||theme==='skirmish04'){
       /* Cabina telefonica roja de Londres. */
       const spT=take();
