@@ -8271,7 +8271,7 @@ const MAP_PIECES=[
   /* Frente de los diseños Meshy (medido en su OBJ: la cara mira a +Z salvo
      el Artillero, que mira a -Z). El arma debe apuntar hacia el frente del
      modelo, no siempre a +X como en los del IPA. */
-  const VIEWER_MESHY_FRONT={Francotirador:1,Espia:1,Artillero:-1};
+  const VIEWER_MESHY_FRONT={Francotirador:1,Espia:1,Artillero:-1,Medico:1,Ingeniero:1};
   const viewerCharacters=[
     ...ORIG_CAST.filter(c=>c.name!=='Soap'&&c.name!=='Spud').map((character,index)=>{
       const role=character.role||VIEWER_ROLE_FALLBACK[character.name]||'';
@@ -8288,7 +8288,9 @@ const MAP_PIECES=[
     }),
     {key:'own:09',label:'Diseño Meshy 09',role:'Francotirador',mesh:'Francotirador'},
     {key:'own:10',label:'Diseño Meshy 10',role:'Artillero',mesh:'Artillero'},
-    {key:'own:11',label:'Diseño Meshy 11',role:'Espía',mesh:'Espia'}
+    {key:'own:11',label:'Diseño Meshy 11',role:'Espía',mesh:'Espia'},
+    {key:'own:12',label:'Diseño Meshy 12',role:'Médico',mesh:'Medico'},
+    {key:'own:13',label:'Diseño Meshy 13',role:'Ingeniero',mesh:'Ingeniero'}
   ];
   viewerCharacters.forEach(entry=>{
     if(entry.mesh){entry.skins=[{key:'own',label:'Textura Meshy'}];return;}
