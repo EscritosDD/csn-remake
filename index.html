@@ -1018,7 +1018,53 @@ const CHARACTERS=[
  {name:'Riot Agent',role:'Comando',bio:'Antidisturbios: escudo primero, preguntas después.'},
  {name:'Commander (M)',role:'Capitán',bio:'Manda con la voz y con el ejemplo.'}
 ];
-function characterForRole(role,slot){const list=CHARACTERS.filter(c=>c.role===role);return list.length?list[slot%list.length]:null;}
+const MESHY_CAST=[
+ {key:'own:09',label:'Diseño Meshy 09',name:'Diseño Meshy 09',role:'Francotirador',mesh:'Francotirador',texture:'assets/personajes_propios/Francotirador_tex.png',bio:'Diseño propio de Dani.',play:true},
+ {key:'own:10',label:'Diseño Meshy 10',name:'Diseño Meshy 10',role:'Artillero',mesh:'Artillero',texture:'assets/personajes_propios/Artillero_tex.png',bio:'Diseño propio de Dani.',play:true},
+ {key:'own:11',label:'Diseño Meshy 11',name:'Diseño Meshy 11',role:'Espía',mesh:'Espia',texture:'assets/personajes_propios/Espia_tex.png',bio:'Diseño propio de Dani.',play:true},
+ {key:'own:12',label:'Diseño Meshy 12',name:'Diseño Meshy 12',role:'Médico',mesh:'Medico',texture:'assets/personajes_propios/Medico_tex.png',bio:'Diseño propio de Dani.',play:true},
+ {key:'own:13',label:'Diseño Meshy 13',name:'Diseño Meshy 13',role:'Ingeniero',mesh:'Ingeniero',texture:'assets/personajes_propios/Ingeniero_tex.png',bio:'Diseño propio de Dani.',play:true}
+];
+const CAST_TEXTURE_FILE={
+ 'Hipster Dave':'Soldier_Light_DeltaForce_d.png',
+ 'Archie Fletcher':'Soldier_Light_Rambo_DeerHunter_d.png',
+ 'Ivan Tkilya':'Soldier_heavy_GermanSpecialForces_d.png',
+ 'Mme La Hacque':'Agent_light_JewelThief_d.png',
+ 'Sneaky Pete':'Agent_light_d.png',
+ 'Sister Florence':'Medic_Rescue_d.png',
+ 'Riot Medic':'Medic_Therapist_d.png',
+ 'Textbook Kate':'Medic_d.png',
+ 'Big Time Taschmann':'Engineer_Spetsnaz_d.png',
+ 'Megan McNick':'Engineer_Light_Trinity_d.png',
+ 'Carlito Grosso':'Engineer_Heavy_EOD_d.png',
+ 'Riot Agent':'Agent_Heavy_Skin1_d.png',
+ 'Riot Engineer':'Engineer_RiotCop_d.png',
+ 'Commander (M)':'Commander_d.png',
+ 'Commander (F)':'Commander_F_d.png'
+};
+const CHAR_ABILITY_ACTIONS={
+ 'CharAbility_14_Frag_Grenade_alpha':'grenade',
+ 'CharAbility_09_Concussion_Grenade_alpha':'flash',
+ 'CharAbility_50_Molotov_alpha':'molotov',
+ 'CharAbility_45_Toolkit_alpha':'toolkit',
+ 'CharAbility_52_WaterCannon_alpha':'water',
+ 'CharAbility_13_Detection_Aura_alpha':'sweep',
+ 'CharAbility_43_Support_Fire_alpha':'arty',
+ 'CharAbility_24_Juggernaut_alpha':'shield',
+ 'CharAbility_17_Ghost_alpha':'special',
+ 'CharAbility_30_Medkit_alpha':'special',
+ 'CharAbility_36_Revive_alpha':'special',
+ 'CharAbility_42_Sniper_Rifle_Specialization_alpha':'special',
+ 'CharAbility_23_HMG_Specialization_alpha':'special',
+ 'CharAbility_07_Caltrops_alpha':'mine',
+ 'CharAbility_33_Nail_Mines_alpha':'mine',
+ 'CharAbility_12_Deployable_Cover_alpha':'cover',
+ 'CharAbility_27_Landmines_alpha':'mine',
+ 'CharAbility_37_Rocket_Turret_alpha':'deployRocket',
+ 'CharAbility_38_Rush_Aura_alpha':'teleport',
+ 'CharAbility_44_Swarm_Aura_alpha':'bees',
+ 'CharAbility_16_Gatling_Turret_alpha':'deploy'
+};
 const ROLES={
  'Francotirador':{body:'ligero',color:'#b8d94e',weapons:['M40','M24 SWS','M110 SASS','SVD Dragunov','AW50','Barrett M82','Mk 14 EBR','PSG-1'],special:'Tiro certero',sdesc:'Especial (3 ⚡): disparo con daño ×1,5 si el objetivo no se ha movido este turno.',desc:'Cuerpo ligero: decide partidas desde 9–10 casillas. Un disparo de cerrojo por turno.'},
  'Artillero':{body:'pesado',color:'#e07b39',weapons:['M249 SAW','M240B','PKM','MG3','RPG-7','AT4','M72 LAW','Browning M2','Mk 19'],special:'Supresión',sdesc:'Sus ametralladoras suprimen: el enemigo alcanzado pierde 2 de energía en su siguiente turno. Los lanzacohetes hacen daño en área.',desc:'Cuerpo pesado: el que más aguanta (300 PV) y el que más daño hace en área, pero paga 3 ⚡ por casilla.'},
@@ -1067,14 +1113,16 @@ const ROLE_PORTRAIT={'Francotirador':'retrato_francotirador.png','Artillero':'re
    uniforme) para que toda la interfaz hable el mismo idioma visual. El PNG
    pintado queda solo como respaldo mientras carga el modelo. */
 const PORTRAIT_CACHE={};
-function rolePortraitURL(role){
+function rolePortraitURL(role,char){
   try{
-    if(PORTRAIT_CACHE[role])return PORTRAIT_CACHE[role];
+    const pkey=role+'|'+((char&&(char.key||char.name))||'');
+    if(PORTRAIT_CACHE[pkey])return PORTRAIT_CACHE[pkey];
     if(REAL.ready&&typeof realSpriteUnit==='function'&&typeof renderRealSprite==='function'){
       const r=ROLES[role];
       if(r){
         const skin=myNation?'nacion':'estandar';
-        const u=realSpriteUnit(role,r.weapons[0],skin,myNation);
+         const u=realSpriteUnit(role,r.weapons[0],skin,myNation,char);
+
         const e=renderRealSprite(u);
         if(e&&e.url){
           /* Busto: recorte de la parte alta del render de cuerpo entero. */
@@ -1085,11 +1133,12 @@ function rolePortraitURL(role){
               const cx=cv.getContext('2d');
               const sw=im.width*0.76, sh=im.height*0.44;
               cx.drawImage(im, im.width*0.12, im.height*0.08, sw, sh, 0, 0, 128, 128);
-              PORTRAIT_CACHE[role]=cv.toDataURL('image/png');
+              PORTRAIT_CACHE[pkey]=cv.toDataURL('image/png');
             }catch(err){PORTRAIT_CACHE[role]=e.url;}
           };
           im.src=e.url;
-          PORTRAIT_CACHE[role]=e.url;
+           PORTRAIT_CACHE[pkey]=e.url;
+
           return e.url;
         }
       }
@@ -1346,7 +1395,7 @@ function squadRows(containerId,team){
     el.appendChild(row);
     const wsel=row.querySelector('[data-kind="weapon"]');
     const fill=()=>{const r=row.querySelector('[data-kind="role"]').value;wsel.innerHTML=ROLES[r].weapons.map(w=>'<option>'+w+'</option>').join('');
-      const ico=row.querySelector('.sq-ico');if(ico)ico.src=(rolePortraitURL(r)||'assets/ui/retrato_capitan.png');
+      const ico=row.querySelector('.sq-ico');if(ico)ico.src=(rolePortraitURL(r,characterForRole(r,i))||'assets/ui/retrato_capitan.png');
       const cl=row.querySelector('.sq-char');if(cl)cl.textContent=(CHAR_PREFS[r]||(charsForRole(r)[0]||{}).name||'');};
     row.querySelector('[data-kind="role"]').onchange=fill;fill();
   }
@@ -1940,6 +1989,40 @@ function falloffFactor(shooter,target,weapon){
 const SPAWNS_A=[{x:0,y:3},{x:0,y:5},{x:1,y:6},{x:0,y:7},{x:0,y:6}];
 const SPAWNS_B=[{x:11,y:8},{x:11,y:6},{x:10,y:5},{x:11,y:4},{x:11,y:5}];
 let uid=0;
+function charAbilitiesFor(ch){
+  if(!ch||!ch.name)return [];
+  const list=CHARACTER_ABILITIES[ch.name];
+  if(!list)return [];
+  return list.map(a=>({icon:a.icon,n:a.n,d:a.d,obj:a.obj,action:CHAR_ABILITY_ACTIONS[a.icon]||null,implemented:!!CHAR_ABILITY_ACTIONS[a.icon]}));
+}
+function hasCharAction(u,action){return !!(u&&u.charAbilities&&u.charAbilities.some(a=>a.implemented&&a.action===action));}
+function hasCharIcon(u,icon){return !!(u&&u.charAbilities&&u.charAbilities.some(a=>a.implemented&&a.icon===icon));}
+function applyCharacterAbilities(u){
+  const ensure=(key,n)=>{if((u[key]||0)<n)u[key]=n;};
+  if(hasCharAction(u,'flash'))ensure('flashes',2);
+  if(hasCharAction(u,'molotov'))ensure('molotovs',2);
+  if(hasCharAction(u,'toolkit'))ensure('toolkits',2);
+  if(hasCharAction(u,'water'))ensure('water',2);
+  if(hasCharAction(u,'shield'))ensure('shields',1);
+  if(hasCharAction(u,'arty'))ensure('arty',2);
+  if(hasCharAction(u,'mine'))ensure('mines',2);
+  if(hasCharAction(u,'cover'))ensure('covers',2);
+  if(hasCharAction(u,'gas'))ensure('gases',2);
+  if(hasCharAction(u,'crate'))ensure('crates',2);
+  if(hasCharAction(u,'teleport'))ensure('teleports',1);
+  if(hasCharAction(u,'bees'))ensure('bees',1);
+  if(hasCharAction(u,'sweep'))ensure('sweeps',1);
+  if(hasCharAction(u,'orbital'))ensure('orbitals',1);
+  if(hasCharAction(u,'tranq'))ensure('tranqs',1);
+}
+function unitHasAction(u,action){
+  if(!u)return false;
+  if(['shoot','pistol','grenade','overwatch','capture','guide'].includes(action))return true;
+  if(action==='special')return hasCharAction(u,'special')||!(u.charAbilities&&u.charAbilities.length);
+  if(u.charAbilities&&u.charAbilities.length)return hasCharAction(u,action);
+  const roleActions={smoke:'Espía',flash:'Comando',mine:'Ingeniero',cover:'Ingeniero',gas:'Artillero',molotov:'Artillero',crate:'Médico',teleport:'Espía',shield:'Comando',arty:'Artillero',bees:'Espía',tranq:'Espía',water:'Comando',toolkit:'Ingeniero',deployRocket:'Ingeniero',orbital:'Artillero',sweep:'Espía',deploy:'Ingeniero'};
+  return roleActions[action]===u.role;
+}
 function makeUnit(team,def,i,nation,skin){
   const sp=team==='A'?SPAWNS_A[i]:SPAWNS_B[i];
   const ch=characterForRole(def.role,i);
@@ -1950,11 +2033,13 @@ function makeUnit(team,def,i,nation,skin){
   if(team==='A'&&setup.mode==='campana'){const c=loadCampaign();vetLevel=(c.vet&&c.vet[i])||0;if(vetLevel>0){maxHp+=vetLevel*25;hp=maxHp;maxEnergy+=vetLevel;energy=maxEnergy;}}
   /* Dificultad de la IA: solo la escuadra rival cuando juega la máquina */
   if(team==='B'&&setup.opp==='ia'){if(setup.difficulty==='veterano'){maxEnergy+=1;energy=maxEnergy;}else if(setup.difficulty==='elite'){maxEnergy+=2;energy=maxEnergy;maxHp+=25;hp=maxHp;}}
-  return {id:++uid,team,role:def.role,name:ch?ch.name:def.role,charBio:ch?ch.bio:'',weapon:def.weapon,skin:skin||'nacion',x:sp.x,y:sp.y,dx:sp.x,dy:sp.y,hp:hp,maxHp:maxHp,
+  const u={id:++uid,team,role:def.role,name:ch?ch.name:def.role,charKey:ch?(ch.key||('original:'+ch.name)):'',charName:ch?ch.name:def.role,charBio:ch?ch.bio:'',charTexture:ch&&ch.texture?ch.texture:'',charMesh:ch&&ch.mesh?ch.mesh:'',charAbilities:charAbilitiesFor(ch),weapon:def.weapon,skin:skin||'nacion',x:sp.x,y:sp.y,dx:sp.x,dy:sp.y,hp:hp,maxHp:maxHp,
     energy:energy,maxEnergy:maxEnergy,alive:true,invisible:false,invisTurns:0,suppressed:false,stunned:false,stunFresh:false,vetLevel:vetLevel,slotIndex:i,
     grenades:def.role==='Comando'?2:1,flashes:def.role==='Comando'?2:0,smokes:def.role==='Espía'?2:0,mines:def.role==='Ingeniero'?2:0,covers:def.role==='Ingeniero'?2:0,gases:def.role==='Artillero'?2:0,sweeps:def.role==='Espía'?1:0,molotovs:def.role==='Artillero'?2:0,crates:def.role==='Médico'?2:0,teleports:def.role==='Espía'?1:0,shields:def.role==='Comando'?1:0,arty:def.role==='Artillero'?2:0,bees:def.role==='Espía'?1:0,tranqs:def.role==='Espía'?1:0,water:def.role==='Comando'?2:0,toolkits:def.role==='Ingeniero'?2:0,orbitals:def.role==='Artillero'?1:0,heals:2,revives:1,captainUsed:false,movedThisTurn:false,
     specialUsedTurn:false,onceUsed:false,nation,hasShot:false,
     facing:team==='A'?0:2,overwatch:false,returnKey:'',body:role.body,moveCost:body.moveCost};
+  applyCharacterAbilities(u);
+  return u;
 }
 function startGame(squadA,squadB){
   uid=0;
@@ -2256,7 +2341,7 @@ try{document.addEventListener('click',function(e){try{if(e.target&&e.target.clos
 function auVoice(un,ev,vol){
   if(!un||!un.role)return;
   let folder=null;
-  try{const nm=charNameFor(un.role);if(nm&&CHAR_VOICE[nm])folder=CHAR_VOICE[nm];}catch(e){}
+  try{const nm=un.name||charNameFor(un.role);if(nm&&CHAR_VOICE[nm])folder=CHAR_VOICE[nm];}catch(e){}
   if(!folder)folder=VOICE_FILES[un.role];
   if(!folder)return;
   auPlay('voice/'+folder+'/'+ev+'.mp3',vol==null?0.5:vol);
@@ -2293,7 +2378,7 @@ function renderSoundBtn(){const b=document.getElementById('soundBtn');if(b)b.tex
 const COVER_COST=3, GAS_COST=3, GAS_DMG=12, GAS_TURNS=2, SWEEP_COST=2, SWEEP_RANGE=3;
 function placeCover(u,x,y){
   try{auPlay('sfx/abilities/drop_cover.mp3',0.55);}catch(e){}
-  if(u.role!=='Ingeniero'){toast('La cobertura desplegable es del Ingeniero.');return;}
+  if(u.role!=='Ingeniero'&&!hasCharAction(u,'cover')){toast('La cobertura desplegable no está disponible para este personaje.');return;}
   if((u.covers||0)<=0){toast('Sin coberturas: el Ingeniero lleva 2 por partida.');return;}
   if(u.energy<COVER_COST){toast('La cobertura cuesta '+COVER_COST+' ⚡.');return;}
   if(cheb(u,{x,y})!==1){toast('La cobertura se despliega en una casilla adyacente.');return;}
@@ -2305,7 +2390,7 @@ function placeCover(u,x,y){
   G.actionMode='move';updateUI();draw();
 }
 function throwGas(u,x,y){
-  if(u.role!=='Artillero'){toast('La granada de gas es del Artillero.');return;}
+  if(u.role!=='Artillero'&&!hasCharAction(u,'gas')){toast('La granada de gas no está disponible para este personaje.');return;}
   if((u.gases||0)<=0){toast('Sin granadas de gas: el Artillero lleva 2 por partida.');return;}
   if(u.energy<GAS_COST){toast('La granada de gas cuesta '+GAS_COST+' ⚡.');return;}
   if(cheb(u,{x,y})>3){toast('La granada de gas se lanza a 3 casillas como máximo.');return;}
@@ -2317,7 +2402,7 @@ function throwGas(u,x,y){
   G.actionMode='move';updateUI();draw();
 }
 function sweepDetect(u,x,y){
-  if(u.role!=='Espía'){toast('El barrido detector es del Espía.');return;}
+  if(u.role!=='Espía'&&!hasCharAction(u,'sweep')){toast('El barrido detector no está disponible para este personaje.');return;}
   if((u.sweeps||0)<=0){toast('Sin barridos: el Espía lleva 1 por partida.');return;}
   if(u.energy<SWEEP_COST){toast('El barrido cuesta '+SWEEP_COST+' ⚡.');return;}
   if(cheb(u,{x,y})>SWEEP_RANGE){toast('El barrido alcanza '+SWEEP_RANGE+' casillas.');return;}
@@ -2332,7 +2417,7 @@ function sweepDetect(u,x,y){
 const ORB_COST=4, ORB_DMG=80, ORB_RANGE=6;
 function fireOrbital(u,x,y){
   try{auPlay('sfx/weapons/strike_laser_a.mp3',0.6);}catch(e){}
-  if(u.role!=='Artillero'){toast('El láser orbital es del Artillero.');return;}
+  if(u.role!=='Artillero'&&!hasCharAction(u,'orbital')){toast('El láser orbital no está disponible para este personaje.');return;}
   if((u.orbitals||0)<=0){toast('Sin cargas orbitales: el Artillero lleva 1 por partida.');return;}
   if(u.energy<ORB_COST){toast('El láser orbital cuesta '+ORB_COST+' ⚡.');return;}
   if(cheb(u,{x,y})>ORB_RANGE){toast('El láser orbital alcanza '+ORB_RANGE+' casillas.');return;}
@@ -2347,7 +2432,7 @@ function fireOrbital(u,x,y){
 /* ===== LOTE 5 (F4): tranquilizante, canon de agua y kit de herramientas ===== */
 const TRANQ_COST=2, TRANQ_RANGE=3, WATER_COST=3, WATER_RANGE=3, WATER_PUSH=2, TOOL_COST=3, TOOL_RANGE=2, TOOL_HEAL=80;
 function throwTranq(u,target){
-  if(u.role!=='Espía'){toast('El tranquilizante es del Espía.');return;}
+  if(u.role!=='Espía'&&!hasCharAction(u,'tranq')){toast('El tranquilizante no está disponible para este personaje.');return;}
   if((u.tranqs||0)<=0){toast('Sin tranquilizantes: el Espía lleva 1 por partida.');return;}
   if(u.energy<TRANQ_COST){toast('El tranquilizante cuesta '+TRANQ_COST+' ⚡.');return;}
   if(!target||target.team===u.team){toast('Elige un enemigo a '+TRANQ_RANGE+' casillas o menos.');return;}
@@ -2358,7 +2443,7 @@ function throwTranq(u,target){
   G.actionMode='move';checkWin();updateUI();draw();
 }
 function waterCannon(u,target){
-  if(u.role!=='Comando'){toast('El cañón de agua es del Comando.');return;}
+  if(u.role!=='Comando'&&!hasCharAction(u,'water')){toast('El cañón de agua no está disponible para este personaje.');return;}
   if((u.water||0)<=0){toast('Sin cargas de cañón de agua: el Comando lleva 2 por partida.');return;}
   if(u.energy<WATER_COST){toast('El cañón de agua cuesta '+WATER_COST+' ⚡.');return;}
   if(!target||target.team===u.team){toast('Elige un enemigo a '+WATER_RANGE+' casillas o menos.');return;}
@@ -2378,7 +2463,7 @@ function waterCannon(u,target){
   G.actionMode='move';updateUI();draw();
 }
 function useToolkit(u){
-  if(u.role!=='Ingeniero'){toast('El kit de herramientas es del Ingeniero.');return;}
+  if(u.role!=='Ingeniero'&&!hasCharAction(u,'toolkit')){toast('El kit de herramientas no está disponible para este personaje.');return;}
   if((u.toolkits||0)<=0){toast('Sin kits: el Ingeniero lleva 2 por partida.');return;}
   if(u.energy<TOOL_COST){toast('El kit cuesta '+TOOL_COST+' ⚡.');return;}
   const t=G.deployed.filter(d=>d.alive&&d.team===u.team&&d.hp<d.maxHp).sort((a,b)=>cheb(u,a)-cheb(u,b))[0];
@@ -2392,7 +2477,7 @@ function useToolkit(u){
 /* ===== LOTE 4 (F4): escudo antidisturbios, artillería y bomba de abejas ===== */
 const SHIELD_COST=3, SHIELD_TURNS=1, SHIELD_MULT=0.55, ARTY_COST=4, ARTY_DMG=60, ARTY_RANGE=3, BEES_COST=2, BEES_DMG=8, BEES_TURNS=2, BEES_RANGE=4;
 function useShield(u){
-  if(u.role!=='Comando'){toast('El escudo antidisturbios es del Comando.');return;}
+  if(u.role!=='Comando'&&!hasCharAction(u,'shield')){toast('El escudo antidisturbios no está disponible para este personaje.');return;}
   if((u.shields||0)<=0){toast('Sin escudo: el Comando lleva 1 por partida.');return;}
   if(u.energy<SHIELD_COST){toast('El escudo cuesta '+SHIELD_COST+' ⚡.');return;}
   G.lastMoveUndo=null;spendEnergy(u,SHIELD_COST);u.shields--;u.shieldT=SHIELD_TURNS;
@@ -2402,7 +2487,7 @@ function useShield(u){
 }
 function fireArtillery(u,x,y){
   try{auPlay('sfx/weapons/strike_artillery_a.mp3',0.6);}catch(e){}
-  if(u.role!=='Artillero'){toast('La artillería es del Artillero.');return;}
+  if(u.role!=='Artillero'&&!hasCharAction(u,'arty')){toast('La artillería no está disponible para este personaje.');return;}
   if((u.arty||0)<=0){toast('Sin cargas de artillería: el Artillero lleva 2 por partida.');return;}
   if(u.energy<ARTY_COST){toast('La artillería cuesta '+ARTY_COST+' ⚡.');return;}
   if(cheb(u,{x,y})>ARTY_RANGE){toast('La artillería alcanza '+ARTY_RANGE+' casillas.');return;}
@@ -2419,7 +2504,7 @@ function fireArtillery(u,x,y){
   G.actionMode='move';checkWin();updateUI();draw();
 }
 function throwBees(u,target){
-  if(u.role!=='Espía'){toast('La bomba de abejas es del Espía.');return;}
+  if(u.role!=='Espía'&&!hasCharAction(u,'bees')){toast('La bomba de abejas no está disponible para este personaje.');return;}
   if((u.bees||0)<=0){toast('Sin bombas de abejas: el Espía lleva 1 por partida.');return;}
   if(u.energy<BEES_COST){toast('La bomba de abejas cuesta '+BEES_COST+' ⚡.');return;}
   if(!target||target.team===u.team){toast('Elige un enemigo a '+BEES_RANGE+' casillas o menos.');return;}
@@ -2433,7 +2518,7 @@ function throwBees(u,target){
 const MOLOTOV_COST=3, MOLOTOV_DMG=15, MOLOTOV_TURNS=2, CRATE_COST=3, TELE_COST=3, TELE_RANGE=4;
 function throwMolotov(u,x,y){
   try{auPlay('sfx/weapons/grenade_throw_01.mp3',0.5);}catch(e){}
-  if(u.role!=='Artillero'){toast('El cóctel molotov es del Artillero.');return;}
+  if(u.role!=='Artillero'&&!hasCharAction(u,'molotov')){toast('El cóctel molotov no está disponible para este personaje.');return;}
   if((u.molotovs||0)<=0){toast('Sin molotovs: el Artillero lleva 2 por partida.');return;}
   if(u.energy<MOLOTOV_COST){toast('El molotov cuesta '+MOLOTOV_COST+' ⚡.');return;}
   if(cheb(u,{x,y})>3){toast('El molotov se lanza a 3 casillas como máximo.');return;}
@@ -2445,7 +2530,7 @@ function throwMolotov(u,x,y){
   G.actionMode='move';updateUI();draw();
 }
 function placeHealthCrate(u,x,y){
-  if(u.role!=='Médico'){toast('La caja de salud es del Médico.');return;}
+  if(u.role!=='Médico'&&!hasCharAction(u,'crate')){toast('La caja de salud no está disponible para este personaje.');return;}
   if((u.crates||0)<=0){toast('Sin cajas: el Médico lleva 2 por partida.');return;}
   if(u.energy<CRATE_COST){toast('La caja de salud cuesta '+CRATE_COST+' ⚡.');return;}
   if(cheb(u,{x,y})!==1){toast('La caja se deja en una casilla adyacente libre.');return;}
@@ -2456,7 +2541,7 @@ function placeHealthCrate(u,x,y){
   G.actionMode='move';updateUI();draw();
 }
 function teleportUnit(u,x,y){
-  if(u.role!=='Espía'){toast('El teletransporte es del Espía.');return;}
+  if(u.role!=='Espía'&&!hasCharAction(u,'teleport')){toast('El teletransporte no está disponible para este personaje.');return;}
   if((u.teleports||0)<=0){toast('Sin cargas de teletransporte: el Espía lleva 1 por partida.');return;}
   if(u.energy<TELE_COST){toast('El teletransporte cuesta '+TELE_COST+' ⚡.');return;}
   if(cheb(u,{x,y})>TELE_RANGE){toast('El teletransporte alcanza '+TELE_RANGE+' casillas.');return;}
@@ -2470,7 +2555,7 @@ function teleportUnit(u,x,y){
   G.actionMode='move';updateUI();draw();
 }
 function throwSmoke(u,x,y){
-  if(u.role!=='Espía'){toast('La M18 de humo es equipo del Espía.');return;}
+  if(u.role!=='Espía'&&!hasCharAction(u,'smoke')){toast('La M18 de humo no está disponible para este personaje.');return;}
   if((u.smokes||0)<=0){toast('Sin granadas de humo M18: el Espía lleva 2 por partida.');return;}
   if(u.energy<2){toast('La M18 cuesta 2 de energía.');return;}
   if(cheb(u,{x,y})>4){toast('La M18 se lanza a 4 casillas como máximo.');return;}
@@ -2503,7 +2588,7 @@ function mineAt(x,y){return (G&&G.mines||[]).find(m=>m.x===x&&m.y===y)||null;}
 function viewerTeam(){if(!G)return 'A';return G.opp==='local'?G.turn:'A';}
 function placeMine(u,x,y){
   try{auPlay('sfx/abilities/landmine_place.mp3',0.5);}catch(e){}
-  if(u.role!=='Ingeniero'){toast('La Claymore M18A1 es equipo del Ingeniero.');return;}
+  if(u.role!=='Ingeniero'&&!hasCharAction(u,'mine')){toast('La Claymore M18A1 no está disponible para este personaje.');return;}
   if((u.mines||0)<=0){toast('Sin Claymores: el Ingeniero lleva 2 por partida.');return;}
   if(u.energy<MINE_COST){toast('Colocar la Claymore cuesta '+MINE_COST+' ⚡.');return;}
   if(dist(u,{x,y})!==1){toast('La Claymore va en una casilla adyacente al Ingeniero.');return;}
@@ -2559,7 +2644,7 @@ function applyStun(t){
   log('💫 '+t.role+' ('+t.team+') queda '+(was?'aturdido otra vez':'aturdido')+': en su próximo turno empezará con −'+STUN_ENERGY_PEN+' ⚡, disparará con −'+STUN_AIM_PEN+' de puntería y hasta entonces no devuelve el fuego ni puede vigilar.');
 }
 function throwFlash(u,x,y){
-  if(u.role!=='Comando'){toast('La M84 aturdidora es equipo del Comando.');return;}
+  if(u.role!=='Comando'&&!hasCharAction(u,'flash')){toast('La M84 aturdidora no está disponible para este personaje.');return;}
   if((u.flashes||0)<=0){toast('Sin aturdidoras M84: el Comando lleva 2 por partida.');return;}
   if(u.energy<FLASH_COST){toast('La M84 cuesta '+FLASH_COST+' de energía.');return;}
   if(cheb(u,{x,y})>FLASH_RANGE){toast('La M84 se lanza a '+FLASH_RANGE+' casillas como máximo.');return;}
@@ -2635,13 +2720,13 @@ function useSpecial(u,target){
     return;
   }
   const role=u.role;
-  if(role==='Espía'){
+  if(role==='Espía'||hasCharIcon(u,'CharAbility_17_Ghost_alpha')){
     if(u.energy<3){toast('Invisibilidad cuesta 3 ⚡.');return;}
     G.lastMoveUndo=null;spendEnergy(u,3);u.invisible=true;u.invisTurns=1;
     fxFloat(u.x,u.y,'👁 INVISIBLE','#c8a8ff');
     log(u.role+' ('+u.team+') activa invisibilidad: no puede ser objetivo este turno.');updateUI();draw();return;
   }
-  if(role==='Francotirador'){
+  if(role==='Francotirador'||hasCharIcon(u,'CharAbility_42_Sniper_Rifle_Specialization_alpha')){
     if(!target||target.team===u.team){toast('Tiro certero: elige un enemigo como objetivo.');G.actionMode='special';updateUI();draw();return;}
     if(u.energy<WEAPONS[u.weapon].cost){toast('Sin energía para disparar.');return;}
     const mult=target.movedThisTurn?1:1.5;
@@ -2649,10 +2734,11 @@ function useSpecial(u,target){
     else toast('Tiro certero: el objetivo no se ha movido. Daño ×1,5.');
     const ok=tryShoot(u,target,u.weapon,mult);if(ok){u.energy=Math.max(0,u.energy-3);}G.actionMode='move';return;
   }
-  if(role==='Médico'){
+  if(role==='Médico'||hasCharIcon(u,'CharAbility_30_Medkit_alpha')){
     if(!target||target.team!==u.team){toast('Elige un aliado adyacente para curar o reanimar.');G.actionMode='special';updateUI();draw();return;}
     if(dist(u,target)>1){toast('El Médico actúa sobre aliados adyacentes.');return;}
     if(!target.alive){
+      if(hasCharIcon(u,'CharAbility_30_Medkit_alpha')&&!hasCharIcon(u,'CharAbility_36_Revive_alpha')){toast('Este personaje cura, pero no tiene Reanimar entre sus habilidades.');return;}
       if(u.revives<=0){toast('Reanimación ya usada.');return;}
       if(u.energy<4){toast('Reanimar cuesta 4 ⚡.');return;}
       G.lastMoveUndo=null;spendEnergy(u,4);u.revives--;playOnce(u,'interact');target.alive=true;target.hp=80;target.energy=0;target._deathT=null;
@@ -2675,7 +2761,7 @@ function useSpecial(u,target){
     log('★ Orden de mando: '+target.role+' recupera 3 de energía.');
     G.actionMode='move';updateUI();draw();return;
   }
-  if(role==='Ingeniero'){G.actionMode='deploy';toast('Toca una casilla adyacente libre para desplegar la torreta M2 (5 ⚡).');updateUI();draw();return;}
+  if(role==='Ingeniero'||hasCharIcon(u,'CharAbility_16_Gatling_Turret_alpha')){G.actionMode='deploy';toast('Toca una casilla adyacente libre para desplegar la torreta M2 (5 ⚡).');updateUI();draw();return;}
   if(role==='Artillero'){toast('La supresión va con sus ametralladoras: cada impacto resta 2 de energía al enemigo en su siguiente turno. Con lanzacohetes, daño en área.');return;}
   if(role==='Comando'){toast('El Comando lleva una M67 extra (botón Granada) y 2 aturdidoras M84 (botón Aturdidora): sin daño, pero dejan al enemigo viendo estrellas durante un turno.');return;}
 }
@@ -2820,7 +2906,7 @@ function endGame(winner,reason){
   const survivors=G.units.filter(u=>u.alive).map(u=>u.role+' ('+u.team+', '+u.hp+' PV)').join(' · ')||'Sin supervivientes.';
   const ST=G.stats||{A:{dmg:0,kills:0},B:{dmg:0,kills:0}};
   const aliveN=t=>G.units.filter(u=>u.alive&&u.team===t).length;
-  const squadLine='<p class="sub" style="margin:8px 0 0;font-size:12px">Tu escuadra: '+G.units.filter(u=>u.team==='A'&&!u.isDrone).map(u=>charNameFor(u.role)+' ('+u.role+', '+(SKINS[u.skin]?SKINS[u.skin].name:'Estándar')+')').join(' · ')+'</p>';
+  const squadLine='<p class="sub" style="margin:8px 0 0;font-size:12px">Tu escuadra: '+G.units.filter(u=>u.team==='A'&&!u.isDrone).map(u=>u.name+' ('+u.role+', '+(SKINS[u.skin]?SKINS[u.skin].name:'Estándar')+')').join(' · ')+'</p>';
   const resTable='<div class="res-table"><div class="res-row head"><span>Bando</span><span>Vivos</span><span>Daño</span><span>Derribos</span></div>'+
     ['A','B'].map(t=>'<div class="res-row"><span>'+(t==='A'?'Tú':'Rival')+'</span><span>'+aliveN(t)+'</span><span>'+ST[t].dmg+'</span><span>'+ST[t].kills+'</span></div>').join('')+'</div>';
   const won=(winner==='A'),lbl=(winner==='A'?'VICTORIA':winner==='draw'?'EMPATE':'DERROTA');
@@ -3561,11 +3647,11 @@ function boardTileClick(t){
   if(G.actionMode==='water'&&u){if(clickedUnit&&clickedUnit.team!==u.team)waterCannon(u,clickedUnit);return;}
   if(clickedUnit){
     if(clickedUnit.team===G.turn){
-      if(G.actionMode==='special'&&u&&(u.role==='Médico'||u.role==='Capitán')){useSpecial(u,clickedUnit);G.actionMode='move';updateUI();draw();return;}
+      if(G.actionMode==='special'&&u&&(u.role==='Médico'||u.role==='Capitán'||hasCharIcon(u,'CharAbility_30_Medkit_alpha')||hasCharIcon(u,'CharAbility_36_Revive_alpha'))){useSpecial(u,clickedUnit);G.actionMode='move';updateUI();draw();return;}
       selectUnit(clickedUnit);return;
     } else {
       if(!u||u.team!==G.turn){toast('Selecciona primero a uno de tus soldados.');return;}
-      if(G.actionMode==='special'&&u.role==='Francotirador'){useSpecial(u,clickedUnit);return;}
+      if(G.actionMode==='special'&&(u.role==='Francotirador'||hasCharIcon(u,'CharAbility_42_Sniper_Rifle_Specialization_alpha'))){useSpecial(u,clickedUnit);return;}
       if(G.actionMode==='pistol'){tryShoot(u,clickedUnit,PISTOL,null);return;}
       tryShoot(u,clickedUnit,u.weapon,null);return;
     }
@@ -3685,16 +3771,16 @@ function updateUI(){
   /* HUD del original: icono de clase, vida, energía, habilidades y carátula del arma. */
   const ROLE_CLASS_ICON={Francotirador:'Soldier',Artillero:'Soldier',Espía:'Agent',Médico:'Medic',Ingeniero:'Engineer',Comando:'Soldier',Capitán:'Commander'};
   const classIco=ROLE_CLASS_ICON[u.role]||'Soldier';
-  const charAbs=(typeof CHARACTER_ABILITIES!=='undefined'?(CHARACTER_ABILITIES[u.name]||CHARACTER_ABILITIES[charNameFor(u.role)]||[]):[]);
+  const charAbs=u.charAbilities||[];
   const abBg=u.team==='A'?'assets/ui/orig/CharAbility_background_blue.png':'assets/ui/orig/CharAbility_background_red.png';
-  const abChips=charAbs.map(a=>'<span class="ab-chip" style="background-image:url(\''+abBg+'\')" title="'+a.n+' · '+a.d+'"><img class="ab-ico" src="assets/ui/ability/'+a.icon+'.png" alt=""/>'+a.n+'</span>').join('');
+  const abChips=charAbs.map(a=>'<span class="ab-chip" style="background-image:url(\''+abBg+'\');'+(a.implemented?'':'opacity:.58')+'" title="'+a.n+' · '+a.d+(a.implemented?' · en juego · '+ABILITY_IMPL[a.icon]:' · solo informativo (aún no implementada)')+'"><img class="ab-ico" src="assets/ui/ability/'+a.icon+'.png" alt=""/>'+a.n+(a.implemented?'':' ℹ')+'</span>').join('');
   const wpMesh=(typeof WEAPON_MESH_FILE!=='undefined'?WEAPON_MESH_FILE[u.weapon]:null);
   const wpCover=wpMesh&&typeof WEAPON_COVER_BY_FILE!=='undefined'&&WEAPON_COVER_BY_FILE[wpMesh]?'<img class="wp-cover" src="assets/weapons/covers/'+WEAPON_COVER_BY_FILE[wpMesh]+'.png" alt=""/>':'';
   const wpOrig=wpMesh&&typeof WEAPONS_ORIGINAL!=='undefined'&&WEAPONS_ORIGINAL[wpMesh]?WEAPONS_ORIGINAL[wpMesh].name:null;
   let tileCov=0;[[1,0],[-1,0],[0,1],[0,-1]].forEach(dd=>{const o=obAt(u.x+dd[0],u.y+dd[1]);if(!o)return;const lv=o.type==='wall'||o.type==='shelf'?3:(o.type==='crate'?(o.hp>o.maxHp/2?2:1):0);if(lv>tileCov)tileCov=lv;});
   const covIco=tileCov>0?'<img class="cov-ico" src="assets/ui/orig/hud_icon_emote_cover'+(tileCov*25)+'.png" alt=""/>':'';
   const covTxt=tileCov>0?' · '+covIco+' Cobertura '+tileCov+' (−'+[0,12,25,40][tileCov]+'%)':'';
-  card.innerHTML=(()=>{const pUrl=rolePortraitURL(u.role);if(pUrl)return '<img class="unit-sprite" src="'+pUrl+'" alt="Retrato del '+u.role+'"/>';const rsUrl=getRealSpriteURL(u);if(rsUrl)return '<img class="unit-sprite" src="'+rsUrl+'" alt="Sprite del '+u.role+' renderizado desde el modelo real, en el tablero"/>';return (ARGON_READY&&ROLE_SVG_ID[u.role]?'<img class="unit-sprite" src="'+spriteDataURI(ROLE_SVG_ID[u.role],u.skin,u.nation)+'" alt="Sprite del '+u.role+' en el tablero"/>':'');})()+'<h3><span class="role-dot" style="background:'+ROLES[u.role].color+';width:14px;height:14px"></span><img class="class-ico" src="assets/ui/orig/Class_'+classIco+'_alpha.png" alt=""/>'+u.role+' <span class="sub" style="font-size:12px">'+charNameFor(u.role)+'</span> <span style="color:'+(u.team==='A'?'var(--teamA)':'var(--teamB)')+';font-size:15px">'+teamName(u.team)+'</span></h3>'+
+  card.innerHTML=(()=>{const pUrl=rolePortraitURL(u.role);if(pUrl)return '<img class="unit-sprite" src="'+pUrl+'" alt="Retrato del '+u.role+'"/>';const rsUrl=getRealSpriteURL(u);if(rsUrl)return '<img class="unit-sprite" src="'+rsUrl+'" alt="Sprite del '+u.role+' renderizado desde el modelo real, en el tablero"/>';return (ARGON_READY&&ROLE_SVG_ID[u.role]?'<img class="unit-sprite" src="'+spriteDataURI(ROLE_SVG_ID[u.role],u.skin,u.nation)+'" alt="Sprite del '+u.role+' en el tablero"/>':'');})()+'<h3><span class="role-dot" style="background:'+ROLES[u.role].color+';width:14px;height:14px"></span><img class="class-ico" src="assets/ui/orig/Class_'+classIco+'_alpha.png" alt=""/>'+u.role+' <span class="sub" style="font-size:12px">'+u.name+'</span> <span style="color:'+(u.team==='A'?'var(--teamA)':'var(--teamB)')+';font-size:15px">'+teamName(u.team)+'</span></h3>'+
    '<div style="display:flex;align-items:center;gap:8px">'+(u.skin==='nacion'?flagHTML(u.nation)+emblemHTML(u.nation)+'<span class="sub">Skin Nación · '+u.nation.name+' · '+u.nation.emblemName+'</span>':'<span class="sub">Skin '+(SKINS[u.skin]?SKINS[u.skin].name:'Estándar')+' · '+(SKINS[u.skin]?SKINS[u.skin].desc:'soldado genérico')+'</span>')+(u.invisible?'<span class="sub">· 👁 invisible este turno</span>':'')+(u.stunned?'<span class="sub" style="color:#e8c84e">· 💫 aturdido por la M84</span>':'')+'</div>'+
    '<div class="hpbar"><i class="'+(u.hp<=u.maxHp*0.3?'low':'')+'" style="width:'+Math.round(u.hp/u.maxHp*100)+'%"></i></div><div class="statline"><img class="hud-ico" src="assets/ui/orig/hud_icon_health.png" alt=""/>Vida <b class="mono">'+u.hp+'/'+u.maxHp+'</b> · Cuerpo '+(BODIES[u.body]?BODIES[u.body].name:u.body)+' · Posición ('+(u.x+1)+','+(u.y+1)+')'+(inBeacon(u.x,u.y)?' · <b style="color:var(--amber)">en la baliza</b>':'') +(u.overwatch?' · <b style="color:var(--amber)">en vigilancia</b>':'')+covTxt+'</div>'+
    '<div class="epips">'+Array.from({length:u.maxEnergy},(_,i)=>'<i class="'+(i<u.energy?'':'off')+'"></i>').join('')+'</div><div class="statline"><img class="hud-ico" src="assets/ui/orig/AP_alpha.png" alt=""/>Energía <b class="mono">'+u.energy+'/'+u.maxEnergy+'</b> · Mover: '+u.moveCost+' ⚡/casilla · Granadas M67: '+u.grenades+(u.role==='Médico'?' · Curaciones: '+u.heals+' · Reanimación: '+u.revives:'')+(u.role==='Ingeniero'?' · Claymores M18A1: '+(u.mines||0):'')+(u.role==='Comando'?' · Aturdidoras M84: '+(u.flashes||0):'')+'</div>'+
@@ -3703,27 +3789,28 @@ function updateUI(){
    '<button data-act="shoot" class="'+(G.actionMode==='shoot'?'on':'')+'" '+(isTurn?'':'disabled')+' title="'+(w.real||'')+' — '+(w.note||'')+'">'+wpCover+'🎯 Disparar [1] · '+u.weapon+'<small>'+w.dmg+' daño · alcance '+w.rng+' · '+w.cost+' ⚡ — luego toca al enemigo</small></button>'+
    '<button data-act="pistol" class="'+(G.actionMode==='pistol'?'on':'')+'" '+(isTurn?'':'disabled')+'>🔫 Pistola M9 [2]<small>22 daño · alcance 3 · 1 ⚡</small></button>'+
    '<button data-act="grenade" class="'+(G.actionMode==='grenade'?'on':'')+'" '+(isTurn&&u.grenades>0?'':'disabled')+'><img class="ab-ico" src="assets/ui/ability/CharAbility_14_Frag_Grenade_alpha.png" alt=""/>Granada M67 [3]<small>75 daño en área · lanza a 3 · 2 ⚡ · quedan '+u.grenades+'</small></button>'+
-   (u.role==='Espía'?'<button data-act="smoke" class="'+(G.actionMode==='smoke'?'on':'')+'" '+(isTurn&&(u.smokes||0)>0?'':'disabled')+'>💨 Humo M18<small>Sin daño · lanza a 4 · 2 ⚡ · quedan '+(u.smokes||0)+' · tapa la visión 2 rondas en cruz (radio 1), no el movimiento</small></button>':'')+
-   (u.role==='Comando'?'<button data-act="flash" class="'+(G.actionMode==='flash'?'on':'')+'" '+(isTurn&&(u.flashes||0)>0?'':'disabled')+'><img class="ab-ico" src="assets/ui/ability/CharAbility_09_Concussion_Grenade_alpha.png" alt=""/>Aturdidora M84<small>Sin daño · lanza a 4 · 2 ⚡ · quedan '+(u.flashes||0)+' · aturde en radio 1 durante 1 turno: −6 ⚡ y −25 de puntería, sin fuego de respuesta ni vigilancia · también ciega a los tuyos</small></button>':'')+
+       (unitHasAction(u,'smoke')?'<button data-act="smoke" class="'+(G.actionMode==='smoke'?'on':'')+'" '+(isTurn&&(u.smokes||0)>0?'':'disabled')+'>💨 Humo M18<small>Sin daño · lanza a 4 · 2 ⚡ · quedan '+(u.smokes||0)+' · tapa la visión 2 rondas en cruz (radio 1), no el movimiento</small></button>':'')+
+       (unitHasAction(u,'flash')?'<button data-act="flash" class="'+(G.actionMode==='flash'?'on':'')+'" '+(isTurn&&(u.flashes||0)>0?'':'disabled')+'><img class="ab-ico" src="assets/ui/ability/CharAbility_09_Concussion_Grenade_alpha.png" alt=""/>Aturdidora M84<small>Sin daño · lanza a 4 · 2 ⚡ · quedan '+(u.flashes||0)+' · aturde en radio 1 durante 1 turno: −6 ⚡ y −25 de puntería, sin fuego de respuesta ni vigilancia · también ciega a los tuyos</small></button>':'')+
    '<button data-act="overwatch" '+(isTurn&&!u.overwatch&&u.energy>=3?'':'disabled')+'>👁 Vigilancia [4]<small>3 ⚡ · dispara gratis al primer enemigo que se mueva a su alcance en el turno rival</small></button>'+
-   '<button data-act="special" class="'+(G.actionMode==='special'||G.actionMode==='deploy'?'on':'')+'" '+(isTurn?'':'disabled')+'>★ '+ROLES[u.role].special+' [5]<small>'+ROLES[u.role].sdesc+'</small></button>'+
+    (unitHasAction(u,'special')?'<button data-act="special" class="'+(G.actionMode==='special'||G.actionMode==='deploy'?'on':'')+'" '+(isTurn?'':'disabled')+'>★ '+((charAbs.find(a=>a.implemented&&a.action==='special')||{}).n||ROLES[u.role].special)+' [5]<small>'+((charAbs.find(a=>a.implemented&&a.action==='special')||{}).d||ROLES[u.role].sdesc)+'</small></button>':'')+
+
    (effMode(G)!=='dominacion'&&onTurret&&G.map.turret.owner!==u.team?'<button data-act="capture" '+(isTurn&&u.energy>=2?'':'disabled')+'>⚙ Capturar torreta central<small>2 ⚡ · disparará al final de tus turnos</small></button>':'')+
-   (u.role==='Ingeniero'?'<button data-act="deploy" class="'+(G.actionMode==='deploy'?'on':'')+'" '+(isTurn?'':'disabled')+'>🛠 Torreta M2 (desplegar)<small>5 ⚡ · casilla adyacente · 120 PV</small></button>':'')+
-   (u.role==='Ingeniero'?'<button data-act="mine" class="'+(G.actionMode==='mine'?'on':'')+'" '+(isTurn&&(u.mines||0)>0?'':'disabled')+'>💥 Claymore M18A1<small>'+MINE_COST+' ⚡ · casilla adyacente · quedan '+(u.mines||0)+' · oculta al enemigo · '+MINE_DMG+' de daño a quien la pise</small></button>':'')+
-   (u.role==='Ingeniero'?'<button data-act="cover" class="'+(G.actionMode==='cover'?'on':'')+'" '+(isTurn&&(u.covers||0)>0?'':'disabled')+'>🧱 Cobertura desplegable<small>'+COVER_COST+' ⚡ · casilla adyacente · quedan '+(u.covers||0)+' · 60 PV, estorba el paso y da cobertura</small></button>':'')+
-   (u.role==='Artillero'?'<button data-act="gas" class="'+(G.actionMode==='gas'?'on':'')+'" '+(isTurn&&(u.gases||0)>0?'':'disabled')+'><img class="ab-ico" src="assets/ui/ability/CharAbility_15_Gas_Grenade_alpha.png" alt=""/>Granada de gas<small>'+GAS_COST+' ⚡ · lanza a 3 · quedan '+(u.gases||0)+' · nube '+GAS_TURNS+' rondas: '+GAS_DMG+' de daño por turno en radio 1</small></button>':'')+
-   (u.role==='Artillero'?'<button data-act="molotov" class="'+(G.actionMode==='molotov'?'on':'')+'" '+(isTurn&&(u.molotovs||0)>0?'':'disabled')+'><img class="ab-ico" src="assets/ui/ability/CharAbility_50_Molotov_alpha.png" alt=""/>Cóctel molotov<small>'+MOLOTOV_COST+' ⚡ · lanza a 3 · quedan '+(u.molotovs||0)+' · fuego '+MOLOTOV_TURNS+' rondas: '+MOLOTOV_DMG+' por turno en radio 1</small></button>':'')+
-   (u.role==='Médico'?'<button data-act="crate" class="'+(G.actionMode==='crate'?'on':'')+'" '+(isTurn&&(u.crates||0)>0?'':'disabled')+'>✚ Caja de salud<small>'+CRATE_COST+' ⚡ · casilla adyacente · quedan '+(u.crates||0)+' · +75 PV a quien la recoja</small></button>':'')+
-   (u.role==='Espía'?'<button data-act="teleport" class="'+(G.actionMode==='teleport'?'on':'')+'" '+(isTurn&&(u.teleports||0)>0?'':'disabled')+'>🌀 Teletransporte<small>'+TELE_COST+' ⚡ · salto a '+TELE_RANGE+' casillas · quedan '+(u.teleports||0)+'</small></button>':'')+
-   (u.role==='Comando'?'<button data-act="shield" class="'+(G.actionMode==='shield'?'on':'')+'" '+(isTurn&&(u.shields||0)>0?'':'disabled')+'><img class="ab-ico" src="assets/ui/ability/CharAbility_24_Juggernaut_alpha.png" alt=""/>Escudo antidisturbios<small>'+SHIELD_COST+' ⚡ · quedan '+(u.shields||0)+' · recibe un 55 % del daño el próximo turno</small></button>':'')+
-   (u.role==='Artillero'?'<button data-act="arty" class="'+(G.actionMode==='arty'?'on':'')+'" '+(isTurn&&(u.arty||0)>0?'':'disabled')+'><img class="ab-ico" src="assets/ui/ability/CharAbility_43_Support_Fire_alpha.png" alt=""/>Artillería<small>'+ARTY_COST+' ⚡ · lanza a '+ARTY_RANGE+' · quedan '+(u.arty||0)+' · '+ARTY_DMG+' en el centro y 35 en radio 1</small></button>':'')+
-   (u.role==='Espía'?'<button data-act="bees" class="'+(G.actionMode==='bees'?'on':'')+'" '+(isTurn&&(u.bees||0)>0?'':'disabled')+'>🐝 Bomba de abejas<small>'+BEES_COST+' ⚡ · un enemigo a '+BEES_RANGE+' · quedan '+(u.bees||0)+' · '+BEES_DMG+' por turno durante '+BEES_TURNS+'</small></button>':'')+
-   (u.role==='Espía'?'<button data-act="tranq" class="'+(G.actionMode==='tranq'?'on':'')+'" '+(isTurn&&(u.tranqs||0)>0?'':'disabled')+'>💉 Tranquilizante<small>'+TRANQ_COST+' ⚡ · un enemigo a '+TRANQ_RANGE+' · quedan '+(u.tranqs||0)+' · lo aturde su siguiente turno sin daño</small></button>':'')+
-   (u.role==='Comando'?'<button data-act="water" class="'+(G.actionMode==='water'?'on':'')+'" '+(isTurn&&(u.water||0)>0?'':'disabled')+'><img class="ab-ico" src="assets/ui/ability/CharAbility_52_WaterCannon_alpha.png" alt=""/>Cañón de agua<small>'+WATER_COST+' ⚡ · un enemigo a '+WATER_RANGE+' · quedan '+(u.water||0)+' · lo empuja hasta '+WATER_PUSH+' casillas sin daño</small></button>':'')+
-   (u.role==='Ingeniero'?'<button data-act="toolkit" '+(isTurn&&(u.toolkits||0)>0?'':'disabled')+'><img class="ab-ico" src="assets/ui/ability/CharAbility_45_Toolkit_alpha.png" alt=""/>Kit de herramientas<small>'+TOOL_COST+' ⚡ · repara '+TOOL_HEAL+' PV a tu torreta desplegada (a '+TOOL_RANGE+' casillas) · quedan '+(u.toolkits||0)+'</small></button>':'')+
-   (u.role==='Ingeniero'?'<button data-act="deployRocket" class="'+(G.actionMode==='deployRocket'?'on':'')+'" '+(isTurn?'':'disabled')+'>🚀 Torreta de cohetes (desplegar)<small>5 ⚡ · casilla adyacente · 100 PV · dispara 60 en el objetivo y 30 en radio 1</small></button>':'')+
-   (u.role==='Artillero'?'<button data-act="orbital" class="'+(G.actionMode==='orbital'?'on':'')+'" '+(isTurn&&(u.orbitals||0)>0?'':'disabled')+'>🛰 Láser orbital<small>'+ORB_COST+' ⚡ · lanza a '+ORB_RANGE+' · quedan '+(u.orbitals||0)+' · '+ORB_DMG+' en una sola casilla, sin salpicadura</small></button>':'')+
-   (u.role==='Espía'?'<button data-act="sweep" class="'+(G.actionMode==='sweep'?'on':'')+'" '+(isTurn&&(u.sweeps||0)>0?'':'disabled')+'><img class="ab-ico" src="assets/ui/ability/CharAbility_13_Detection_Aura_alpha.png" alt=""/>Barrido detector<small>'+SWEEP_COST+' ⚡ · radio '+SWEEP_RANGE+' · quedan '+(u.sweeps||0)+' · revela invisibles</small></button>':'')+
+       (unitHasAction(u,'deploy')?'<button data-act="deploy" class="'+(G.actionMode==='deploy'?'on':'')+'" '+(isTurn?'':'disabled')+'>🛠 Torreta M2 (desplegar)<small>5 ⚡ · casilla adyacente · 120 PV</small></button>':'')+
+       (unitHasAction(u,'mine')?'<button data-act="mine" class="'+(G.actionMode==='mine'?'on':'')+'" '+(isTurn&&(u.mines||0)>0?'':'disabled')+'>💥 Claymore M18A1<small>'+MINE_COST+' ⚡ · casilla adyacente · quedan '+(u.mines||0)+' · oculta al enemigo · '+MINE_DMG+' de daño a quien la pise</small></button>':'')+
+       (unitHasAction(u,'cover')?'<button data-act="cover" class="'+(G.actionMode==='cover'?'on':'')+'" '+(isTurn&&(u.covers||0)>0?'':'disabled')+'>🧱 Cobertura desplegable<small>'+COVER_COST+' ⚡ · casilla adyacente · quedan '+(u.covers||0)+' · 60 PV, estorba el paso y da cobertura</small></button>':'')+
+       (unitHasAction(u,'gas')?'<button data-act="gas" class="'+(G.actionMode==='gas'?'on':'')+'" '+(isTurn&&(u.gases||0)>0?'':'disabled')+'><img class="ab-ico" src="assets/ui/ability/CharAbility_15_Gas_Grenade_alpha.png" alt=""/>Granada de gas<small>'+GAS_COST+' ⚡ · lanza a 3 · quedan '+(u.gases||0)+' · nube '+GAS_TURNS+' rondas: '+GAS_DMG+' de daño por turno en radio 1</small></button>':'')+
+       (unitHasAction(u,'molotov')?'<button data-act="molotov" class="'+(G.actionMode==='molotov'?'on':'')+'" '+(isTurn&&(u.molotovs||0)>0?'':'disabled')+'><img class="ab-ico" src="assets/ui/ability/CharAbility_50_Molotov_alpha.png" alt=""/>Cóctel molotov<small>'+MOLOTOV_COST+' ⚡ · lanza a 3 · quedan '+(u.molotovs||0)+' · fuego '+MOLOTOV_TURNS+' rondas: '+MOLOTOV_DMG+' por turno en radio 1</small></button>':'')+
+       (unitHasAction(u,'crate')?'<button data-act="crate" class="'+(G.actionMode==='crate'?'on':'')+'" '+(isTurn&&(u.crates||0)>0?'':'disabled')+'>✚ Caja de salud<small>'+CRATE_COST+' ⚡ · casilla adyacente · quedan '+(u.crates||0)+' · +75 PV a quien la recoja</small></button>':'')+
+       (unitHasAction(u,'teleport')?'<button data-act="teleport" class="'+(G.actionMode==='teleport'?'on':'')+'" '+(isTurn&&(u.teleports||0)>0?'':'disabled')+'>🌀 Teletransporte<small>'+TELE_COST+' ⚡ · salto a '+TELE_RANGE+' casillas · quedan '+(u.teleports||0)+'</small></button>':'')+
+       (unitHasAction(u,'shield')?'<button data-act="shield" class="'+(G.actionMode==='shield'?'on':'')+'" '+(isTurn&&(u.shields||0)>0?'':'disabled')+'><img class="ab-ico" src="assets/ui/ability/CharAbility_24_Juggernaut_alpha.png" alt=""/>Escudo antidisturbios<small>'+SHIELD_COST+' ⚡ · quedan '+(u.shields||0)+' · recibe un 55 % del daño el próximo turno</small></button>':'')+
+       (unitHasAction(u,'arty')?'<button data-act="arty" class="'+(G.actionMode==='arty'?'on':'')+'" '+(isTurn&&(u.arty||0)>0?'':'disabled')+'><img class="ab-ico" src="assets/ui/ability/CharAbility_43_Support_Fire_alpha.png" alt=""/>Artillería<small>'+ARTY_COST+' ⚡ · lanza a '+ARTY_RANGE+' · quedan '+(u.arty||0)+' · '+ARTY_DMG+' en el centro y 35 en radio 1</small></button>':'')+
+       (unitHasAction(u,'bees')?'<button data-act="bees" class="'+(G.actionMode==='bees'?'on':'')+'" '+(isTurn&&(u.bees||0)>0?'':'disabled')+'>🐝 Bomba de abejas<small>'+BEES_COST+' ⚡ · un enemigo a '+BEES_RANGE+' · quedan '+(u.bees||0)+' · '+BEES_DMG+' por turno durante '+BEES_TURNS+'</small></button>':'')+
+       (unitHasAction(u,'tranq')?'<button data-act="tranq" class="'+(G.actionMode==='tranq'?'on':'')+'" '+(isTurn&&(u.tranqs||0)>0?'':'disabled')+'>💉 Tranquilizante<small>'+TRANQ_COST+' ⚡ · un enemigo a '+TRANQ_RANGE+' · quedan '+(u.tranqs||0)+' · lo aturde su siguiente turno sin daño</small></button>':'')+
+       (unitHasAction(u,'water')?'<button data-act="water" class="'+(G.actionMode==='water'?'on':'')+'" '+(isTurn&&(u.water||0)>0?'':'disabled')+'><img class="ab-ico" src="assets/ui/ability/CharAbility_52_WaterCannon_alpha.png" alt=""/>Cañón de agua<small>'+WATER_COST+' ⚡ · un enemigo a '+WATER_RANGE+' · quedan '+(u.water||0)+' · lo empuja hasta '+WATER_PUSH+' casillas sin daño</small></button>':'')+
+       (unitHasAction(u,'toolkit')?'<button data-act="toolkit" '+(isTurn&&(u.toolkits||0)>0?'':'disabled')+'><img class="ab-ico" src="assets/ui/ability/CharAbility_45_Toolkit_alpha.png" alt=""/>Kit de herramientas<small>'+TOOL_COST+' ⚡ · repara '+TOOL_HEAL+' PV a tu torreta desplegada (a '+TOOL_RANGE+' casillas) · quedan '+(u.toolkits||0)+'</small></button>':'')+
+       (unitHasAction(u,'deployRocket')?'<button data-act="deployRocket" class="'+(G.actionMode==='deployRocket'?'on':'')+'" '+(isTurn?'':'disabled')+'>🚀 Torreta de cohetes (desplegar)<small>5 ⚡ · casilla adyacente · 100 PV · dispara 60 en el objetivo y 30 en radio 1</small></button>':'')+
+       (unitHasAction(u,'orbital')?'<button data-act="orbital" class="'+(G.actionMode==='orbital'?'on':'')+'" '+(isTurn&&(u.orbitals||0)>0?'':'disabled')+'>🛰 Láser orbital<small>'+ORB_COST+' ⚡ · lanza a '+ORB_RANGE+' · quedan '+(u.orbitals||0)+' · '+ORB_DMG+' en una sola casilla, sin salpicadura</small></button>':'')+
+       (unitHasAction(u,'sweep')?'<button data-act="sweep" class="'+(G.actionMode==='sweep'?'on':'')+'" '+(isTurn&&(u.sweeps||0)>0?'':'disabled')+'><img class="ab-ico" src="assets/ui/ability/CharAbility_13_Detection_Aura_alpha.png" alt=""/>Barrido detector<small>'+SWEEP_COST+' ⚡ · radio '+SWEEP_RANGE+' · quedan '+(u.sweeps||0)+' · revela invisibles</small></button>':'')+
    (effMode(G)==='escolta'&&G.drone&&G.drone.alive&&u.team==='A'?'<button data-act="guide" class="'+(G.actionMode==='drone'?'on':'')+'" '+(isTurn&&dist(u,G.drone)<=1&&u.energy>=2&&G.drone.movesLeft>0?'':'disabled')+'>🤖 Guiar dron · 2 ⚡<small>Mueve el dron 1 casilla · quedan '+G.drone.movesLeft+' guiados esta ronda · tienes que estar pegado a él — luego toca la casilla destino junto al dron</small></button>':'')+
    '</div>'+(u.team!==G.turn?'<p class="sub" style="margin-top:8px">Este soldado es del bando rival: podrás actuar con él en su turno'+(G.opp==='ia'?' (lo mueve la IA)':'')+'.</p>':'');
   /* Tooltip de cada accion y traslado del bloque a la barra inferior. */
@@ -4969,7 +5056,7 @@ function makeSoldier3(un){
    pose de bind) queda solo como reserva por si el archivo de clips no
    cargara. Si la malla no carga, la vista 3D sigue con el soldado de
    cajas de makeSoldier3, con la misma partida. */
-const REAL={ready:false,data:null,geo:null,tex:null};
+const REAL={ready:false,data:null,geo:null,tex:null,castTex:{}};
 function parseOBJ3(txt,skin){
   const P=[],UV=[],NO=[],idxMap={};
   const pos=[],uv=[],nor=[],si=[],sw=[],outIdx=[];
@@ -5016,7 +5103,7 @@ const ROLE_MODEL_FILES={'Francotirador':'Francotirador','Artillero':'Artillero',
 const ROLE_OUTFIT_FILES={'Francotirador':'veteran','Artillero':'deerhunter','Espía':'spetsnaz','Médico':'decon','Ingeniero':'rambo','Comando':'deltaforce','Capitán':'base'};
 function loadRealSoldier(){
   if(typeof THREE==='undefined')return;
-  REAL.texByRole={};REAL.byRole={};
+  REAL.texByRole={};REAL.byRole={};REAL.castTex={};
   fetch('assets/soldier_scales.json').then(r=>r.json()).then(sc=>{ROLE_SCALES=sc||{};}).catch(()=>{});
   fetch('assets/soldier_clips.json').then(r=>{if(!r.ok)throw new Error('clips');return r.json();}).then(pack=>{CLIPLIB.pack=pack;CLIPLIB.ready=true;}).catch(()=>{});
   const texLoad=(path)=>new Promise(res=>{new THREE.TextureLoader().load(path,t=>{t.colorSpace=THREE.SRGBColorSpace;res(t);},undefined,()=>res(null));});
@@ -5043,6 +5130,13 @@ function loadRealSoldier(){
     ));
   }).then(pairs=>{
     (pairs||[]).forEach(([role,t])=>{if(t)REAL.texByRole[role]=t;});
+    return Promise.all([
+      Promise.all(Object.values(CAST_TEXTURE_FILE).map(file=>texLoad('assets/soldier/cast/'+file).then(t=>[file,t]))),
+      Promise.all(MESHY_CAST.map(c=>loadMeshyModel(c.mesh)))
+    ]).then(([casts])=>{
+      (casts||[]).forEach(([file,t])=>{if(t)REAL.castTex[file]=t;});
+    });
+  }).then(()=>{
     if(typeof buildSpriteStrip==='function')buildSpriteStrip();
     if(typeof rebuildDemo==='function')rebuildDemo();
     if(G&&T3&&VIEW_MODE==='3d')build3DWorld();
@@ -5305,6 +5399,112 @@ function parseOBJStatic(txt){
   g.setIndex(outIdx);
   return g;
 }
+const MESHY_MODELS={},MESHY_LOADING={};
+function normalizeMeshyRig(rig){
+  if(Array.isArray(rig.skinIndex[0]))return rig;
+  const skinIndex=[],skinWeight=[];
+  for(let i=0;i<rig.skinIndex.length;i+=4){
+    skinIndex.push(rig.skinIndex.slice(i,i+4));
+    skinWeight.push(rig.skinWeight.slice(i,i+4));
+  }
+  return Object.assign({},rig,{skinIndex,skinWeight});
+}
+const normalizeMeshyRigGlobal=normalizeMeshyRig;
+function parseMeshyOBJ(text,rig){
+  const vertices=[],uvs=[],normals=[],positions=[],outUvs=[],outNormals=[],skinIndices=[],skinWeights=[];
+  const resolveIndex=(index,length)=>index<0?length+index:index-1;
+  for(const line of text.split(/\r?\n/)){
+    const parts=line.trim().split(/\s+/);
+    if(parts[0]==='v')vertices.push([+parts[1],+parts[2],+parts[3]]);
+    else if(parts[0]==='vt')uvs.push([+parts[1],+parts[2]]);
+    else if(parts[0]==='vn')normals.push([+parts[1],+parts[2],+parts[3]]);
+    else if(parts[0]==='f'){
+      const face=parts.slice(1).map(token=>{
+        const indices=token.split('/');
+        return {v:resolveIndex(+indices[0],vertices.length),uv:indices[1]?resolveIndex(+indices[1],uvs.length):-1,n:indices[2]?resolveIndex(+indices[2],normals.length):-1};
+      });
+      for(let i=1;i<face.length-1;i++){
+        for(const corner of [face[0],face[i],face[i+1]]){
+          const vertex=vertices[corner.v],uv=uvs[corner.uv],normal=normals[corner.n];
+          if(!vertex)throw new Error('El OBJ Meshy contiene una cara inválida.');
+          const boneIndices=rig.skinIndex[corner.v],boneWeights=rig.skinWeight[corner.v];
+          if(!boneIndices||!boneWeights||boneIndices.length!==4||boneWeights.length!==4)throw new Error('El rig Meshy no contiene pesos para todos los vértices.');
+          positions.push(vertex[0],vertex[1],vertex[2]);
+          outUvs.push(uv?uv[0]:0,uv?uv[1]:0);
+          if(normal)outNormals.push(normal[0],normal[1],normal[2]);
+          skinIndices.push(...boneIndices);
+          skinWeights.push(...boneWeights);
+        }
+      }
+    }
+  }
+  if(!positions.length)throw new Error('El OBJ Meshy no contiene caras.');
+  const geometry=new THREE.BufferGeometry();
+  geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));
+  geometry.setAttribute('uv',new THREE.Float32BufferAttribute(outUvs,2));
+  if(outNormals.length===positions.length)geometry.setAttribute('normal',new THREE.Float32BufferAttribute(outNormals,3));
+  else geometry.computeVertexNormals();
+  geometry.setAttribute('skinIndex',new THREE.Float32BufferAttribute(skinIndices,4));
+  geometry.setAttribute('skinWeight',new THREE.Float32BufferAttribute(skinWeights,4));
+  geometry.computeBoundingBox();
+  return geometry;
+}
+function loadMeshyModel(mesh){
+  if(MESHY_MODELS[mesh])return Promise.resolve(MESHY_MODELS[mesh]);
+  if(MESHY_LOADING[mesh])return MESHY_LOADING[mesh];
+  if(typeof THREE==='undefined')return Promise.resolve(null);
+  MESHY_LOADING[mesh]=Promise.all([
+    fetch('assets/personajes_propios/'+mesh+'.obj'),
+    fetch('assets/personajes_propios/'+mesh+'_rig.json'),
+    new Promise(res=>{new THREE.TextureLoader().load('assets/personajes_propios/'+mesh+'_tex.png',t=>{t.colorSpace=THREE.SRGBColorSpace;res(t);},undefined,()=>res(null));})
+  ]).then(([objRes,rigRes,tex])=>{
+    if(!objRes.ok||!rigRes.ok)return null;
+    return Promise.all([objRes.text(),rigRes.json()]).then(([objText,rawRig])=>{
+      const data=normalizeMeshyRig(rawRig);
+      const geo=parseMeshyOBJ(objText,data);
+      const size=new THREE.Vector3();geo.boundingBox.getSize(size);
+      const maxDim=Math.max(size.x,size.y,size.z)||1;
+      const rest=(REAL.data&&REAL.data.bones&&REAL.data.bones.length===data.bones.length)?REAL.data.bones:data.bones;
+      return {geo:geo,data:data,tex:tex,scale:0.95*1.14/maxDim,zUp:!!(data.bones[1]&&data.bones[1].pos[2]>data.bones[1].pos[1]+0.1),baseRestQ:rest.map(b=>new THREE.Quaternion(b.quat[0],b.quat[1],b.quat[2],b.quat[3]))};
+    });
+  }).then(model=>{if(model)MESHY_MODELS[mesh]=model;return model;}).catch(()=>null).finally(()=>{delete MESHY_LOADING[mesh];});
+  return MESHY_LOADING[mesh];
+}
+function makeSkinnedModel(geometry,data,texture,options={}){
+  const model=new THREE.Group();
+  const bones=data.bones.map(b=>{
+    const bone=new THREE.Bone();
+    bone.name=b.name;
+    bone.position.fromArray(b.pos);
+    bone.quaternion.fromArray(b.quat);
+    if(b.scale)bone.scale.fromArray(b.scale);
+    return bone;
+  });
+  data.bones.forEach((b,i)=>{if(b.parent>=0)bones[b.parent].add(bones[i]);});
+  const skeleton=new THREE.Skeleton(data.skinBones.map(i=>bones[i]),data.boneInverses.map(a=>new THREE.Matrix4().set(
+    a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7],
+    a[8],a[9],a[10],a[11],a[12],a[13],a[14],a[15]
+  )));
+  const mesh=new THREE.SkinnedMesh(geometry,new THREE.MeshStandardMaterial({
+    map:texture,roughness:0.85,metalness:0.02,transparent:false,opacity:1,depthWrite:true,
+    side:options.meshy?THREE.DoubleSide:THREE.FrontSide
+  }));
+  mesh.add(bones[0]);
+  mesh.bind(skeleton,new THREE.Matrix4());
+  mesh.frustumCulled=false;
+  mesh.castShadow=true;
+  model.add(mesh);
+  model.userData={
+    bones,bindLocal:data.bones.map(b=>new THREE.Quaternion(b.quat[0],b.quat[1],b.quat[2],b.quat[3])),
+    curQ:data.bones.map(b=>new THREE.Quaternion(b.quat[0],b.quat[1],b.quat[2],b.quat[3])),
+    bindPos:data.bones.map(b=>new THREE.Vector3(b.pos[0],b.pos[1],b.pos[2])),
+    curDelta:new THREE.Vector3(),mesh3:mesh,meshy:!!options.meshy,
+    animatable:!!options.animatable,idleClipKey:options.idleClipKey||'idle2h',idleRole:options.idleRole,
+    baseRestQ:options.baseRestQ||null,isClassRig:!!options.baseRestQ,grip:!!options.grip,role:options.role||'',gun:null,
+    byName:Object.fromEntries(bones.map((bone,index)=>[bone.name,index]))
+  };
+  return model;
+}
 function makeRealGun3(weapon){
   const file=WEAPON_MESH_FILE[weapon]; if(!file)return null;
   const cached=GUN_MESH_CACHE[weapon]; if(cached!==undefined)return cached;
@@ -5506,15 +5706,18 @@ function makeRealSoldier3(un){
      este mismo constructor. */
   const lk=roleLook(un.role);
   spin.scale.set(lk.s[0],lk.s[1],lk.s[2]);
-  const tilt=new THREE.Group();tilt.rotation.x=-Math.PI/2;spin.add(tilt);
+  const tilt=new THREE.Group();spin.add(tilt);
   /* Las mallas de clase siguen en investigacion (ver docs/Examen §5): se
      activan con window.__classModels=true; por defecto, malla base + uniforme. */
   /* Malla de clase por rol. El Comando (Agent_Heavy) tiene un skin de 17
      huesos cuya bind no cuadra (boneWorld x boneInverse != I) y sale como un
      blob: de momento usa la malla base con su uniforme. */
   const CLASS_MODEL_SKIP={};
-  const RD=(!window.__forceBaseModel&&!CLASS_MODEL_SKIP[un.role]&&REAL.byRole&&REAL.byRole[un.role])||REAL;
-  const roleTex=RD.tex||(REAL.texByRole&&REAL.texByRole[un.role])||REAL.tex;
+  const meshy=(un.charMesh&&MESHY_MODELS[un.charMesh])||null;
+  tilt.rotation.x=(meshy&&!meshy.zUp)?0:-Math.PI/2;
+  const castTex=(un.charTexture&&REAL.castTex)?REAL.castTex[un.charTexture]:null;
+  const RD=meshy||((!window.__forceBaseModel&&!CLASS_MODEL_SKIP[un.role]&&REAL.byRole&&REAL.byRole[un.role])||REAL);
+  const roleTex=castTex||(meshy&&meshy.tex)||RD.tex||(REAL.texByRole&&REAL.texByRole[un.role])||REAL.tex;
   const data=RD.data;
   const bones=data.bones.map(b=>{
     const bone=new THREE.Bone();bone.name=b.name;
@@ -5552,8 +5755,8 @@ function makeRealSoldier3(un){
   /* Equipo enemigo: el uniforme se tine calido para que no se confunda con
      el tuyo ni de espaldas. El bando A conserva el color natural. */
   if(un.skin==='camuflaje'){try{const ct=camoTexture();if(ct){mat.map=ct;mat.color.set(0xffffff);}}catch(e){}}
-  if(un.skin==='estandar'){
-    try{const cn=charNameFor(un.role);const ce=OWN_CAST.concat(ORIG_CAST).find(c=>c.name===cn);if(ce&&ce.tint)mat.color.copy(new THREE.Color(ce.tint)).lerp(new THREE.Color('#ffffff'),0.42);}catch(e){}
+  if(un.skin==='estandar'&&!castTex&&!meshy){
+    try{const cn=un.name||charNameFor(un.role);const ce=OWN_CAST.concat(ORIG_CAST).find(c=>c.name===cn);if(ce&&ce.tint)mat.color.copy(new THREE.Color(ce.tint)).lerp(new THREE.Color('#ffffff'),0.42);}catch(e){}
   }
   if(un.skin==='clase'&&ROLES[un.role]){mat.color.copy(new THREE.Color(ROLES[un.role].color)).lerp(new THREE.Color('#ffffff'),0.30);}
   if(un.team==='B'){mat.color.lerp(new THREE.Color('#c95338'),0.22);}
@@ -5630,7 +5833,7 @@ function makeRealSoldier3(un){
      Soldier_Heavy, Agent, Medic, Engineer, Commander): no se escala nada. */
   /* la malla de clase trae su propia escala (ROLE_SCALES); la base usa 0,95 */
   /* la escala de clase va horneada en la geometria y en las bind poses */
-  mesh.scale.setScalar(0.95);
+  mesh.scale.setScalar(meshy?meshy.scale:0.95);
 
   /* Tocados por rol sobre la malla real, colgados del hueso Head: su Z
      local es el arriba del IPA, así que el grupo gira para que su +Y
@@ -6043,11 +6246,11 @@ const _cqDelta=new THREE.Quaternion();
    apoyar los pies del sprite sobre su casilla. */
 const REAL_SPRITES={renderer:null,scene:null,camera:null,failed:false,cache:{}};
 const REAL_SPRITE_FEET=0.77;
-function realSpriteKey(un){return un.role+'|'+un.weapon+'|'+un.skin+'|'+(un.skin==='nacion'&&un.nation?un.nation.id:'std');}
-function realSpriteUnit(role,weapon,skin,nation){
+function realSpriteKey(un){return un.role+'|'+un.weapon+'|'+un.skin+'|'+(un.skin==='nacion'&&un.nation?un.nation.id:'std')+'|'+(un.charKey||un.name||'');}
+function realSpriteUnit(role,weapon,skin,nation,char){
   const r=ROLES[role];if(!r)return null;
   const body=BODIES[r.body]||BODIES.medio;
-  return {id:700+ROLE_NAMES.indexOf(role),team:'A',role:role,weapon:weapon||r.weapons[0],skin:skin||'nacion',nation:nation||NATIONS[0],x:0,y:0,dx:0,dy:0,hp:body.hp,maxHp:body.hp,energy:body.energy,maxEnergy:body.energy,alive:true,invisible:false,body:r.body,facing:0};
+  return {id:700+ROLE_NAMES.indexOf(role),team:'A',role:role,weapon:weapon||r.weapons[0],skin:skin||'nacion',nation:nation||NATIONS[0],x:0,y:0,dx:0,dy:0,hp:body.hp,maxHp:body.hp,energy:body.energy,maxEnergy:body.energy,alive:true,invisible:false,body:r.body,facing:0,charKey:char?(char.key||char.name):'',charName:char?char.name:role,charTexture:char&&char.texture?char.texture:'',charMesh:char&&char.mesh?char.mesh:''};
 }
 function initRealSpriteRenderer(){
   if(REAL_SPRITES.renderer||REAL_SPRITES.failed)return !!REAL_SPRITES.renderer;
@@ -7494,7 +7697,18 @@ function CAST_BODIES(){
   return seen.sort((a,b)=>{const ia=CLASS_ORDER.indexOf(a),ib=CLASS_ORDER.indexOf(b);return (ia<0?99:ia)-(ib<0?99:ib);});
 }
 const ROLE_BODY={'Francotirador':'Soldier_Light','Artillero':'Soldier_Heavy','Espía':'Agent_Light','Médico':'Medic','Ingeniero':'Engineer','Comando':'Agent_Heavy','Capitán':'Commander'};
-function charsForRole(role){const b=ROLE_BODY[role];return OWN_CAST.filter(c=>c.body===b).concat(ORIG_CAST.filter(c=>c.body===b));}
+function charsForRole(role){
+  const orig=ORIG_CAST.filter(c=>c.play&&c.role===role).map(c=>Object.assign({},c,{texture:CAST_TEXTURE_FILE[c.name]||''}));
+  const meshy=MESHY_CAST.filter(c=>c.play&&c.role===role);
+  const own=OWN_CAST.filter(c=>c.role===role);
+  return orig.concat(meshy).concat(own);
+}
+function characterForRole(role,slot){
+  const opts=charsForRole(role);if(!opts.length)return null;
+  const prefs=(typeof CHAR_PREFS!=='undefined'&&CHAR_PREFS)?CHAR_PREFS:{};
+  const chosen=opts.find(c=>c.name===prefs[role]||c.key===prefs[role]);
+  return chosen||opts[slot%opts.length];
+}
 const ORIG_CAST=[
  {name:'Hipster Dave',body:'Soldier_Light',outfit:'Soldier_Light_d / DeltaForce / Veteran',role:'Francotirador',bio:'Gafas verdes, pelo naranja y un fusil enorme. Cara de enfado permanente.',play:true},
  {name:'Archie Fletcher',body:'Soldier_Light',outfit:'Rambo / DeerHunter',role:'',bio:'Rambo de mercadillo: cinta en la cabeza y más valor que puntería.',play:false},
@@ -7730,8 +7944,9 @@ function renderBarracks(){
     const body=BODIES[ROLES[r].body];
     const opts=charsForRole(r);
     const cur=(CHAR_PREFS[r]||(opts[0]&&opts[0].name)||'');
+    const current=opts.find(o=>o.name===cur)||opts[0];
     const sel='<select data-charrole="'+r+'" class="barrack-sel">'+opts.map(o=>'<option'+(o.name===cur?' selected':'')+'>'+o.name+'</option>').join('')+'</select>';
-    return '<div class="panel barrack-card"><img class="barrack-portrait" src="'+(rolePortraitURL(r)||'assets/ui/retrato_capitan.png')+'" alt="Retrato de '+r+'"/><div class="barrack-info"><h3>'+r+'</h3><p class="sub" style="margin:0">'+body.name+' · '+ROLES[r].weapons.length+' armas</p>'+sel+'<p class="sub tiny">'+ROLES[r].special+'</p></div></div>';
+    return '<div class="panel barrack-card"><img class="barrack-portrait" src="'+(rolePortraitURL(r,current)||'assets/ui/retrato_capitan.png')+'" alt="Retrato de '+r+'"/><div class="barrack-info"><h3>'+r+'</h3><p class="sub" style="margin:0">'+body.name+' · '+ROLES[r].weapons.length+' armas</p>'+sel+'<p class="sub tiny">'+ROLES[r].special+'</p></div></div>';
   }).join('');
   const cast=CAST_BODIES().map(body=>{
     const list=OWN_CAST.concat(ORIG_CAST).filter(c=>c.body===body);
@@ -7860,6 +8075,7 @@ loadSkirmishTop('skirmish03');loadSkirmishTop('skirmish04');
    si la entrada fallara por cualquier motivo, no se debe volver a la
    pantalla de selección como si no hubiera nación elegida. */
 (function(){
+  CHAR_PREFS=loadChars();
   const params=new URLSearchParams(window.location.search||'');
   const auto=params.get('autostart');
   const saved=lsGet(LS_NATION);const found=saved?nationById(saved):null;
@@ -8229,23 +8445,7 @@ const MAP_PIECES=[
     'Riot Medic':'Médico','Megan McNick':'Ingeniero','Carlito Grosso':'Ingeniero',
     'Riot Engineer':'Ingeniero','Commander (F)':'Capitán'
   };
-  const VIEWER_CAST_TEXTURE={
-    'Hipster Dave':'Soldier_Light_DeltaForce_d.png',
-    'Archie Fletcher':'Soldier_Light_Rambo_DeerHunter_d.png',
-    'Ivan Tkilya':'Soldier_heavy_GermanSpecialForces_d.png',
-    'Mme La Hacque':'Agent_light_JewelThief_d.png',
-    'Sneaky Pete':'Agent_light_d.png',
-    'Sister Florence':'Medic_Rescue_d.png',
-    'Riot Medic':'Medic_Therapist_d.png',
-    'Textbook Kate':'Medic_d.png',
-    'Big Time Taschmann':'Engineer_Spetsnaz_d.png',
-    'Megan McNick':'Engineer_Light_Trinity_d.png',
-    'Carlito Grosso':'Engineer_Heavy_EOD_d.png',
-    'Riot Agent':'Agent_Heavy_Skin1_d.png',
-    'Riot Engineer':'Engineer_RiotCop_d.png',
-    'Commander (M)':'Commander_d.png',
-    'Commander (F)':'Commander_F_d.png'
-  };
+  const VIEWER_CAST_TEXTURE=CAST_TEXTURE_FILE;
   /* Cuerpo -> .obj en assets/soldier/bodies/ (solo los cuerpos que no
      son una clase del repo). Los demás cuerpos usan REAL.byRole o el
      soldado genérico (REAL), según VIEWER_BODY_ROLE. */
@@ -8293,11 +8493,7 @@ const MAP_PIECES=[
         file:bodyFile||(bodyRole?ROLE_MODEL_FILES[bodyRole]+'.obj':'soldier.obj')
       };
     }),
-    {key:'own:09',label:'Diseño Meshy 09',role:'Francotirador',mesh:'Francotirador'},
-    {key:'own:10',label:'Diseño Meshy 10',role:'Artillero',mesh:'Artillero'},
-    {key:'own:11',label:'Diseño Meshy 11',role:'Espía',mesh:'Espia'},
-    {key:'own:12',label:'Diseño Meshy 12',role:'Médico',mesh:'Medico'},
-    {key:'own:13',label:'Diseño Meshy 13',role:'Ingeniero',mesh:'Ingeniero'}
+    ...MESHY_CAST.map(c=>({key:c.key,label:c.label,name:c.name,role:c.role,mesh:c.mesh,bio:c.bio}))
   ];
   viewerCharacters.forEach(entry=>{
     if(entry.mesh){entry.skins=[{key:'own',label:'Textura Meshy'}];return;}
@@ -8632,59 +8828,8 @@ const MAP_PIECES=[
     viewer.bodyGeo[path]=geo;
     return geo;
   }
-  function normalizeMeshyRig(rig){
-    if(Array.isArray(rig.skinIndex[0]))return rig;
-    const skinIndex=[],skinWeight=[];
-    for(let i=0;i<rig.skinIndex.length;i+=4){
-      skinIndex.push(rig.skinIndex.slice(i,i+4));
-      skinWeight.push(rig.skinWeight.slice(i,i+4));
-    }
-    return Object.assign({},rig,{skinIndex,skinWeight});
-  }
-  function parseViewerOBJ(text,rig){
-    const vertices=[],uvs=[],normals=[],positions=[],outUvs=[],outNormals=[],skinIndices=[],skinWeights=[];
-    const resolveIndex=(index,length)=>index<0?length+index:index-1;
-    for(const line of text.split(/\r?\n/)){
-      const parts=line.trim().split(/\s+/);
-      if(parts[0]==='v')vertices.push([+parts[1],+parts[2],+parts[3]]);
-      else if(parts[0]==='vt')uvs.push([+parts[1],+parts[2]]);
-      else if(parts[0]==='vn')normals.push([+parts[1],+parts[2],+parts[3]]);
-      else if(parts[0]==='f'){
-        const face=parts.slice(1).map(token=>{
-          const indices=token.split('/');
-          return {
-            v:resolveIndex(+indices[0],vertices.length),
-            uv:indices[1]?resolveIndex(+indices[1],uvs.length):-1,
-            n:indices[2]?resolveIndex(+indices[2],normals.length):-1
-          };
-        });
-        for(let i=1;i<face.length-1;i++){
-          for(const corner of [face[0],face[i],face[i+1]]){
-            const vertex=vertices[corner.v],uv=uvs[corner.uv],normal=normals[corner.n];
-            if(!vertex)throw new Error('El OBJ Meshy contiene una cara inválida.');
-            const boneIndices=rig.skinIndex[corner.v],boneWeights=rig.skinWeight[corner.v];
-            if(!boneIndices||!boneWeights||boneIndices.length!==4||boneWeights.length!==4)
-              throw new Error('El rig Meshy no contiene pesos para todos los vértices.');
-            positions.push(vertex[0],vertex[1],vertex[2]);
-            outUvs.push(uv?uv[0]:0,uv?uv[1]:0);
-            if(normal)outNormals.push(normal[0],normal[1],normal[2]);
-            skinIndices.push(...boneIndices);
-            skinWeights.push(...boneWeights);
-          }
-        }
-      }
-    }
-    if(!positions.length)throw new Error('El OBJ Meshy no contiene caras.');
-    const geometry=new THREE.BufferGeometry();
-    geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));
-    geometry.setAttribute('uv',new THREE.Float32BufferAttribute(outUvs,2));
-    if(outNormals.length===positions.length)geometry.setAttribute('normal',new THREE.Float32BufferAttribute(outNormals,3));
-    else geometry.computeVertexNormals();
-    geometry.setAttribute('skinIndex',new THREE.Float32BufferAttribute(skinIndices,4));
-    geometry.setAttribute('skinWeight',new THREE.Float32BufferAttribute(skinWeights,4));
-    geometry.computeBoundingBox();
-    return geometry;
-  }
+  function normalizeMeshyRig(rig){return normalizeMeshyRigGlobal(rig);}
+  function parseViewerOBJ(text,rig){return parseMeshyOBJ(text,rig);}
   async function loadViewerMeshy(entry){
     const base='assets/personajes_propios/'+entry.mesh;
     const [response,rigResponse,texture]=await Promise.all([
@@ -8715,43 +8860,7 @@ const MAP_PIECES=[
     model.userData.gripUnit={role:entry.role,weapon:''};
     return model;
   }
-  function makeViewerRiggedModel(geometry,data,texture,options={}){
-    const model=new THREE.Group();
-    const bones=data.bones.map(b=>{
-      const bone=new THREE.Bone();
-      bone.name=b.name;
-      bone.position.fromArray(b.pos);
-      bone.quaternion.fromArray(b.quat);
-      if(b.scale)bone.scale.fromArray(b.scale);
-      return bone;
-    });
-    data.bones.forEach((b,i)=>{if(b.parent>=0)bones[b.parent].add(bones[i]);});
-    const skeleton=new THREE.Skeleton(data.skinBones.map(i=>bones[i]),data.boneInverses.map(a=>new THREE.Matrix4().set(
-      a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7],
-      a[8],a[9],a[10],a[11],a[12],a[13],a[14],a[15]
-    )));
-    const mesh=new THREE.SkinnedMesh(geometry,new THREE.MeshStandardMaterial({
-      map:texture,roughness:0.85,metalness:0.02,transparent:false,opacity:1,depthWrite:true,
-      side:options.meshy?THREE.DoubleSide:THREE.FrontSide
-    }));
-    mesh.add(bones[0]);
-    mesh.bind(skeleton,new THREE.Matrix4());
-    mesh.frustumCulled=false;
-    mesh.castShadow=true;
-    model.add(mesh);
-    model.userData={
-      bones,bindLocal:data.bones.map(b=>new THREE.Quaternion(b.quat[0],b.quat[1],b.quat[2],b.quat[3])),
-      curQ:data.bones.map(b=>new THREE.Quaternion(b.quat[0],b.quat[1],b.quat[2],b.quat[3])),
-      bindPos:data.bones.map(b=>new THREE.Vector3(b.pos[0],b.pos[1],b.pos[2])),
-      curDelta:new THREE.Vector3(),mesh3:mesh,meshy:!!options.meshy,
-      animatable:!!options.animatable,idleClipKey:options.idleClipKey||'idle2h',idleRole:options.idleRole,
-      baseRestQ:options.baseRestQ||null,
-      isClassRig:!!options.baseRestQ,
-      grip:!!options.grip,role:options.role||'',gun:null,
-      byName:Object.fromEntries(bones.map((bone,index)=>[bone.name,index]))
-    };
-    return model;
-  }
+  function makeViewerRiggedModel(geometry,data,texture,options={}){return makeSkinnedModel(geometry,data,texture,options);}
   function poseViewerRest(model,clipKey,ct){
     const pack=CLIPLIB.pack,clip=pack&&pack.clips&&pack.clips[clipKey];
     const ud=model&&model.userData;
