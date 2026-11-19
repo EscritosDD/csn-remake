@@ -8665,9 +8665,10 @@ const MAP_PIECES=[
     const [response,rigResponse,texture]=await Promise.all([
       fetch(base+'.obj'),fetch(base+'_rig.json'),
       new Promise((resolve,reject)=>{
-        /* La textura Meshy es byte a byte la misma que la de clase en
-           assets/soldier/, así que se carga de ahí y no se guarda duplicada. */
-        new THREE.TextureLoader().load('assets/soldier/'+entry.mesh+'_tex.png',resolve,undefined,reject);
+        /* Cada diseño Meshy es autocontenido en assets/personajes_propios/
+           (obj + rig + tex): la textura ya no es la de clase en
+           assets/soldier/, porque esas clases volvieron a ser del original. */
+        new THREE.TextureLoader().load(base+'_tex.png',resolve,undefined,reject);
       })
     ]);
     if(!response.ok)throw new Error('No se pudo cargar el OBJ Meshy de '+entry.mesh+'.');
