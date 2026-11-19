@@ -13,7 +13,7 @@ function loadEngine() {
   const idx = code.indexOf(mark);
   assert.ok(idx > 0, 'INIT marker must exist');
   code = code.slice(0, idx);
-  code += '\n;globalThis.__api={startGame,endTurn,checkWin,coverLevel,isFlanked,hasLOS,smokeBlocksLOS,throwSmoke,placeMine,checkMines,throwFlash,damage,guideDrone,scoreDominationFor,domControl,ROLES,WEAPONS,NATIONS,DOM_ZONES,DOM_TARGET,ESCORT_EXT,ESCORT_DRONE_HP,ESCORT_DRONE_MAXHP,get G(){return G;},get setup(){return setup;},set myNation(v){myNation=v;},mkSquad(n){return DEFAULT_SQUADS[n].map(r=>({role:r,weapon:ROLES[r].weapons[0]}));}};';
+  code += '\n;globalThis.__api={startGame,endTurn,checkWin,coverLevel,isFlanked,hasLOS,smokeBlocksLOS,throwSmoke,placeMine,checkMines,throwFlash,damage,tryShoot,guideDrone,scoreDominationFor,domControl,ROLES,WEAPONS,NATIONS,DOM_ZONES,DOM_TARGET,ESCORT_EXT,ESCORT_DRONE_HP,ESCORT_DRONE_MAXHP,get G(){return G;},get setup(){return setup;},set myNation(v){myNation=v;},mkSquad(n){return DEFAULT_SQUADS[n].map(r=>({role:r,weapon:ROLES[r].weapons[0]}));}};';
 
   const magic = () => {
     const f = () => {};
@@ -203,4 +203,62 @@ test('Escolta guarded drone reduces damage to 47% and wins on extraction', () =>
   api.guideDrone(guard, 10, 5);
   assert.equal(G.over, true);
   assert.equal(G.winner, 'A');
+});
+
+test('crates give cover without blocking LOS; walls and shelves do', () => {
+  const api = loadEngine();
+  api.myNation = api.NATIONS[0];
+  Object.assign(api.setup, { mode: 'eliminacion', fmt: 2, opp: 'local', map: 'almacen', difficulty: 'normal' });
+  api.startGame(api.mkSquad(2), api.mkSquad(2));
+  const G = api.G;
+  const from = { x: 2, y: 5 }, to = { x: 8, y: 5 };
+  G.map.obstacles = [{ x: 5, y: 5, type: 'crate', hp: 50, maxHp: 50 }];
+  assert.equal(api.hasLOS(from, to), true);
+  G.map.obstacles = [{ x: 5, y: 5, type: 'shelf', hp: 999, maxHp: 999 }];
+  assert.equal(api.hasLOS(from, to), false);
+});
+
+test('damage accounting credits the source team and kills from area sources', () => {
+  const api = loadEngine();
+  api.myNation = api.NATIONS[0];
+  Object.assign(api.setup, { mode: 'eliminacion', fmt: 2, opp: 'local', map: 'almacen', difficulty: 'normal' });
+  api.startGame(api.mkSquad(2), api.mkSquad(2));
+  const G = api.G;
+  const foe = G.units.find(u => u.team === 'B');
+  G.stats.A = { dmg: 0, kills: 0 };
+  api.damage(foe, 20, 'M67', 'A');
+  assert.equal(G.stats.A.dmg, 20);
+  assert.equal(G.stats.A.kills, 0);
+  foe.hp = 1;
+  api.damage(foe, 20, 'M67', 'A');
+  assert.equal(G.stats.A.kills, 1);
+});
+
+test('turn-start damage resolves victory before the next side moves', () => {
+  const api = loadEngine();
+  api.myNation = api.NATIONS[0];
+  Object.assign(api.setup, { mode: 'eliminacion', fmt: 2, opp: 'local', map: 'almacen', difficulty: 'normal' });
+  api.startGame(api.mkSquad(2), api.mkSquad(2));
+  const G = api.G;
+  const foes = G.units.filter(u => u.team === 'B');
+  foes.slice(1).forEach(u => { u.alive = false; u.hp = 0; });
+  const last = foes[0];
+  last.alive = true; last.hp = 1; last.x = 5; last.y = 5;
+  G.map.obstacles = [];
+  G.smoke = [{ x: 5, y: 5, team: 'A', left: 2, kind: 'gas' }];
+  api.endTurn();
+  assert.equal(G.over, true);
+  assert.equal(G.winner, 'A');
+});
+
+test('dead shooters cannot fire', () => {
+  const api = loadEngine();
+  api.myNation = api.NATIONS[0];
+  Object.assign(api.setup, { mode: 'eliminacion', fmt: 2, opp: 'local', map: 'almacen', difficulty: 'normal' });
+  api.startGame(api.mkSquad(2), api.mkSquad(2));
+  const G = api.G;
+  const shooter = G.units.find(u => u.team === 'A');
+  const target = G.units.find(u => u.team === 'B');
+  shooter.alive = false;
+  assert.equal(api.tryShoot(shooter, target, 'M4A1', null), false);
 });

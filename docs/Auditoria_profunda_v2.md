@@ -67,3 +67,52 @@ cerca: el soldado se ve de pie, con casco, mochila, arma y uniforme.
 - `VERIFICAR.ps1`: sintaxis 0, 19/19 tableros, reglas 6/6, datos 6/6, humo 3D.
 - Capturas de cerca (la captura de cerca de una unidad) y de tablero (la captura del tablero completo).
 - Commit `1fe168c` empujado a `main`.
+
+## Auditoría de la fase de personajes (19/11/2026)
+
+Esta ronda se ejecutó sobre los commits `c570135` (retirada de
+`referencia_original/`) y `434211a` (personajes por rol con textura y lógica).
+Se combinaron cuatro fuentes: lectura estática de `index.html`, carga del motor
+en los stubs de `bench/`, inspección en navegador mediante CDP de los 12
+personajes jugables, y contraste con `_original/decompiled/` y
+`docs/Informe_CSN_vs_original.md`.
+
+### Fallos reales encontrados y corregidos
+
+| # | Fallo | Evidencia | Arreglo |
+|---|---|---|---|
+| 1 | Una unidad muerta durante su activación de IA seguía disparando y agotando energía. | Tras pisar una Claymore, `alive:false`, pero el bucle de tiro causaba daño. `tryShoot` no comprobaba `shooter.alive`. | Guarda en `tryShoot` y altas después de minas/aturdimiento en los puntos de la IA donde la unidad puede morir. |
+| 2 | El daño de gas, fuego y abejas no resolvía victoria/derrota. | Con el último enemigo a 1 PV, `endTurn()` dejaba `over:false` y al enemigo muerto. | `checkWin()` inmediatamente después del bloque de daño por turno, antes de cambiar de bando. |
+| 3 | `hasLOS` cortaba la visión con cajas de nivel 1/2. | `_original/decompiled/GameGridComponent.cs:77` y `GameTileComponent.cs:154-160` bloquean solo el nivel máximo; el propio comentario de `hasLOS` lo decía. | Solo `wall` y `shelf` cortan LOS; las cajas siguen dando cobertura y penalización de puntería. |
+| 4 | Granadas, artillería, minas, torretas, gas, fuego y abejas no contabilizaban daño/bajas en `G.stats`. | `G._dmgTeam` solo se fijaba en `tryShoot`. | `damage()` acepta equipo de origen y todas las fuentes de daño lo pasan explícitamente. |
+| 5 | Decisiones de IA usaban `Math.random()` pese a existir semilla por turno. | `setTurnSeed`/`rng()` se fijaban en `startGame` y `endTurn`, pero seis decisiones salían de `Math.random()`. | Esas decisiones usan `rng()`; se conservan umbrales y probabilidades. |
+| 6 | La campaña anunciaba 5 misiones aunque los datos y tests tienen 6. | `CAMPAIGN_MISSIONS.length === 6`. | Los textos usan `CAMPAIGN_MISSIONS.length`. |
+| 7 | Retratos de roster y ficha ignoraban al personaje elegido. | `rolePortraitURL(u.role)` sin segundo argumento en `updateUI`. | Se pasa la unidad completa; el caché usa clave por personaje. |
+| 8 | Contadores del HUD y botones podían describir acciones que el personaje no tiene. | P. ej. Riot Agent mostraba M84 pero su lógica es Fantasma + Molotov; Sister Florence mostraba Reanimación sin tener el icono. | Los textos de recursos usan `unitHasAction`, `canHealSpecial` y `canReviveSpecial`; la IA usa los mismos predicados. |
+| 9 | Cambiar personaje en el Cuartel no refrescaba el retrato ni la escuadra. | El handler solo guardaba `localStorage`. | Se actualizan la tarjeta, `updateUI()` y `buildSquads()`. |
+| 10 | Atajos `1`-`5` apuntaban a `#unitCard`, pero los botones están en `#actionBar`. | Selector obsoleto tras el rediseño del HUD. | Selector corregido. |
+| 11 | Cachés con fallback permanente o clave equivocada. | Miniaturas de armas cacheaban `null` mientras cargaban; fallo de red cacheaba `false`; fallback de retrato guardaba con clave de rol; materiales de resaltado ignoraban color/opacidad; textura superior fallida se reintentaba siempre. | Reintentos permitidos, clave por personaje/color/opacidad y marca de fallo en mapas. |
+| 12 | Retratos/sprites generados antes de cargar cast y Meshy podían quedarse obsoletos. | `REAL.ready` se marcaba antes de que terminaran las texturas cast y los rigs Meshy. | Se limpian `PORTRAIT_CACHE` y `REAL_SPRITES.cache` al terminar la carga, y se redibuja la UI. |
+| 13 | `__forceBaseModel` no se respetaba para las mallas Meshy en sprites/retratos. | La cámara del sprite está calibrada para la malla base. | La geometría Meshy se fuerza a base en el renderer de sprites; la textura cast del personaje se conserva. |
+| 14 | Tooltip de la torreta Gatling mostraba `undefined`. | `CharAbility_16_Gatling_Turret_alpha` estaba implementada pero no en `ABILITY_IMPL`. | Añadida descripción "Torreta M2". |
+| 15 | Personajes propios de `OWN_CAST` se etiquetaban como `original:` en `charKey`. | Falta de `key` en esas entradas. | `characterKey()` distingue `own:` de `original:`. |
+
+### Verificación
+
+- `node bench/check-syntax.js`: 2 bloques, 0 errores.
+- `node bench/boards.js`: 19/19 tableros `ok`, 0 solapes.
+- `node bench/rules.test.js`: 10/10 (4 regresiones nuevas: LOS de cajas,
+  contabilidad de daño, victoria por daño por turno y tirador muerto).
+- `node --test bench/data.test.js`: 6/6.
+- CDP sobre los 12 personajes jugables: 12/12 nombres, texturas/rigs y sin
+  excepciones; los botones y chips corresponden a la lógica de cada personaje.
+- Smoke `?autostart=1`: 3 canvas, 8 unidades, modo `baliza`, 0 errores.
+
+### Sin cambios deliberados
+
+- No se han creado texturas, habilidades ni estadísticas nuevas.
+- No se han modificado tableros, armas, daños, costes ni el catálogo de 18
+  personajes propios pendientes.
+- El cerebro de IA del IPA sigue ofuscado y no permite contrastar decisiones
+  concretas más allá de la semilla; las cifras de armas servidas por
+  UnityWeb/IPA tampoco se han desempaquetado en esta ronda.

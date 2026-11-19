@@ -1043,8 +1043,10 @@ const CAST_TEXTURE_FILE={
  'Commander (F)':'Commander_F_d.png'
 };
 const CHAR_ABILITY_ACTIONS={
- 'CharAbility_14_Frag_Grenade_alpha':'grenade',
- 'CharAbility_09_Concussion_Grenade_alpha':'flash',
+  'CharAbility_14_Frag_Grenade_alpha':'grenade',
+  'CharAbility_15_Gas_Grenade_alpha':'gas',
+  'CharAbility_09_Concussion_Grenade_alpha':'flash',
+
  'CharAbility_50_Molotov_alpha':'molotov',
  'CharAbility_45_Toolkit_alpha':'toolkit',
  'CharAbility_52_WaterCannon_alpha':'water',
@@ -1052,7 +1054,9 @@ const CHAR_ABILITY_ACTIONS={
  'CharAbility_43_Support_Fire_alpha':'arty',
  'CharAbility_24_Juggernaut_alpha':'shield',
  'CharAbility_17_Ghost_alpha':'special',
- 'CharAbility_30_Medkit_alpha':'special',
+  'CharAbility_30_Medkit_alpha':'special',
+  'PlayerAbility_06_Health_Crate_alpha':'crate',
+
  'CharAbility_36_Revive_alpha':'special',
  'CharAbility_42_Sniper_Rifle_Specialization_alpha':'special',
  'CharAbility_23_HMG_Specialization_alpha':'special',
@@ -1115,7 +1119,7 @@ const ROLE_PORTRAIT={'Francotirador':'retrato_francotirador.png','Artillero':'re
 const PORTRAIT_CACHE={};
 function rolePortraitURL(role,char){
   try{
-    const pkey=role+'|'+((char&&(char.key||char.name))||'');
+    const pkey=role+'|'+((char&&(char.key||char.charKey||char.name))||'');
     if(PORTRAIT_CACHE[pkey])return PORTRAIT_CACHE[pkey];
     if(REAL.ready&&typeof realSpriteUnit==='function'&&typeof renderRealSprite==='function'){
       const r=ROLES[role];
@@ -1134,7 +1138,7 @@ function rolePortraitURL(role,char){
               const sw=im.width*0.76, sh=im.height*0.44;
               cx.drawImage(im, im.width*0.12, im.height*0.08, sw, sh, 0, 0, 128, 128);
               PORTRAIT_CACHE[pkey]=cv.toDataURL('image/png');
-            }catch(err){PORTRAIT_CACHE[role]=e.url;}
+            }catch(err){PORTRAIT_CACHE[pkey]=e.url;}
           };
           im.src=e.url;
            PORTRAIT_CACHE[pkey]=e.url;
@@ -1339,7 +1343,8 @@ function openSetup(mode,missionIdx){
     setup.campaignMission=(typeof missionIdx==='number')?missionIdx:(c.done?0:c.next);
     const m=CAMPAIGN_MISSIONS[setup.campaignMission];
     setup.map=m.map;setup.fmt=m.fmt;setup.opp='ia';setup.difficulty=m.difficulty;setup.skinA='nacion';setup.rivalNation=null;
-    if(banner){banner.style.display='block';banner.innerHTML='<b style="font-family:\'Barlow Condensed\';text-transform:uppercase;font-size:19px">Campaña · Misión '+(setup.campaignMission+1)+' de 5 · '+m.title+'</b><br><span class="sub">'+m.brief+'</span>'+(c.vet&&c.vet[setup.campaignMission]!==undefined?'':'')+((c.vet&&c.vet.some(v=>v>0))?'<br><span class="sub">Veterania que entra en esta misión, por posición de escuadra: '+c.vet.map((v,i)=>v>0?('Pos. '+(i+1)+': +'+(v*25)+' PV y +'+v+' ⚡'):null).filter(Boolean).join(' · ')+'</span>':'');}
+    if(banner){banner.style.display='block';banner.innerHTML='<b style="font-family:\'Barlow Condensed\';text-transform:uppercase;font-size:19px">Campaña · Misión '+(setup.campaignMission+1)+' de '+CAMPAIGN_MISSIONS.length+' · '
++m.title+'</b><br><span class="sub">'+m.brief+'</span>'+(c.vet&&c.vet[setup.campaignMission]!==undefined?'':'')+((c.vet&&c.vet.some(v=>v>0))?'<br><span class="sub">Veterania que entra en esta misión, por posición de escuadra: '+c.vet.map((v,i)=>v>0?('Pos. '+(i+1)+': +'+(v*25)+' PV y +'+v+' ⚡'):null).filter(Boolean).join(' · ')+'</span>':'');}
   } else {if(banner)banner.style.display='none';}
   if(mode==='guerra'){setup.fmt=4;setup.opp='ia';setup.skinA='nacion';const others=NATIONS.filter(n=>n.id!==myNation.id);setup.rivalNation=others[Math.floor(Math.random()*others.length)];}
   else if(mode!=='campana') setup.rivalNation=null;
@@ -1934,7 +1939,7 @@ function hasLOS(a,b){
   while(guard++<60){if(x===x1&&y===y1)return true;const e2=2*err;
     if(e2>-dy){err-=dy;x+=sx;} if(e2<dx){err+=dx;y+=sy;}
     if(x===x1&&y===y1)return true;
-    if(obAt(x,y))return false;}
+    const o=obAt(x,y);if(o&&(o.type==='wall'||o.type==='shelf'))return false;}
   return true;
 }
 function coverLevel(target,shooter){
@@ -1999,6 +2004,7 @@ function hasCharAction(u,action){return !!(u&&u.charAbilities&&u.charAbilities.s
 function hasCharIcon(u,icon){return !!(u&&u.charAbilities&&u.charAbilities.some(a=>a.implemented&&a.icon===icon));}
 function applyCharacterAbilities(u){
   const ensure=(key,n)=>{if((u[key]||0)<n)u[key]=n;};
+  if(hasCharAction(u,'smoke'))ensure('smokes',2);
   if(hasCharAction(u,'flash'))ensure('flashes',2);
   if(hasCharAction(u,'molotov'))ensure('molotovs',2);
   if(hasCharAction(u,'toolkit'))ensure('toolkits',2);
@@ -2023,6 +2029,9 @@ function unitHasAction(u,action){
   const roleActions={smoke:'Espía',flash:'Comando',mine:'Ingeniero',cover:'Ingeniero',gas:'Artillero',molotov:'Artillero',crate:'Médico',teleport:'Espía',shield:'Comando',arty:'Artillero',bees:'Espía',tranq:'Espía',water:'Comando',toolkit:'Ingeniero',deployRocket:'Ingeniero',orbital:'Artillero',sweep:'Espía',deploy:'Ingeniero'};
   return roleActions[action]===u.role;
 }
+function canHealSpecial(u){return !!(u&&(u.role==='Médico'||hasCharIcon(u,'CharAbility_30_Medkit_alpha')||hasCharIcon(u,'CharAbility_36_Revive_alpha')));}
+function canReviveSpecial(u){return !!(u&&((u.role==='Médico'&&!(u.charAbilities&&u.charAbilities.length))||hasCharIcon(u,'CharAbility_36_Revive_alpha')));}
+function canSnipeSpecial(u){return !!(u&&(u.role==='Francotirador'||hasCharIcon(u,'CharAbility_42_Sniper_Rifle_Specialization_alpha')));}
 function makeUnit(team,def,i,nation,skin){
   const sp=team==='A'?SPAWNS_A[i]:SPAWNS_B[i];
   const ch=characterForRole(def.role,i);
@@ -2033,7 +2042,7 @@ function makeUnit(team,def,i,nation,skin){
   if(team==='A'&&setup.mode==='campana'){const c=loadCampaign();vetLevel=(c.vet&&c.vet[i])||0;if(vetLevel>0){maxHp+=vetLevel*25;hp=maxHp;maxEnergy+=vetLevel;energy=maxEnergy;}}
   /* Dificultad de la IA: solo la escuadra rival cuando juega la máquina */
   if(team==='B'&&setup.opp==='ia'){if(setup.difficulty==='veterano'){maxEnergy+=1;energy=maxEnergy;}else if(setup.difficulty==='elite'){maxEnergy+=2;energy=maxEnergy;maxHp+=25;hp=maxHp;}}
-  const u={id:++uid,team,role:def.role,name:ch?ch.name:def.role,charKey:ch?(ch.key||('original:'+ch.name)):'',charName:ch?ch.name:def.role,charBio:ch?ch.bio:'',charTexture:ch&&ch.texture?ch.texture:'',charMesh:ch&&ch.mesh?ch.mesh:'',charAbilities:charAbilitiesFor(ch),weapon:def.weapon,skin:skin||'nacion',x:sp.x,y:sp.y,dx:sp.x,dy:sp.y,hp:hp,maxHp:maxHp,
+  const u={id:++uid,team,role:def.role,name:ch?ch.name:def.role,charKey:characterKey(ch),charName:ch?ch.name:def.role,charBio:ch?ch.bio:'',charTexture:ch&&ch.texture?ch.texture:'',charMesh:ch&&ch.mesh?ch.mesh:'',charAbilities:charAbilitiesFor(ch),weapon:def.weapon,skin:skin||'nacion',x:sp.x,y:sp.y,dx:sp.x,dy:sp.y,hp:hp,maxHp:maxHp,
     energy:energy,maxEnergy:maxEnergy,alive:true,invisible:false,invisTurns:0,suppressed:false,stunned:false,stunFresh:false,vetLevel:vetLevel,slotIndex:i,
     grenades:def.role==='Comando'?2:1,flashes:def.role==='Comando'?2:0,smokes:def.role==='Espía'?2:0,mines:def.role==='Ingeniero'?2:0,covers:def.role==='Ingeniero'?2:0,gases:def.role==='Artillero'?2:0,sweeps:def.role==='Espía'?1:0,molotovs:def.role==='Artillero'?2:0,crates:def.role==='Médico'?2:0,teleports:def.role==='Espía'?1:0,shields:def.role==='Comando'?1:0,arty:def.role==='Artillero'?2:0,bees:def.role==='Espía'?1:0,tranqs:def.role==='Espía'?1:0,water:def.role==='Comando'?2:0,toolkits:def.role==='Ingeniero'?2:0,orbitals:def.role==='Artillero'?1:0,heals:2,revives:1,captainUsed:false,movedThisTurn:false,
     specialUsedTurn:false,onceUsed:false,nation,hasShot:false,
@@ -2099,7 +2108,7 @@ function fireClipFor(weaponName){
 }
 /* Gesto único del original en la vista 3D (granada, despliegue, recogida…). */
 function playOnce(u,key){if(u){u._onceKey=key;u._onceT=FX.t;}}
-function damage(target,dmg,srcLabel){
+function damage(target,dmg,srcLabel,srcTeam){
   if(!target.alive)return;
   if(target.isDrone&&G&&G.units&&G.units.some(u=>u.alive&&u.team==='A'&&cheb(u,target)<=1)){
     dmg=Math.max(1,Math.round(dmg*0.47));
@@ -2107,7 +2116,8 @@ function damage(target,dmg,srcLabel){
   if(target.buffArmor&&!target.isDrone)dmg=Math.max(1,Math.round(dmg*target.buffArmor));
   if(target.shieldT>0&&!target.isDrone)dmg=Math.max(1,Math.round(dmg*SHIELD_MULT));
   target.hp-=dmg;
-  if(G&&G.stats&&G._dmgTeam&&G._dmgTeam!==target.team){const st=G.stats[G._dmgTeam];st.dmg+=dmg;if(target.hp<=0)st.kills++;}
+  const dmgTeam=srcTeam||(G&&G._dmgTeam)||null;
+  if(G&&G.stats&&dmgTeam&&dmgTeam!==target.team){const st=G.stats[dmgTeam];st.dmg+=dmg;if(target.hp<=0)st.kills++;}
   target._hitT=FX.t;target._hitAmt=Math.min(1,dmg/70);
   /* Tipo de impacto, para elegir el clip del original en la vista 3D:
      explosión (barril, M67, salpicadura, lanzacohetes, lanzagranadas),
@@ -2122,18 +2132,19 @@ function damage(target,dmg,srcLabel){
   if(target.hp<=0){target.hp=0;target.alive=false;target.invisible=false;if(!target.isDrone)auVoice(target,'death',0.55);log('✕ '+target.role+' ('+target.team+') eliminado.');}
   else if(!target.isDrone&&Math.random()<0.2)auVoice(target,'pain',0.35);
 }
-function explodeBarrel(b,srcLabel){
+function explodeBarrel(b,srcLabel,srcTeam){
   try{auPlay('sfx/weapons/cluster_explode.mp3',0.6);}catch(e){}
   if(!b.alive)return;b.alive=false;G.lastMoveUndo=null;FX.shake=11;sfx('boom');fxBurst(b.x,b.y,22,'#ffb03a');fxFloat(b.x,b.y,'💥','#ffe1a8');if(typeof fx3Explosion==='function')fx3Explosion(b.x,b.y,'expl');
   log('💥 ¡Barril explotado por '+srcLabel+'! 70 de daño en las casillas adyacentes.');
-  G.units.filter(u=>u.alive&&cheb(u,b)<=1).forEach(u=>damage(u,70,'La explosión del barril'));
-  if(G.drone&&G.drone.alive&&cheb(G.drone,b)<=1)damage(G.drone,70,'La explosión del barril');
+  G.units.filter(u=>u.alive&&cheb(u,b)<=1).forEach(u=>damage(u,70,'La explosión del barril',srcTeam));
+  if(G.drone&&G.drone.alive&&cheb(G.drone,b)<=1)damage(G.drone,70,'La explosión del barril',srcTeam);
   G.map.obstacles.filter(o=>o.type==='crate'&&cheb(o,b)<=1).forEach(o=>{o.hp-=70;});
   G.map.obstacles=G.map.obstacles.filter(o=>!(o.type==='crate'&&o.hp<=0));
-  G.map.barrels.filter(o=>o.alive&&o!==b&&cheb(o,b)<=1).forEach(o=>explodeBarrel(o,'la reacción en cadena'));
+  G.map.barrels.filter(o=>o.alive&&o!==b&&cheb(o,b)<=1).forEach(o=>explodeBarrel(o,'la reacción en cadena',srcTeam));
   checkWin();
 }
 function tryShoot(shooter,target,weaponName,multiplier,opts){
+  if(!shooter||!shooter.alive)return false;
   opts=opts||{};
   if(G)G._dmgTeam=shooter.team;
   if(G&&target&&target.x!=null)G._camFocus={x:target.x,y:target.y,until:Date.now()+2600};
@@ -2171,7 +2182,7 @@ function tryShoot(shooter,target,weaponName,multiplier,opts){
     if(G&&G.opp==='ia'&&shooter.team==='B'){if(G.difficulty==='recluta')dmg=dmg*0.85;else if(G.difficulty==='elite')dmg=dmg*1.15;}
     if(shooter.buffDmg)dmg=dmg*(1+shooter.buffDmg);
     dmg=Math.max(1,Math.round(dmg));
-    damage(target,dmg,shooter.role+' ('+shooter.team+') con '+weaponName+(crit?' · ¡CRÍTICO ×1,5!':'')+(opts.isReturn?' · fuego de respuesta':'')+(opts.isOverwatch?' · vigilancia':''));
+    damage(target,dmg,shooter.role+' ('+shooter.team+') con '+weaponName+(crit?' · ¡CRÍTICO ×1,5!':'')+(opts.isReturn?' · fuego de respuesta':'')+(opts.isOverwatch?' · vigilancia':''),shooter.team);
     /* Empujón del original (KnockbackDistance): las escopetas y los lanzadores
        desplazan 1 casilla al objetivo vivo si la casilla está libre. */
     if(w.kb&&target.alive&&!target.isDrone&&target.x!=null&&!opts.isReturn){
@@ -2191,7 +2202,7 @@ function tryShoot(shooter,target,weaponName,multiplier,opts){
        original. Los lanzagranadas no lo necesitan: su cluster_explode
        ya suena al disparar. */
     if(w.aoe&&w.cat==='Lanzacohetes'&&target.x!=null)try{auPlay('sfx/weapons/launcher_explode.mp3',0.55);}catch(e){}
-    if(w.aoe&&target.role){G.units.filter(u=>u.alive&&u!==target&&cheb(u,target)<=1).forEach(u=>damage(u,Math.round(dmg*0.45),shooter.role+' · salpicadura'));if(G.drone&&G.drone.alive&&target!==G.drone&&cheb(G.drone,target)<=1)damage(G.drone,Math.round(dmg*0.45),shooter.role+' · salpicadura');explodeNear(target);}
+    if(w.aoe&&target.role){G.units.filter(u=>u.alive&&u!==target&&cheb(u,target)<=1).forEach(u=>damage(u,Math.round(dmg*0.45),shooter.role+' · salpicadura',shooter.team));if(G.drone&&G.drone.alive&&target!==G.drone&&cheb(G.drone,target)<=1)damage(G.drone,Math.round(dmg*0.45),shooter.role+' · salpicadura',shooter.team);explodeNear(target,shooter.team);}
     if(w.supp&&target.alive&&!target.isDrone){target.suppressed=true;log(target.role+' queda suprimido: −2 de energía en su siguiente turno.');}
   } else {
     if(target.x!=null)fxFloat(target.x,target.y,'FALLO','#b8c2b0');
@@ -2271,7 +2282,7 @@ function pickupLoot(u){
   else {G.units.filter(a=>a.alive&&a.team===u.team).forEach(a=>{a.energy=Math.min(a.maxEnergy,a.energy+3);});log('📦 '+u.role+' abre la caja de Espíritu de equipo: +3 ⚡ a toda la escuadra.');}
   playOnce(u,'pickup');
 }
-function explodeNear(pos){const b=G.map.barrels.find(x=>x.alive&&cheb(x,pos)<=1);if(b)explodeBarrel(b,'la salpicadura');}
+function explodeNear(pos,srcTeam){const b=G.map.barrels.find(x=>x.alive&&cheb(x,pos)<=1);if(b)explodeBarrel(b,'la salpicadura',srcTeam);}
 function throwGrenade(u,x,y){
   try{auPlay('sfx/weapons/grenade_throw_01.mp3',0.5);}catch(e){}
   if(u.grenades<=0){toast('Sin granadas M67.');return;}
@@ -2283,9 +2294,9 @@ function throwGrenade(u,x,y){
   if(typeof fx3Explosion==='function')fx3Explosion(x,y,'expl');
   fxBurst(x,y,18,'#ff9640');FX.shake=Math.max(FX.shake,9);
   log(u.role+' ('+u.team+') lanza una M67 a ('+(x+1)+','+(y+1)+').');
-  G.units.filter(t=>t.alive&&cheb(t,{x,y})<=1).forEach(t=>damage(t,t.x===x&&t.y===y?75:35,'La M67'));
-  if(G.drone&&G.drone.alive&&cheb(G.drone,{x,y})<=1)damage(G.drone,G.drone.x===x&&G.drone.y===y?75:35,'La M67');
-  const b=barrelAt(x,y)||G.map.barrels.find(bb=>bb.alive&&cheb(bb,{x,y})<=1);if(b)explodeBarrel(b,'la M67');
+  G.units.filter(t=>t.alive&&cheb(t,{x,y})<=1).forEach(t=>damage(t,t.x===x&&t.y===y?75:35,'La M67',u.team));
+  if(G.drone&&G.drone.alive&&cheb(G.drone,{x,y})<=1)damage(G.drone,G.drone.x===x&&G.drone.y===y?75:35,'La M67',u.team);
+  const b=barrelAt(x,y)||G.map.barrels.find(bb=>bb.alive&&cheb(bb,{x,y})<=1);if(b)explodeBarrel(b,'la M67',u.team);
   G.actionMode='move';checkWin();updateUI();draw();
 }
 /* ================= SONIDO SINTETIZADO =================
@@ -2425,8 +2436,8 @@ function fireOrbital(u,x,y){
   if(typeof fx3Explosion==='function')fx3Explosion(x,y,'expl');
   fxBurst(x,y,18,'#8fd8ff');
   log('🛰 '+u.role+' ('+u.team+') pide el láser orbital sobre ('+(x+1)+','+(y+1)+'): '+ORB_DMG+' de daño en esa casilla (no hay salpicadura).');
-  G.units.filter(t=>t.alive&&t.x===x&&t.y===y).forEach(t=>damage(t,ORB_DMG,'El láser orbital'));
-  if(G.drone&&G.drone.alive&&G.drone.x===x&&G.drone.y===y)damage(G.drone,ORB_DMG,'El láser orbital');
+  G.units.filter(t=>t.alive&&t.x===x&&t.y===y).forEach(t=>damage(t,ORB_DMG,'El láser orbital',u.team));
+  if(G.drone&&G.drone.alive&&G.drone.x===x&&G.drone.y===y)damage(G.drone,ORB_DMG,'El láser orbital',u.team);
   G.actionMode='move';checkWin();updateUI();draw();
 }
 /* ===== LOTE 5 (F4): tranquilizante, canon de agua y kit de herramientas ===== */
@@ -2444,7 +2455,7 @@ function throwTranq(u,target){
 }
 function waterCannon(u,target){
   if(u.role!=='Comando'&&!hasCharAction(u,'water')){toast('El cañón de agua no está disponible para este personaje.');return;}
-  if((u.water||0)<=0){toast('Sin cargas de cañón de agua: el Comando lleva 2 por partida.');return;}
+  if((u.water||0)<=0){toast('Sin cargas de cañón de agua.');return;}
   if(u.energy<WATER_COST){toast('El cañón de agua cuesta '+WATER_COST+' ⚡.');return;}
   if(!target||target.team===u.team){toast('Elige un enemigo a '+WATER_RANGE+' casillas o menos.');return;}
   if(cheb(u,target)>WATER_RANGE){toast('El cañón de agua alcanza '+WATER_RANGE+' casillas.');return;}
@@ -2478,7 +2489,7 @@ function useToolkit(u){
 const SHIELD_COST=3, SHIELD_TURNS=1, SHIELD_MULT=0.55, ARTY_COST=4, ARTY_DMG=60, ARTY_RANGE=3, BEES_COST=2, BEES_DMG=8, BEES_TURNS=2, BEES_RANGE=4;
 function useShield(u){
   if(u.role!=='Comando'&&!hasCharAction(u,'shield')){toast('El escudo antidisturbios no está disponible para este personaje.');return;}
-  if((u.shields||0)<=0){toast('Sin escudo: el Comando lleva 1 por partida.');return;}
+  if((u.shields||0)<=0){toast('Sin escudo antidisturbios.');return;}
   if(u.energy<SHIELD_COST){toast('El escudo cuesta '+SHIELD_COST+' ⚡.');return;}
   G.lastMoveUndo=null;spendEnergy(u,SHIELD_COST);u.shields--;u.shieldT=SHIELD_TURNS;
   playOnce(u,'interact');sfx('place');
@@ -2496,11 +2507,11 @@ function fireArtillery(u,x,y){
   if(typeof fx3Explosion==='function')fx3Explosion(x,y,'expl');
   fxBurst(x,y,26,'#ff9640');
   log('💥 '+u.role+' ('+u.team+') pide artillería sobre ('+(x+1)+','+(y+1)+'): '+ARTY_DMG+' de daño en el centro y 35 alrededor.');
-  G.units.filter(t=>t.alive&&cheb(t,{x,y})<=1).forEach(t=>damage(t,t.x===x&&t.y===y?ARTY_DMG:35,'La artillería'));
-  if(G.drone&&G.drone.alive&&cheb(G.drone,{x,y})<=1)damage(G.drone,G.drone.x===x&&G.drone.y===y?ARTY_DMG:35,'La artillería');
+  G.units.filter(t=>t.alive&&cheb(t,{x,y})<=1).forEach(t=>damage(t,t.x===x&&t.y===y?ARTY_DMG:35,'La artillería',u.team));
+  if(G.drone&&G.drone.alive&&cheb(G.drone,{x,y})<=1)damage(G.drone,G.drone.x===x&&G.drone.y===y?ARTY_DMG:35,'La artillería',u.team);
   G.map.obstacles.filter(o=>cheb(o,{x,y})<=1).forEach(o=>{if(o.type==='crate')o.hp-=ARTY_DMG;});
   G.map.obstacles=G.map.obstacles.filter(o=>!(o.type==='crate'&&o.hp<=0));
-  const b=barrelAt(x,y)||G.map.barrels.find(bb=>bb.alive&&cheb(bb,{x,y})<=1);if(b)explodeBarrel(b,'la artillería');
+  const b=barrelAt(x,y)||G.map.barrels.find(bb=>bb.alive&&cheb(bb,{x,y})<=1);if(b)explodeBarrel(b,'la artillería',u.team);
   G.actionMode='move';checkWin();updateUI();draw();
 }
 function throwBees(u,target){
@@ -2510,7 +2521,7 @@ function throwBees(u,target){
   if(!target||target.team===u.team){toast('Elige un enemigo a '+BEES_RANGE+' casillas o menos.');return;}
   if(cheb(u,target)>BEES_RANGE){toast('La bomba de abejas alcanza '+BEES_RANGE+' casillas.');return;}
   G.lastMoveUndo=null;spendEnergy(u,BEES_COST);u.bees--;playOnce(u,'throw');
-  target.beesT=BEES_TURNS;
+  target.beesT=BEES_TURNS;target.beesTeam=u.team;
   log('🐝 '+u.role+' lanza la bomba de abejas a '+target.role+': '+BEES_DMG+' de daño por turno durante '+BEES_TURNS+' turnos.');
   G.actionMode='move';updateUI();draw();
 }
@@ -2613,7 +2624,7 @@ function checkMines(u){
   G.mines=G.mines.filter(mm=>mm!==m);
   FX.shake=9;try{auPlay('sfx/weapons/landmine_explode.mp3',0.6);}catch(e){}fxBurst(u.x,u.y,16,'#ffb03a');fxFloat(u.x,u.y,'💥','#ffe1a8');if(typeof fx3Explosion==='function')fx3Explosion(u.x,u.y,'expl');
   log('💥 ¡'+u.role+' ('+u.team+') pisa la Claymore M18A1 colocada en ('+(u.x+1)+','+(u.y+1)+')! La mina se consume en la explosión.');
-  damage(u,MINE_DMG,'La explosión de la Claymore M18A1');
+  damage(u,MINE_DMG,'La explosión de la Claymore M18A1',m.team);
   checkWin();
 }
 /* ---- M84 · GRANADA ATURDIDORA (solo el Comando) ----
@@ -2645,7 +2656,7 @@ function applyStun(t){
 }
 function throwFlash(u,x,y){
   if(u.role!=='Comando'&&!hasCharAction(u,'flash')){toast('La M84 aturdidora no está disponible para este personaje.');return;}
-  if((u.flashes||0)<=0){toast('Sin aturdidoras M84: el Comando lleva 2 por partida.');return;}
+  if((u.flashes||0)<=0){toast('Sin aturdidoras M84.');return;}
   if(u.energy<FLASH_COST){toast('La M84 cuesta '+FLASH_COST+' de energía.');return;}
   if(cheb(u,{x,y})>FLASH_RANGE){toast('La M84 se lanza a '+FLASH_RANGE+' casillas como máximo.');return;}
   G.lastMoveUndo=null;
@@ -2800,7 +2811,7 @@ function turretFire(ownerTeam){
     const inR=targets.filter(t=>cheb(pos,t)<=rng&&hasLOS(pos,t)&&!smokeBlocksLOS(pos,t)).sort((a,b)=>cheb(pos,a)-cheb(pos,b));
     if(inR.length){
       fxTracer(pos,inR[0]);if(typeof fx3Shot==='function')fx3Shot(pos,inR[0],'Ametralladoras');sfx('shoot');
-      G._dmgTeam=ownerTeam;damage(inR[0],dmg,label);G._dmgTeam=null;
+      damage(inR[0],dmg,label,ownerTeam);
     }
   };
   if(effMode(G)!=='dominacion'&&G.map.turret.owner===ownerTeam)fire(TURRET_POS,30,6,'La torreta central');
@@ -2808,8 +2819,8 @@ function turretFire(ownerTeam){
     if(t.type==='rocket'){
       const inR=targets.filter(x=>cheb(t,x)<=6&&hasLOS(t,x)&&!smokeBlocksLOS(t,x)).sort((a,b)=>cheb(t,a)-cheb(t,b));
       if(inR.length){const tg=inR[0];fxTracer(t,tg);if(typeof fx3Shot==='function')fx3Shot(t,tg,'Lanzacohetes');sfx('boom');
-        damage(tg,60,'La torreta de cohetes');
-        G.units.filter(u=>u.alive&&u.team!==ownerTeam&&u!==tg&&cheb(u,tg)<=1).forEach(u=>damage(u,30,'La torreta de cohetes'));}
+        damage(tg,60,'La torreta de cohetes',ownerTeam);
+        G.units.filter(u=>u.alive&&u.team!==ownerTeam&&u!==tg&&cheb(u,tg)<=1).forEach(u=>damage(u,30,'La torreta de cohetes',ownerTeam));}
     } else fire(t,45,6,'La torreta M2 desplegada');
   });
 }
@@ -2894,7 +2905,7 @@ function endGame(winner,reason){
       const isLast=idx>=CAMPAIGN_MISSIONS.length-1;
       saveCampaign({next:isLast?CAMPAIGN_MISSIONS.length:Math.max(c.next,idx+1),vet:vet,done:isLast?true:c.done});
       const gained=G.units.filter(u=>u.team==='A'&&u.alive).map(u=>u.role).join(', ')||'ninguno';
-      extra='<p><b>Misión '+(idx+1)+' superada.</b> Veterania ganada por sobrevivir: '+gained+'. Esos soldados empiezan la siguiente misión con +25 PV y +1 ⚡ más por cada nivel.</p>'+(isLast?'<div class="score-big">OPERACIÓN COMPLETADA</div><p>Has cerrado las cinco misiones de Operación Londres.</p>':'<p>Siguiente misión: <b>'+CAMPAIGN_MISSIONS[idx+1].title+'</b> · '+CAMPAIGN_MISSIONS[idx+1].brief+'</p>');
+      extra='<p><b>Misión '+(idx+1)+' superada.</b> Veterania ganada por sobrevivir: '+gained+'. Esos soldados empiezan la siguiente misión con +25 PV y +1 ⚡ más por cada nivel.</p>'+(isLast?'<div class="score-big">OPERACIÓN COMPLETADA</div><p>Has cerrado las '+CAMPAIGN_MISSIONS.length+' misiones de Operación Londres.</p>':'<p>Siguiente misión: <b>'+CAMPAIGN_MISSIONS[idx+1].title+'</b> · '+CAMPAIGN_MISSIONS[idx+1].brief+'</p>');
       campaignButtons=isLast?'':'<button class="btn primary big" onclick="closeModal();openSetup(\'campana\','+(idx+1)+')">Siguiente misión ▶</button>';
     } else {
       extra='<p><b>Misión '+(idx+1)+' no superada.</b> No pierdes veterania ni progreso: repite esta misión con otra escuadra o con las mismas armas.</p>';
@@ -2950,16 +2961,17 @@ function endTurn(){
   });
   /* Nube de gas: daña a todo soldado en su radio al empezar un turno. */
   if(G.smoke&&G.smoke.some(s=>s.kind==='gas')){
-    G.units.filter(x=>x.alive&&G.smoke.some(g=>g.kind==='gas'&&cheb(x,g)<=1)).forEach(x=>damage(x,GAS_DMG,'La nube de gas'));
+    G.units.filter(x=>x.alive&&G.smoke.some(g=>g.kind==='gas'&&cheb(x,g)<=1)).forEach(x=>{const g=G.smoke.find(z=>z.kind==='gas'&&cheb(x,z)<=1);damage(x,GAS_DMG,'La nube de gas',g&&g.team);});
   }
   if(G.smoke&&G.smoke.some(s=>s.kind==='fuego')){
-    G.units.filter(x=>x.alive&&G.smoke.some(f=>f.kind==='fuego'&&cheb(x,f)<=1)).forEach(x=>damage(x,MOLOTOV_DMG,'El fuego del molotov'));
+    G.units.filter(x=>x.alive&&G.smoke.some(f=>f.kind==='fuego'&&cheb(x,f)<=1)).forEach(x=>{const f=G.smoke.find(z=>z.kind==='fuego'&&cheb(x,z)<=1);damage(x,MOLOTOV_DMG,'El fuego del molotov',f&&f.team);});
   }
   /* Escudo (duración) y abejas (daño por turno) al empezar el turno de su dueño. */
   G.units.filter(x=>x.alive&&x.team===next).forEach(x=>{
     if(x.shieldT>0){x.shieldT--;if(x.shieldT<=0)log('· '+x.role+' baja el escudo antidisturbios.');}
-    if(x.beesT>0){x.beesT--;damage(x,BEES_DMG,'La bomba de abejas');}
+    if(x.beesT>0){x.beesT--;damage(x,BEES_DMG,'La bomba de abejas',x.beesTeam);}
   });
+  if(checkWin())return;
   /* Aturdidos por la M84: quien cierra su turno ya servido (la bandera
      puesta y el turno aturdido ya empezado, stunFresh en falso) se
      despeja aquí, al acabar ESE turno suyo y no antes: así un aliado
@@ -2981,7 +2993,7 @@ function endTurn(){
   if(G.opp==='local'){
     showModal('<h2>Turno del '+(next==='A'?'Jugador 1':'Jugador 2')+'</h2><p>Pasa el dispositivo. Tu escuadra: <b>'+teamName(next)+'</b>.</p><button class="btn primary big" onclick="closeModal()">Estoy listo · Jugar</button>');
   } else if(next==='B'){
-    runAI();
+    runAI().catch(err=>{if(G)G.aiBusy=false;console.error(err);});
   }
 }
 $('#endTurnBtn').onclick=endTurn;
@@ -3088,7 +3100,7 @@ function aiUnitAct(u){
           return res();
         }
         /* 0) Médico: si el dron tiene daño serio (<=155 PV, o <=maxHp-40 desde R3) o un aliado está herido, curarlo */
-        if(u.role==='Médico'&&u.heals>0&&u.energy>=3){
+        if(canHealSpecial(u)&&u.heals>0&&u.energy>=3){
           const hurtAlly=G.units.filter(a=>a.alive&&a.team==='A'&&a.hp<=a.maxHp*0.65&&dist(u,a)<=1).sort((a,b)=>a.hp-b.hp)[0];
           const droneNeedsHeal=(d.hp<=170)||(G.round>=3&&d.hp<=d.maxHp-40);
           const healTgt=droneNeedsHeal?d:hurtAlly;
@@ -3101,7 +3113,8 @@ function aiUnitAct(u){
               if(best&&dist(best,healTgt)<=1){
                 const ff=angleToFacing(best.x-u.x,best.y-u.y);if(ff!=null)u.facing=ff;
                 u.x=best.x;u.y=best.y;u.energy-=best.d;u.movedThisTurn=true;checkMines(u);checkOverwatch(u);pickupLoot(u);
-                if(u.alive&&G.drone&&G.drone.alive&&dist(u,healTgt)<=1&&u.energy>=3){useSpecial(u,healTgt);if(!G||G.over)return res();}
+                if(!u.alive||!G||G.over)return res();
+                if(G.drone&&G.drone.alive&&dist(u,healTgt)<=1&&u.energy>=3){useSpecial(u,healTgt);if(!G||G.over)return res();}
               }
             }
           }
@@ -3154,7 +3167,7 @@ function aiUnitAct(u){
           return guided>0;
         };
         /* 1a) Limpiar amenazas pegadas o aturdirlas antes de exponer al dron */
-        if(u.role==='Comando'&&(u.flashes||0)>0&&u.energy>=FLASH_COST){
+        if(unitHasAction(u,'flash')&&(u.flashes||0)>0&&u.energy>=FLASH_COST){
           const threat=enemies.find(e=>!e.stunned&&cheb(u,e)<=FLASH_RANGE&&!G.units.some(a=>a.alive&&a.team===u.team&&a!==u&&cheb(a,e)<=1));
           if(threat)throwFlash(u,threat.x,threat.y);
         }
@@ -3209,18 +3222,18 @@ function aiUnitAct(u){
         }
         /* 3) apoyos tácticos de escolta: torreta M2 cuando hay contacto, humo M18 sobre el dron, aturdidora M84 y M67 */
         if(!u.alive||!G||G.over)return res();
-        if(u.role==='Ingeniero'&&u.energy>=5&&(d.x>=3||enemies.some(e=>cheb(u,e)<=7))&&!G.deployed.some(t=>t.alive&&t.team===u.team)){
+        if(unitHasAction(u,'deploy')&&u.energy>=5&&(d.x>=3||enemies.some(e=>cheb(u,e)<=7))&&!G.deployed.some(t=>t.alive&&t.team===u.team)){
           const spots=[[1,0],[0,1],[0,-1],[-1,0]].map(dd=>({x:u.x+dd[0],y:u.y+dd[1]})).filter(p=>p.x>=0&&p.y>=0&&p.x<W&&p.y<H&&!blocked(p.x,p.y));
           if(spots.length)deployTurret(u,spots[0].x,spots[0].y);
         }
-        if(u.role==='Espía'&&(u.smokes||0)>0&&u.energy>=2&&!smokeAt(d.x,d.y)){
+        if(unitHasAction(u,'smoke')&&(u.smokes||0)>0&&u.energy>=2&&!smokeAt(d.x,d.y)){
           const shooterThreat=enemies.find(e=>cheb(e,d)<=8&&hasLOS(e,d)&&!smokeBlocksLOS(e,d));
           if(shooterThreat){
             const sx=Math.max(0,Math.min(W-1,d.x+Math.sign(shooterThreat.x-d.x))),sy=Math.max(0,Math.min(H-1,d.y+Math.sign(shooterThreat.y-d.y)));
             if(cheb(u,{x:sx,y:sy})>=1&&cheb(u,{x:sx,y:sy})<=4)throwSmoke(u,sx,sy);
           }
         }
-        if(u.role==='Comando'&&(u.flashes||0)>0&&u.energy>=FLASH_COST){
+        if(unitHasAction(u,'flash')&&(u.flashes||0)>0&&u.energy>=FLASH_COST){
           const threat=enemies.find(e=>!e.stunned&&cheb(u,e)<=FLASH_RANGE&&!G.units.some(a=>a.alive&&a.team===u.team&&a!==u&&cheb(a,e)<=1));
           if(threat)throwFlash(u,threat.x,threat.y);
         }
@@ -3239,7 +3252,7 @@ function aiUnitAct(u){
         for(const e of foes){if(cheb(u,e)<=w.rng&&hasLOS(u,e)&&!smokeBlocksLOS(u,e)&&hitChance(u,e,w)>0){tgt=e;break;}}
         if(tgt){let shots=0;while(tgt&&tgt.alive&&u.energy>=w.cost+guideReserve&&shots<3){if(!tryShoot(u,tgt,u.weapon,null))break;shots++;if(!tgt.alive)tgt=foes.find(e=>e.alive&&cheb(u,e)<=w.rng&&hasLOS(u,e)&&!smokeBlocksLOS(u,e)&&hitChance(u,e,w)>0)||null;}}
         if(u.alive&&G&&!G.over&&dist(u,d)<=1&&d.movesLeft>0&&u.energy>=2){if(tryGuideFwd(2,false)&&(!G||G.over))return res();}
-        if(u.alive&&G&&!G.over&&u.energy>=3&&!u.overwatch&&!u.stunned&&Math.random()<0.65){u.energy-=3;u.overwatch=true;}
+        if(u.alive&&G&&!G.over&&u.energy>=3&&!u.overwatch&&!u.stunned&&rng()<0.65){u.energy-=3;u.overwatch=true;}
         return res();
       }
       /* Médico: cura a un aliado adyacente, o se acerca a un aliado muy herido para curarlo */
@@ -3257,7 +3270,8 @@ function aiUnitAct(u){
             if(bh){
               const ff=angleToFacing(bh.x-u.x,bh.y-u.y);if(ff!=null)u.facing=ff;
               u.x=bh.x;u.y=bh.y;u.energy-=bh.d;u.movedThisTurn=true;checkMines(u);checkOverwatch(u);pickupLoot(u);
-              if(u.alive&&G&&!G.over&&hurtFar.alive&&dist(u,hurtFar)<=1&&u.energy>=3){useSpecial(u,hurtFar);return res();}
+              if(!u.alive||!G||G.over)return res();
+              if(hurtFar.alive&&dist(u,hurtFar)<=1&&u.energy>=3){useSpecial(u,hurtFar);return res();}
             }
           }
         }
@@ -3305,7 +3319,7 @@ function aiUnitAct(u){
            marcha a interceptar al dron y se planta en su ruta; quien ya
            lo tiene a tiro y con visión no se mueve y le dispara. */
         goal=drone;
-      } else if(effMode(G)==='baliza'&&!inBeacon(u.x,u.y)&&(hardAI||Math.random()<0.65)){
+      } else if(effMode(G)==='baliza'&&!inBeacon(u.x,u.y)&&(hardAI||rng()<0.65)){
         goal=BEACON.slice().sort((a,b)=>pathDist(u,a)-pathDist(u,b))[0];
       }
       const hasCleanShot=target&&cheb(u,target)<=w.rng&&hasLOS(u,target)&&!smokeBlocksLOS(u,target);
@@ -3379,6 +3393,7 @@ function aiUnitAct(u){
         });
         if(best&&(best.x!==u.x||best.y!==u.y)){
           const fx=u.x,fy=u.y;u._prevPos={x:fx,y:fy};const ff=angleToFacing(best.x-fx,best.y-fy);if(ff!=null)u.facing=ff;u.x=best.x;u.y=best.y;u.energy-=best.d;u.movedThisTurn=true;checkMines(u);checkOverwatch(u);pickupLoot(u);
+          if(!u.alive||!G||G.over)return res();
           log('IA: '+u.role+' avanza de ('+(fx+1)+','+(fy+1)+') a ('+(u.x+1)+','+(u.y+1)+').');
           const mk=G.map.medkits.find(m=>!m.used&&m.x===u.x&&m.y===u.y);
           if(mk&&u.alive&&u.hp<u.maxHp){mk.used=true;u.hp=Math.min(u.maxHp,u.hp+50);playOnce(u,'pickup');log('IA: '+u.role+' usa el botiquín (+50 PV).');}
@@ -3389,7 +3404,7 @@ function aiUnitAct(u){
          cegar a aliados que ya tienen tiro limpio): solo se lanza si el
          dron de Escolta está bajo fuego, si el Espía está expuesto/herido
          bajo tiro rival o si necesita cubrir un avance sin arriesgarse. */
-      if(u.role==='Espía'&&(u.smokes||0)>0&&u.energy>=2&&!smokeAt(u.x,u.y)){
+      if(unitHasAction(u,'smoke')&&(u.smokes||0)>0&&u.energy>=2&&!smokeAt(u.x,u.y)){
         const smokeFocus=(effMode(G)==='escolta'&&drone&&cheb(target,drone)<=7&&hasLOS(target,drone))?drone:u;
         const foe=target;
         const exposed=foe&&cheb(smokeFocus,foe)<=6&&hasLOS(foe,smokeFocus)&&!coverBonus(smokeFocus,foe);
@@ -3406,7 +3421,7 @@ function aiUnitAct(u){
          la baliza, en una zona de Dominación o en la extracción, o de
          cara al enemigo cercano. La coloca con la misma función que
          usa el jugador, así que paga su coste y gasta su cupo. */
-      if(u.role==='Ingeniero'&&(u.mines||0)>0&&u.energy>=MINE_COST){
+      if(unitHasAction(u,'mine')&&(u.mines||0)>0&&u.energy>=MINE_COST){
         const cands=[[1,0],[-1,0],[0,1],[0,-1]].map(d=>({x:u.x+d[0],y:u.y+d[1]})).filter(p=>p.x>=0&&p.y>=0&&p.x<W&&p.y<H&&!blocked(p.x,p.y)&&!mineAt(p.x,p.y)&&!(p.x===TURRET_POS.x&&p.y===TURRET_POS.y)&&!G.map.medkits.some(m=>!m.used&&m.x===p.x&&m.y===p.y));
         let bestM=null,bestMS=-1;
         cands.forEach(p=>{let s=0;if(inBeacon(p.x,p.y))s+=3;if(DOM_ZONES.some(z=>inDomZone(p.x,p.y,z)))s+=3;if(effMode(G)==='escolta'&&isExtraction(p.x,p.y))s+=3;if(cheb(p,target)<cheb(u,target))s+=1;if(cheb(p,target)<=3)s+=2;if(s>bestMS){bestMS=s;bestM=p;}});
@@ -3421,7 +3436,7 @@ function aiUnitAct(u){
          gasta su cupo y el fogonazo le niega al objetivo el fuego de
          respuesta de este turno, que es justo lo que la IA aprovecha
          disparando después. */
-      if(u.role==='Comando'&&(u.flashes||0)>0&&u.energy>=FLASH_COST){
+      if(unitHasAction(u,'flash')&&(u.flashes||0)>0&&u.energy>=FLASH_COST){
         let bestF=null,bestFS=0,bestFE=0;
         for(let fy2=0;fy2<H;fy2++)for(let fx3=0;fx3<W;fx3++){
           if(cheb(u,{x:fx3,y:fy2})>FLASH_RANGE)continue;
@@ -3430,11 +3445,11 @@ function aiUnitAct(u){
           const fs=fe-fa;
           if(fe>0&&(fs>bestFS||(fs===bestFS&&fe>bestFE))){bestFS=fs;bestFE=fe;bestF={x:fx3,y:fy2};}
         }
-        if(bestF&&(bestFE>=2||Math.random()<0.5))throwFlash(u,bestF.x,bestF.y);
+        if(bestF&&(bestFE>=2||rng()<0.5))throwFlash(u,bestF.x,bestF.y);
       }
       /* Escolta: granada al dron cuando flaquea o sin blindaje */
       const droneGuarded=drone&&G.units.some(a=>a.alive&&a.team==='A'&&dist(a,drone)<=1);
-      if(drone&&u.grenades>0&&u.energy>=2&&cheb(u,drone)<=3&&cheb(u,drone)>=2&&(!droneGuarded||drone.hp<=160)&&Math.random()<0.55){throwGrenade(u,drone.x,drone.y);return res();}
+      if(drone&&u.grenades>0&&u.energy>=2&&cheb(u,drone)<=3&&cheb(u,drone)>=2&&(!droneGuarded||drone.hp<=160)&&rng()<0.55){throwGrenade(u,drone.x,drone.y);return res();}
       /* Granada M67 táctica: busca la casilla óptima sin fuego amigo */
       if(u.grenades>0&&u.energy>=2){
         let bestG=null,bestGS=0,bestGE=0;
@@ -3449,20 +3464,20 @@ function aiUnitAct(u){
         }
         if(bestG){throwGrenade(u,bestG.x,bestG.y);return res();}
       }
-      if(u.role==='Espía'&&(u.tranqs||0)>0&&u.energy>=TRANQ_COST){
+      if(unitHasAction(u,'tranq')&&(u.tranqs||0)>0&&u.energy>=TRANQ_COST){
         const tgt=enemies.filter(e=>e.alive&&!e.stunned&&cheb(u,e)<=TRANQ_RANGE).sort((a,b)=>b.hp-a.hp)[0];
         if(tgt){throwTranq(u,tgt);return res();}
       }
-      if(u.role==='Comando'&&(u.water||0)>0&&u.energy>=WATER_COST){
+      if(unitHasAction(u,'water')&&(u.water||0)>0&&u.energy>=WATER_COST){
         const tgt=enemies.filter(e=>e.alive&&cheb(u,e)<=WATER_RANGE).sort((a,b)=>cheb(u,a)-cheb(u,b))[0];
         if(tgt){waterCannon(u,tgt);return res();}
       }
-      if(u.role==='Ingeniero'&&(u.toolkits||0)>0&&u.energy>=TOOL_COST){
+      if(unitHasAction(u,'toolkit')&&(u.toolkits||0)>0&&u.energy>=TOOL_COST){
         const tur=G.deployed.filter(d=>d.alive&&d.team===u.team&&d.hp<d.maxHp&&cheb(u,d)<=TOOL_RANGE)[0];
         if(tur){useToolkit(u);}
       }
-      if(u.role==='Comando'&&(u.shields||0)>0&&u.energy>=SHIELD_COST&&u.hp<=u.maxHp*0.6&&enemies.some(e=>cheb(u,e)<=6)){useShield(u);}
-      if(u.role==='Artillero'&&(u.arty||0)>0&&u.energy>=ARTY_COST){
+      if(unitHasAction(u,'shield')&&(u.shields||0)>0&&u.energy>=SHIELD_COST&&u.hp<=u.maxHp*0.6&&enemies.some(e=>cheb(u,e)<=6)){useShield(u);}
+      if(unitHasAction(u,'arty')&&(u.arty||0)>0&&u.energy>=ARTY_COST){
         let bestA=null,bestAN=0;
         for(let gy=0;gy<H;gy++)for(let gx=0;gx<W;gx++){
           if(cheb(u,{x:gx,y:gy})>ARTY_RANGE||cheb(u,{x:gx,y:gy})===0)continue;
@@ -3471,11 +3486,11 @@ function aiUnitAct(u){
         }
         if(bestA&&bestAN>=1){fireArtillery(u,bestA.x,bestA.y);return res();}
       }
-      if(u.role==='Espía'&&(u.bees||0)>0&&u.energy>=BEES_COST){
+      if(unitHasAction(u,'bees')&&(u.bees||0)>0&&u.energy>=BEES_COST){
         const fat=enemies.filter(e=>e.alive&&cheb(u,e)<=BEES_RANGE).sort((a,b)=>b.hp-a.hp)[0];
         if(fat&&fat.beesT==null){throwBees(u,fat);return res();}
       }
-      if(u.role==='Artillero'&&(u.molotovs||0)>0&&u.energy>=MOLOTOV_COST){
+      if(unitHasAction(u,'molotov')&&(u.molotovs||0)>0&&u.energy>=MOLOTOV_COST){
         let bestF=null,bestFN=0;
         for(let gy=0;gy<H;gy++)for(let gx=0;gx<W;gx++){
           if(cheb(u,{x:gx,y:gy})>3||cheb(u,{x:gx,y:gy})===0)continue;
@@ -3484,13 +3499,13 @@ function aiUnitAct(u){
         }
         if(bestF&&bestFN>=1){throwMolotov(u,bestF.x,bestF.y);return res();}
       }
-      if(u.role==='Médico'&&(u.crates||0)>0&&u.energy>=CRATE_COST){
+      if(unitHasAction(u,'crate')&&(u.crates||0)>0&&u.energy>=CRATE_COST){
         const hurt=G.units.filter(a=>a.alive&&a.team===u.team&&a!==u&&a.hp<=a.maxHp*0.55).sort((a,b)=>a.hp-b.hp)[0];
         if(hurt){const spots=[[1,0],[-1,0],[0,1],[0,-1]].map(d=>({x:u.x+d[0],y:u.y+d[1]})).filter(p=>p.x>=0&&p.y>=0&&p.x<W&&p.y<H&&!blocked(p.x,p.y)&&!inBeacon(p.x,p.y));
           if(spots.length)placeHealthCrate(u,spots[0].x,spots[0].y);}
       }
       /* Habilidades nuevas (F4): gas del Artillero, cobertura del Ingeniero y barrido del Espía */
-      if(u.role==='Artillero'&&(u.gases||0)>0&&u.energy>=GAS_COST){
+      if(unitHasAction(u,'gas')&&(u.gases||0)>0&&u.energy>=GAS_COST){
         let bestG=null,bestN=0;
         for(let gy=0;gy<H;gy++)for(let gx=0;gx<W;gx++){
           if(cheb(u,{x:gx,y:gy})>3||cheb(u,{x:gx,y:gy})===0)continue;
@@ -3499,18 +3514,18 @@ function aiUnitAct(u){
         }
         if(bestG&&bestN>=1){throwGas(u,bestG.x,bestG.y);return res();}
       }
-      if(u.role==='Ingeniero'&&(u.covers||0)>0&&u.energy>=COVER_COST&&enemies.some(e=>cheb(u,e)<=6)&&Math.random()<0.5){
+      if(unitHasAction(u,'cover')&&(u.covers||0)>0&&u.energy>=COVER_COST&&enemies.some(e=>cheb(u,e)<=6)&&rng()<0.5){
         const spots=[[1,0],[-1,0],[0,1],[0,-1]].map(d=>({x:u.x+d[0],y:u.y+d[1]})).filter(p=>p.x>=0&&p.y>=0&&p.x<W&&p.y<H&&!blocked(p.x,p.y)&&!inBeacon(p.x,p.y));
         const ally=G.units.filter(a=>a.alive&&a.team===u.team&&a!==u&&a.hp<=a.maxHp*0.7).sort((a,b)=>a.hp-b.hp)[0];
         if(spots.length&&ally)placeCover(u,spots[0].x,spots[0].y);
       }
-      if(u.role==='Espía'&&(u.sweeps||0)>0&&u.energy>=SWEEP_COST){
+      if(unitHasAction(u,'sweep')&&(u.sweeps||0)>0&&u.energy>=SWEEP_COST){
         const inv=enemies.find(e=>e.invisible);
         if(inv){sweepDetect(u,inv.x,inv.y);return res();}
       }
       /* Escolta: si el dron está sin escolta pegada o tocado, concentrar fuego; si está bien escoltado, castiga al escolta crítico o presiona al dron */
       if(drone&&cheb(u,drone)<=w.rng&&hasLOS(u,drone)&&hitChance(u,drone,w)>0){
-        if(hardAI&&u.role==='Francotirador'&&!drone.movedThisTurn&&u.energy>=w.cost+3){useSpecial(u,drone);return res();}
+        if(hardAI&&unitHasAction(u,'special')&&canSnipeSpecial(u)&&!drone.movedThisTurn&&u.energy>=w.cost+3){useSpecial(u,drone);return res();}
         const weakEscort=G.units.some(a=>a.alive&&a.team==='A'&&a.hp<=50&&cheb(u,a)<=w.rng&&hasLOS(u,a)&&!smokeBlocksLOS(u,a));
         if(!droneGuarded||!weakEscort){
           let dshots=0;
@@ -3528,12 +3543,12 @@ function aiUnitAct(u){
       };
       target=pickShootTarget();
       /* Francotirador Veterano/Élite: tiro certero sobre objetivo quieto */
-      if(hardAI&&u.role==='Francotirador'&&target&&!target.movedThisTurn&&u.energy>=WEAPONS[u.weapon].cost+3){useSpecial(u,target);return res();}
+      if(hardAI&&unitHasAction(u,'special')&&canSnipeSpecial(u)&&target&&!target.movedThisTurn&&u.energy>=WEAPONS[u.weapon].cost+3){useSpecial(u,target);return res();}
       let shots=0;
       const maxShots=(G.round===1&&w.rng>=8)?1:3;
       while(target&&u.energy>=w.cost&&shots<maxShots){if(!tryShoot(u,target,u.weapon,null))break;shots++;if(!target.alive)target=pickShootTarget();}
       if(u.energy>=1&&target&&cheb(u,target)<=3&&u.energy<w.cost)tryShoot(u,target,PISTOL,null);
-      if(u.alive&&u.energy>=3&&shots===0&&!u.overwatch&&!u.stunned&&!lateStall&&Math.random()<(G.round===1?0.5:0.75)){u.energy-=3;u.overwatch=true;log('IA: '+u.role+' se queda en vigilancia.');}
+      if(u.alive&&u.energy>=3&&shots===0&&!u.overwatch&&!u.stunned&&!lateStall&&rng()<(G.round===1?0.5:0.75)){u.energy-=3;u.overwatch=true;log('IA: '+u.role+' se queda en vigilancia.');}
       res();
     },420);
   });
@@ -3647,11 +3662,11 @@ function boardTileClick(t){
   if(G.actionMode==='water'&&u){if(clickedUnit&&clickedUnit.team!==u.team)waterCannon(u,clickedUnit);return;}
   if(clickedUnit){
     if(clickedUnit.team===G.turn){
-      if(G.actionMode==='special'&&u&&(u.role==='Médico'||u.role==='Capitán'||hasCharIcon(u,'CharAbility_30_Medkit_alpha')||hasCharIcon(u,'CharAbility_36_Revive_alpha'))){useSpecial(u,clickedUnit);G.actionMode='move';updateUI();draw();return;}
+      if(G.actionMode==='special'&&u&&(canHealSpecial(u)||u.role==='Capitán')){useSpecial(u,clickedUnit);G.actionMode='move';updateUI();draw();return;}
       selectUnit(clickedUnit);return;
     } else {
       if(!u||u.team!==G.turn){toast('Selecciona primero a uno de tus soldados.');return;}
-      if(G.actionMode==='special'&&(u.role==='Francotirador'||hasCharIcon(u,'CharAbility_42_Sniper_Rifle_Specialization_alpha'))){useSpecial(u,clickedUnit);return;}
+      if(G.actionMode==='special'&&canSnipeSpecial(u)){useSpecial(u,clickedUnit);return;}
       if(G.actionMode==='pistol'){tryShoot(u,clickedUnit,PISTOL,null);return;}
       tryShoot(u,clickedUnit,u.weapon,null);return;
     }
@@ -3758,7 +3773,7 @@ function updateUI(){
   G.units.forEach(u=>{
     const b=document.createElement('button');
     b.className=(G.selected===u?'sel':'')+(u.alive?'':' dead');
-    b.innerHTML=(rolePortraitURL(u.role)?'<img class="roster-portrait" src="'+rolePortraitURL(u.role)+'" alt=""/>':'')+'<span class="role-dot" style="background:'+ROLES[u.role].color+'"></span><span style="flex:none"><b>'+u.role+'</b>'+(u.name&&u.name!==u.role?'<br><small style="color:var(--muted)">'+u.name+'</small>':'')+((u.alive?[u.stunned?'💫':(u.invisible?'👻':''),u.overwatch?'👁':'',u.suppressed?'⚡':'',((u.beesT||0)>0)?'🐝':'',((u.shieldT||0)>0)?'🛡':'',(u.hp<=u.maxHp*0.35?'🩹':'')]:[]).filter(Boolean).length?'<br><small title="estados">'+[u.stunned?'💫':(u.invisible?'👻':''),u.overwatch?'👁':'',u.suppressed?'⚡':'',((u.beesT||0)>0)?'🐝':'',((u.shieldT||0)>0)?'🛡':'',(u.hp<=u.maxHp*0.35?'🩹':'')].filter(Boolean).join('')+'</small>':'')+(u.vetLevel?'<span class="vet-badge">Vet. '+u.vetLevel+'</span>':'')+' <span style="color:'+(u.team==='A'?'var(--teamA)':'var(--teamB)')+'">●'+u.team+'</span><br><small style="color:var(--muted)">'+u.weapon+' · ⚡'+(u.alive?u.energy:0)+'</small></span><span class="mini-hp"><i style="width:'+Math.round(u.hp/u.maxHp*100)+'%"></i></span><b class="mono" style="font-size:13px">'+(u.alive?u.hp+' PV':'K.O.')+'</b>';
+    b.innerHTML=(rolePortraitURL(u.role,u)?'<img class="roster-portrait" src="'+rolePortraitURL(u.role,u)+'" alt=""/>':'')+'<span class="role-dot" style="background:'+ROLES[u.role].color+'"></span><span style="flex:none"><b>'+u.role+'</b>'+(u.name&&u.name!==u.role?'<br><small style="color:var(--muted)">'+u.name+'</small>':'')+((u.alive?[u.stunned?'💫':(u.invisible?'👻':''),u.overwatch?'👁':'',u.suppressed?'⚡':'',((u.beesT||0)>0)?'🐝':'',((u.shieldT||0)>0)?'🛡':'',(u.hp<=u.maxHp*0.35?'🩹':'')]:[]).filter(Boolean).length?'<br><small title="estados">'+[u.stunned?'💫':(u.invisible?'👻':''),u.overwatch?'👁':'',u.suppressed?'⚡':'',((u.beesT||0)>0)?'🐝':'',((u.shieldT||0)>0)?'🛡':'',(u.hp<=u.maxHp*0.35?'🩹':'')].filter(Boolean).join('')+'</small>':'')+(u.vetLevel?'<span class="vet-badge">Vet. '+u.vetLevel+'</span>':'')+' <span style="color:'+(u.team==='A'?'var(--teamA)':'var(--teamB)')+'">●'+u.team+'</span><br><small style="color:var(--muted)">'+u.weapon+' · ⚡'+(u.alive?u.energy:0)+'</small></span><span class="mini-hp"><i style="width:'+Math.round(u.hp/u.maxHp*100)+'%"></i></span><b class="mono" style="font-size:13px">'+(u.alive?u.hp+' PV':'K.O.')+'</b>';
     b.onclick=()=>{if(u.alive&&u.team===G.turn&&!G.aiBusy)selectUnit(u);};
     r.appendChild(b);
   });
@@ -3780,10 +3795,19 @@ function updateUI(){
   let tileCov=0;[[1,0],[-1,0],[0,1],[0,-1]].forEach(dd=>{const o=obAt(u.x+dd[0],u.y+dd[1]);if(!o)return;const lv=o.type==='wall'||o.type==='shelf'?3:(o.type==='crate'?(o.hp>o.maxHp/2?2:1):0);if(lv>tileCov)tileCov=lv;});
   const covIco=tileCov>0?'<img class="cov-ico" src="assets/ui/orig/hud_icon_emote_cover'+(tileCov*25)+'.png" alt=""/>':'';
   const covTxt=tileCov>0?' · '+covIco+' Cobertura '+tileCov+' (−'+[0,12,25,40][tileCov]+'%)':'';
-  card.innerHTML=(()=>{const pUrl=rolePortraitURL(u.role);if(pUrl)return '<img class="unit-sprite" src="'+pUrl+'" alt="Retrato del '+u.role+'"/>';const rsUrl=getRealSpriteURL(u);if(rsUrl)return '<img class="unit-sprite" src="'+rsUrl+'" alt="Sprite del '+u.role+' renderizado desde el modelo real, en el tablero"/>';return (ARGON_READY&&ROLE_SVG_ID[u.role]?'<img class="unit-sprite" src="'+spriteDataURI(ROLE_SVG_ID[u.role],u.skin,u.nation)+'" alt="Sprite del '+u.role+' en el tablero"/>':'');})()+'<h3><span class="role-dot" style="background:'+ROLES[u.role].color+';width:14px;height:14px"></span><img class="class-ico" src="assets/ui/orig/Class_'+classIco+'_alpha.png" alt=""/>'+u.role+' <span class="sub" style="font-size:12px">'+u.name+'</span> <span style="color:'+(u.team==='A'?'var(--teamA)':'var(--teamB)')+';font-size:15px">'+teamName(u.team)+'</span></h3>'+
+  const resBits=['Granadas M67: '+u.grenades];
+  if(unitHasAction(u,'crate'))resBits.push('Cajas de salud: '+(u.crates||0));
+  if(canHealSpecial(u))resBits.push('Curaciones: '+u.heals);
+  if(canReviveSpecial(u))resBits.push('Reanimación: '+u.revives);
+  if(unitHasAction(u,'mine'))resBits.push('Claymores M18A1: '+(u.mines||0));
+  if(unitHasAction(u,'flash'))resBits.push('Aturdidoras M84: '+(u.flashes||0));
+  if(unitHasAction(u,'smoke'))resBits.push('Humo M18: '+(u.smokes||0));
+  if(unitHasAction(u,'toolkit'))resBits.push('Kits: '+(u.toolkits||0));
+  if(unitHasAction(u,'arty'))resBits.push('Artillería: '+(u.arty||0));
+  card.innerHTML=(()=>{const pUrl=rolePortraitURL(u.role,u);if(pUrl)return '<img class="unit-sprite" src="'+pUrl+'" alt="Retrato del '+u.role+'"/>';const rsUrl=getRealSpriteURL(u);if(rsUrl)return '<img class="unit-sprite" src="'+rsUrl+'" alt="Sprite del '+u.role+' renderizado desde el modelo real, en el tablero"/>';return (ARGON_READY&&ROLE_SVG_ID[u.role]?'<img class="unit-sprite" src="'+spriteDataURI(ROLE_SVG_ID[u.role],u.skin,u.nation)+'" alt="Sprite del '+u.role+' en el tablero"/>':'');})()+'<h3><span class="role-dot" style="background:'+ROLES[u.role].color+';width:14px;height:14px"></span><img class="class-ico" src="assets/ui/orig/Class_'+classIco+'_alpha.png" alt=""/>'+u.role+' <span class="sub" style="font-size:12px">'+u.name+'</span> <span style="color:'+(u.team==='A'?'var(--teamA)':'var(--teamB)')+';font-size:15px">'+teamName(u.team)+'</span></h3>'+
    '<div style="display:flex;align-items:center;gap:8px">'+(u.skin==='nacion'?flagHTML(u.nation)+emblemHTML(u.nation)+'<span class="sub">Skin Nación · '+u.nation.name+' · '+u.nation.emblemName+'</span>':'<span class="sub">Skin '+(SKINS[u.skin]?SKINS[u.skin].name:'Estándar')+' · '+(SKINS[u.skin]?SKINS[u.skin].desc:'soldado genérico')+'</span>')+(u.invisible?'<span class="sub">· 👁 invisible este turno</span>':'')+(u.stunned?'<span class="sub" style="color:#e8c84e">· 💫 aturdido por la M84</span>':'')+'</div>'+
    '<div class="hpbar"><i class="'+(u.hp<=u.maxHp*0.3?'low':'')+'" style="width:'+Math.round(u.hp/u.maxHp*100)+'%"></i></div><div class="statline"><img class="hud-ico" src="assets/ui/orig/hud_icon_health.png" alt=""/>Vida <b class="mono">'+u.hp+'/'+u.maxHp+'</b> · Cuerpo '+(BODIES[u.body]?BODIES[u.body].name:u.body)+' · Posición ('+(u.x+1)+','+(u.y+1)+')'+(inBeacon(u.x,u.y)?' · <b style="color:var(--amber)">en la baliza</b>':'') +(u.overwatch?' · <b style="color:var(--amber)">en vigilancia</b>':'')+covTxt+'</div>'+
-   '<div class="epips">'+Array.from({length:u.maxEnergy},(_,i)=>'<i class="'+(i<u.energy?'':'off')+'"></i>').join('')+'</div><div class="statline"><img class="hud-ico" src="assets/ui/orig/AP_alpha.png" alt=""/>Energía <b class="mono">'+u.energy+'/'+u.maxEnergy+'</b> · Mover: '+u.moveCost+' ⚡/casilla · Granadas M67: '+u.grenades+(u.role==='Médico'?' · Curaciones: '+u.heals+' · Reanimación: '+u.revives:'')+(u.role==='Ingeniero'?' · Claymores M18A1: '+(u.mines||0):'')+(u.role==='Comando'?' · Aturdidoras M84: '+(u.flashes||0):'')+'</div>'+
+   '<div class="epips">'+Array.from({length:u.maxEnergy},(_,i)=>'<i class="'+(i<u.energy?'':'off')+'"></i>').join('')+'</div><div class="statline"><img class="hud-ico" src="assets/ui/orig/AP_alpha.png" alt=""/>Energía <b class="mono">'+u.energy+'/'+u.maxEnergy+'</b> · Mover: '+u.moveCost+' ⚡/casilla · '+resBits.join(' · ')+'</div>'+
    (abChips?'<div class="ab-row">'+abChips+'</div>':'')+
    '<div class="actions">'+
    '<button data-act="shoot" class="'+(G.actionMode==='shoot'?'on':'')+'" '+(isTurn?'':'disabled')+' title="'+(w.real||'')+' — '+(w.note||'')+'">'+wpCover+'🎯 Disparar [1] · '+u.weapon+'<small>'+w.dmg+' daño · alcance '+w.rng+' · '+w.cost+' ⚡ — luego toca al enemigo</small></button>'+
@@ -5137,10 +5161,12 @@ function loadRealSoldier(){
       (casts||[]).forEach(([file,t])=>{if(t)REAL.castTex[file]=t;});
     });
   }).then(()=>{
+    Object.keys(PORTRAIT_CACHE).forEach(k=>delete PORTRAIT_CACHE[k]);
+    REAL_SPRITES.cache={};REAL_SPRITES.failed=false;
     if(typeof buildSpriteStrip==='function')buildSpriteStrip();
     if(typeof rebuildDemo==='function')rebuildDemo();
     if(G&&T3&&VIEW_MODE==='3d')build3DWorld();
-    if(G)draw();
+    if(G){updateUI();draw();}
   }).catch(()=>{});
 }
 loadRealSoldier();
@@ -5192,10 +5218,10 @@ const SKIRMISH_GEO={
 function skState(theme){return SKIRMISH_GEO[theme]||null;}
 function loadSkirmishTop(theme){
   const st=skState(theme);
-  if(!st||st.topImg)return;
+  if(!st||st.topImg||st.topFailed)return;
   const im=new Image();
   im.onload=()=>{st.topImg=im;st.topReady=true;if(G)draw();};
-  im.onerror=()=>{};
+  im.onerror=()=>{st.topFailed=true;};
   im.src=st.top;
 }
 function loadSkirmishGeo(theme){
@@ -5338,8 +5364,10 @@ const WEAPON_THUMB_CACHE={};
 let _wThumbR=null;
 function renderWeaponThumb(weapon){
   if(WEAPON_THUMB_CACHE[weapon]!==undefined)return WEAPON_THUMB_CACHE[weapon];
-  const file=WEAPON_MESH_FILE[weapon]; const holder=GUN_MESH_CACHE[weapon];
-  if(!file||!holder){WEAPON_THUMB_CACHE[weapon]=null;return null;}
+  const file=WEAPON_MESH_FILE[weapon];
+  if(!file){WEAPON_THUMB_CACHE[weapon]=null;return null;}
+  const holder=GUN_MESH_CACHE[weapon];
+  if(!holder)return null;
   try{
     if(!_wThumbR){
       _wThumbR=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});
@@ -5532,7 +5560,7 @@ function makeRealGun3(weapon){
     holder.rotation.x=-Math.PI/2;
     GUN_MESH_CACHE[weapon]=holder;
     if(gunSwapWaiters[weapon]){gunSwapWaiters[weapon].forEach(fn=>{try{fn(holder);}catch(e){}});gunSwapWaiters[weapon]=[];}
-  }).catch(()=>{GUN_MESH_CACHE[weapon]=false;});
+  }).catch(()=>{delete GUN_MESH_CACHE[weapon];});
   return null;
 }
 const gunSwapWaiters={};
@@ -5713,7 +5741,7 @@ function makeRealSoldier3(un){
      huesos cuya bind no cuadra (boneWorld x boneInverse != I) y sale como un
      blob: de momento usa la malla base con su uniforme. */
   const CLASS_MODEL_SKIP={};
-  const meshy=(un.charMesh&&MESHY_MODELS[un.charMesh])||null;
+  const meshy=(!window.__forceBaseModel&&un.charMesh&&MESHY_MODELS[un.charMesh])||null;
   tilt.rotation.x=(meshy&&!meshy.zUp)?0:-Math.PI/2;
   const castTex=(un.charTexture&&REAL.castTex)?REAL.castTex[un.charTexture]:null;
   const RD=meshy||((!window.__forceBaseModel&&!CLASS_MODEL_SKIP[un.role]&&REAL.byRole&&REAL.byRole[un.role])||REAL);
@@ -6250,7 +6278,7 @@ function realSpriteKey(un){return un.role+'|'+un.weapon+'|'+un.skin+'|'+(un.skin
 function realSpriteUnit(role,weapon,skin,nation,char){
   const r=ROLES[role];if(!r)return null;
   const body=BODIES[r.body]||BODIES.medio;
-  return {id:700+ROLE_NAMES.indexOf(role),team:'A',role:role,weapon:weapon||r.weapons[0],skin:skin||'nacion',nation:nation||NATIONS[0],x:0,y:0,dx:0,dy:0,hp:body.hp,maxHp:body.hp,energy:body.energy,maxEnergy:body.energy,alive:true,invisible:false,body:r.body,facing:0,charKey:char?(char.key||char.name):'',charName:char?char.name:role,charTexture:char&&char.texture?char.texture:'',charMesh:char&&char.mesh?char.mesh:''};
+  return {id:700+ROLE_NAMES.indexOf(role),team:'A',role:role,weapon:weapon||r.weapons[0],skin:skin||'nacion',nation:nation||NATIONS[0],x:0,y:0,dx:0,dy:0,hp:body.hp,maxHp:body.hp,energy:body.energy,maxEnergy:body.energy,alive:true,invisible:false,body:r.body,facing:0,charKey:characterKey(char),charName:char?char.name:role,charTexture:char&&char.texture?char.texture:'',charMesh:char&&char.mesh?char.mesh:''};
 }
 function initRealSpriteRenderer(){
   if(REAL_SPRITES.renderer||REAL_SPRITES.failed)return !!REAL_SPRITES.renderer;
@@ -6910,7 +6938,7 @@ function rebuildHighlights3(){
   if(!T3.hlTileGeo)T3.hlTileGeo=new THREE.PlaneGeometry(0.88,0.88);
   if(!T3.hlRingGeo)T3.hlRingGeo=new THREE.RingGeometry(0.33,0.45,24);
   if(!T3.hlMatCache)T3.hlMatCache={};
-  const getMat=(key,col,op,mask)=>{if(!T3.hlMatCache[key]){const mm={color:col,transparent:true,opacity:op,depthWrite:false,side:THREE.DoubleSide};if(mask&&T3.tileMasks&&T3.tileMasks[mask])mm.alphaMap=T3.tileMasks[mask];T3.hlMatCache[key]=new THREE.MeshBasicMaterial(mm);}return T3.hlMatCache[key];};
+  const getMat=(key,col,op,mask)=>{const k=key+':'+col+':'+op+(mask?':'+mask:'');if(!T3.hlMatCache[k]){const mm={color:col,transparent:true,opacity:op,depthWrite:false,side:THREE.DoubleSide};if(mask&&T3.tileMasks&&T3.tileMasks[mask])mm.alphaMap=T3.tileMasks[mask];T3.hlMatCache[k]=new THREE.MeshBasicMaterial(mm);}return T3.hlMatCache[k];};
   const addTile=(x,y,key,col,op,mask)=>{
     const p=new THREE.Mesh(T3.hlTileGeo,getMat('t:'+key+(mask?':'+mask:''),col,op,mask));
     p.rotation.x=-Math.PI/2;p.position.set(w2cx(x),0.064,w2cx(y));T3.hlGroup.add(p);
@@ -7462,7 +7490,7 @@ window.addEventListener('keydown',e=>{
   if(k==='escape'){if(G.actionMode!=='move'){G.actionMode='move';updateUI();draw();}return;}
   if(k==='z'){e.preventDefault();undoLastMove();return;}
   const actMap={'1':'shoot','2':'pistol','3':'grenade','4':'overwatch','5':'special'};
-  if(actMap[k]){const btn=document.querySelector('#unitCard [data-act="'+actMap[k]+'"]');if(btn&&!btn.disabled){btn.click();btn.blur();}return;}
+  if(actMap[k]){const btn=document.querySelector('#actionBar [data-act="'+actMap[k]+'"]');if(btn&&!btn.disabled){btn.click();btn.blur();}return;}
   if(T3&&T3.cam&&VIEW_MODE==='3d'){
     if(k==='q')T3.cam.yaw-=0.38;
     else if(k==='e')T3.cam.yaw+=0.38;
@@ -7709,6 +7737,7 @@ function characterForRole(role,slot){
   const chosen=opts.find(c=>c.name===prefs[role]||c.key===prefs[role]);
   return chosen||opts[slot%opts.length];
 }
+function characterKey(ch){return ch?(ch.key||((ch.own?'own:':'original:')+ch.name)):'';}
 const ORIG_CAST=[
  {name:'Hipster Dave',body:'Soldier_Light',outfit:'Soldier_Light_d / DeltaForce / Veteran',role:'Francotirador',bio:'Gafas verdes, pelo naranja y un fusil enorme. Cara de enfado permanente.',play:true},
  {name:'Archie Fletcher',body:'Soldier_Light',outfit:'Rambo / DeerHunter',role:'',bio:'Rambo de mercadillo: cinta en la cabeza y más valor que puntería.',play:false},
@@ -7892,6 +7921,7 @@ const ABILITY_IMPL={
   'CharAbility_12_Deployable_Cover_alpha':'Cobertura desplegable',
   'CharAbility_27_Landmines_alpha':'Minas',
   'CharAbility_37_Rocket_Turret_alpha':'Torreta de cohetes',
+  'CharAbility_16_Gatling_Turret_alpha':'Torreta M2',
   'CharAbility_38_Rush_Aura_alpha':'Teletransporte',
   'CharAbility_44_Swarm_Aura_alpha':'Bomba de abejas'
 };
@@ -7995,7 +8025,7 @@ function tutHide(){const b=document.getElementById('tutBubble');if(b)b.style.dis
   };
   const e=document.getElementById('mnuExpansions');if(e)e.onclick=()=>toast('Expansiones: aún no hay contenido descargable. El arte propio y las skins llegan por fases.');
   const bk=document.getElementById('mnuBarracks');if(bk)bk.onclick=openBarracks;
-  document.addEventListener('change',(e)=>{const t=e.target;if(t&&t.dataset&&t.dataset.charrole){CHAR_PREFS=loadChars();CHAR_PREFS[t.dataset.charrole]=t.value;saveChars(CHAR_PREFS);toast('Personaje de '+t.dataset.charrole+': '+t.value+'.');}});
+  document.addEventListener('change',(e)=>{const t=e.target;if(t&&t.dataset&&t.dataset.charrole){const role=t.dataset.charrole;CHAR_PREFS=loadChars();CHAR_PREFS[role]=t.value;saveChars(CHAR_PREFS);const opts=charsForRole(role),cur=opts.find(o=>o.name===t.value)||opts[0],card=t.closest('.barrack-card'),img=card&&card.querySelector('.barrack-portrait');if(img)img.src=rolePortraitURL(role,cur)||'assets/ui/retrato_capitan.png';if(G)updateUI();else if(typeof buildSquads==='function')buildSquads();toast('Personaje de '+role+': '+t.value+'.');}});
   const ar=document.getElementById('mnuArmory');if(ar)ar.onclick=()=>{showScreen('scr-arsenal');armTab('armas');};
   document.querySelectorAll('#armTabSeg button').forEach(b=>b.onclick=()=>armTab(b.dataset.armtab));
   const bb=document.getElementById('barrBack');if(bb)bb.onclick=()=>showScreen('scr-play');
