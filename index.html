@@ -8188,7 +8188,7 @@ const MAP_PIECES=[
   const zoomControl=document.getElementById('viewerZoom');
   const texturePreview=document.getElementById('viewerTexture');
   const viewer={
-    renderer:null,scene:null,camera:null,spin:null,platform:null,
+    renderer:null,scene:null,camera:null,spin:null,platform:null,meshyFill:null,meshyRim:null,
     baseDistance:3,drag:null,lastFrame:0,selection:0,
     kind:'roles',name:'',skinIndex:0,weapon:'',idleActor:null,gripActor:null,idleClipKey:'idle2h',
     frameRequested:false,models:{roles:{},weapons:{},props:{},pieces:{}},textures:{},bodyGeo:{},pieceMap:'Skirmish_03'
@@ -8373,6 +8373,8 @@ const MAP_PIECES=[
       viewer.scene.add(new THREE.HemisphereLight(0xe7f0d9,0x30372b,2));
       const key=new THREE.DirectionalLight(0xffedc2,2.4);key.position.set(3,5,4);viewer.scene.add(key);
       const fill=new THREE.DirectionalLight(0x9bb8d1,1.1);fill.position.set(-4,2,-3);viewer.scene.add(fill);
+      viewer.meshyFill=new THREE.DirectionalLight(0xd7ebff,1.8);viewer.meshyFill.position.set(-3,2,5);viewer.meshyFill.intensity=0;viewer.scene.add(viewer.meshyFill);
+      viewer.meshyRim=new THREE.DirectionalLight(0xffd9a8,2.2);viewer.meshyRim.position.set(3,4,-4);viewer.meshyRim.intensity=0;viewer.scene.add(viewer.meshyRim);
       viewer.camera=new THREE.PerspectiveCamera(36,1,0.01,80);
       viewer.spin=new THREE.Group();viewer.scene.add(viewer.spin);
       viewer.platform=new THREE.Mesh(
@@ -8457,6 +8459,8 @@ const MAP_PIECES=[
     viewer.spin.add(model);
     viewer.idleActor=viewer.kind==='roles'&&model.userData.animatable?model:null;
     viewer.gripActor=viewer.kind==='roles'&&model.userData.grip?model:null;
+    if(viewer.meshyFill)viewer.meshyFill.intensity=viewer.kind==='roles'&&model.userData.meshy?1.8:0;
+    if(viewer.meshyRim)viewer.meshyRim.intensity=viewer.kind==='roles'&&model.userData.meshy?2.2:0;
     viewer.idleClipKey=model.userData.idleClipKey||'idle2h';
     if(viewer.gripActor&&viewer.gripActor.userData.gun)
       fitGunToHand3(viewer.gripActor.userData.gripUnit,viewer.gripActor,false);
@@ -8628,6 +8632,15 @@ const MAP_PIECES=[
     viewer.bodyGeo[path]=geo;
     return geo;
   }
+  function normalizeMeshyRig(rig){
+    if(Array.isArray(rig.skinIndex[0]))return rig;
+    const skinIndex=[],skinWeight=[];
+    for(let i=0;i<rig.skinIndex.length;i+=4){
+      skinIndex.push(rig.skinIndex.slice(i,i+4));
+      skinWeight.push(rig.skinWeight.slice(i,i+4));
+    }
+    return Object.assign({},rig,{skinIndex,skinWeight});
+  }
   function parseViewerOBJ(text,rig){
     const vertices=[],uvs=[],normals=[],positions=[],outUvs=[],outNormals=[],skinIndices=[],skinWeights=[];
     const resolveIndex=(index,length)=>index<0?length+index:index-1;
@@ -8686,18 +8699,20 @@ const MAP_PIECES=[
     if(!response.ok)throw new Error('No se pudo cargar el OBJ Meshy de '+entry.mesh+'.');
     if(!rigResponse.ok)throw new Error('No se pudo cargar el rig Meshy de '+entry.mesh+'.');
     texture.colorSpace=THREE.SRGBColorSpace;
-    const [objText,rig]=await Promise.all([response.text(),rigResponse.json()]);
+    const [objText,rawRig]=await Promise.all([response.text(),rigResponse.json()]);
+    const rig=normalizeMeshyRig(rawRig);
     const geometry=parseViewerOBJ(objText,rig);
-    geometry.deleteAttribute('skinIndex');
-    geometry.deleteAttribute('skinWeight');
-    const model=new THREE.Group();
-    const mesh=new THREE.Mesh(geometry,new THREE.MeshStandardMaterial({
-      map:texture,roughness:0.85,metalness:0.02,transparent:false,opacity:1,depthWrite:true,
-      side:THREE.DoubleSide
-    }));
-    mesh.castShadow=true;
-    model.add(mesh);
-    model.userData.meshy=true;
+    const started=Date.now();
+    while(!CLIPLIB.ready&&Date.now()-started<5000)await wait(50);
+    const restBones=(REAL.data&&REAL.data.bones&&REAL.data.bones.length===rig.bones.length)
+      ?REAL.data.bones:rig.bones;
+    const baseRestQ=restBones.map(b=>new THREE.Quaternion(b.quat[0],b.quat[1],b.quat[2],b.quat[3]));
+    const model=makeViewerRiggedModel(geometry,rig,texture,{
+      meshy:true,grip:true,role:entry.role,baseRestQ
+    });
+    if(rig.bones[1].pos[2]>rig.bones[1].pos[1]+0.1)model.rotation.x=-Math.PI/2;
+    poseViewerRest(model,'idle2h',0);
+    model.userData.gripUnit={role:entry.role,weapon:''};
     return model;
   }
   function makeViewerRiggedModel(geometry,data,texture,options={}){
