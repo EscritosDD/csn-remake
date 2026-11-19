@@ -5275,27 +5275,34 @@ function weaponCoverURL(weapon){
 }
 const GUN_MESH_CACHE={};
 function parseOBJStatic(txt){
-  const pos=[],uv=[],nor=[],idx=[],mapV={},mapVT={},mapVN={};
-  const lines=txt.split('\n');
-  for(const ln of lines){
-    if(!ln||ln[0]==='#')continue;
-    const p=ln.split(/\s+/);
-    if(p[0]==='v'){pos.push(+p[1],+p[2],+p[3]);}
-    else if(p[0]==='vt'){uv.push(+p[1],+p[2]);}
-    else if(p[0]==='vn'){nor.push(+p[1],+p[2],+p[3]);}
+  const P=[],UV=[],NO=[],idxMap={};
+  const pos=[],uv=[],nor=[],outIdx=[];
+  txt.split(/\r?\n/).forEach(line=>{
+    const p=line.trim().split(/\s+/);
+    if(p[0]==='v')P.push([+p[1],+p[2],+p[3]]);
+    else if(p[0]==='vt')UV.push([+p[1],+p[2]]);
+    else if(p[0]==='vn')NO.push([+p[1],+p[2],+p[3]]);
     else if(p[0]==='f'){
-      for(let k=1;k<p.length;k++){
-        const q=p[k].split('/');
-        const vi=parseInt(q[0],10)-1; if(isNaN(vi)||vi<0)continue;
-        let a=mapV[vi];
-        if(a===undefined){a=pos.length/3;mapV[vi]=a;pos.push(pos[vi*3],pos[vi*3+1],pos[vi*3+2]);}
-        idx.push(a);
+      for(let i=1;i<p.length;i++){
+        const t=p[i].split('/');
+        const vi=parseInt(t[0],10)-1,ti=parseInt(t[1],10)-1,ni=parseInt(t[2],10)-1;
+        if(!(vi>=0&&P[vi]))continue;
+        const key=vi+'/'+ti+'/'+ni;
+        if(idxMap[key]==null){
+          idxMap[key]=pos.length/3;
+          pos.push(P[vi][0],P[vi][1],P[vi][2]);
+          if(UV[ti])uv.push(UV[ti][0],UV[ti][1]);else uv.push(0,0);
+          if(NO[ni])nor.push(NO[ni][0],NO[ni][1],NO[ni][2]);else nor.push(0,1,0);
+        }
+        outIdx.push(idxMap[key]);
       }
     }
-  }
+  });
   const g=new THREE.BufferGeometry();
   g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
-  g.computeVertexNormals();
+  g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));
+  g.setAttribute('normal',new THREE.Float32BufferAttribute(nor,3));
+  g.setIndex(outIdx);
   return g;
 }
 function makeRealGun3(weapon){
