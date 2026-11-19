@@ -8190,7 +8190,7 @@ const MAP_PIECES=[
   const viewer={
     renderer:null,scene:null,camera:null,spin:null,platform:null,
     baseDistance:3,drag:null,lastFrame:0,selection:0,
-    kind:'roles',name:'',skinIndex:0,weapon:'',idleActor:null,idleClipKey:'idle2h',
+    kind:'roles',name:'',skinIndex:0,weapon:'',idleActor:null,gripActor:null,idleClipKey:'idle2h',
     frameRequested:false,models:{roles:{},weapons:{},props:{},pieces:{}},textures:{},bodyGeo:{},pieceMap:'Skirmish_03'
   };
   /* Skins por cuerpo: cada cuerpo tiene solo sus variantes de outfit
@@ -8407,6 +8407,8 @@ const MAP_PIECES=[
     if(viewer.renderer){
       const idle=CLIPLIB.ready&&CLIPLIB.pack&&CLIPLIB.pack.clips[viewer.idleClipKey];
       if(viewer.idleActor&&idle)poseSpriteClip(null,viewer.idleActor,idle,(now/1000)%idle.dur,viewer.idleClipKey);
+      if(viewer.gripActor&&viewer.gripActor.userData.gun)
+        fitGunToHand3(viewer.gripActor.userData.gripUnit,viewer.gripActor,false);
       if(!viewer.drag&&viewer.spin&&viewer.spin.children.length)viewer.spin.rotation.y+=(now-viewer.lastFrame)/1000*0.22;
       viewer.renderer.render(viewer.scene,viewer.camera);
       refreshTexturePreview();
@@ -8454,7 +8456,10 @@ const MAP_PIECES=[
     model.position.sub(center);
     viewer.spin.add(model);
     viewer.idleActor=viewer.kind==='roles'&&model.userData.animatable?model:null;
+    viewer.gripActor=viewer.kind==='roles'&&model.userData.grip?model:null;
     viewer.idleClipKey=model.userData.idleClipKey||'idle2h';
+    if(viewer.gripActor&&viewer.gripActor.userData.gun)
+      fitGunToHand3(viewer.gripActor.userData.gripUnit,viewer.gripActor,false);
     viewer.spin.rotation.set(viewer.kind==='weapons'?0.25:0,-0.55,0);
     const platformRadius=Math.max(0.35,Math.max(size.x,size.z)*0.72);
     viewer.platform.scale.set(platformRadius,platformRadius,1);
@@ -8724,10 +8729,38 @@ const MAP_PIECES=[
       curQ:data.bones.map(b=>new THREE.Quaternion(b.quat[0],b.quat[1],b.quat[2],b.quat[3])),
       bindPos:data.bones.map(b=>new THREE.Vector3(b.pos[0],b.pos[1],b.pos[2])),
       curDelta:new THREE.Vector3(),mesh3:mesh,meshy:!!options.meshy,
-      animatable:true,idleClipKey:options.idleClipKey||'idle2h',idleRole:options.idleRole,
+      animatable:!!options.animatable,idleClipKey:options.idleClipKey||'idle2h',idleRole:options.idleRole,
+      baseRestQ:options.baseRestQ||null,
+      isClassRig:!!options.baseRestQ,
+      grip:!!options.grip,role:options.role||'',gun:null,
       byName:Object.fromEntries(bones.map((bone,index)=>[bone.name,index]))
     };
     return model;
+  }
+  function poseViewerRest(model,clipKey,ct){
+    const pack=CLIPLIB.pack,clip=pack&&pack.clips&&pack.clips[clipKey];
+    const ud=model&&model.userData;
+    if(!clip||!ud||!ud.bones||!ud.bindLocal)return false;
+    const tq=new THREE.Quaternion(),delta=new THREE.Quaternion();
+    const rootP=new THREE.Vector3(),rootT=new THREE.Vector3(),pelvis=new THREE.Vector3();
+    for(let n=0;n<24;n++){
+      for(let i=0;i<ud.bones.length;i++){
+        const tr=clip.rot[pack.bones[i]];
+        if(tr)sampleClipQuat(tr,ct,tq);else tq.copy(ud.bindLocal[i]);
+        if(ud.isClassRig&&ud.baseRestQ&&ud.baseRestQ[i]&&tr){
+          delta.copy(ud.baseRestQ[i]).invert().multiply(tq);
+          tq.copy(ud.bindLocal[i]).multiply(delta);
+        }
+        ud.bones[i].quaternion.copy(tq);
+      }
+      if(clip.root)sampleClipPos(clip.root,ct,rootT);else rootT.set(0,0,0);
+      rootP.copy(ud.curDelta).lerp(rootT,0.45);
+      pelvis.copy(ud.bindPos[1]);
+      ud.bones[0].position.copy(pelvis).add(rootP).sub(pelvis.clone().applyQuaternion(ud.bones[0].quaternion));
+    }
+    ud._clipKey=clipKey;
+    model.updateMatrixWorld(true);
+    return true;
   }
   /* Carga un cuerpo de assets/soldier/bodies/ con el cargador del juego
      (parseOBJ3). Los .obj de bodies/ no traen rig, así que se parsean
@@ -8784,12 +8817,13 @@ const MAP_PIECES=[
     }
     if(!texture)throw new Error('El modelo no tiene una textura disponible.');
     /* Solo el cuerpo Soldier_Light del repo (Hipster Dave, el soldado
-       genérico) usa el modelo con esqueleto y pose de reposo (el único
-       que la tiene sin descabalarse). Todos los demás son malla
-       estática: forzar animatable en todos es lo que descabaló los
-       modelos. */
+       genérico) usa el modelo con esqueleto y pose de reposo animada.
+       Sister Florence se monta también con esqueleto, pero con la pose
+       de reposo retargetizada y sin animación, para que el arma se
+       enganche a sus manos. El resto sigue siendo malla estática:
+       forzar animatable en todos es lo que descabaló los modelos. */
     if(!entry.bodyFile&&!entry.bodyRole){
-      const model=makeViewerRiggedModel(source.geo.clone(),source.data,texture);
+      const model=makeViewerRiggedModel(source.geo.clone(),source.data,texture,{animatable:true});
       model.scale.setScalar(1.15);
       const mesh=model.userData.mesh3;
       model.remove(mesh);
@@ -8801,6 +8835,32 @@ const MAP_PIECES=[
       spin.add(tilt);
       mesh.scale.setScalar(0.95);
       tilt.add(mesh);
+      return model;
+    }
+    if(entry.name==='Sister Florence'&&source){
+      const started=Date.now();
+      while(!CLIPLIB.ready&&Date.now()-started<5000)await wait(50);
+      const baseRestQ=REAL.data&&REAL.data.bones
+        ?REAL.data.bones.map(b=>new THREE.Quaternion(b.quat[0],b.quat[1],b.quat[2],b.quat[3]))
+        :null;
+      const model=makeViewerRiggedModel(source.geo.clone(),source.data,texture,{
+        baseRestQ,grip:true,role:entry.role
+      });
+      model.scale.setScalar(1.15);
+      const mesh=model.userData.mesh3;
+      model.remove(mesh);
+      const spin=new THREE.Group();
+      spin.rotation.y=Math.PI/2;
+      const lk=roleLook(entry.role);
+      if(lk&&lk.s)spin.scale.set(lk.s[0],lk.s[1],lk.s[2]);
+      model.add(spin);
+      const tilt=new THREE.Group();
+      tilt.rotation.x=-Math.PI/2;
+      spin.add(tilt);
+      mesh.scale.setScalar(0.95);
+      tilt.add(mesh);
+      poseViewerRest(model,'idle2h',0);
+      model.userData.gripUnit={role:entry.role,weapon:''};
       return model;
     }
     const geometry=bodyGeo?bodyGeo.clone():(source?source.geo.clone():null);
@@ -8847,6 +8907,7 @@ const MAP_PIECES=[
     if(current===wanted)return;
     if(model.userData&&model.userData.viewerGun){
       model.remove(model.userData.viewerGun);
+      if(model.userData.gun===model.userData.viewerGun)model.userData.gun=null;
       model.userData.viewerGun=null;
       model.userData.viewerGunWeapon='';
     }
@@ -8864,19 +8925,32 @@ const MAP_PIECES=[
       if(!GUN_MESH_CACHE[cacheKey])throw new Error('La carga de la malla tardó demasiado.');
     }
     const holder=GUN_MESH_CACHE[cacheKey].clone(true);
-    const gunGroup=new THREE.Group();
-    gunGroup.userData.isViewerGun=true;
-    if(entry.mesh){
-      const front=VIEWER_MESHY_FRONT[entry.mesh]||1;
-      gunGroup.position.set(0,0.62,front*0.14);
-      gunGroup.rotation.y=front>0?-Math.PI/2:Math.PI/2;
+    let gunGroup;
+    if(model.userData&&model.userData.grip){
+      gunGroup=makeGunProp3({role:entry.role,weapon:wanted});
+      gunGroup.userData.isViewerGun=true;
+      gunGroup.children.forEach(ch=>{ch.visible=false;});
+      gunGroup.add(holder);
     }else{
-      gunGroup.position.set(0.14,0.62,-0.02);
+      gunGroup=new THREE.Group();
+      gunGroup.userData.isViewerGun=true;
+      if(entry.mesh){
+        const front=VIEWER_MESHY_FRONT[entry.mesh]||1;
+        gunGroup.position.set(0,0.62,front*0.14);
+        gunGroup.rotation.y=front>0?-Math.PI/2:Math.PI/2;
+      }else{
+        gunGroup.position.set(0.14,0.62,-0.02);
+      }
+      gunGroup.add(holder);
     }
-    gunGroup.add(holder);
     model.add(gunGroup);
     model.userData.viewerGun=gunGroup;
     model.userData.viewerGunWeapon=wanted;
+    if(model.userData.grip){
+      model.userData.gun=gunGroup;
+      model.userData.gripUnit={role:entry.role,weapon:wanted};
+      fitGunToHand3(model.userData.gripUnit,model,false);
+    }
   }
   async function selectModel(kind,name){
     viewer.kind=kind;viewer.name=name;
