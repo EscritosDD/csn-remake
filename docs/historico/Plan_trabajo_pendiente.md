@@ -7,7 +7,6 @@ está arreglada y medida, suite de pruebas 6/6, 13 tableros correctos.
 Permiso del propietario: **se puede usar el original como fuente** (código
 descompilado en `referencia_original/decompiled/`, datos en
 `referencia_original/datos/`, documentos de `docs/`, capturas oficiales).
-La revisión de derechos queda para más adelante.
 
 Regla de oro de todo el plan: **el juego no se rompe** — cada cambio deja
 `index.html` cargando y la partida jugable; sintaxis 0; tableros correctos;

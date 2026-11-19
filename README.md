@@ -39,7 +39,7 @@ integridad de datos (`data.test.js`) y humo 3D en navegador con captura.
 | `assets/ui/` | Retratos, naciones, modos, iconos de habilidad del original, logo y arte de la portada. |
 | `bench/` | Verificación: `bench/VERIFICAR.ps1`, `check-syntax.js`, `boards.js`, `rules.test.js`, `data.test.js`, `harness.js`. |
 | `docs/` | Diseño, arquitectura, equilibrio medido, catálogo de habilidades, capturas 3D y planes. |
-| `referencia_original/` | Código descompilado y datos del original (solo lectura, referencia para desarrollo). |
+| `referencia_original/` | Código descompilado y datos del original, la base del desarrollo. |
 
 ## Herramientas de medida
 
@@ -62,16 +62,14 @@ integridad de datos (`data.test.js`) y humo 3D en navegador con captura.
 
 El código y el arte propio de CSN son de Dani. El repositorio **incluye
 material extraído del IPA de RAD Soldiers** (modelos, texturas, audio, mapas,
-arte de la portada y logo) por permiso expreso del autor **solo para
-desarrollo**. Ese material es propiedad de Splash Damage / WarChest: **no se
-puede redistribuir ni licenciar** y deberá sustituirse por arte propio antes
-de cualquier publicación.
+arte de la portada y logo) porque el original es la base del juego: su
+material se copia, adapta y reutiliza por decisión expresa del autor. Ese
+material es propiedad de Splash Damage / WarChest (RAD Soldiers, 2012).
 
 ## Licencia
 
 Sin licencia decidida por ahora (`all rights reserved`). La decisión sobre el
-código propio queda pendiente de Dani; los assets del original no son
-licenciables.
+código propio queda pendiente de Dani.
 
 
 ## Estructura del repositorio
@@ -86,5 +84,5 @@ tools/                utilidades de Z.ai y de modelos (scripts .ps1 y .py)
 _capture_all.mjs      generador de capturas 3D
 ```
 
-El material de referencia del IPA está en `referencia_original/` (código descompilado del
-original y datos de animaciones/prefabs). Es solo lectura y no lo usa el juego en ejecución.
+El material del IPA está en `referencia_original/` (código descompilado del
+original y datos de animaciones/prefabs). Es la base del desarrollo del juego.

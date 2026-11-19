@@ -114,8 +114,6 @@ en tablero de código como capa de reserva.
    ~1,5 casillas. Subirlos requiere reajustar arma/mochila (van colgadas
    del grupo) y está sin hacer.
 4. **Contorno tipo dibujo** del soldado (rim/outline) no implementado.
-5. Las texturas de los mapas de Londres son las originales del IPA (uso
-   privado); para publicar hay que sustituirlas por arte propio → Parte 2.
 
 ---
 

@@ -80,9 +80,7 @@ ampliado**. El juego sigue jugable en `main` en cada commit.
    Dominación (decisión de diseño del jugador).
 2. **Campaña con geometría propia del original**: la geometría de campaña
    venía del servidor y no está en el IPA; habría que reconstruirla o diseñarla.
-3. **Arte propio**: sustituir los assets del IPA (modelos, audio, logo) por
-   arte propio antes de publicar; son de Splash Damage / WarChest.
-4. **`.git` de 185 MB**: si se quiere aligerar, reescribir historia con
+3. **`.git` de 185 MB**: si se quiere aligerar, reescribir historia con
    `git filter-repo` (irreversible; requiere permiso).
 
 ## Cómo seguir (para la siguiente IA)

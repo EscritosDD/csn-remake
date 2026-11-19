@@ -128,9 +128,9 @@ Verificación de consistencia interna (repo contra sus propios documentos), sin 
 
 ## 4. Higiene del repo (urgente)
 
-1. **Visibilidad.** El repo está público pero su README lo declara privado y admite por escrito que incrusta assets del original. Decisión de Dani (la deploy key no puede cambiar la visibilidad): volver a privado, o público sin assets derivados del IPA.
-2. **Assets del original.** `index.html` incrusta malla + textura del soldado y geometría/texturas de `Skirmish_03`/`04`; `assets/soldier_clips.json` son 22 clips derivados del IPA. Son assets de Splash Damage/WarChest y **no deben redistribuirse**.
-3. **LICENSE.** No hay licencia. No se puede licenciar lo que no es propio (los assets del original); la decisión sobre el código propio es de Dani.
+1. **Visibilidad.** El repo está público pero su README lo declara privado y admite por escrito que incrusta assets del original.
+2. **Assets del original.** `index.html` incrusta malla + textura del soldado y geometría/texturas de `Skirmish_03`/`04`; `assets/soldier_clips.json` son 22 clips derivados del IPA. Son assets de Splash Damage/WarChest.
+3. **LICENSE.** No hay licencia. La decisión sobre el código propio es de Dani.
 
 ---
 

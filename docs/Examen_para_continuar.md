@@ -82,11 +82,6 @@ Las 6 misiones ya tienen tablero propio (`campana01..06`) y se juegan en el
 motor. Falta: **arte de capítulo** (los iconos del IPA son GameObjects de
 atlas), textos de misión más ricos y una pantalla de selección de capítulo.
 
-### T5 · Arte propio
-Sustituir los assets del IPA (modelos, texturas, audio, logo) por arte propio
-antes de publicar. Los del original están incluidos **solo por permiso de
-desarrollo**.
-
 ## 5. El problema abierto: mallas de clase y animación
 
 **Qué se probó** (y por qué no funcionó):

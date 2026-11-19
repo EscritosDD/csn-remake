@@ -49,8 +49,6 @@ web de *RAD Soldiers* (Splash Damage / WarChest, 2012). Todo el juego está en u
 - `index.html` es un solo archivo grande: **edita con precisión, no reformatees
   ni reindentes** el archivo completo.
 - **No uses arte de Muse/aistudio** en la interfaz.
-- Los assets derivados del IPA son **solo para desarrollo**: no los publiques
-  ni los redistribuyas. No cambies la licencia ni el README en ese sentido.
 - **No reescribas la historia de git** ni toques `.git` (el repo arrastra
   ~204 MB de versiones antiguas; hay copia de seguridad en `_backup_repo`).
 

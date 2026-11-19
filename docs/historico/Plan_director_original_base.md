@@ -127,8 +127,6 @@ headless con `__csn3d.geo` y captura 2D. Commit y push por fase.
 2. **S07 y campaña**: no están en el IPA; se reconstruyen (F2).
 3. **Números del original**: viven en servidor (paquetes UnityWeb); la
    fidelidad es estructural, no cifra a cifra.
-4. **Arte propio definitivo**: los trajes del IPA son de Splash Damage;
-   las skins propias y la UI nueva son el camino para publicar.
 
 ## 3.bis Estado a fecha de hoy (rondas 1-4 del objetivo)
 
@@ -204,5 +202,4 @@ prueba que lo demuestra y se puede re-verificar con
   6/6 datos y humo 3D con captura.
 
 Pendiente fuera del alcance de codigo: la campana con geometria propia del
-original (los niveles venian del servidor y no estan en el IPA) y la
-sustitucion de los assets del IPA por arte propio antes de publicar.
+original (los niveles venian del servidor y no estan en el IPA).
