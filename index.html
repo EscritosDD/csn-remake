@@ -148,6 +148,7 @@ canvas#board{width:100%;height:auto;display:block;border-radius:6px;touch-action
 .actions button{min-width:0}
 .unit-card{overflow-x:hidden}
 html,body{overflow-x:hidden}
+html.is-playing{overflow-y:hidden}
 .actions button{background:var(--panel2);border:1.5px solid var(--line);color:var(--ink);border-radius:8px;padding:10px 8px;font-weight:700;font-size:14px;text-align:left}
 .actions button small{display:block;font-weight:500;color:var(--muted);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .actions button.on{border-color:var(--amber);box-shadow:0 0 0 1.5px var(--amber)}
@@ -258,7 +259,7 @@ canvas#board{border-radius:10px;box-shadow:0 0 0 2px rgba(0,0,0,.45), inset 0 0 
 #glWrap{width:100%;aspect-ratio:16/11;min-height:300px;border-radius:10px;overflow:hidden;background:#1d2522;box-shadow:0 0 0 2px rgba(0,0,0,.45);position:relative;user-select:none}
 #glWrap canvas{display:block;width:100%!important;height:100%!important;touch-action:none;cursor:pointer}
 .gl-badge{position:absolute;left:10px;bottom:10px;background:rgba(10,12,8,.84);color:#f2b234;border:1.5px solid #f2b234;border-radius:999px;padding:4px 12px;font-weight:700;font-size:12px;pointer-events:none;letter-spacing:.03em;z-index:3}
-.gl-controls{position:absolute;right:10px;top:10px;display:flex;gap:5px;flex-wrap:wrap;z-index:4;pointer-events:auto}
+.gl-controls{position:static;display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;flex:1 0 100%;margin-top:4px;pointer-events:auto}
 .gl-controls button{min-height:32px;padding:4px 9px;border-radius:8px;border:1.5px solid rgba(242,178,52,.6);background:rgba(16,20,16,.86);color:#eef2e4;font-weight:700;font-size:12px;font-family:'JetBrains Mono',monospace;box-shadow:0 2px 0 rgba(0,0,0,.4)}
 .gl-controls button:hover{border-color:#f2b234;color:#f2b234}
 .gl-overlay{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:2}
@@ -282,7 +283,7 @@ canvas#board{border-radius:10px;box-shadow:0 0 0 2px rgba(0,0,0,.45), inset 0 0 
 .gl-tooltip.bad{border-color:#e5484d;color:#ffb4ad}
 .gl-tooltip.cov{border-color:#57c46a;color:#c7f7ce}
 .gl-float{position:absolute;transform:translate(-50%,-50%);font:800 15px/1 'JetBrains Mono',monospace;text-shadow:0 2px 0 #090b08, 0 -1px 0 #090b08, 1px 0 0 #090b08, -1px 0 0 #090b08;white-space:nowrap;will-change:transform,opacity}
-@media(max-width:640px){#glWrap{aspect-ratio:1/1;min-height:280px}.gl-controls button{min-height:28px;padding:2px 7px;font-size:11px}}
+@media(max-width:640px){#glWrap{aspect-ratio:1/1;min-height:280px}.gl-controls{justify-content:flex-start}.gl-controls button{min-height:28px;padding:2px 7px;font-size:11px}}
 /* Escenario 3D en vivo en la primera pantalla */
 #demoWrap{width:100%;aspect-ratio:16/8;min-height:240px;border-radius:10px;overflow:hidden;background:#1d2522;box-shadow:0 0 0 2px rgba(0,0,0,.45);position:relative;margin-top:10px}
 #demoWrap canvas{display:block;width:100%!important;height:100%!important}
@@ -406,10 +407,22 @@ body[data-state="setup"] #scr-play .hero{display:none}
 .menuCol .btn .sub{font-size:12px}
 .actionBar{display:none;gap:10px;overflow-x:auto;align-items:stretch;position:fixed;left:0;right:0;bottom:0;z-index:60;padding:10px 16px;background:var(--panel);border-top:2px solid var(--line);box-shadow:0 -6px 18px rgba(0,0,0,.28)}
 body[data-state="playing"] .actionBar{display:flex}
-body[data-state="playing"]{padding-bottom:112px}
+body[data-state="playing"]{padding-bottom:0;overflow-y:hidden}
+body[data-state="playing"] #gameArea{height:max(180px,calc(100dvh - var(--csn-play-header,68px) - var(--csn-play-footer,88px)));margin-top:0!important;overflow-y:auto;overscroll-behavior:contain}
+@supports not (height:100dvh){body[data-state="playing"] #gameArea{height:max(180px,calc(100vh - var(--csn-play-header,68px) - var(--csn-play-footer,88px)))}}
 .actionBar .actions{display:flex;gap:8px;margin:0;width:100%}
 .actionBar .actions button{flex:0 0 186px;min-width:0}
 .actionBar>p{width:100%}
+@media(max-width:640px){
+  .topbar-in{padding:6px 10px;gap:6px}
+  .brand{flex:1 1 100%;justify-content:center;gap:8px}
+  .brand-mark{width:32px;height:32px;font-size:16px}
+  .brand b{font-size:18px}
+  .brand small{display:none}
+  .nation-chip{margin:0 auto;padding:4px 9px;gap:6px;font-size:12px}
+  .topbar nav.tabs{width:100%;justify-content:center;gap:4px}
+  .topbar nav.tabs button{min-height:34px;padding:4px 8px;font-size:12px}
+}
 .chapter-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:12px}
 .chapter-card{display:flex;flex-direction:column}
 .ch-top{display:flex;gap:10px;align-items:center;margin-bottom:10px}
@@ -528,10 +541,10 @@ details.info .info-body b{color:var(--ink)}
       <div class="panel menuOrigen" id="origMenu" style="margin-top:16px">
         <h2>Menú</h2>
         <div class="menuCol" style="margin-top:8px">
-          <button class="btn primary" id="mnuQuick">⚡ Quick game<small class="sub">Partida rápida en el Almacén</small></button>
-          <button class="btn" id="mnuOnline">🌐 Play online<small class="sub">Sin servidor: IA o dos jugadores en local</small></button>
-          <button class="btn" id="mnuChallenges">🏆 Challenges<small class="sub">Operación Londres · 6 misiones</small></button>
-          <button class="btn" id="mnuExpansions">📦 Expansions<small class="sub">Contenido futuro</small></button>
+          <button class="btn primary" id="mnuQuick">⚡ Partida rápida<small class="sub">Partida rápida en el Almacén</small></button>
+          <button class="btn" id="mnuOnline">🌐 Jugar en local<small class="sub">Sin servidor: IA o dos jugadores en local</small></button>
+          <button class="btn" id="mnuChallenges">🏆 Desafíos<small class="sub">Operación Londres · 6 misiones</small></button>
+          <button class="btn" id="mnuExpansions">📦 Expansiones<small class="sub">Contenido futuro</small></button>
           <button class="btn" id="mnuBarracks">🏰 Cuartel<small class="sub">Tropas, skins, arsenal y monedas</small></button>
           <button class="btn" id="mnuViewer">🧊 Visor 3D<small class="sub">Personajes y armas sin entrar a una partida</small></button>
           <button class="btn" id="mnuArmory">🛠 Armería<small class="sub">Armas y catálogo de habilidades del original</small></button>
@@ -752,9 +765,10 @@ details.info .info-body b{color:var(--ink)}
               <button data-view="2d" class="btn small" style="opacity:.7" title="Alternativa para moviles o si el 3D no funciona">Vista 2D (alternativa)</button>
             </div>
             <span class="sub">Clic/toca para mover o disparar · Arrastra con botón derecho (o <span class="kbd">Q</span>/<span class="kbd">E</span>) para girar cámara · Rueda para zoom · <span class="kbd">Tab</span> cambia soldado.</span>
+            <div class="gl-controls"><button type="button" data-cam="rotL" title="Girar cámara izquierda (Q)">⟲ Q</button><button type="button" data-cam="reset" title="Restaurar cámara (C)">C</button><button type="button" data-cam="rotR" title="Girar cámara derecha (E)">E ⟳</button><button type="button" data-cam="zoomIn" title="Acercar (+)">+</button><button type="button" data-cam="zoomOut" title="Alejar (−)">−</button></div>
           </div>
           <div id="glFail" role="alert"></div>
-          <div class="board-wrap"><div id="glWrap" style="display:none"><div class="gl-overlay" id="glOverlay"><div class="gl-tooltip" id="glTooltip"></div><div id="glUnitHuds"></div><div id="glFloats"></div></div><div class="gl-controls"><button type="button" data-cam="rotL" title="Girar cámara izquierda (Q)">⟲ Q</button><button type="button" data-cam="reset" title="Restaurar cámara (C)">C</button><button type="button" data-cam="rotR" title="Girar cámara derecha (E)">E ⟳</button><button type="button" data-cam="zoomIn" title="Acercar (+)">+</button><button type="button" data-cam="zoomOut" title="Alejar (−)">−</button></div><span class="gl-badge">3D · soldado original + cámara táctica</span></div><canvas id="board" width="960" height="960"></canvas></div>
+          <div class="board-wrap"><div id="glWrap" style="display:none"><div class="gl-overlay" id="glOverlay"><div class="gl-tooltip" id="glTooltip"></div><div id="glUnitHuds"></div><div id="glFloats"></div></div><span class="gl-badge">3D · soldado original + cámara táctica</span></div><canvas id="board" width="960" height="960"></canvas></div>
           <div class="legend">
             <span><i class="sw" style="background:#7f858b"></i> Muro / contenedor (no se rompe)</span>
             <span><i class="sw" style="background:#9a6c34"></i> Caja (cobertura destructible)</span>
@@ -1103,6 +1117,15 @@ const ROLE_LOOK={
  'Capitán':{s:[1.00,1.10,1.00],silueta:'Alto y erguido',pose:{clip:'interact',ct:0.45}}
 };
 function roleLook(role){return ROLE_LOOK[role]||{s:[1,1,1],silueta:'',pose:null};}
+function gameplayModelPresentation(role,authoredModel){
+  return {
+    scale:authoredModel?[1,1,1]:roleLook(role).s,
+    addRoleGear:!authoredModel,
+    preserveTexture:authoredModel,
+    twoSided:authoredModel,
+    emissiveIntensity:authoredModel?0.45:0
+  };
+}
 /* ============ RETRATOS DE ROL (assets/ui/retrato_*.png) ============
    Los siete retratos de busto aprobados por Dani (generados fuera, en
    Gemini Studio, y descargados como PNG transparentes de 512×512):
@@ -1254,10 +1277,26 @@ function renderNationChip(){
   chip.style.display='flex';
   chip.innerHTML=flagArtHTML(myNation,true)+emblemHTML(myNation)+'<span title="'+(myNation.pers?myNation.pers.name+': '+myNation.pers.desc:'')+'">'+myNation.name+'</span><span class="mono" style="color:var(--amber);font-size:13px" title="Victorias en Guerra de Naciones">★ '+wins+'</span><span class="mono" style="color:var(--ink);font-size:13px" title="Monedas de CSN">🪙 '+coinsGet()+'</span>';
 }
+function screenStateFor(id,game=G){
+  if(id==='scr-nation')return 'nation';
+  if(id==='scr-play'&&game)return game.over?'gameover':'playing';
+  return 'menu';
+}
+function syncPlayingViewport(){
+  const root=document.documentElement;
+  root.classList.toggle('is-playing',document.body.dataset.state==='playing');
+  const header=document.querySelector('.topbar');
+  const bar=document.getElementById('actionBar');
+  const headerHeight=header?header.getBoundingClientRect().height:68;
+  const footerHeight=bar&&document.body.dataset.state==='playing'?bar.getBoundingClientRect().height:0;
+  root.style.setProperty('--csn-play-header',Math.ceil(headerHeight)+'px');
+  root.style.setProperty('--csn-play-footer',Math.ceil(footerHeight)+'px');
+}
 function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
   $('#'+id).classList.add('on');
-  document.body.dataset.state=(id==='scr-nation'?'nation':'menu');
+  document.body.dataset.state=screenStateFor(id);
+  syncPlayingViewport();
   /* El escenario 3D en vivo acompaña a la pantalla principal que esté
      abierta (selección de nación o menú de juego), para que lo nuevo se
      vea nada más abrir la página y no solo dentro de una partida. */
@@ -2051,6 +2090,7 @@ function makeUnit(team,def,i,nation,skin){
   return u;
 }
 function startGame(squadA,squadB){
+  resetCam3D();
   uid=0;
   const rivalNation=setup.mode==='guerra'?setup.rivalNation:(setup.opp==='local'?myNation:NATIONS[Math.floor(Math.random()*NATIONS.length)]);
   const campMission=setup.mode==='campana'?CAMPAIGN_MISSIONS[setup.campaignMission]:null;
@@ -2926,7 +2966,7 @@ function endGame(winner,reason){
 }
 function showModal(html){$('#modalBox').innerHTML=html;$('#modal').classList.add('on');}
 function closeModal(){$('#modal').classList.remove('on');}
-function backToMenu(){try{auStopAmbient();}catch(e){}try{auMusicStop();}catch(e){}try{const hp=document.querySelector('#scr-play .hero');if(hp)hp.style.display='';}catch(e){}$('#gameArea').style.display='none';$('#setupArea').style.display='none';$('#menuArea').style.display='block';G=null;document.body.dataset.state='menu';refreshGuerra();renderNationChip();if(typeof renderCampaignPanel==='function')renderCampaignPanel();}
+function backToMenu(){try{auStopAmbient();}catch(e){}try{auMusicStop();}catch(e){}try{const hp=document.querySelector('#scr-play .hero');if(hp)hp.style.display='';}catch(e){}$('#gameArea').style.display='none';$('#setupArea').style.display='none';$('#menuArea').style.display='block';G=null;document.body.dataset.state='menu';syncPlayingViewport();refreshGuerra();renderNationChip();if(typeof renderCampaignPanel==='function')renderCampaignPanel();}
 $('#quitBtn').onclick=()=>{showModal('<h2>¿Abandonar la partida?</h2><p>Se perderá el progreso de esta partida. Tu nación y tu marcador de Guerra de Naciones no se tocan.</p><div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px"><button class="btn danger big" onclick="closeModal();backToMenu()">Sí, abandonar</button><button class="btn big" onclick="closeModal()">Seguir jugando</button></div>');};
 
 function endTurn(){
@@ -3626,9 +3666,9 @@ function fxLoop(ts){
 requestAnimationFrame(fxLoop);
 function tileFromEvent(e){
   const r=canvas.getBoundingClientRect();
-  const cx=(e.touches?e.touches[0].clientX:e.clientX)-r.left, cy=(e.touches?e.touches[0].clientY:e.clientY)-r.top;
-  const x=Math.floor(cx/r.width*W),y=Math.floor(cy/r.height*H);
-  return (x>=0&&y>=0&&x<W&&y<H)?{x,y}:null;
+  const px=((e.touches?e.touches[0].clientX:e.clientX)-r.left)/r.width*canvas.width;
+  const py=((e.touches?e.touches[0].clientY:e.clientY)-r.top)/r.height*canvas.height;
+  return classicTileFromPoint(px,py,canvas.width,canvas.height);
 }
 canvas.addEventListener('mousemove',e=>{hoverTile=tileFromEvent(e);if(G)draw();});
 function boardTileClick(t){
@@ -3848,6 +3888,7 @@ function updateUI(){
       else bar.innerHTML='<p class="sub" style="margin:0">Selecciona un soldado para ver sus acciones.</p>';
     }
   }catch(e){}
+  syncPlayingViewport();
   document.querySelectorAll('[data-act]').forEach(b=>b.onclick=()=>{
     const act=b.dataset.act;
     if(act==='shoot'){G.actionMode='shoot';toast('Toca a un enemigo en alcance para disparar con '+u.weapon+'. Pasa el cursor sobre él para ver la puntería.');}
@@ -4090,6 +4131,15 @@ function segRing(cx,cy,rx,ry,un){
   ctx.beginPath();ctx.arc(cx,cy+ry,4.6,0,7);ctx.fillStyle=un.team==='A'?'#39c2d7':'#ff7a45';ctx.fill();
   ctx.lineWidth=1.6;ctx.strokeStyle='rgba(0,0,0,.55)';ctx.stroke();
 }
+function classicBoardMetrics(width,height){
+  const S=Math.min(width/W,height/H)*0.9;
+  return {S,offsetX:(width-W*S)/2,offsetY:(height-H*S)/2};
+}
+function classicTileFromPoint(px,py,width,height){
+  const {S,offsetX,offsetY}=classicBoardMetrics(width,height);
+  const x=Math.floor((px-offsetX)/S),y=Math.floor((py-offsetY)/S);
+  return (x>=0&&y>=0&&x<W&&y<H)?{x,y}:null;
+}
 function draw(){
   if(!G)return;
   /* Interpolación de posiciones: la posición de dibujo persigue a la
@@ -4097,9 +4147,11 @@ function draw(){
   G.units.forEach(un=>{if(un.dx==null){un.dx=un.x;un.dy=un.y;}const k=REDUCED_MOTION?1:0.16;un.dx+=(un.x-un.dx)*k;un.dy+=(un.y-un.dy)*k;if(Math.abs(un.x-un.dx)<0.01)un.dx=un.x;if(Math.abs(un.y-un.dy)<0.01)un.dy=un.y;});
   if(G.drone){const d=G.drone;if(d.dx==null){d.dx=d.x;d.dy=d.y;}const k=REDUCED_MOTION?1:0.16;d.dx+=(d.x-d.dx)*k;d.dy+=(d.y-d.dy)*k;if(Math.abs(d.x-d.dx)<0.01)d.dx=d.x;if(Math.abs(d.y-d.dy)<0.01)d.dy=d.y;}
   if(VIEW_MODE==='3d'){if(FX.shake>0.4&&!REDUCED_MOTION)FX.shake*=0.86;else FX.shake=0;return;}
-  const S=canvas.width/W;
+  const {S,offsetX,offsetY}=classicBoardMetrics(canvas.width,canvas.height);
+  const boardW=W*S,boardH=H*S;
   ctx.clearRect(0,0,canvas.width,canvas.height);
   ctx.save();
+  ctx.translate(offsetX,offsetY);
   if(FX.shake>0.4&&!REDUCED_MOTION){ctx.translate((Math.random()-.5)*FX.shake,(Math.random()-.5)*FX.shake);FX.shake*=0.86;}else FX.shake=0;
   /* suelo urbano */
   for(let y=0;y<H;y++)for(let x=0;x<W;x++)drawFloorTile(x,y,S);
@@ -4113,16 +4165,16 @@ function draw(){
      encima como en los otros tableros. */
   const skTop=skState(G.map.theme);
   if(skTop&&skTop.topReady&&skTop.topImg){
-    ctx.drawImage(skTop.topImg,0,0,canvas.width,canvas.height);
+    ctx.drawImage(skTop.topImg,0,0,boardW,boardH);
     ctx.strokeStyle='rgba(16,18,22,.38)';ctx.lineWidth=1;
     ctx.beginPath();
-    for(let i=1;i<W;i++){ctx.moveTo(i*S+.5,0);ctx.lineTo(i*S+.5,canvas.height);ctx.moveTo(0,i*S+.5);ctx.lineTo(canvas.width,i*S+.5);}
+    for(let i=1;i<W;i++){ctx.moveTo(i*S+.5,0);ctx.lineTo(i*S+.5,boardH);ctx.moveTo(0,i*S+.5);ctx.lineTo(boardW,i*S+.5);}
     ctx.stroke();
   }
   /* luz cenital suave */
-  const light=ctx.createRadialGradient(canvas.width*.32,canvas.height*.2,80,canvas.width*.32,canvas.height*.2,canvas.width*.95);
+  const light=ctx.createRadialGradient(boardW*.32,boardH*.2,Math.min(boardW,boardH)*.08,boardW*.32,boardH*.2,Math.max(boardW,boardH)*.95);
   light.addColorStop(0,'rgba(255,244,214,.13)');light.addColorStop(1,'rgba(255,244,214,0)');
-  ctx.fillStyle=light;ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle=light;ctx.fillRect(0,0,boardW,boardH);
   /* zonas de despliegue */
   const zone=(list,col)=>{list.forEach(s=>{rr(s.x*S+3,s.y*S+3,S-6,S-6,8);ctx.fillStyle=col;ctx.fill();});};
   zone(SPAWNS_A,'rgba(57,194,215,.13)');zone(SPAWNS_B,'rgba(255,122,69,.13)');
@@ -4205,9 +4257,9 @@ function draw(){
   /* barriles */
   G.map.barrels.forEach(b=>{if(b.alive)drawBarrel(b,S);});
   /* viñeta de cámara */
-  const vg=ctx.createRadialGradient(canvas.width/2,canvas.height/2,canvas.width*.42,canvas.width/2,canvas.height/2,canvas.width*.78);
+  const vg=ctx.createRadialGradient(boardW/2,boardH/2,Math.min(boardW,boardH)*.42,boardW/2,boardH/2,Math.max(boardW,boardH)*.78);
   vg.addColorStop(0,'rgba(10,12,16,0)');vg.addColorStop(1,'rgba(10,12,16,.20)');
-  ctx.fillStyle=vg;ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle=vg;ctx.fillRect(0,0,boardW,boardH);
   /* torretas desplegadas */
   G.deployed.slice().sort((a,b)=>a.y-b.y).forEach(t=>{if(t.alive)drawDeployed(t,S);});
   /* puntería al pasar el cursor */
@@ -4225,7 +4277,7 @@ function draw(){
       }
       const label=p>0?('Acierto '+p+'% · '+w.dmg+' daño'):(t.invisible?'Invisible':(smokeBlocksLOS(u,t)?'Sin tiro · humo M18':'Sin tiro'));
       ctx.font='700 14px JetBrains Mono';const tw=ctx.measureText(label).width+18;
-      let tx=hoverTile.x*S,ty=hoverTile.y*S-34;if(ty<0)ty=hoverTile.y*S+S+8;if(tx+tw>canvas.width)tx=canvas.width-tw;
+      let tx=hoverTile.x*S,ty=hoverTile.y*S-34;if(ty<0)ty=hoverTile.y*S+S+8;if(tx+tw>boardW)tx=boardW-tw;
       rr(tx,ty,tw,24,7);ctx.fillStyle='rgba(10,12,8,.9)';ctx.fill();ctx.strokeStyle=p>0?'#f2b234':'#e5484d';ctx.lineWidth=1.5;ctx.stroke();
       ctx.fillStyle=p>0?'#f2b234':'#ff8a80';ctx.fillText(label,tx+9,ty+16);
     }
@@ -5428,6 +5480,32 @@ function parseOBJStatic(txt){
   return g;
 }
 const MESHY_MODELS={},MESHY_LOADING={};
+function validatedRigBoneInverses(data,bones,provided){
+  const inverses=provided||data.boneInverses.map(a=>new THREE.Matrix4().set(
+    a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7],
+    a[8],a[9],a[10],a[11],a[12],a[13],a[14],a[15]
+  ));
+  if(inverses.length!==data.skinBones.length)
+    throw new Error('El rig no tiene una matriz bind por cada hueso de piel.');
+  data.bones.forEach((bone,i)=>{if(bone.parent<0)bones[i].updateMatrixWorld(true);});
+  const identity=new THREE.Matrix4();
+  let maxError=0;
+  data.skinBones.forEach((boneIndex,i)=>{
+    const bind=bones[boneIndex].matrixWorld.clone().multiply(inverses[i]);
+    bind.elements.forEach((value,j)=>{maxError=Math.max(maxError,Math.abs(value-identity.elements[j]));});
+  });
+  if(maxError<=0.001)return inverses;
+  return data.skinBones.map(boneIndex=>{
+    const bind=bones[boneIndex].matrixWorld;
+    const determinant=bind.determinant();
+    if(!Number.isFinite(determinant)||Math.abs(determinant)<1e-12)
+      throw new Error('El rig contiene una bind pose singular.');
+    return bind.clone().invert();
+  });
+}
+function sameRigBoneOrder(source,target){
+  return !!source&&!!target&&source.length===target.length&&source.every((bone,i)=>bone.name===target[i].name);
+}
 function normalizeMeshyRig(rig){
   if(Array.isArray(rig.skinIndex[0]))return rig;
   const skinIndex=[],skinWeight=[];
@@ -5485,16 +5563,17 @@ function loadMeshyModel(mesh){
     fetch('assets/personajes_propios/'+mesh+'.obj'),
     fetch('assets/personajes_propios/'+mesh+'_rig.json'),
     new Promise(res=>{new THREE.TextureLoader().load('assets/personajes_propios/'+mesh+'_tex.png',t=>{t.colorSpace=THREE.SRGBColorSpace;res(t);},undefined,()=>res(null));})
-  ]).then(([objRes,rigRes,tex])=>{
+  ]).then(async ([objRes,rigRes,tex])=>{
     if(!objRes.ok||!rigRes.ok)return null;
-    return Promise.all([objRes.text(),rigRes.json()]).then(([objText,rawRig])=>{
-      const data=normalizeMeshyRig(rawRig);
-      const geo=parseMeshyOBJ(objText,data);
-      const size=new THREE.Vector3();geo.boundingBox.getSize(size);
-      const maxDim=Math.max(size.x,size.y,size.z)||1;
-      const rest=(REAL.data&&REAL.data.bones&&REAL.data.bones.length===data.bones.length)?REAL.data.bones:data.bones;
-      return {geo:geo,data:data,tex:tex,scale:0.95*1.14/maxDim,zUp:!!(data.bones[1]&&data.bones[1].pos[2]>data.bones[1].pos[1]+0.1),baseRestQ:rest.map(b=>new THREE.Quaternion(b.quat[0],b.quat[1],b.quat[2],b.quat[3]))};
-    });
+    const [objText,rawRig]=await Promise.all([objRes.text(),rigRes.json()]);
+    const data=normalizeMeshyRig(rawRig);
+    const geo=parseMeshyOBJ(objText,data);
+    const size=new THREE.Vector3();geo.boundingBox.getSize(size);
+    const maxDim=Math.max(size.x,size.y,size.z)||1;
+    const started=Date.now();
+    while(!(REAL.ready&&REAL.data&&REAL.data.bones)&&Date.now()-started<5000)await wait(50);
+    const baseData=sameRigBoneOrder(REAL.data&&REAL.data.bones,data.bones)?REAL.data:null;
+    return {geo:geo,data:data,tex:tex,scale:0.95*1.14/maxDim,zUp:!!(data.bones[1]&&data.bones[1].pos[2]>data.bones[1].pos[1]+0.1),baseRestQ:baseData?baseData.bones.map(b=>new THREE.Quaternion(b.quat[0],b.quat[1],b.quat[2],b.quat[3])):null,baseRestParents:baseData?baseData.bones.map(b=>b.parent):null};
   }).then(model=>{if(model)MESHY_MODELS[mesh]=model;return model;}).catch(()=>null).finally(()=>{delete MESHY_LOADING[mesh];});
   return MESHY_LOADING[mesh];
 }
@@ -5509,10 +5588,8 @@ function makeSkinnedModel(geometry,data,texture,options={}){
     return bone;
   });
   data.bones.forEach((b,i)=>{if(b.parent>=0)bones[b.parent].add(bones[i]);});
-  const skeleton=new THREE.Skeleton(data.skinBones.map(i=>bones[i]),data.boneInverses.map(a=>new THREE.Matrix4().set(
-    a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7],
-    a[8],a[9],a[10],a[11],a[12],a[13],a[14],a[15]
-  )));
+  const inverses=validatedRigBoneInverses(data,bones);
+  const skeleton=new THREE.Skeleton(data.skinBones.map(i=>bones[i]),inverses);
   const mesh=new THREE.SkinnedMesh(geometry,new THREE.MeshStandardMaterial({
     map:texture,roughness:0.85,metalness:0.02,transparent:false,opacity:1,depthWrite:true,
     side:options.meshy?THREE.DoubleSide:THREE.FrontSide
@@ -5522,13 +5599,24 @@ function makeSkinnedModel(geometry,data,texture,options={}){
   mesh.frustumCulled=false;
   mesh.castShadow=true;
   model.add(mesh);
+  const parents=data.bones.map(b=>b.parent);
+  const bindLocal=data.bones.map(b=>new THREE.Quaternion(b.quat[0],b.quat[1],b.quat[2],b.quat[3]));
+  const bindWorldQ=worldRotationsFromLocal(bindLocal,parents);
+  const baseRestQ=options.baseRestQ||null;
+  const sourceParents=baseRestQ?(options.baseParents||parents):parents;
   model.userData={
-    bones,bindLocal:data.bones.map(b=>new THREE.Quaternion(b.quat[0],b.quat[1],b.quat[2],b.quat[3])),
+    bones,bindLocal,
     curQ:data.bones.map(b=>new THREE.Quaternion(b.quat[0],b.quat[1],b.quat[2],b.quat[3])),
     bindPos:data.bones.map(b=>new THREE.Vector3(b.pos[0],b.pos[1],b.pos[2])),
     curDelta:new THREE.Vector3(),mesh3:mesh,meshy:!!options.meshy,
     animatable:!!options.animatable,idleClipKey:options.idleClipKey||'idle2h',idleRole:options.idleRole,
-    baseRestQ:options.baseRestQ||null,isClassRig:!!options.baseRestQ,grip:!!options.grip,role:options.role||'',gun:null,
+    baseRestQ,baseRestWorldQ:baseRestQ?worldRotationsFromLocal(baseRestQ,sourceParents):null,
+    bindWorldQ,parents,sourceParents,
+    sourcePoseQ:data.bones.map(()=>new THREE.Quaternion()),
+    sourceWorldQ:data.bones.map(()=>new THREE.Quaternion()),
+    targetWorldQ:data.bones.map(()=>new THREE.Quaternion()),
+    targetLocalQ:data.bones.map(()=>new THREE.Quaternion()),
+    isClassRig:!!baseRestQ,grip:!!options.grip,role:options.role||'',gun:null,
     byName:Object.fromEntries(bones.map((bone,index)=>[bone.name,index]))
   };
   return model;
@@ -5722,29 +5810,17 @@ function makeRealSoldier3(un){
      arriba; el grupo spin+tilt lo deja Y arriba y mirando a +X, y el
      esqueleto va dentro, así que huesos y malla comparten el giro. */
   const spin=new THREE.Group();spin.rotation.y=Math.PI/2;g.add(spin);
-  /* Silueta por ROL sobre la misma malla real: el grupo spin gira los
-     ejes del IPA a los del mundo (su X local es el lateral del
-     soldado, su Y la altura y su Z la profundidad), así que escalarlo
-     da a cada rol su cuerpo —el Artillero enorme y ancho, el
-     Francotirador flaco y alto, el Espía pequeño, el Ingeniero
-     bajito y rechoncho, el Capitán el más alto— sin tocar ni un peso
-     del skinning, porque huesos y malla cuelgan del mismo grupo. La
-     escala sale de ROLE_LOOK y es la misma en la vista 3D, en el
-     sprite de la clásica y en las tarjetas, que se fotografían desde
-     este mismo constructor. */
+  /* Solo el cuerpo generico necesita una silueta sintetica por rol;
+     las mallas propias ya traen su proporcion. */
   const lk=roleLook(un.role);
-  spin.scale.set(lk.s[0],lk.s[1],lk.s[2]);
   const tilt=new THREE.Group();spin.add(tilt);
-  /* Las mallas de clase siguen en investigacion (ver docs/Examen §5): se
-     activan con window.__classModels=true; por defecto, malla base + uniforme. */
-  /* Malla de clase por rol. El Comando (Agent_Heavy) tiene un skin de 17
-     huesos cuya bind no cuadra (boneWorld x boneInverse != I) y sale como un
-     blob: de momento usa la malla base con su uniforme. */
-  const CLASS_MODEL_SKIP={};
+  /* Prefer the authored Meshy or role model when available. */
   const meshy=(!window.__forceBaseModel&&un.charMesh&&MESHY_MODELS[un.charMesh])||null;
   tilt.rotation.x=(meshy&&!meshy.zUp)?0:-Math.PI/2;
   const castTex=(un.charTexture&&REAL.castTex)?REAL.castTex[un.charTexture]:null;
-  const RD=meshy||((!window.__forceBaseModel&&!CLASS_MODEL_SKIP[un.role]&&REAL.byRole&&REAL.byRole[un.role])||REAL);
+  const RD=meshy||((!window.__forceBaseModel&&REAL.byRole&&REAL.byRole[un.role])||REAL);
+  const presentation=gameplayModelPresentation(un.role,!!meshy||RD!==REAL);
+  spin.scale.set(presentation.scale[0],presentation.scale[1],presentation.scale[2]);
   const roleTex=castTex||(meshy&&meshy.tex)||RD.tex||(REAL.texByRole&&REAL.texByRole[un.role])||REAL.tex;
   const data=RD.data;
   const bones=data.bones.map(b=>{
@@ -5755,10 +5831,11 @@ function makeRealSoldier3(un){
   });
   data.bones.forEach((b,i)=>{if(b.parent>=0)bones[b.parent].add(bones[i]);});
   const skinBones=data.skinBones.map(i=>bones[i]);
-  const inverses=data.boneInverses.map(a=>new THREE.Matrix4().set(a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8],a[9],a[10],a[11],a[12],a[13],a[14],a[15]));
+  let inverses=data.boneInverses.map(a=>new THREE.Matrix4().set(a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8],a[9],a[10],a[11],a[12],a[13],a[14],a[15]));
   /* Diagnostico: las bind poses del IPA pueden venir en columnas. Con este
      interruptor se trasponen antes de montar el esqueleto. */
   if(window.__transposeBind)inverses.forEach(m=>m.transpose());
+  else inverses=validatedRigBoneInverses(data,bones,inverses);
   const skeleton=new THREE.Skeleton(skinBones,inverses);
   /* Material cartoon: rampa de 4 pasos en el canal de luz (MeshToonMaterial)
      para el look cel del original, con la textura real del IPA. Si algo
@@ -5774,20 +5851,28 @@ function makeRealSoldier3(un){
     gradTex=new THREE.CanvasTexture(gc);
     gradTex.minFilter=THREE.NearestFilter;gradTex.magFilter=THREE.NearestFilter;
   }catch(e){}
-  const mat=gradTex?new THREE.MeshToonMaterial({map:roleTex,gradientMap:gradTex}):new THREE.MeshStandardMaterial({map:roleTex,roughness:0.85,metalness:0.02});
-  /* Skin de NACION: el uniforme se tine con el color de la bandera
-     (multiplicado sobre la textura del original, sin taparla). */
-  if(un.skin==='nacion'&&un.nation&&un.nation.colors){
+  const materialSide=presentation.twoSided?THREE.DoubleSide:THREE.FrontSide;
+  const mat=presentation.preserveTexture
+    ?new THREE.MeshStandardMaterial({map:roleTex,roughness:0.85,metalness:0.02,side:materialSide})
+    :(gradTex?new THREE.MeshToonMaterial({map:roleTex,gradientMap:gradTex,side:materialSide}):new THREE.MeshStandardMaterial({map:roleTex,roughness:0.85,metalness:0.02,side:materialSide}));
+  /* Keep authored character textures intact; tint only the generic fallback. */
+  if(un.skin==='nacion'&&un.nation&&un.nation.colors&&!presentation.preserveTexture){
     mat.color.copy(new THREE.Color(nationTintColor(un.nation))).lerp(new THREE.Color('#ffffff'),0.42);
   }
   /* Equipo enemigo: el uniforme se tine calido para que no se confunda con
      el tuyo ni de espaldas. El bando A conserva el color natural. */
   if(un.skin==='camuflaje'){try{const ct=camoTexture();if(ct){mat.map=ct;mat.color.set(0xffffff);}}catch(e){}}
-  if(un.skin==='estandar'&&!castTex&&!meshy){
+  if(un.skin==='estandar'&&!castTex&&!meshy&&!presentation.preserveTexture){
     try{const cn=un.name||charNameFor(un.role);const ce=OWN_CAST.concat(ORIG_CAST).find(c=>c.name===cn);if(ce&&ce.tint)mat.color.copy(new THREE.Color(ce.tint)).lerp(new THREE.Color('#ffffff'),0.42);}catch(e){}
   }
   if(un.skin==='clase'&&ROLES[un.role]){mat.color.copy(new THREE.Color(ROLES[un.role].color)).lerp(new THREE.Color('#ffffff'),0.30);}
-  if(un.team==='B'){mat.color.lerp(new THREE.Color('#c95338'),0.22);}
+  if(un.team==='B'&&!presentation.preserveTexture){mat.color.lerp(new THREE.Color('#c95338'),0.22);}
+  if(presentation.emissiveIntensity>0){
+    mat.emissiveMap=mat.map;
+    mat.emissive.copy(mat.color);
+    mat.emissiveIntensity=presentation.emissiveIntensity;
+    mat.needsUpdate=true;
+  }
   /* El color lo ponen las ramas de skin de arriba (nación, estándar, clase,
      camuflaje) y el tinte rojo del equipo B: no se sobrescribe aquí, porque
      un mat.color.copy(tint) final anulaba todas esas skins. */
@@ -5802,6 +5887,7 @@ function makeRealSoldier3(un){
   /* Mochila de rol, construida en código a la espalda (el frente del grupo
      es +X, por donde sale el arma): es lo que distingue a cada rol de un
      vistazo sobre la misma malla del IPA, igual que el arma de su rol. */
+  if(presentation.addRoleGear){
   const pack=new THREE.Group();pack.position.set(-0.21*lk.s[2],0.74*lk.s[1],0);
   const packCol=un.role==='Médico'?'#eef0e6':un.role==='Ingeniero'?'#5b5348':shadeHex(c.role,-30);
   const packScale=lk.s[0];
@@ -5845,13 +5931,17 @@ function makeRealSoldier3(un){
       em.position.set(0.171,0.76,0);em.rotation.y=Math.PI/2;g.add(em);
     }
   }
+  }
   const bindLocal=data.bones.map(b=>new THREE.Quaternion(b.quat[0],b.quat[1],b.quat[2],b.quat[3]));
   /* Retargeting: si este cuerpo es una malla de clase, su reposo no es el
      del rig base con el que se hornearon los clips. Se aplica el clip como
-     DELTA:  q = rest_clase * (rest_base^-1 * q_clip). */
-  const baseRestQ=(RD!==REAL&&REAL.data&&REAL.data.bones)?REAL.data.bones.map(b=>new THREE.Quaternion(b.quat[0],b.quat[1],b.quat[2],b.quat[3])):null;
-  const bindWorldQ=[];
-  data.bones.forEach((b,i)=>{bindWorldQ[i]=b.parent>=0?bindWorldQ[b.parent].clone().multiply(bindLocal[i]):bindLocal[i].clone();});
+     delta en espacio mundial para respetar los ejes locales de cada rig. */
+  const parents=data.bones.map(b=>b.parent);
+  const baseData=RD!==REAL&&sameRigBoneOrder(REAL.data&&REAL.data.bones,data.bones)?REAL.data:null;
+  const baseRestQ=baseData?baseData.bones.map(b=>new THREE.Quaternion(b.quat[0],b.quat[1],b.quat[2],b.quat[3])):(RD!==REAL&&RD.baseRestQ||null);
+  const sourceParents=baseData?baseData.bones.map(b=>b.parent):(RD!==REAL&&RD.baseRestParents)||parents;
+  const bindWorldQ=worldRotationsFromLocal(bindLocal,parents);
+  const baseRestWorldQ=baseRestQ?worldRotationsFromLocal(baseRestQ,sourceParents):null;
   const byName={};data.bones.forEach((b,i)=>{byName[b.name]=i;});
   /* Complexion por rol: se escalan huesos concretos (claviculas, columna,
      cabeza y piernas) para que cada clase tenga cuerpo propio sin tocar la
@@ -5859,10 +5949,11 @@ function makeRealSoldier3(un){
      estrecho y bajo, francotirador alto y fino, capitan erguido. */
   /* La complexion ya la trae cada modelo del original (Soldier_Light,
      Soldier_Heavy, Agent, Medic, Engineer, Commander): no se escala nada. */
-  /* la malla de clase trae su propia escala (ROLE_SCALES); la base usa 0,95 */
-  /* la escala de clase va horneada en la geometria y en las bind poses */
+  /* The 3D viewer's authored models already contain their proportions and
+     equipment. ROLE_LOOK and procedural gear are only for the generic body. */
   mesh.scale.setScalar(meshy?meshy.scale:0.95);
 
+  if(presentation.addRoleGear){
   /* Tocados por rol sobre la malla real, colgados del hueso Head: su Z
      local es el arriba del IPA, así que el grupo gira para que su +Y
      apunte a ese arriba y el casco se mueve con la cabeza en reposo,
@@ -5937,7 +6028,8 @@ function makeRealSoldier3(un){
       }
     }
   }
-  g.userData={real:true,body:null,segs:segs,selRing:selRing,baseMesh:base,contactSh:contactSh,baseChev:chev,bones:bones,mesh3:mesh,gun:gun,bindLocal:bindLocal,baseRestQ:baseRestQ,isClassRig:!!baseRestQ,bindWorldQ:bindWorldQ,byName:byName,curQ:bindLocal.map(q=>q.clone()),curRootP:new THREE.Vector3(),walkPh:Math.random()*6.28,bindPos:data.bones.map(b=>new THREE.Vector3(b.pos[0],b.pos[1],b.pos[2])),curDelta:new THREE.Vector3(),clipPhase:Math.random()*10};
+  }
+  g.userData={real:true,body:null,segs:segs,selRing:selRing,baseMesh:base,contactSh:contactSh,baseChev:chev,bones:bones,mesh3:mesh,gun:gun,bindLocal:bindLocal,baseRestQ:baseRestQ,baseRestWorldQ:baseRestWorldQ,isClassRig:!!baseRestQ,bindWorldQ:bindWorldQ,parents:parents,sourceParents:sourceParents,sourcePoseQ:data.bones.map(()=>new THREE.Quaternion()),sourceWorldQ:data.bones.map(()=>new THREE.Quaternion()),targetWorldQ:data.bones.map(()=>new THREE.Quaternion()),targetLocalQ:data.bones.map(()=>new THREE.Quaternion()),byName:byName,curQ:bindLocal.map(q=>q.clone()),curRootP:new THREE.Vector3(),walkPh:Math.random()*6.28,bindPos:data.bones.map(b=>new THREE.Vector3(b.pos[0],b.pos[1],b.pos[2])),curDelta:new THREE.Vector3(),clipPhase:Math.random()*10};
   return g;
 }
 /* Si la librería three.js no llega a cargar (sin red, CDN caído), el juego
@@ -5948,6 +6040,7 @@ function makeRealSoldier3(un){
    comprobaba typeof THREE antes de tocarlo (loadRealSoldier, init3D). */
 const HAS_THREE=typeof THREE!=='undefined';
 const _rq=HAS_THREE?new THREE.Quaternion():null,_rq2=HAS_THREE?new THREE.Quaternion():null,_sv=HAS_THREE?new THREE.Vector3():null;
+const _retargetDelta=HAS_THREE?new THREE.Quaternion():null,_retargetInverse=HAS_THREE?new THREE.Quaternion():null;
 const AXIS_X3=HAS_THREE?new THREE.Vector3(1,0,0):null,AXIS_Y3=HAS_THREE?new THREE.Vector3(0,1,0):null,AXIS_Z3=HAS_THREE?new THREE.Vector3(0,0,1):null;
 function rotAxisQ(axis,ang){return new THREE.Quaternion().setFromAxisAngle(axis,ang);}
 /* Giro compuesto de la postura de apunte, en el espacio del IPA: primero
@@ -6124,6 +6217,34 @@ function sampleClipPos(tr,t,out){
   out.set(a[0]+(b[0]-a[0])*k,a[1]+(b[1]-a[1])*k,a[2]+(b[2]-a[2])*k);
   return out;
 }
+function worldRotationsFromLocal(localQ,parents){
+  const worldQ=[];
+  for(let i=0;i<localQ.length;i++){
+    const parent=parents[i];
+    worldQ[i]=parent>=0?worldQ[parent].clone().multiply(localQ[i]):localQ[i].clone();
+  }
+  return worldQ;
+}
+function retargetPoseToRig(sourcePoseQ,sourceRestWorldQ,targetRestWorldQ,sourceParents,targetParents,sourceWorldQ,targetWorldQ,targetLocalQ){
+  for(let i=0;i<sourcePoseQ.length;i++){
+    const sourceParent=sourceParents[i];
+    if(sourceParent>=0)sourceWorldQ[i].copy(sourceWorldQ[sourceParent]).multiply(sourcePoseQ[i]);
+    else sourceWorldQ[i].copy(sourcePoseQ[i]);
+    _retargetDelta.copy(sourceWorldQ[i])
+      .multiply(_retargetInverse.copy(sourceRestWorldQ[i]).invert())
+      .multiply(targetRestWorldQ[i]);
+    targetWorldQ[i].copy(_retargetDelta);
+    const targetParent=targetParents[i];
+    if(targetParent>=0)targetLocalQ[i].copy(targetWorldQ[targetParent]).invert().multiply(targetWorldQ[i]);
+    else targetLocalQ[i].copy(targetWorldQ[i]);
+  }
+}
+function rootBonePositionForClip(rootBase,pelvisOffset,delta,rotatedPelvis,out){
+  out.x=rootBase.x+pelvisOffset.x+delta.x-rotatedPelvis.x;
+  out.y=rootBase.y+pelvisOffset.y+delta.y-rotatedPelvis.y;
+  out.z=rootBase.z+pelvisOffset.z+delta.z-rotatedPelvis.z;
+  return out;
+}
 function driveClipSoldier(un,mesh,t,moving){
   if(window.__noClips)return; /* diagnostico: reposo puro */
   const ud=mesh.userData,pack=CLIPLIB.pack,clips=pack.clips,ts=t/1000;
@@ -6172,7 +6293,6 @@ function driveClipSoldier(un,mesh,t,moving){
      peso smoothstep del tiempo transcurrido. Sin cambio de clave no
      hay fundido y el muestreo es el de siempre. */
   let prevClip=null,prevCt=0,blendW=1;
-const _cqDelta=new THREE.Quaternion();
   if(ud._clipKey!==key){
     /* Los impactos entran sin fundido (ver la nota de la cabecera):
        su primer tramo ya es el latigazo, y retenerlo lo concentra. */
@@ -6204,26 +6324,33 @@ const _cqDelta=new THREE.Quaternion();
   ud._clipLastT=t;
   const baseK=(key==='death'||key==='deathExpl')?0.5:0.45;
   const k=REDUCED_MOTION?1:1-Math.pow(1-baseK,dtMs/16.7);
+  const retarget=!!(ud.isClassRig&&ud.baseRestWorldQ&&ud.sourcePoseQ);
   for(let i=0;i<ud.bones.length;i++){
     const tr=clip.rot[pack.bones[i]];
-    if(tr)sampleClipQuat(tr,ct,_cq);else _cq.copy(ud.bindLocal[i]);
+    const restQ=retarget?ud.baseRestQ[i]:ud.bindLocal[i];
+    if(tr)sampleClipQuat(tr,ct,_cq);else _cq.copy(restQ);
     if(prevClip){
       const ptr=prevClip.rot[pack.bones[i]];
-      if(ptr)sampleClipQuat(ptr,prevCt,_cq2);else _cq2.copy(ud.bindLocal[i]);
+      if(ptr)sampleClipQuat(ptr,prevCt,_cq2);else _cq2.copy(restQ);
       _cq2.slerp(_cq,blendW);
       _cq.copy(_cq2);
     }
-    if(ud.isClassRig&&ud.baseRestQ&&ud.baseRestQ[i]&&tr){
-      _cqDelta.copy(ud.baseRestQ[i]).invert().multiply(_cq);
-      _cq.copy(ud.bindLocal[i]).multiply(_cqDelta);
+    if(retarget){
+      ud.sourcePoseQ[i].copy(_cq);
+    }else{
+      ud.curQ[i].slerp(_cq,k);
+      ud.bones[i].quaternion.copy(ud.curQ[i]);
     }
-    ud.curQ[i].slerp(_cq,k);
-    ud.bones[i].quaternion.copy(ud.curQ[i]);
   }
-  /* Raíz: la pelvis sigue el desplazamiento del clip y el hueso raíz se
-     coloca compensando su propia rotación, así el cuerpo cae, se agacha
-     o se desplaza sin hundirse bajo el suelo ni flotar sobre él. El
-     desplazamiento también se funde entre los dos clips del fundido. */
+  if(retarget){
+    retargetPoseToRig(ud.sourcePoseQ,ud.baseRestWorldQ,ud.bindWorldQ,ud.sourceParents,ud.parents,ud.sourceWorldQ,ud.targetWorldQ,ud.targetLocalQ);
+    for(let i=0;i<ud.bones.length;i++){
+      ud.curQ[i].slerp(ud.targetLocalQ[i],k);
+      ud.bones[i].quaternion.copy(ud.curQ[i]);
+    }
+  }
+  /* La raíz conserva su offset de bind además de aplicar el movimiento del
+     clip; algunos rigs colocan el hueso raíz a la altura de la pelvis. */
   if(clip.root)sampleClipPos(clip.root,ct,_cv);else _cv.set(0,0,0);
   if(prevClip){
     if(prevClip.root)sampleClipPos(prevClip.root,prevCt,_cv3);else _cv3.set(0,0,0);
@@ -6231,8 +6358,8 @@ const _cqDelta=new THREE.Quaternion();
     _cv.copy(_cv3);
   }
   ud.curDelta.lerp(_cv,k);
-  const pelvOff=ud.bindPos[1];
-  _cv2.copy(pelvOff).add(ud.curDelta).sub(_cv.copy(pelvOff).applyQuaternion(ud.bones[0].quaternion));
+  const rootBase=ud.bindPos[0],pelvOff=ud.bindPos[1];
+  rootBonePositionForClip(rootBase,pelvOff,ud.curDelta,_cv.copy(pelvOff).applyQuaternion(ud.bones[0].quaternion),_cv2);
   ud.bones[0].position.copy(_cv2);
   const firing=key.indexOf('fire')===0;
   if(ud.gun&&ud.gun.userData&&ud.gun.userData.flash){
@@ -6314,19 +6441,31 @@ function poseSpriteClip(un,grp,clip,ct,clipKey){
   const pack=CLIPLIB.pack;if(!pack||!clip)return false;
   const ud=grp.userData;if(!ud||!ud.bones||!ud.bindLocal||!ud.curQ)return false;
   ud._clipKey=clipKey||'';
-  const tq=new THREE.Quaternion(),tp=new THREE.Vector3(),tp2=new THREE.Vector3();
+  const tq=new THREE.Quaternion(),tp=new THREE.Vector3(),tp2=new THREE.Vector3(),pelvis=new THREE.Vector3();
+  const retarget=!!(ud.isClassRig&&ud.baseRestWorldQ&&ud.sourcePoseQ);
   for(let n=0;n<24;n++){
     for(let i=0;i<ud.bones.length;i++){
       const tr=clip.rot[pack.bones[i]];
-      if(tr)sampleClipQuat(tr,ct,tq);else tq.copy(ud.bindLocal[i]);
-      ud.curQ[i].slerp(tq,0.45);
-      ud.bones[i].quaternion.copy(ud.curQ[i]);
+      const restQ=retarget?ud.baseRestQ[i]:ud.bindLocal[i];
+      if(tr)sampleClipQuat(tr,ct,tq);else tq.copy(restQ);
+      if(retarget){
+        ud.sourcePoseQ[i].copy(tq);
+      }else{
+        ud.curQ[i].slerp(tq,0.45);
+        ud.bones[i].quaternion.copy(ud.curQ[i]);
+      }
+    }
+    if(retarget){
+      retargetPoseToRig(ud.sourcePoseQ,ud.baseRestWorldQ,ud.bindWorldQ,ud.sourceParents,ud.parents,ud.sourceWorldQ,ud.targetWorldQ,ud.targetLocalQ);
+      for(let i=0;i<ud.bones.length;i++){
+        ud.curQ[i].slerp(ud.targetLocalQ[i],0.45);
+        ud.bones[i].quaternion.copy(ud.curQ[i]);
+      }
     }
     if(clip.root)sampleClipPos(clip.root,ct,tp);else tp.set(0,0,0);
     ud.curDelta.lerp(tp,0.45);
-    const pelvOff=ud.bindPos[1];
-    tp2.copy(pelvOff).add(ud.curDelta).sub(tp.copy(pelvOff).applyQuaternion(ud.bones[0].quaternion));
-    ud.bones[0].position.copy(tp2);
+    pelvis.copy(ud.bindPos[1]);
+    rootBonePositionForClip(ud.bindPos[0],pelvis,ud.curDelta,tp2.copy(pelvis).applyQuaternion(ud.bones[0].quaternion),ud.bones[0].position);
   }
   return true;
 }
@@ -7239,9 +7378,22 @@ function updateUnitHuds3D(w,h){
 /* Enganche de diagnostico: permite a las herramientas de captura acercar la
    camara para revisar modelos (no afecta al juego). */
 try{window.__csnCam={get cam(){return T3&&T3.cam;},get t3(){return T3;}};}catch(e){}
+function resetCamState(cam){
+  cam.yaw=-0.4363;cam.dist=8.5;cam.panX=0;cam.panZ=0.35;
+}
 function resetCam3D(){
   if(!T3||!T3.cam)return;
-  T3.cam.yaw=-0.4363;T3.cam.dist=8.5;T3.cam.panX=0;T3.cam.panZ=0.35; /* yaw 335°, distancia 8,5 del original */
+  resetCamState(T3.cam);
+}
+function fitViewerDistance(size,fovDegrees,aspect,margin=1.12){
+  const radius=Math.hypot(size.x,size.y,size.z)*0.5;
+  const halfVertical=fovDegrees*Math.PI/360;
+  const halfHorizontal=Math.atan(Math.tan(halfVertical)*Math.max(0.01,aspect));
+  const halfFov=Math.min(halfVertical,halfHorizontal);
+  return Math.max(0.01,radius/Math.sin(halfFov)*margin);
+}
+function viewerCenterOffset(center){
+  return {x:-center.x,y:-center.y,z:-center.z};
 }
 function init3D(){
   if(T3)return true;
@@ -7942,16 +8094,16 @@ function renderAbilityCatalog(){
   }).join('');
 }
 
-/* Barra inferior de acciones: el bloque de botones sale de la tarjeta y se
-   coloca bajo el tablero, a lo ancho, como el HUD del original. */
+/* Barra inferior de acciones: el bloque se mantiene fuera del área de juego
+   para poder reservar un viewport desplazable encima de ella. */
 (function(){
-  try{
-    const ga=document.getElementById('gameArea');
-    if(ga&&!document.getElementById('actionBar')){
-      const bar=document.createElement('div');bar.id='actionBar';bar.className='actionBar';
-      ga.appendChild(bar);
-    }
-  }catch(e){}
+  const ga=document.getElementById('gameArea');
+  if(ga&&!document.getElementById('actionBar')){
+    const bar=document.createElement('div');bar.id='actionBar';bar.className='actionBar';
+    document.body.appendChild(bar);
+  }
+  syncPlayingViewport();
+  window.addEventListener('resize',()=>requestAnimationFrame(syncPlayingViewport),{passive:true});
 })();
 /* Tooltip completo de las acciones del HUD: el detalle queda en una linea
    con puntos suspensivos y el texto entero aparece al pasar el raton. */
@@ -8660,29 +8812,30 @@ const MAP_PIECES=[
   function mount(model){
     while(viewer.spin.children.length)viewer.spin.remove(viewer.spin.children[0]);
     model.updateMatrixWorld(true);
+    model.traverse(object=>{
+      if(object.isSkinnedMesh&&object.skeleton)object.skeleton.update();
+    });
+    model.updateMatrixWorld(true);
     const bounds=new THREE.Box3();
-    const corner=new THREE.Vector3();
+    const meshBounds=new THREE.Box3();
     model.traverse(object=>{
       if(!object.isMesh||!object.geometry)return;
       /* El arma equipada no entra en el encuadre: si contara, el cañón
          desplazaría el centro y el soldado quedaría descentrado. */
       let p=object.parent;
       while(p&&p!==model){if(p.userData&&p.userData.isViewerGun)return;p=p.parent;}
-      const geometry=object.geometry;
-      if(!geometry.boundingBox)geometry.computeBoundingBox();
-      if(!geometry.boundingBox)return;
-      for(let x=0;x<2;x++)for(let y=0;y<2;y++)for(let z=0;z<2;z++){
-        corner.set(x?geometry.boundingBox.max.x:geometry.boundingBox.min.x,
-          y?geometry.boundingBox.max.y:geometry.boundingBox.min.y,
-          z?geometry.boundingBox.max.z:geometry.boundingBox.min.z).applyMatrix4(object.matrixWorld);
-        bounds.expandByPoint(corner);
-      }
+      meshBounds.setFromObject(object,true);
+      bounds.union(meshBounds);
     });
     const size=new THREE.Vector3(),center=new THREE.Vector3();
     bounds.getSize(size);bounds.getCenter(center);
     if(!Number.isFinite(size.x)||Math.max(size.x,size.y,size.z)<0.001)throw new Error('El modelo no contiene geometría visible.');
-    model.position.sub(center);
-    viewer.spin.add(model);
+    const centerOffset=viewerCenterOffset(center);
+    const centered=new THREE.Group();
+    centered.position.set(centerOffset.x,centerOffset.y,centerOffset.z);
+    centered.add(model);
+    viewer.spin.add(centered);
+    centered.updateMatrixWorld(true);
     viewer.idleActor=viewer.kind==='roles'&&model.userData.animatable?model:null;
     viewer.gripActor=viewer.kind==='roles'&&model.userData.grip?model:null;
     if(viewer.meshyFill)viewer.meshyFill.intensity=viewer.kind==='roles'&&model.userData.meshy?1.8:0;
@@ -8694,9 +8847,9 @@ const MAP_PIECES=[
     const platformRadius=Math.max(0.35,Math.max(size.x,size.z)*0.72);
     viewer.platform.scale.set(platformRadius,platformRadius,1);
     viewer.platform.position.y=-size.y/2-0.035;
-    viewer.baseDistance=Math.max(size.x,size.y,size.z)*(model.userData.meshy||model.userData.staticRole?4.8:2.5);
-    updateCamera();
     resize();
+    viewer.baseDistance=fitViewerDistance(size,viewer.camera.fov,viewer.camera.aspect);
+    updateCamera();
     viewer.renderer.render(viewer.scene,viewer.camera);
     refreshTexturePreview();
     setStatus('',false);
@@ -8754,9 +8907,12 @@ const MAP_PIECES=[
       const pieces=MAP_PIECES.filter(piece=>piece.m===viewer.pieceMap);
       document.getElementById('viewerPieceCount').textContent=pieces.length+' piezas · mapa '+viewer.pieceMap;
       list.innerHTML='';
-      pieces.forEach(entry=>{
+      pieces.forEach((entry,index)=>{
         const button=document.createElement('button');
-        button.type='button';button.textContent=entry.l;
+        const meshName=(entry.f||entry.k).split('/').pop();
+        button.type='button';button.textContent=entry.l+' · '+String(index+1).padStart(2,'0');
+        button.title=entry.f||entry.k;
+        button.setAttribute('aria-label',entry.l+' ('+meshName+')');
         button.classList.toggle('on',viewer.name===entry.k);
         button.onclick=()=>selectModel('pieces',entry.k);
         list.appendChild(button);
@@ -8879,11 +9035,11 @@ const MAP_PIECES=[
     const geometry=parseViewerOBJ(objText,rig);
     const started=Date.now();
     while(!CLIPLIB.ready&&Date.now()-started<5000)await wait(50);
-    const restBones=(REAL.data&&REAL.data.bones&&REAL.data.bones.length===rig.bones.length)
-      ?REAL.data.bones:rig.bones;
-    const baseRestQ=restBones.map(b=>new THREE.Quaternion(b.quat[0],b.quat[1],b.quat[2],b.quat[3]));
+    const baseData=sameRigBoneOrder(REAL.data&&REAL.data.bones,rig.bones)?REAL.data:null;
+    const baseRestQ=baseData?baseData.bones.map(b=>new THREE.Quaternion(b.quat[0],b.quat[1],b.quat[2],b.quat[3])):null;
+    const baseParents=baseData?baseData.bones.map(b=>b.parent):null;
     const model=makeViewerRiggedModel(geometry,rig,texture,{
-      meshy:true,grip:true,role:entry.role,baseRestQ
+      meshy:true,grip:true,role:entry.role,baseRestQ,baseParents
     });
     if(rig.bones[1].pos[2]>rig.bones[1].pos[1]+0.1)model.rotation.x=-Math.PI/2;
     poseViewerRest(model,'idle2h',0);
@@ -8895,22 +9051,28 @@ const MAP_PIECES=[
     const pack=CLIPLIB.pack,clip=pack&&pack.clips&&pack.clips[clipKey];
     const ud=model&&model.userData;
     if(!clip||!ud||!ud.bones||!ud.bindLocal)return false;
-    const tq=new THREE.Quaternion(),delta=new THREE.Quaternion();
+    const tq=new THREE.Quaternion();
+    const retarget=!!(ud.isClassRig&&ud.baseRestWorldQ&&ud.sourcePoseQ);
     const rootP=new THREE.Vector3(),rootT=new THREE.Vector3(),pelvis=new THREE.Vector3();
     for(let n=0;n<24;n++){
       for(let i=0;i<ud.bones.length;i++){
         const tr=clip.rot[pack.bones[i]];
-        if(tr)sampleClipQuat(tr,ct,tq);else tq.copy(ud.bindLocal[i]);
-        if(ud.isClassRig&&ud.baseRestQ&&ud.baseRestQ[i]&&tr){
-          delta.copy(ud.baseRestQ[i]).invert().multiply(tq);
-          tq.copy(ud.bindLocal[i]).multiply(delta);
+        const restQ=retarget?ud.baseRestQ[i]:ud.bindLocal[i];
+        if(tr)sampleClipQuat(tr,ct,tq);else tq.copy(restQ);
+        if(retarget){
+          ud.sourcePoseQ[i].copy(tq);
+        }else{
+          ud.bones[i].quaternion.copy(tq);
         }
-        ud.bones[i].quaternion.copy(tq);
+      }
+      if(retarget){
+        retargetPoseToRig(ud.sourcePoseQ,ud.baseRestWorldQ,ud.bindWorldQ,ud.sourceParents,ud.parents,ud.sourceWorldQ,ud.targetWorldQ,ud.targetLocalQ);
+        for(let i=0;i<ud.bones.length;i++)ud.bones[i].quaternion.copy(ud.targetLocalQ[i]);
       }
       if(clip.root)sampleClipPos(clip.root,ct,rootT);else rootT.set(0,0,0);
       rootP.copy(ud.curDelta).lerp(rootT,0.45);
       pelvis.copy(ud.bindPos[1]);
-      ud.bones[0].position.copy(pelvis).add(rootP).sub(pelvis.clone().applyQuaternion(ud.bones[0].quaternion));
+      rootBonePositionForClip(ud.bindPos[0],pelvis,rootP,rootT.copy(pelvis).applyQuaternion(ud.bones[0].quaternion),ud.bones[0].position);
     }
     ud._clipKey=clipKey;
     model.updateMatrixWorld(true);
@@ -8994,11 +9156,11 @@ const MAP_PIECES=[
     if(entry.name==='Sister Florence'&&source){
       const started=Date.now();
       while(!CLIPLIB.ready&&Date.now()-started<5000)await wait(50);
-      const baseRestQ=REAL.data&&REAL.data.bones
-        ?REAL.data.bones.map(b=>new THREE.Quaternion(b.quat[0],b.quat[1],b.quat[2],b.quat[3]))
-        :null;
+      const baseData=sameRigBoneOrder(REAL.data&&REAL.data.bones,source.data.bones)?REAL.data:null;
+      const baseRestQ=baseData?baseData.bones.map(b=>new THREE.Quaternion(b.quat[0],b.quat[1],b.quat[2],b.quat[3])):null;
+      const baseParents=baseData?baseData.bones.map(b=>b.parent):null;
       const model=makeViewerRiggedModel(source.geo.clone(),source.data,texture,{
-        baseRestQ,grip:true,role:entry.role
+        baseRestQ,baseParents,grip:true,role:entry.role
       });
       model.scale.setScalar(1.15);
       const mesh=model.userData.mesh3;

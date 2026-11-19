@@ -27,6 +27,7 @@ Qué hay aquí y para qué sirve. Si vienes nuevo, lee en este orden.
 
 | Documento | Para qué |
 |---|---|
+| [Auditoria_visual_profunda_2026-11-19.md](Auditoria_visual_profunda_2026-11-19.md) | Hallazgos visuales reproducibles, hipótesis separadas y prompt técnico para OpenCode |
 | [Auditoria_profunda_v2.md](Auditoria_profunda_v2.md) | Los fallos de la tanda de corrección y cómo se arreglaron |
 | [Capturas_3D.md](Capturas_3D.md) | Cómo regenerar capturas (no se guardan en el repo) |
 

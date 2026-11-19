@@ -13,7 +13,7 @@ function loadEngine() {
   const idx = code.indexOf(mark);
   assert.ok(idx > 0, 'INIT marker must exist');
   code = code.slice(0, idx);
-  code += '\n;globalThis.__api={startGame,endTurn,checkWin,coverLevel,isFlanked,hasLOS,smokeBlocksLOS,throwSmoke,placeMine,checkMines,throwFlash,damage,tryShoot,guideDrone,scoreDominationFor,domControl,ROLES,WEAPONS,NATIONS,DOM_ZONES,DOM_TARGET,ESCORT_EXT,ESCORT_DRONE_HP,ESCORT_DRONE_MAXHP,get G(){return G;},get setup(){return setup;},set myNation(v){myNation=v;},mkSquad(n){return DEFAULT_SQUADS[n].map(r=>({role:r,weapon:ROLES[r].weapons[0]}));}};';
+  code += '\n;globalThis.__api={startGame,endTurn,checkWin,coverLevel,isFlanked,hasLOS,smokeBlocksLOS,throwSmoke,placeMine,checkMines,throwFlash,damage,tryShoot,guideDrone,scoreDominationFor,domControl,screenStateFor,classicBoardMetrics,classicTileFromPoint,fitViewerDistance,viewerCenterOffset,gameplayModelPresentation,rootBonePositionForClip,validatedRigBoneInverses,resetCamState,resetCam3D,ROLES,WEAPONS,NATIONS,DOM_ZONES,DOM_TARGET,ESCORT_EXT,ESCORT_DRONE_HP,ESCORT_DRONE_MAXHP,get G(){return G;},get T3(){return T3;},set T3(v){T3=v;},setBuild3D(fn){window.__build3D=fn;},setTHREE(v){globalThis.THREE=v;},get setup(){return setup;},set myNation(v){myNation=v;},mkSquad(n){return DEFAULT_SQUADS[n].map(r=>({role:r,weapon:ROLES[r].weapons[0]}));}};';
 
   const magic = () => {
     const f = () => {};
@@ -51,6 +51,113 @@ function loadEngine() {
   vm.runInContext(code, sb, { filename: 'index.html' });
   return sb.__api;
 }
+
+test('authored gameplay models use viewer-compatible proportions, surfaces, textures, and gear', () => {
+  const api = loadEngine();
+  const style = api.gameplayModelPresentation('Artillero', true);
+  assert.deepEqual(Array.from(style.scale), [1, 1, 1]);
+  assert.equal(style.addRoleGear, false);
+  assert.equal(style.preserveTexture, true);
+  assert.equal(style.twoSided, true);
+  assert.ok(style.emissiveIntensity > 0);
+});
+
+test('generic gameplay fallback retains role-specific proportions and gear', () => {
+  const api = loadEngine();
+  const style = api.gameplayModelPresentation('Artillero', false);
+  assert.deepEqual(Array.from(style.scale), [1.3, 1.04, 1.22]);
+  assert.equal(style.addRoleGear, true);
+  assert.equal(style.preserveTexture, false);
+  assert.equal(style.twoSided, false);
+  assert.equal(style.emissiveIntensity, 0);
+});
+
+test('invalid rig bind matrices are recalculated while valid ones are preserved', () => {
+  const api = loadEngine();
+  const identity = () => [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+  const rowMajorTranslation = x => [1, 0, 0, x, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+  class Matrix4 {
+    constructor(elements = identity()) { this.elements = elements.slice(); }
+    set(...v) {
+      this.elements = [v[0], v[4], v[8], v[12], v[1], v[5], v[9], v[13],
+        v[2], v[6], v[10], v[14], v[3], v[7], v[11], v[15]];
+      return this;
+    }
+    clone() { return new Matrix4(this.elements); }
+    multiply(other) {
+      this.elements[12] += other.elements[12];
+      this.elements[13] += other.elements[13];
+      this.elements[14] += other.elements[14];
+      return this;
+    }
+    invert() {
+      this.elements[12] *= -1;
+      this.elements[13] *= -1;
+      this.elements[14] *= -1;
+      return this;
+    }
+    determinant() { return 1; }
+  }
+  api.setTHREE({ Matrix4 });
+  const bone = { matrixWorld: new Matrix4([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 2, 0, 0, 1]), updateMatrixWorld() {} };
+  const data = { bones: [{ parent: -1 }], skinBones: [0], boneInverses: [rowMajorTranslation(-2)] };
+  const valid = api.validatedRigBoneInverses(data, [bone]);
+  assert.equal(valid[0].elements[12], -2);
+
+  data.boneInverses = [rowMajorTranslation(-1)];
+  const repaired = api.validatedRigBoneInverses(data, [bone]);
+  assert.equal(repaired[0].elements[12], -2);
+});
+
+test('clip root keeps a rig root offset while following pelvis motion', () => {
+  const api = loadEngine();
+  const result = {};
+  api.rootBonePositionForClip(
+    { x: 0, y: 0.855, z: 0 },
+    { x: 0, y: 0.2, z: 0 },
+    { x: 0, y: 0.05, z: 0 },
+    { x: 0, y: 0.1, z: 0 },
+    result,
+  );
+  assert.deepEqual(result, { x: 0, y: 1.005, z: 0 });
+});
+
+test('screen state preserves a live game when returning to Play', () => {
+  const api = loadEngine();
+  assert.equal(api.screenStateFor('scr-play', { over: false }), 'playing');
+  assert.equal(api.screenStateFor('scr-play', { over: true }), 'gameover');
+  assert.equal(api.screenStateFor('scr-viewer', { over: false }), 'menu');
+  assert.equal(api.screenStateFor('scr-nation', { over: false }), 'nation');
+});
+
+test('new matches reset tactical camera state', () => {
+  const api = loadEngine();
+  api.myNation = api.NATIONS[0];
+  api.T3 = { cam: { yaw: 1.2, dist: 6, panX: 4, panZ: -3 } };
+  api.setBuild3D(() => {});
+  Object.assign(api.setup, { mode: 'eliminacion', fmt: 2, opp: 'local', map: 'almacen', difficulty: 'normal' });
+  api.startGame(api.mkSquad(2), api.mkSquad(2));
+  assert.deepEqual({ ...api.T3.cam }, { yaw: -0.4363, dist: 8.5, panX: 0, panZ: 0.35 });
+});
+
+test('2D board margins preserve tile hit testing across canvas aspect ratios', () => {
+  const api = loadEngine();
+  const square = api.classicBoardMetrics(960, 960);
+  assert.deepEqual({ ...square }, { S: 72, offsetX: 48, offsetY: 48 });
+  assert.deepEqual({ ...api.classicTileFromPoint(square.offsetX + square.S / 2, square.offsetY + square.S / 2, 960, 960) }, { x: 0, y: 0 });
+  assert.equal(api.classicTileFromPoint(24, 480, 960, 960), null);
+  const wide = api.classicBoardMetrics(1200, 960);
+  assert.deepEqual({ ...api.classicTileFromPoint(wide.offsetX + 11.5 * wide.S, wide.offsetY + 11.5 * wide.S, 1200, 960) }, { x: 11, y: 11 });
+});
+
+test('3D viewer framing is based on model bounds rather than model category', () => {
+  const api = loadEngine();
+  assert.deepEqual({ ...api.viewerCenterOffset({ x: 2, y: -3, z: 4 }) }, { x: -2, y: 3, z: -4 });
+  const base = api.fitViewerDistance({ x: 0.75, y: 1.02, z: 0.61 }, 36, 1.5);
+  const larger = api.fitViewerDistance({ x: 1.5, y: 2.04, z: 1.22 }, 36, 1.5);
+  assert.ok(base > 0);
+  assert.ok(larger > base);
+});
 
 test('coverLevel directional levels (0/1/2/3) and isFlanked', () => {
   const api = loadEngine();

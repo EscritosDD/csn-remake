@@ -14,15 +14,36 @@ node _capture_all.mjs skirmish05 REAL_skirmish05
 
 # una mision de campana
 node _capture_all.mjs campana:3 CAM_M3B
+
+# pantallas de interfaz
+node _capture_all.mjs ui:menu UI_menu 1500
+node _capture_all.mjs ui:setup UI_setup 1500
+node _capture_all.mjs ui:barracks UI_cuartel 1500
+node _capture_all.mjs ui:viewer UI_visor 5000
+node _capture_all.mjs ui:pieces UI_piezas 5000
+node _capture_all.mjs ui:game UI_partida 4000
+node _capture_all.mjs ui:resume UI_reanudar 4000
+
+# Si el servidor usa otro puerto, y para guardar en otra carpeta:
+$env:CSN_URL = "http://127.0.0.1:3000/"
+$env:CSN_CAPTURE_DIR = Join-Path $PWD "docs\capturas"
+node _capture_all.mjs skirmish05 REAL_skirmish05 6000
 ```
 
-El script arranca Chrome headless, entra al mapa, fuerza el render 3D, espera y
-guarda `_captures/<prefijo>_3d.png` (y `_2d.png` solo si el 3D fallara). Imprime
-ademas el estado de `window.__csn3d` (tema, geometria real, unidades,
-triangulos, llamadas) y los errores de consola.
-
-**Si cambias un asset, borra antes el perfil `_chrome_*`**: el navegador cachea y
-la captura miente.
+El script arranca Chrome, entra al mapa, fuerza el render 3D, espera y guarda
+`docs/capturas/<prefijo>_3d.png` (y `_2d.png` solo si el 3D fallara). El
+servidor y la carpeta de salida se pueden cambiar con `CSN_URL` y
+`CSN_CAPTURE_DIR`; la carpeta predeterminada de capturas ya esta ignorada por
+Git. Imprime ademas el estado de `window.__csn3d` (tema, geometria real,
+unidades, triangulos, llamadas) y los errores de consola.
+La numeracion `campana:N` es de 1 a 6, igual que la interfaz; el script la
+convierte al indice interno de cero a cinco y comprueba el numero antes de
+desplegar.
+`ui:<pantalla>` captura menu, setup, cuartel, visor, piezas, partida o
+reanudar partida y guarda `<prefijo>_ui.png`; los mapas y las misiones guardan
+`<prefijo>_3d.png`.
+Cada ejecucion usa un perfil temporal aislado y lo intenta eliminar al cerrar
+Chrome.
 
 ## Qué capturar para revisar el juego
 
