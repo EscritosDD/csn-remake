@@ -1,4 +1,8 @@
 > **Nota de alcance:** este documento es histórico. Cita arte y material del original que vive fuera del repositorio (carpeta `_original/`), y capturas que no se guardan aquí por tamaño. No son enlaces rotos: son referencias al material de trabajo local.
+>
+> `referencia_original/` ya no existe: si hay que tirar del original, se tira
+> directamente del IPA en `_original/` y de los modelos, rigs, texturas, audio y
+> mapas extraídos en `assets/`.
 
 # Referencia del RAD Soldiers original — auditoría para CSN
 

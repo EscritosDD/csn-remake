@@ -146,7 +146,7 @@ Queda por hacer, descargando el original de archive.org:
 
 ## 6. Fase 2 (parte 1, hecha): comparación contra el original — código descompilado
 
-Descargué `rad-soldiers-assembly-csharp-decompiled.zip` de archive.org (2.476.556 B, verificado contra el metadata) y lo extraje: **1.578 ficheros `.cs`**. Cotejé las afirmaciones de `docs/Referencia_original.md` contra ese código real. Resultado: **todas COINCIDEN** en lo verificable:
+Descargué `rad-soldiers-assembly-csharp-decompiled.zip` de archive.org (2.476.556 B, verificado contra el metadata) y lo extraje: **1.578 ficheros `.cs`**. Cotejé las afirmaciones de `docs/historico/Referencia_original.md` contra ese código real. Resultado: **todas COINCIDEN** en lo verificable:
 
 | Afirmación del repo | Código real | Veredicto |
 |---|---|---|

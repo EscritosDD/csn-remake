@@ -4,9 +4,10 @@ Estado de partida: repo sincronizado en `7db5f1a` (44 commits de Gemini +
 auditoría). El juego carga, los 8 mapas reales se renderizan, Dominación
 está arreglada y medida, suite de pruebas 6/6, 13 tableros correctos.
 
-Permiso del propietario: **se puede usar el original como fuente** (código
-descompilado en `referencia_original/decompiled/`, datos en
-`referencia_original/datos/`, documentos de `docs/`, capturas oficiales).
+Permiso del propietario: **se puede usar el original como fuente** (IPA y
+código descompilado en `_original/`, datos ya integrados en `assets/`,
+documentos de `docs/`, capturas oficiales). Si hay que tirar del original,
+se tira directamente del IPA y de `assets/`.
 
 Regla de oro de todo el plan: **el juego no se rompe** — cada cambio deja
 `index.html` cargando y la partida jugable; sintaxis 0; tableros correctos;
@@ -35,7 +36,7 @@ la extracción. La defensa gana siempre.
 1. Diagnóstico con trazas: por qué el dron no avanza (¿la IA de la escolta
    no guía? ¿el guiado no se ejecuta? ¿el dron muere antes por foco?).
    Usar el harness con `dronePos/droneDelivered/droneAlive`.
-2. Leer las reglas del original en `referencia_original/decompiled/`
+2. Leer las reglas del original en `_original/decompiled/`
    (`UAVGameObjectComponent.cs`, `GameRulesComponent.cs` y los handlers de
    escolta) para el comportamiento correcto del dron.
 3. Arreglo propuesto: la IA de la escolta debe priorizar guiar el dron
@@ -68,8 +69,8 @@ los ajustes, y el harness extendido pasando.
 ## FASE 3 — Informe CSN contra el original (2 días)
 
 1. Estructura de tres columnas: **qué tiene el original · qué tiene CSN ·
-   qué falta o falla**, con **fuente** por fila (archivo `.cs`, JSON de
-   `referencia_original/datos/`, documento de `docs/` o captura oficial).
+   qué falta o falla**, con **fuente** por fila (archivo `.cs` de
+   `_original/decompiled/`, datos de `assets/`, documento de `docs/` o captura oficial).
 2. Cubrir: reglas, modos, mapas, personajes/roles, habilidades, armas,
    economía, campaña, HUD/interfaz, presentación (cámara, ritmo, sonido).
 3. Actualizarlo con lo ya hecho (arma, mapas, HUD, efectos, deshacer,

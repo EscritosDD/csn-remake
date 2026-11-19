@@ -4,10 +4,11 @@ Fecha: 18 nov 2026. Encargo pendiente de la lista de Gemini Studio: informe
 completo con tres columnas (original · CSN · qué falta o falla) y **fuente
 por fila**.
 
-**Fuentes**: `referencia_original/decompiled/*.cs` (1.578 archivos del
-original), `referencia_original/datos/` (rigs, prefabs, materiales, 41
-animaciones), `docs/§§docs/historico/Referencia_original.md` (auditoría con cada dato y su
-archivo), `docs/Estetica_original.md`, el propio `index.html` de CSN, el
+**Fuentes**: `_original/decompiled/*.cs` (1.578 archivos del original) y el
+propio IPA en `_original/`, los datos ya integrados en `assets/` (`assets/soldier/`,
+`assets/soldier_clips.json`, `assets/maps/`, `assets/audio/`),
+`docs/historico/Referencia_original.md` (auditoría con cada dato y su archivo),
+`docs/Estetica_original.md`, el propio `index.html` de CSN, el
 harness (`bench/`) y las mediciones de `docs/Equilibrio_medido.md`.
 Cuando un dato del original no se pudo verificar (código ofuscado o
 paquetes UnityWeb sin desempaquetar) la fila lo dice; no se inventa nada.
@@ -38,7 +39,7 @@ paquetes UnityWeb sin desempaquetar) la fila lo dice; no se inventa nada.
 | Eliminación: aniquilar al rival | Sí | — | `TacticsGameStateTurnData.cs` · `index.html` `checkWin()` |
 | Captura: aguantar la zona **5 turnos**; bandera con colores de equipo y sonidos propios | Baliza a 5 turnos (`checkBeaconAtTurnEnd`, motivo «Baliza aguantada durante 5 turnos»); zona con anillo | Falta el sonido de captura por bando | `ControlPointManagerComponent.cs` · `index.html` `checkWin()` |
 | Modos del original: Eliminación y Captura (2 confirmados), niveles de un jugador (`SinglePlayerOnly`) | 5 modos: eliminación, baliza, **dominación**, **escolta** y **campaña** | Dominación, Escolta y Campaña son añadidos propios, no del original | `BuildManifestLevelData.cs` · `index.html` `effMode()` |
-| **Dominación no está confirmada** en el material leído | Existe y está medida (ver §13 de este informe) | Añadido propio (decisión de diseño) | `docs/§§docs/historico/Referencia_original.md` §1 |
+| **Dominación no está confirmada** en el material leído | Existe y está medida (ver §13 de este informe) | Añadido propio (decisión de diseño) | `docs/historico/Referencia_original.md` §1 |
 | El original tenía los modos de la lista de niveles descargados del servidor | El jugador elige modo, mapa, formato y roles en la configuración | — | `BuildManifestMapPackData.cs` · `index.html` pantalla de configuración |
 
 ## 4. Cobertura, visión y orientación
@@ -75,7 +76,7 @@ paquetes UnityWeb sin desempaquetar) la fila lo dice; no se inventa nada.
 
 | Original | CSN | Falta / falla | Fuente |
 |---|---|---|---|
-| **28 habilidades** con parámetros completos (`RequiredAP`, `MaxUses`, alcance, radio, `HealAmount`, `TickDamage`, `Duration`, `BuffType`…) | **7 especiales de rol** + **14 habilidades nuevas de F4** (cobertura desplegable, granada de gas, barrido detector, molotov, caja de salud, teletransporte, escudo antidisturbios, artilleria, bomba de abejas, tranquilizante, canon de agua, kit de herramientas, torreta de cohetes y laser orbital) + 5 lanzables/colocables previos (humo, claymore, aturdidora, minas, torreta M2) | **Quedan 4 sin equivalente directo** (carga remota, UAV, torreta Gatling, ballesta explosiva), cubiertas funcionalmente por claymore+artilleria, barrido, torreta M2 y fusiles; tambien cajas de municion/analgesicos/espiritu ya como botin de partida | `AbilityGameplayData.cs` · `docs/§§docs/historico/Referencia_original.md` §2 · `index.html` (F4: `throwGas`, `placeCover`, `sweepDetect`, `throwMolotov`, `placeHealthCrate`, `teleportUnit`, `useShield`, `fireArtillery`, `throwBees`, `throwTranq`, `waterCannon`, `useToolkit`, `fireOrbital`, `deployTurret(...,'rocket')`) |
+| **28 habilidades** con parámetros completos (`RequiredAP`, `MaxUses`, alcance, radio, `HealAmount`, `TickDamage`, `Duration`, `BuffType`…) | **7 especiales de rol** + **14 habilidades nuevas de F4** (cobertura desplegable, granada de gas, barrido detector, molotov, caja de salud, teletransporte, escudo antidisturbios, artilleria, bomba de abejas, tranquilizante, canon de agua, kit de herramientas, torreta de cohetes y laser orbital) + 5 lanzables/colocables previos (humo, claymore, aturdidora, minas, torreta M2) | **Quedan 4 sin equivalente directo** (carga remota, UAV, torreta Gatling, ballesta explosiva), cubiertas funcionalmente por claymore+artilleria, barrido, torreta M2 y fusiles; tambien cajas de municion/analgesicos/espiritu ya como botin de partida | `AbilityGameplayData.cs` · `docs/historico/Referencia_original.md` §2 · `index.html` (F4: `throwGas`, `placeCover`, `sweepDetect`, `throwMolotov`, `placeHealthCrate`, `teleportUnit`, `useShield`, `fireArtillery`, `throwBees`, `throwTranq`, `waterCannon`, `useToolkit`, `fireOrbital`, `deployTurret(...,'rocket')`) |
 | Cajas de habilidad (salud, munición de alta velocidad, analgésicos, espíritu de equipo) | Botiquines fijos + cajas de botín de la partida | Falta la habilidad de colocar cajas | `AbilityGameplayData.cs` |
 | Habilidades de comandante aparte (Capitán con habilidades propias) | «Orden de mando» del Capitán (+3 ⚡ a un aliado) | Falta la selección de habilidades de comandante | `CommanderAbilitySelectionScreenHandler.cs` · `index.html` `useSpecial()` |
 
@@ -85,7 +86,7 @@ paquetes UnityWeb sin desempaquetar) la fila lo dice; no se inventa nada.
 |---|---|---|---|
 | Esquema completo: `MinDamage`/`DamageSpread`, `Accuracy`, `CritChance`, `SplashRange`, `LineRange`, `ShotsPerAttack`, `MaxUses`, caída, empuje, puntos de escuadra, `TwoStageAttack` | 29 armas reales con daño, alcance, coste, categoría y nota histórica | Falta `SplashRange` por arma (salpicadura genérica), empuje y ataque en dos fases | `WeaponGameplayData.cs` · `index.html` `WEAPONS` |
 | Armas ficticias con nombres propios | Armas reales verificadas (M4A1, M9, M40, M67, M84…) | Cambio central del remake (decisión propia) | `docs/Arsenal_real.md` |
-| Números por arma **no verificables** (paquetes UnityWeb sin desempaquetar) | Números propios documentados | No se puede comparar cifra a cifra | `docs/§§docs/historico/Referencia_original.md` §3 |
+| Números por arma **no verificables** (paquetes UnityWeb sin desempaquetar) | Números propios documentados | No se puede comparar cifra a cifra | `docs/historico/Referencia_original.md` §3 |
 
 ## 9. Puntos de escuadra
 
@@ -127,7 +128,7 @@ paquetes UnityWeb sin desempaquetar) la fila lo dice; no se inventa nada.
 | Original | CSN | Falta / falla | Fuente |
 |---|---|---|---|
 | Menús de barracas, selección de escuadra, tienda, retratos, HUD con vida/energía y bocadillos de tutorial | Portada con modos, configuración, HUD con retratos (7), barras, registro, deshacer, vista 3D/clásica | Faltan: menú PLAY ONLINE/CHALLENGES/EXPANSIONS/QUICK GAME, monedas, tienda, bocadillos de tutorial con botones (F6/F7 del plan) | `BaseMenuHandler.cs`, `GameTitleScreenHandler.cs`, `TutorialTextBubble.cs` · `index.html` |
-| Animaciones: 390 en los assets, 41 en `datos/` | 22 clips del IPA + animaciones procedurales | Faltan clips propios para habilidades nuevas | `referencia_original/datos/` · `assets/soldier_clips.json` |
+| Animaciones: 390 en los assets, 41 clips de referencia del IPA | 22 clips del IPA + animaciones procedurales | Faltan clips propios para habilidades nuevas | `assets/soldier_clips.json` · `_original/` (IPA) |
 | Audio: 132 clips, 75 fuentes, shaders de audio por arma y unidad | Efectos sintetizados (WebAudio) | **Falta** audio propio por arma/unidad/voz | `UnityCacheGroup.cs` · `index.html` `sfx()` |
 | Escala de crítico y respuesta por datos del servidor | Crítico ×1,5 y respuesta ×0,6 fijos | Valores no verificables en el original | `GenericGameplayData.cs` |
 

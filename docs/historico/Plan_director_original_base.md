@@ -6,9 +6,10 @@ esa base quede lista para que IAs más capaces (Gemini Studio, z.ai…) la
 lleven a otro nivel. No es «un juego inspirado»: es coger el original,
 reconstruirlo con fidelidad y ampliarlo con contenido propio encima.
 
-Fuentes disponibles: el IPA completo (`_original/ipa/…/Data/Raw`), el
-código descompilado (`referencia_original/decompiled`), los datos del
-original (`referencia_original/datos`) y los documentos de `docs/`.
+Fuentes disponibles: el IPA completo (`_original/ipa/…/Data/Raw`) y su
+código descompilado (`_original/decompiled/`), los datos del original ya
+integrados en `assets/` y los documentos de `docs/`. Si hay que tirar del
+original, se tira directamente del IPA y de `assets/`.
 
 ---
 

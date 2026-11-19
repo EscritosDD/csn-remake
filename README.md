@@ -39,7 +39,7 @@ integridad de datos (`data.test.js`) y humo 3D en navegador con captura.
 | `assets/ui/` | Retratos, naciones, modos, iconos de habilidad del original, logo y arte de la portada. |
 | `bench/` | Verificación: `bench/VERIFICAR.ps1`, `check-syntax.js`, `boards.js`, `rules.test.js`, `data.test.js`, `harness.js`. |
 | `docs/` | Diseño, arquitectura, equilibrio medido, catálogo de habilidades, capturas 3D y planes. |
-| `referencia_original/` | Código descompilado y datos del original, la base del desarrollo. |
+| `_original/` | IPA, zip y código descompilado del original: referencia privada, no la carga el juego. |
 
 ## Herramientas de medida
 
@@ -52,7 +52,7 @@ integridad de datos (`data.test.js`) y humo 3D en navegador con captura.
 ## Documentos clave
 
 - [Arquitectura](docs/ARQUITECTURA.md) — estructura, funciones con su línea y reglas de edición.
-- [Plan director](docs/§§docs/historico/Plan_director_original_base.md) — fases, criterios y estado.
+- [Plan director](docs/historico/Plan_director_original_base.md) — fases, criterios y estado.
 - [Catálogo de habilidades del original](docs/Catalogo_habilidades_original.md) — las 52 con su estado.
 - [Capturas 3D](docs/Capturas_3D.md) — los 13 mapas y las 6 misiones.
 - [Equilibrio medido](docs/Equilibrio_medido.md) — cifras por modo×mapa.
@@ -84,5 +84,8 @@ tools/                utilidades de Z.ai y de modelos (scripts .ps1 y .py)
 _capture_all.mjs      generador de capturas 3D
 ```
 
-El material del IPA está en `referencia_original/` (código descompilado del
-original y datos de animaciones/prefabs). Es la base del desarrollo del juego.
+El material de referencia del IPA está en `_original/` (el `.ipa`, el zip y el
+código descompilado). Los modelos, rigs, texturas, audio y mapas que usa el
+juego están en `assets/`. Si hay que tirar del original, se tira directamente
+del IPA y de `assets/`, no de una traducción descompilada intermedia. El
+material de `_original/` es solo de consulta: no lo carga el juego en ejecución.

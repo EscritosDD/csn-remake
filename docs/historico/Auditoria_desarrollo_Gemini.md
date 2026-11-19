@@ -19,8 +19,8 @@ botones quedó generado pero sin usar.
 
 ## 2. Inventario de lo nuevo
 
-- `referencia_original/decompiled/` — 1.578 `.cs` del original (7,1 MB en
-  total con `datos/`). Texto, no binarios: correcto.
+- `_original/decompiled/` — 1.578 `.cs` del original (7,1 MB en total con
+  sus datos). Texto, no binarios: correcto. Antes estuvo en `referencia_original/`.
 - `assets/ui/` — 7 retratos de rol, 12 insignias de nación, 4 de modo,
   3 botones, panel, logo y favicon.
 - `assets/three.min.js` y `assets/argon-soldiers.svg` — extraídos del HTML.
