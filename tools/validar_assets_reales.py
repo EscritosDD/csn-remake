@@ -1,30 +1,24 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Valida los 3 assets reales contra las reglas del motor (index.html).
+"""Valida los 3 assets generados contra las reglas del motor (index.html).
 
-OJO con la convención (costó de encontrar): el OBJ se escribe con la X YA
-INVERTIDA (v -x, y, z); parseOBJ3 del juego niega X otra vez -> el juego
-trabaja en el espacio ORIGINAL del modelo. Las caras se escriben DIRECTAS
-(a,b,c) porque el juego las lee en orden inverso (i=3..1) y esa inversión
-compensa la del espejo X -> winding CCW final.
+El OBJ se escribe con la X YA INVERTIDA y las caras invertidas; parseOBJ3
+niega X otra vez y lee las caras directas -> el juego trabaja en el espacio
+ORIGINAL del modelo con volumen positivo y normales hacia fuera.
 
 Comprueba: orden de 20 huesos del rig base, skin 4 influencias con pesos
-~1, volumen firmado > 0 (normales hacia fuera en el espacio del juego),
-2k-5k tris, índices en rango, UV en [0,1]."""
+~1, volumen firmado > 0, 2k-5k tris, índices en rango, UV en [0,1]."""
 import json
+import os
 import numpy as np
+from rig_base import RIG_BASE_BONES as RIG_BASE
 
-RIG_BASE = ["Bip001","Bip001 Pelvis","Bip001 Spine","Bip001 Spine1","Bip001 Neck","Bip001 Head",
-"Bip001 L Clavicle","Bip001 L UpperArm","Bip001 L Forearm","Bip001 L Hand",
-"Bip001 R Clavicle","Bip001 R UpperArm","Bip001 R Forearm","Bip001 R Hand",
-"Bip001 L Thigh","Bip001 L Calf","Bip001 L Foot","Bip001 R Thigh","Bip001 R Calf","Bip001 R Foot"]
-
-BASE = "assets_juego"
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE = os.path.join(ROOT, "assets_juego")
 for clase in ("Artillero", "Espia", "Francotirador"):
-    txt = open(f"{BASE}/{clase}.obj", encoding="utf-8").read()
-    rig = json.load(open(f"{BASE}/{clase}_rig.json"))
+    txt = open(os.path.join(BASE, clase + ".obj"), encoding="utf-8").read()
+    rig = json.load(open(os.path.join(BASE, clase + "_rig.json")))
 
-    # réplica del juego: X re-negada (el OBJ ya viene espejado) + cara (C,B,A)
     P, UV, faces = [], [], []
     for l in txt.split("\n"):
         s = l.strip()
@@ -34,7 +28,7 @@ for clase in ("Artillero", "Espia", "Francotirador"):
             q = s.split(); UV.append([float(q[1]), float(q[2])])
         elif s.startswith("f "):
             q = s.split()
-            faces.append([int(q[3].split("/")[0])-1, int(q[2].split("/")[0])-1, int(q[1].split("/")[0])-1])
+            faces.append([int(q[1].split("/")[0])-1, int(q[2].split("/")[0])-1, int(q[3].split("/")[0])-1])
     P, UV, faces = np.array(P), np.array(UV), np.array(faces)
 
     names = [b["name"] for b in rig["bones"]]

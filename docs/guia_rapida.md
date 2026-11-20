@@ -23,8 +23,9 @@ copy modelos_nuevos\Modelo1_zai\Modelo1_tex.png  assets\soldier\Modelo1_tex.png
 ```
 
 Objetivo: cada modelo queda en **2.000–5.000 triángulos**, rig de 20 huesos
-en el orden del rig base (los clips se aplican por índice), OBJ con la X ya
-invertida y winding compensado (`parseOBJ3`), y textura lista.
+en el orden del rig base (los clips se aplican por índice), OBJ en el espacio
+original (el motor niega X, mantiene el orden de caras y recalcula normales en
+`parseOBJ3`), y textura lista.
 
 Si algo se ve raro en tu Chrome: `window.__forceBaseModel=true` en consola
 para volver al modelo base al instante, y captura para mí.

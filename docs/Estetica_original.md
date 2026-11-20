@@ -1,8 +1,8 @@
-> **Nota de alcance:** este documento es histórico. Cita arte y material del original que vive fuera del repositorio (carpeta `_original/`), y capturas que no se guardan aquí por tamaño. No son enlaces rotos: son referencias al material de trabajo local.
+> **Nota de alcance:** este documento es histórico. Cita arte y material del original que vive en `_original/` dentro del repositorio, y capturas que no se guardan aquí por tamaño. No son enlaces rotos: son referencias al material de trabajo local.
 
 # Estética del RAD Soldiers original — auditoría visual para CSN
 
-Cómo construyeron los personajes y los mapas del original, medido en sus archivos. Esto es la lógica de construcción, no sus archivos: el arte de CSN sigue siendo original, nada de sus texturas, modelos ni audio va al juego. Cada cifra cita su fuente (archivo `.assets`, prefab o `.cs`).
+Cómo construyeron los personajes y los mapas del original, medido en sus archivos. Esa lógica de construcción se aplica hoy directamente en CSN: mallas, texturas, audio, mapas e iconos extraídos del IPA se usan en el juego por decisión expresa del autor (ver `README.md` §Aviso sobre los assets del original). Cada cifra cita su fuente (archivo `.assets`, prefab o `.cs`).
 
 **Fuentes:** `hidden_files/original/rad-soldiers-unity3d-unpacked-quickbms.zip` (level0-3, mainData, resources.assets, sharedassets0-4.assets), leído con UnityPy 1.25.4; `hidden_files/original/decompiled/` (528 `.cs`); capturas del original subidas por Dani (`~/workspace/user/media_library/image/image-2.png` … `image-8.png`).
 
@@ -250,7 +250,7 @@ La plantilla que se repite en todo el original, solo con lo medido:
 
 ## 7. Prompt para Argon (v4)
 
-Prompt listo para copiar y pegar en Gemini Argon (web), con las capturas del original adjuntas como referencia de estilo. Argon devuelve SVG por código: los sprites deben ser originales nuestros siguiendo estos moldes, no copias de los suyos.
+Prompt listo para copiar y pegar en Gemini Argon (web), con las capturas y el material del original adjuntos como referencia de estilo. Argon devuelve SVG por código siguiendo estos moldes y los rasgos concretos del material original.
 
 **Imágenes que hay que adjuntarle** (Dani ya las subió; están en `~/workspace/user/media_library/image/`):
 - `image-2.png` (mapa de estación, anillos de bando, sacos y barreras), `image-3.png` (mapa de arena, explosión), `image-4.png` (tren rojo, anillo rojo de enemigo), `image-5.png` (HUD, casillas azules y blancas), `image-6.png` (tutorial, anillo rojo, bocadillo), `image-7.png` (cartel «CREA TU SUPER EQUIPO»: los 10 personajes en fila, personalidades distintas), `image-8.png` (calle con estatua, anillos verdes, sacos naranjas).
@@ -258,7 +258,7 @@ Prompt listo para copiar y pegar en Gemini Argon (web), con las capturas del ori
 **Prompt:**
 
 ```
-Eres el dibujante de sprites de un juego de táctica por turnos en cuadrícula, vista cenital inclinada a 50 grados. Necesito los 7 soldados del juego como símbolos SVG en una sola hoja, cada uno en su viewBox 0 0 200 200, con ids francotirador, artillero, espia, medico, ingeniero, comando y capitan. Los sprites deben ser ORIGINALES, creados por ti siguiendo las medidas y el estilo de las imágenes de referencia que te adjunto, sin copiar ningún personaje concreto de ellas.
+Eres el dibujante de sprites de un juego de táctica por turnos en cuadrícula, vista cenital inclinada a 50 grados. Necesito los 7 soldados del juego como símbolos SVG en una sola hoja, cada uno en su viewBox 0 0 200 200, con ids francotirador, artillero, espia, medico, ingeniero, comando y capitan. Los sprites siguen las medidas y el estilo de las imágenes y demás material original que te adjunto, tomando de él los rasgos concretos de cada personaje.
 
 MEDIDAS EXACTAS (la proporción es lo más importante, respétala en cada soldado):
 - Cada soldado mide 200 px de alto dentro de su viewBox y ocupa de pie casi toda la altura. La cabeza mide 40 px de alto (1/5 de la altura total, cabezona como en las referencias). El torso es largo y las piernas cortas: la pelvis está a 70 px del suelo, los hombros a 165 px, las manos cuelgan hasta 95 px del suelo. Hombros anchos, brazos largos, pies separados.

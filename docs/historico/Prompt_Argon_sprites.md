@@ -56,7 +56,7 @@ SALIDA: devuelve SOLO el código SVG completo y válido, sin explicaciones, sin 
 Actualizado el 16/11 (~06:16) con las medidas auditadas del original. Se adjuntan las capturas image-2, image-3, image-4 e image-8 como referencia de estilo. Los SVG resultantes se usan como texturas y sprites en la versión 3D web (Three.js) del juego.
 
 ```
-Eres el dibujante de un juego de táctica por turnos en cuadrícula, vista 3D cenital inclinada a 50 grados. Necesito los objetos del mapa y el logo de CSN (Chess Soldier Nation) como símbolos SVG en una sola hoja, cada uno en su viewBox 0 0 200 200, con fondo transparente. Los objetos deben ser ORIGINALES, creados por ti siguiendo las medidas y el estilo de las imágenes de referencia que te adjunto, sin copiar ningún objeto concreto de ellas.
+Eres el dibujante de un juego de táctica por turnos en cuadrícula, vista 3D cenital inclinada a 50 grados. Necesito los objetos del mapa y el logo de CSN (Chess Soldier Nation) como símbolos SVG en una sola hoja, cada uno en su viewBox 0 0 200 200, con fondo transparente. Los objetos siguen las medidas y el estilo de las imágenes y material original que te adjunto, tomando como referencia los objetos concretos de ellas.
 
 MEDIDAS Y ESTILO (medidos del original, respétalos):
 - Textura pintada a mano: colores planos saturados con sombreado suave, contorno oscuro grueso, nada fotorrealista, nada de degradados de render 3D. Las texturas del original son pequeñas (128-256 px) y se nota el pincel.
@@ -96,7 +96,7 @@ SALIDA: devuelve SOLO el código SVG completo y válido, sin explicaciones, sin 
 Actualizado el 16/11 (~06:16). Se adjunta la captura image-7 («CREA TU SUPER EQUIPO», los 10 personajes en fila) como referencia de estilo. Los rasgos de cada uno son sugeridos por su nombre y por la fila del cartel; Dani corrige lo que no cuadre. Solo el retrato de Hipster Dave se pudo leer en los archivos del original; los otros 9 se dibujan de cero siguiendo los moldes.
 
 ```
-Eres el dibujante de un juego de táctica por turnos en cuadrícula. Necesito los retratos de los 10 personajes del juego como símbolos SVG en una sola hoja, cada uno en su viewBox 0 0 200 200, con fondo transparente. Son retratos de busto (cabeza y hombros) para el HUD. Deben ser ORIGINALES, creados por ti siguiendo el estilo de la imagen de referencia que te adjunto, sin copiar ningún retrato concreto de ella.
+Eres el dibujante de un juego de táctica por turnos en cuadrícula. Necesito los retratos de los 10 personajes del juego como símbolos SVG en una sola hoja, cada uno en su viewBox 0 0 200 200, con fondo transparente. Son retratos de busto (cabeza y hombros) para el HUD. Siguen el estilo de la imagen y material original que te adjunto, tomando como referencia los retratos concretos de ella.
 
 ESTILO (medido del original, respétalo):
 - Dibujo 2D pintado a mano: colores planos saturados con sombreado suave, contorno oscuro grueso, nada fotorrealista.

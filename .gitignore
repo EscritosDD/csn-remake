@@ -14,6 +14,7 @@ __pycache__/
 # Archivos de trabajo local (no van al repo)
 _extract/
 *.log
+*.zip
 
 # Capturas de documentacion (se generan localmente con _capture_all.mjs, no van al repo)
 docs/capturas/

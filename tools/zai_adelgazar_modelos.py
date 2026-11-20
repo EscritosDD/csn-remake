@@ -21,7 +21,7 @@ Entrada esperada por modelo (formatos que trimesh puede leer):
   + (opcional) esqueleto (si el formato trae skinning, se reaprovecha).
 
 Salida por modelo N (p. ej. "Dani_01"):
-  out/Dani_01.obj            malla X-invertida, 2k–5k tris, vt+vn, skin por comentario
+  out/Dani_01.obj            malla X-invertida con caras invertidas, 2k–5k tris, vt+vn
   out/Dani_01_rig.json       rig en formato del juego (orden de huesos base)
   out/Dani_01_tex.png        textura recolocada a los UV decimados
   out/Dani_01_informe.json   triángulos antes/después, errores, mapa de huesos
@@ -57,25 +57,7 @@ try:
 except ImportError:
     Image = None
 
-# ---------------------------------------------------------------------------
-# El orden de huesos del rig base (assets/soldier_rig.json / soldier_clips.json
-# .bones). LOS CLIPS SE APLICAN POR ÍNDICE: cualquier rig nuevo debe respetar
-# este orden exacto o las rotaciones caen en huesos equivocados.
-RIG_BASE_BONES = [
-    "Bip001", "Bip001 Pelvis", "Bip001 Spine", "Bip001 Spine1",
-    "Bip001 Neck", "Bip001 Head",
-    "Bip001 L Clavicle", "Bip001 L UpperArm", "Bip001 L Forearm", "Bip001 L Hand",
-    "Bip001 R Clavicle", "Bip001 R UpperArm", "Bip001 R Forearm", "Bip001 R Hand",
-    "Bip001 L Thigh", "Bip001 L Calf", "Bip001 L Foot",
-    "Bip001 R Thigh", "Bip001 R Calf", "Bip001 R Foot",
-]
-
-# Estructura padre/hijo de ese rig (índice -> índice del padre, -1 raíz).
-RIG_PARENTS = [-1, 0, 1, 2, 3, 4,
-              5, 6, 7, 8,
-              5, 10, 11, 12,
-              1, 14, 15,
-              1, 17, 18]
+from rig_base import RIG_BASE_BONES, RIG_PARENTS
 
 # ---------------------------------------------------------------------------
 def quat_mul(a, b):
@@ -288,12 +270,11 @@ def box_uv(verts):
     return uv
 
 def export_obj(path, verts, faces, uvs, normals, comments, flip_faces=True):
-    """OBJ con la X ya invertida (parseOBJ3 del juego la re-niega).
+    """OBJ con la X invertida y caras invertidas; parseOBJ3 re-niega X y lee
+    las caras directas, dejando el volumen positivo en el espacio del juego.
 
-    flip_faces: parseOBJ3 recorre los índices en orden INVERSO
-    (`for(i=3;i>=1;i--)`), así que el winding se escribe compensado
-    (c,b,a) para que el juego lea (a,b,c). Con --no-flip-faces se
-    escribe el orden directo por si el original usa otro convenio."""
+    Con --no-flip-faces se escribe el orden directo por si el original usa
+    otro convenio."""
     with open(path, "w", encoding="utf-8") as f:
         f.write("# CSN — malla adelgazada por zai_adelgazar_modelos.py\n")
         for c in comments:
@@ -365,8 +346,8 @@ def process_model(path, out_dir, target_tris, scale_factor=None, flip_faces=True
 
     # --- OBJ ----------------------------------------------------------------
     comments = [
-        "malla X-invertida para parseOBJ3 (el motor niega X)",
-        "winding compensado: parseOBJ3 lee los indices en orden inverso",
+        "malla X-invertida para parseOBJ3 (el motor re-niega X)",
+        "caras invertidas: parseOBJ3 lee los indices directos y recalcula normales",
         "huesos: %d (orden del rig base)" % len(bones),
         "triangulos: %d (antes %d)" % (len(f2), n0),
     ]
@@ -421,7 +402,7 @@ def main():
     ap.add_argument("--tri-target", type=int, default=4000,
                     help="triángulos objetivo (por defecto 4000, rango del juego 2k-5k)")
     ap.add_argument("--no-flip-faces", action="store_true",
-                    help="no compensar el winding (por defecto lo compensa, porque parseOBJ3 lee los índices al revés)")
+                    help="no invertir las caras (por defecto se invierten porque parseOBJ3 niega X y lee directo)")
     ap.add_argument("--scale", type=float, default=None,
                     help="escala horneada en los vértices (ROLE_SCALES del juego)")
     args = ap.parse_args()

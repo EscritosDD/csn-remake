@@ -93,8 +93,9 @@ Deploy from a branch → `zai/pruebas`). Dos avisos:
 
 - **Pages en repo privado exige plan de pago** (Pro/Team). Si tu repo es privado
   y no tienes Pro, Pages no te dejará.
-- Si algún día lo activas, **no publiques `main`** con assets del IPA: son solo
-  para desarrollo.
+- Si algún día lo activas, ten en cuenta que `main` incluye los assets del IPA y
+  que su publicación está autorizada por el autor; la visibilidad del repo la
+  decides tú.
 
 La forma barata y siempre disponible es `tools\zai-ver.ps1` (local).
 

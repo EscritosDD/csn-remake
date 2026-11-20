@@ -482,11 +482,34 @@ details.info .info-body b{color:var(--ink)}
 .btn{border-radius:10px}
 .btn.primary{font-family:'Barlow Condensed','Barlow',sans-serif;text-transform:uppercase;letter-spacing:.05em;font-size:17px}
 .btn.primary.big{font-size:19px}
+.btn,nav.tabs button,.seg button,.actions button,.filters button,.viewer-list button,.mode-card button,.campaign-mission,.barrack-card button{min-height:44px}
+.btn{padding:11px 18px}
+nav.tabs button{padding:9px 16px}
+.seg button{padding:10px 14px}
+.actions button{padding:11px 10px}
+.filters button{padding:9px 15px}
+:where(button,a,select,input,summary,[role="button"]):focus-visible{outline:3px solid var(--amber);outline-offset:2px;box-shadow:0 0 0 5px rgba(242,178,52,.18)}
+.btn:hover:not(:disabled),nav.tabs button:hover,.seg button:hover,.filters button:hover,.viewer-list button:hover{transform:translateY(-1px)}
+.btn:active:not(:disabled),nav.tabs button:active,.seg button:active{transform:translateY(1px)}
+.mode-art{max-height:96px;object-fit:contain;object-position:center}
+.step-chip{display:inline-flex;align-items:center;gap:8px;border:1px dashed var(--line);border-radius:999px;padding:6px 12px;color:var(--muted);font-size:12.5px;font-weight:600;white-space:nowrap}
+.step-chip b{color:var(--amber)}
+.step-count{font-family:'JetBrains Mono',monospace;color:var(--amber)}
+.step-dots{display:inline-flex;gap:3px}
+.step-dots i{display:block;width:15px;height:4px;border-radius:99px;background:var(--line)}
+#stepHint[data-step="nation"] .step-dots i:nth-child(-n+1),#stepHint[data-step="mode"] .step-dots i:nth-child(-n+2),#stepHint[data-step="squad"] .step-dots i:nth-child(-n+3),#stepHint[data-step="battle"] .step-dots i:nth-child(-n+4){background:var(--amber)}
+.step-detail{display:none;max-width:38ch;overflow:hidden;text-overflow:ellipsis}
+@media(min-width:900px){.step-detail{display:inline}}
+.guide-note{border:1px solid var(--line);border-left:4px solid var(--amber);border-radius:10px;background:color-mix(in srgb,var(--amber) 7%,var(--panel));padding:10px 14px;margin:12px 0;color:var(--muted);font-size:14px}
+.guide-note b{color:var(--ink)}
+.back-row{margin:10px 0 -6px}
+@media(max-width:640px){nav.tabs button{min-height:38px}.step-chip{padding:4px 9px;gap:5px;font-size:11px}.step-dots i{width:10px}}
 </style>
 </head>
 <body>
 <div class="topbar"><div class="topbar-in">
   <div class="brand"><img class="brand-logo" src="assets/ui/logo_csn.png" alt="CSN — Chess Soldier Nation"/><div><b>CSN · CHESS SOLDIER NATION</b><small>Táctica por turnos en cuadrícula · 13 tableros 12×12 + 6 de campaña</small></div></div>
+  <div class="step-chip" id="stepHint" aria-live="polite" data-step="nation"><span class="step-dots" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="step-count" id="stepCount">1/4</span><b id="stepLabel">Nación</b><span class="step-detail" id="stepDetail"></span></div>
   <div class="nation-chip" id="nationChip" style="display:none"></div>
   <nav class="tabs" id="mainTabs" style="display:none">
     <button data-tab="play" class="on">Jugar</button>
@@ -504,6 +527,7 @@ details.info .info-body b{color:var(--ink)}
       <h1>Elige tu <em>nación</em></h1>
       <details class="info"><summary>ⓘ ¿Qué es esto?</summary><div class="info-body"><p>Antes de tu primera partida tienes que alistarte en una de las <b>12 naciones</b> del juego. Cada una se identifica por <b>los colores de su bandera</b> y por el <b>emblema de sus fuerzas armadas</b>, que será el distintivo de tu skin de Nación. Y en el evento <b>Guerra de Naciones</b> lucharás por ella cada fin de semana.</p></div></details>
     </div>
+    <div class="guide-note" id="nationGuide"><b>Paso 1 de 4.</b> Elige una bandera y confirma: tu nación queda guardada en este dispositivo.</div>
     <div id="demoSlotNation"><div class="panel" id="demoPanel" style="margin-top:14px;border-color:var(--amber)">
         <h2>El tablero 3D, en vivo ahora mismo</h2>
         <details class="info"><summary>ⓘ ¿Qué es esto?</summary><div class="info-body"><p>Esto no es una imagen: es la vista 3D del juego renderizándose en tu dispositivo, con el escenario en volumen y los soldados sobre la cuadrícula. Gira solo para que lo veas desde todos los lados. En cuanto entres en partida, este mismo 3D es el tablero donde juegas.</p></div></details>
@@ -538,6 +562,7 @@ details.info .info-body b{color:var(--ink)}
     </div>
 
     <div id="menuArea">
+      <div class="guide-note" id="modeGuide"><b>Paso 2 de 4.</b> Entra a partida rápida o elige un modo. El Cuartel y el Visor son opcionales y siempre tienen vuelta atrás.</div>
       <div class="panel menuOrigen" id="origMenu" style="margin-top:16px">
         <h2>Menú</h2>
         <div class="menuCol" style="margin-top:8px">
@@ -553,19 +578,6 @@ details.info .info-body b{color:var(--ink)}
       </div>
       
       <div id="demoSlotPlay"></div>
-      <!-- Bocadillo de tutorial con los botones del original -->
-      <div id="tutBubble" style="display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:60;max-width:600px;width:calc(100% - 32px)">
-        <div class="panel">
-          <p class="sub" id="tutText" style="margin:0 0 8px">Tutorial rápido: toca un botón para saber qué hace en partida.</p>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button class="btn small" data-tut="undo">↶ Deshacer</button>
-            <button class="btn small" data-tut="settings">⚙ Ajustes</button>
-            <button class="btn small" data-tut="home">⌂ Inicio</button>
-            <button class="btn small" data-tut="confirm">✔ Confirmar</button>
-            <button class="btn primary small" id="tutDone">Entendido</button>
-          </div>
-        </div>
-      </div>
       <div class="grid3" style="margin-top:18px">
         <div class="mode-card" data-modecard="eliminacion">
           <img class="mode-art" src="assets/ui/modo_eliminacion.png" alt="Dos escuadras de soldados frente a frente"/>
@@ -674,6 +686,7 @@ details.info .info-body b{color:var(--ink)}
     <div id="setupArea" style="display:none;margin-top:18px">
       <div class="panel">
         <div class="setupHead"><img id="setupArt" src="assets/ui/modo_eliminacion.png" alt=""/><div><h2 id="setupTitle">Configurar partida</h2><p class="sub" id="setupSub"></p></div></div>
+        <div class="guide-note"><b>Paso 3 de 4.</b> Revisa mapa, rival y escuadra. Cuando estés listo, pulsa «Desplegar y jugar».</div>
         <label class="f">Mapa</label>
         <div class="seg mapGrid" id="mapSeg">
           <button data-map="almacen" class="on" title="Almacén industrial">Almacén</button>
@@ -794,6 +807,19 @@ details.info .info-body b{color:var(--ink)}
     </div>
   </section>
 
+  <div id="tutBubble" style="display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:60;max-width:600px;width:calc(100% - 32px)">
+    <div class="panel">
+      <p class="sub" id="tutText" style="margin:0 0 8px">Paso 4: toca un botón para saber qué hace en partida.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn small" data-tut="undo">↶ Deshacer</button>
+        <button class="btn small" data-tut="settings">⚙ Ajustes</button>
+        <button class="btn small" data-tut="home">⌂ Inicio</button>
+        <button class="btn small" data-tut="confirm">✔ Confirmar</button>
+        <button class="btn primary small" id="tutDone">Entendido</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ============ ARSENAL ============ -->
   <section class="screen" id="scr-barracks">
     <div class="panel">
@@ -805,6 +831,7 @@ details.info .info-body b{color:var(--ink)}
   </section>
 
   <section class="screen" id="scr-arsenal">
+    <div class="back-row"><button class="btn ghost" data-back>← Volver al menú</button></div>
     <div class="hero">
       <h1>Arsenal <em>real</em></h1>
       <details class="info"><summary>ⓘ ¿Qué hay aquí?</summary><div class="info-body"><p>37 armas jugables con datos verificados de manuales militares y fichas del fabricante, más el equipo de granadas, torretas y botiquines de la sección siguiente. Aquí ves las armas de la v1 con sus datos reales y su traducción al juego: daño, alcance en casillas y coste de energía sobre cuerpos de 200, 250 o 300 PV según el tipo (ligero, medio o pesado).</p></div></details>
@@ -835,6 +862,7 @@ details.info .info-body b{color:var(--ink)}
 
   <!-- ============ HOW ============ -->
   <section class="screen" id="scr-how">
+    <div class="back-row"><button class="btn ghost" data-back>← Volver al menú</button></div>
     <div class="hero"><h1>Cómo se <em>juega</em></h1><p>Todo lo que necesitas saber para jugar.</p></div>
     <div class="howto">
       <details class="rule"><summary><b>1 · Turnos alternos</b><span class="rule-info">ⓘ</span></summary><div class="info-body"><p>Juega un bando entero y luego el otro, como en el ajedrez. Cada soldado tiene su propia reserva de energía por turno.</p></div></details>
@@ -870,6 +898,7 @@ details.info .info-body b{color:var(--ink)}
   </section>
 
   <section class="screen" id="scr-viewer">
+    <div class="back-row"><button class="btn ghost" data-back>← Volver al menú</button></div>
     <div class="hero">
       <h1>Visor <em>3D</em></h1>
       <details class="info"><summary>ⓘ ¿Cómo se usa?</summary><div class="info-body"><p>Explora los modelos y texturas del juego sin iniciar una partida. Arrastra para girar, usa la rueda o el control para acercar y alejar.</p></div></details>
@@ -1123,7 +1152,7 @@ function gameplayModelPresentation(role,authoredModel){
     addRoleGear:!authoredModel,
     preserveTexture:authoredModel,
     twoSided:authoredModel,
-    emissiveIntensity:authoredModel?0.45:0
+    emissiveIntensity:authoredModel?0.18:0
   };
 }
 /* ============ RETRATOS DE ROL (assets/ui/retrato_*.png) ============
@@ -1176,6 +1205,29 @@ function rolePortraitURL(role,char){
 
 /* ================= STATE ================= */
 const $=s=>document.querySelector(s);
+const STEP_META={
+  nation:{n:1,label:'Nación',hint:'Elige y confirma tu nación'},
+  mode:{n:2,label:'Modo',hint:'Elige qué quieres jugar'},
+  squad:{n:3,label:'Escuadra',hint:'Ajusta mapa, rival y tropas'},
+  battle:{n:4,label:'Batalla',hint:'Mueve, dispara y termina el turno'}
+};
+const AUX_LABELS={'scr-barracks':'Cuartel','scr-arsenal':'Arsenal','scr-viewer':'Visor 3D','scr-how':'Reglas'};
+const AUX_HINTS={'scr-barracks':'Tropas, skins y monedas · opcional','scr-arsenal':'Datos reales de armas · opcional','scr-viewer':'Modelos y armas en 3D · opcional','scr-how':'Reglas rápidas · opcional'};
+let flowStep='nation';
+function setStep(step,detail){
+  if(step&&STEP_META[step])flowStep=step;
+  const meta=STEP_META[flowStep];
+  const label=step&&!STEP_META[step]?step:meta.label;
+  const text=detail||meta.hint;
+  const chip=$('#stepHint'),count=$('#stepCount'),lbl=$('#stepLabel'),desc=$('#stepDetail');
+  if(chip){chip.dataset.step=flowStep;chip.setAttribute('aria-label','Paso '+meta.n+' de 4: '+label+'. '+text);}
+  if(count)count.textContent=meta.n+'/4';
+  if(lbl)lbl.textContent=label;
+  if(desc)desc.textContent=text;
+  document.body.dataset.step=flowStep;
+  const inBattle=!!(G&&!G.over);
+  document.querySelectorAll('[data-back]').forEach(b=>b.textContent=inBattle?'← Volver a la partida':'← Volver al menú');
+}
 let myNation=null, pickedNation=null;
 let setup={mode:'baliza',fmt:4,opp:'ia',rivalNation:null,skinA:'nacion',skinB:'nacion',map:'almacen',difficulty:'normal',campaignMission:0};
 const LS_CAMPAIGN='radsoldiers_campaign_v1';
@@ -1252,7 +1304,7 @@ function buildNationGrid(){
   NATIONS.forEach(n=>{
     const b=document.createElement('button');b.className='nation-card';b.dataset.id=n.id;
     b.innerHTML='<img class="nation-art" src="assets/ui/nacion_'+NATION_ART[n.id]+'.png" alt="Escudo de '+n.name+'"/><span style="display:flex;gap:8px;align-items:center">'+flagArtHTML(n)+emblemHTML(n)+'</span><span>'+n.name+'</span><small style="color:var(--muted);font-weight:500;font-size:12px">'+n.emblemName+'</small>'+(n.pers?'<small style="color:var(--ink);font-weight:600;font-size:12px">'+n.pers.name+' · <span style="color:var(--muted);font-weight:500">'+n.pers.desc+'</span></small>':'')+'<small style="color:var(--muted);font-size:11px">Personalidad solo visual: no altera el equilibrio.</small>';
-    b.onclick=()=>{pickedNation=n;document.querySelectorAll('.nation-card').forEach(c=>c.classList.toggle('sel',c.dataset.id===n.id));$('#confirmNation').disabled=false;$('#nationPickLabel').innerHTML='Has elegido <b>'+n.name+'</b>. Si confirmas, será tu nación para siempre en este dispositivo.';};
+    b.onclick=()=>{pickedNation=n;setStep('nation',n.name+' seleccionada · confirma abajo');document.querySelectorAll('.nation-card').forEach(c=>c.classList.toggle('sel',c.dataset.id===n.id));$('#confirmNation').disabled=false;$('#nationPickLabel').innerHTML='Has elegido <b>'+n.name+'</b>. Si confirmas, será tu nación para siempre en este dispositivo.';};
     grid.appendChild(b);
   });
   $('#confirmNation').onclick=()=>{
@@ -1279,7 +1331,11 @@ function renderNationChip(){
 }
 function screenStateFor(id,game=G){
   if(id==='scr-nation')return 'nation';
-  if(id==='scr-play'&&game)return game.over?'gameover':'playing';
+  if(id==='scr-play'){
+    if(game)return game.over?'gameover':'playing';
+    const sa=document.getElementById('setupArea');
+    return sa&&sa.style.display==='block'?'setup':'menu';
+  }
   return 'menu';
 }
 function syncPlayingViewport(){
@@ -1305,6 +1361,9 @@ function showScreen(id){
   if(dp&&slot&&dp.parentNode!==slot)slot.appendChild(dp);
   if(typeof buildDemo==='function')buildDemo();
   document.querySelectorAll('#mainTabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===id.replace('scr-','')));
+  if(id==='scr-nation')setStep('nation');
+  else if(id==='scr-play')setStep($('#setupArea')?.style.display==='block'?'squad':(G&&!G.over?'battle':'mode'));
+  else setStep(AUX_LABELS[id]||null,AUX_HINTS[id]||null);
   window.scrollTo({top:0});
 }
 function enterApp(){
@@ -1321,6 +1380,7 @@ function enterApp(){
   if(typeof buildSpriteStrip==='function')buildSpriteStrip();
 }
 document.querySelectorAll('#mainTabs button').forEach(b=>b.onclick=()=>showScreen('scr-'+b.dataset.tab));
+document.querySelectorAll('[data-back]').forEach(b=>b.onclick=()=>showScreen('scr-play'));
 
 /* ================= GUERRA DE NACIONES ================= */
 function refreshGuerra(){
@@ -1400,6 +1460,7 @@ function openSetup(mode,missionIdx){
     : mode==='campana' ? 'Misión '+(setup.campaignMission+1)+' · '+CAMPAIGN_MISSIONS[setup.campaignMission].title+' — mapa, formato y dificultad fijos.'
     : 'Formato, rival y composición de cada escuadra.';
   $('#setupSub').title=mode==='campana'?CAMPAIGN_MISSIONS[setup.campaignMission].brief:'';
+  setStep('squad',(titles[mode]||mode)+' · revisa tu escuadra');
   const locked=(mode==='guerra'||mode==='campana');
   document.querySelectorAll('#fmtSeg button').forEach(x=>{x.classList.toggle('on',+x.dataset.fmt===setup.fmt);x.disabled=locked;});
   document.querySelectorAll('#oppSeg button').forEach(x=>{x.classList.toggle('on',x.dataset.opp===setup.opp);x.disabled=locked;});
@@ -1424,7 +1485,7 @@ function syncSkinSegs(){
   document.querySelectorAll('#skinSegB button').forEach(x=>x.classList.toggle('on',x.dataset.skin===setup.skinB));
   $('#skinBWrap').style.display=setup.opp==='local'?'block':'none';
 }
-$('#cancelSetup').onclick=()=>{$('#setupArea').style.display='none';$('#menuArea').style.display='block';refreshGuerra();};
+$('#cancelSetup').onclick=()=>{$('#setupArea').style.display='none';$('#menuArea').style.display='block';document.body.dataset.state='menu';syncPlayingViewport();setStep('mode');refreshGuerra();};
 
 function squadRows(containerId,team){
   const el=$('#'+containerId);el.innerHTML='';
@@ -1504,7 +1565,7 @@ function angleToFacing(dx,dy){if(dx===0&&dy===0)return null;if(Math.abs(dx)>=Mat
    llaman a la misma función, así que giran a la vez y en el mismo
    sentido. Devuelve la guiñada visual actual en radianes, en el mismo
    convenio que ya usa el juego: atan2(dy, dx) sobre la cuadrícula. */
-function facingYaw(u){const fv=facingVec(u);return Math.atan2(fv[1],fv[0]);}
+function facingYaw(u){if(u._moveYaw!=null)return u._moveYaw;const fv=facingVec(u);return Math.atan2(fv[1],fv[0]);}
 function shortestArc(a){while(a>Math.PI)a-=Math.PI*2;while(a<-Math.PI)a+=Math.PI*2;return a;}
 function advanceUnitYaw(un,t){
   const target=facingYaw(un);
@@ -1957,6 +2018,73 @@ function reachable(unit,budget){
       seen.set(k,c.d+mc);q.push({x:nx,y:ny,d:c.d+mc});});}
   seen.delete(key(unit.x,unit.y));return seen;
 }
+const DRAW_MOVE_MS_PER_TILE=235;
+function drawMovePath(unit,from,to){
+  const key=(x,y)=>x+','+y;
+  const sx=Math.round(from.x),sy=Math.round(from.y),tx=to.x,ty=to.y;
+  if(sx===tx&&sy===ty)return [{x:sx,y:sy},{x:tx,y:ty}];
+  const prev=new Map([[key(sx,sy),null]]);
+  const q=[{x:sx,y:sy}];
+  const dirs=[[1,0],[-1,0],[0,1],[0,-1]];
+  let found=false;
+  while(q.length&&q.length<4000){
+    const c=q.shift();
+    if(c.x===tx&&c.y===ty){found=true;break;}
+    for(const [dx,dy] of dirs){
+      const nx=c.x+dx,ny=c.y+dy,k=key(nx,ny);
+      if(nx<0||ny<0||nx>=W||ny>=H||prev.has(k))continue;
+      if(nx===tx&&ny===ty){}else if(obAt(nx,ny)||unitAt(nx,ny)||deployedAt(nx,ny)||droneAt(nx,ny))continue;
+      prev.set(k,key(c.x,c.y));q.push({x:nx,y:ny});
+    }
+  }
+  if(!found)return null;
+  const out=[];let k=key(tx,ty);
+  while(k!=null){const [x,y]=k.split(',').map(Number);out.push({x,y});k=prev.get(k);}
+  return out.reverse();
+}
+function startDrawMove(un,path){
+  const now=FX.t||performance.now();
+  un._drawLastX=un.x;un._drawLastY=un.y;
+  un._drawPath=[{x:un.dx!=null?un.dx:un.x,y:un.dy!=null?un.dy:un.y},...path.slice(1)];
+  un._drawPathT0=now;
+  un._drawPathDur=Math.max(120,(path.length-1)*DRAW_MOVE_MS_PER_TILE);
+}
+function smoothDrawStep(p){return p*p*(3-2*p);}
+function updateUnitDrawPosition(un,now){
+  if(un.dx==null){un.dx=un.x;un.dy=un.y;un._drawLastX=un.x;un._drawLastY=un.y;un._drawLastT=now;return;}
+  if(un._drawLastX==null){un._drawLastX=un.x;un._drawLastY=un.y;}
+  if(REDUCED_MOTION){
+    un.dx=un.x;un.dy=un.y;un._drawPath=null;un._moveYaw=null;
+    un._drawLastX=un.x;un._drawLastY=un.y;un._drawLastT=now;return;
+  }
+  if(un.x!==un._drawLastX||un.y!==un._drawLastY){
+    const from={x:un.dx,y:un.dy};
+    un._drawLastX=un.x;un._drawLastY=un.y;
+    if(Math.abs(un.x-from.x)>0.02||Math.abs(un.y-from.y)>0.02){
+      const path=drawMovePath(un,from,{x:un.x,y:un.y});
+      if(path&&path.length>1)startDrawMove(un,path);
+    }
+  }
+  const path=un._drawPath;
+  if(path&&path.length>1){
+    const raw=Math.max(0,Math.min(1,(now-(un._drawPathT0||now))/(un._drawPathDur||120)));
+    const q=smoothDrawStep(raw)*(path.length-1);
+    const i=Math.min(path.length-2,Math.floor(q)),f=q-i;
+    un.dx=path[i].x+(path[i+1].x-path[i].x)*f;
+    un.dy=path[i].y+(path[i+1].y-path[i].y)*f;
+    const sx=path[i+1].x-path[i].x,sy=path[i+1].y-path[i].y;
+    un._moveYaw=(Math.abs(sx)+Math.abs(sy)>0.01)?Math.atan2(sy,sx):null;
+    if(raw>=1){un.dx=un.x;un.dy=un.y;un._drawPath=null;un._moveYaw=null;}
+  }else{
+    const dt=now-(un._drawLastT||now);
+    const k=1-Math.pow(0.02,dt/260);
+    un.dx+=(un.x-un.dx)*k;un.dy+=(un.y-un.dy)*k;
+    if(Math.abs(un.x-un.dx)<0.01)un.dx=un.x;
+    if(Math.abs(un.y-un.dy)<0.01)un.dy=un.y;
+    un._moveYaw=null;
+  }
+  un._drawLastT=now;
+}
 function pathDist(a,b){ /* BFS distance ignoring units */
   if(a.x===b.x&&a.y===b.y)return 0;
   const seen=new Set([a.x+','+a.y]);let q=[{x:a.x,y:a.y,d:0}];
@@ -2100,6 +2228,7 @@ function startGame(squadA,squadB){
      selected:null,actionMode:'move',over:false,aiBusy:false,lastMoveUndo:null,rivalNation,
      names:{A:myNation.name+' (J1)',B:setup.mode==='guerra'?rivalNation.name+' (IA)':(setup.opp==='ia'?'Escuadra IA':'Jugador 2')}};
   document.body.dataset.state='playing';
+  setStep('battle','Ronda 1 · '+G.names.A);
   /* Al jugar se retira la portada: el 3D ocupa la pantalla. */
   try{const hp=document.querySelector('#scr-play .hero');if(hp)hp.style.display='none';const mp=document.getElementById('menuArea');if(mp)mp.style.display='none';}catch(e){}
   try{auAmbient(G.map.theme);}catch(e){}
@@ -2121,9 +2250,10 @@ function startGame(squadA,squadB){
   selectUnit(G.units.find(u=>u.team==='A'));
   updateUI();draw();
   if(window.__build3D)window.__build3D();
+  if(!lsGet('radsoldiers_tut'))setTimeout(tutShow,900);
   window.scrollTo({top:0,behavior:'smooth'});
 }
-function log(msg){const el=$('#log');const d=document.createElement('div');d.innerHTML='<span class="t">R'+(G?G.round:'–')+'</span> '+msg;el.prepend(d);}
+function log(msg){const el=$('#log');const d=document.createElement('div');const safe=String(msg).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/&lt;b&gt;/g,'<b>').replace(/&lt;\/b&gt;/g,'</b>');d.innerHTML='<span class="t">R'+(G?G.round:'–')+'</span> '+safe;el.prepend(d);}
 function teamName(t){return G.names[t];}
 function aliveCount(t){return G.units.filter(u=>u.team===t&&u.alive).length;}
 
@@ -2966,7 +3096,7 @@ function endGame(winner,reason){
 }
 function showModal(html){$('#modalBox').innerHTML=html;$('#modal').classList.add('on');}
 function closeModal(){$('#modal').classList.remove('on');}
-function backToMenu(){try{auStopAmbient();}catch(e){}try{auMusicStop();}catch(e){}try{const hp=document.querySelector('#scr-play .hero');if(hp)hp.style.display='';}catch(e){}$('#gameArea').style.display='none';$('#setupArea').style.display='none';$('#menuArea').style.display='block';G=null;document.body.dataset.state='menu';syncPlayingViewport();refreshGuerra();renderNationChip();if(typeof renderCampaignPanel==='function')renderCampaignPanel();}
+function backToMenu(){try{auStopAmbient();}catch(e){}try{auMusicStop();}catch(e){}try{const hp=document.querySelector('#scr-play .hero');if(hp)hp.style.display='';}catch(e){}$('#gameArea').style.display='none';$('#setupArea').style.display='none';$('#menuArea').style.display='block';G=null;document.body.dataset.state='menu';syncPlayingViewport();showScreen('scr-play');refreshGuerra();renderNationChip();if(typeof renderCampaignPanel==='function')renderCampaignPanel();}
 $('#quitBtn').onclick=()=>{showModal('<h2>¿Abandonar la partida?</h2><p>Se perderá el progreso de esta partida. Tu nación y tu marcador de Guerra de Naciones no se tocan.</p><div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px"><button class="btn danger big" onclick="closeModal();backToMenu()">Sí, abandonar</button><button class="btn big" onclick="closeModal()">Seguir jugando</button></div>');};
 
 function endTurn(){
@@ -3764,8 +3894,11 @@ function boardTileClick(t){
       const hadWatcher=G.units.some(w2=>w2.alive&&w2.team!==u.team&&w2.overwatch&&!w2.stunned&&!u.invisible&&hitChance(w2,u,WEAPONS[w2.weapon])>0);
       const hadLoot=(G.lootBoxes||[]).some(b2=>b2.x===t.x&&b2.y===t.y);
       const hadMedkit=G.map.medkits.some(m=>!m.used&&m.x===t.x&&m.y===t.y);
-      const ff2=angleToFacing(t.x-fx,t.y-fy);if(ff2!=null)u.facing=ff2;
+      const movePath=drawMovePath(u,{x:fx,y:fy},{x:t.x,y:t.y});
+      const stepFrom=movePath&&movePath.length>1?movePath[movePath.length-2]:{x:fx,y:fy};
+      const ff2=angleToFacing(t.x-stepFrom.x,t.y-stepFrom.y);if(ff2!=null)u.facing=ff2;
       u.x=t.x;u.y=t.y;u.energy-=cost;u.movedThisTurn=true;checkMines(u);checkOverwatch(u);pickupLoot(u);
+      if(u.alive&&movePath&&movePath.length>1)startDrawMove(u,movePath);
       log(u.role+' ('+u.team+') se mueve de ('+(fx+1)+','+(fy+1)+') a ('+(t.x+1)+','+(t.y+1)+') · −'+cost+' ⚡.');
       const mk=G.map.medkits.find(m=>!m.used&&m.x===t.x&&m.y===t.y);
       if(mk&&u.alive){mk.used=true;u.hp=Math.min(u.maxHp,u.hp+50);playOnce(u,'pickup');fxFloat(t.x,t.y,'+50 PV','#8df09a');log('✚ '+u.role+' recoge el botiquín del mapa: +50 PV (ahora '+u.hp+').');}
@@ -3799,6 +3932,7 @@ function updateUI(){
   pill.className='turn-pill '+G.turn;
   pill.textContent=G.over?'Partida terminada':'Turno: '+teamName(G.turn)+(G.aiBusy?' · la IA está jugando…':'');
   $('#roundLabel').textContent='Ronda '+G.round+(effMode(G)==='dominacion'?(' / '+DOM_MAX_ROUNDS):effMode(G)==='escolta'?(' / '+ESCORT_MAX_ROUNDS):'')+' · '+G.map.name+' · '+(effMode(G)==='eliminacion'?'Eliminación':effMode(G)==='dominacion'?'Dominación':effMode(G)==='escolta'?'Escolta del dron':G.mode==='guerra'?'Guerra de Naciones':G.mode==='campana'?('Campaña · Misión '+(G.campaignMission+1)+' · '+CAMPAIGN_MISSIONS[G.campaignMission].title):'Captura de baliza')+(G.opp==='ia'?(' · IA '+G.difficulty):'')+' · Quedan '+aliveCount('A')+' contra '+aliveCount('B');
+  setStep('battle',(G.over?'Partida terminada':'Ronda '+G.round+' · '+teamName(G.turn))+(G.aiBusy?' · IA pensando':''));
   const bm=$('#beaconMeter');
   if(effMode(G)!=='baliza'){bm.style.display='none';}
   else{bm.style.display='flex';bm.innerHTML='<span style="color:var(--teamA)">J1</span>'+[0,1,2,3,4].map(i=>'<i class="pip '+(G.beacon.A>i?'full':'')+'"></i>').join('')+'<span style="margin-left:8px;color:var(--teamB)">Rival</span>'+[0,1,2,3,4].map(i=>'<i class="pip '+(G.beacon.B>i?'full':'')+'"></i>').join('');}
@@ -4144,8 +4278,9 @@ function draw(){
   if(!G)return;
   /* Interpolación de posiciones: la posición de dibujo persigue a la
      casilla lógica, y así ningún soldado se teletransporta. */
-  G.units.forEach(un=>{if(un.dx==null){un.dx=un.x;un.dy=un.y;}const k=REDUCED_MOTION?1:0.16;un.dx+=(un.x-un.dx)*k;un.dy+=(un.y-un.dy)*k;if(Math.abs(un.x-un.dx)<0.01)un.dx=un.x;if(Math.abs(un.y-un.dy)<0.01)un.dy=un.y;});
-  if(G.drone){const d=G.drone;if(d.dx==null){d.dx=d.x;d.dy=d.y;}const k=REDUCED_MOTION?1:0.16;d.dx+=(d.x-d.dx)*k;d.dy+=(d.y-d.dy)*k;if(Math.abs(d.x-d.dx)<0.01)d.dx=d.x;if(Math.abs(d.y-d.dy)<0.01)d.dy=d.y;}
+  const drawNow=FX.t||performance.now();
+  G.units.forEach(un=>updateUnitDrawPosition(un,drawNow));
+  if(G.drone)updateUnitDrawPosition(G.drone,drawNow);
   if(VIEW_MODE==='3d'){if(FX.shake>0.4&&!REDUCED_MOTION)FX.shake*=0.86;else FX.shake=0;return;}
   const {S,offsetX,offsetY}=classicBoardMetrics(canvas.width,canvas.height);
   const boardW=W*S,boardH=H*S;
@@ -5134,22 +5269,20 @@ function makeSoldier3(un){
    cajas de makeSoldier3, con la misma partida. */
 const REAL={ready:false,data:null,geo:null,tex:null,castTex:{}};
 function parseOBJ3(txt,skin){
-  const P=[],UV=[],NO=[],idxMap={};
-  const pos=[],uv=[],nor=[],si=[],sw=[],outIdx=[];
+  const P=[],UV=[],idxMap={};
+  const pos=[],uv=[],si=[],sw=[],outIdx=[];
   txt.split('\n').forEach(line=>{
     const p=line.trim().split(/\s+/);
     if(p[0]==='v')P.push([-(+p[1]),+p[2],+p[3]]);
     else if(p[0]==='vt')UV.push([+p[1],+p[2]]);
-    else if(p[0]==='vn')NO.push([-(+p[1]),+p[2],+p[3]]);
     else if(p[0]==='f'){
-      for(let i=3;i>=1;i--){
+      for(let i=1;i<=3;i++){
         const t=p[i].split('/');const vi=+t[0]-1,ti=+t[1]-1,ni=+t[2]-1;
         const key=vi+'/'+ti+'/'+ni;
         if(idxMap[key]==null){
           idxMap[key]=pos.length/3;
           pos.push(P[vi][0],P[vi][1],P[vi][2]);
-          if(UV[ti])uv.push(UV[ti][0],UV[ti][1]);else uv.push(0,0);
-          if(NO[ni])nor.push(NO[ni][0],NO[ni][1],NO[ni][2]);else nor.push(0,1,0);
+          if(UV[ti])uv.push(Math.min(0.998,Math.max(0.002,UV[ti][0])),Math.min(0.998,Math.max(0.002,UV[ti][1])));else uv.push(0.5,0.5);
           for(let k=0;k<4;k++){si.push(skin.skinIndex[vi*4+k]);sw.push(skin.skinWeight[vi*4+k]);}
         }
         outIdx.push(idxMap[key]);
@@ -5159,10 +5292,10 @@ function parseOBJ3(txt,skin){
   const g=new THREE.BufferGeometry();
   g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
   g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));
-  g.setAttribute('normal',new THREE.Float32BufferAttribute(nor,3));
   g.setAttribute('skinIndex',new THREE.Float32BufferAttribute(si,4));
   g.setAttribute('skinWeight',new THREE.Float32BufferAttribute(sw,4));
   g.setIndex(outIdx);
+  g.computeVertexNormals();
   return g;
 }
 /* Modelos del original por CLASE: cada rol carga su malla, su rig de
@@ -5182,7 +5315,12 @@ function loadRealSoldier(){
   REAL.texByRole={};REAL.byRole={};REAL.castTex={};
   fetch('assets/soldier_scales.json').then(r=>r.json()).then(sc=>{ROLE_SCALES=sc||{};}).catch(()=>{});
   fetch('assets/soldier_clips.json').then(r=>{if(!r.ok)throw new Error('clips');return r.json();}).then(pack=>{CLIPLIB.pack=pack;CLIPLIB.ready=true;}).catch(()=>{});
-  const texLoad=(path)=>new Promise(res=>{new THREE.TextureLoader().load(path,t=>{t.colorSpace=THREE.SRGBColorSpace;res(t);},undefined,()=>res(null));});
+  const texLoad=(path)=>new Promise(res=>{new THREE.TextureLoader().load(path,t=>{
+    t.colorSpace=THREE.SRGBColorSpace;t.generateMipmaps=false;
+    t.minFilter=THREE.LinearFilter;t.magFilter=THREE.LinearFilter;
+    t.wrapS=THREE.ClampToEdgeWrapping;t.wrapT=THREE.ClampToEdgeWrapping;
+    res(t);
+  },undefined,()=>res(null));});
   const loadRole=(role,file)=>Promise.all([
     fetch('assets/soldier/'+file+'.obj').then(r=>{if(!r.ok)throw new Error('obj');return r.text();}),
     fetch('assets/soldier/'+file+'_rig.json').then(r=>{if(!r.ok)throw new Error('rig');return r.json();}),
@@ -6250,6 +6388,17 @@ function driveClipSoldier(un,mesh,t,moving){
   const ud=mesh.userData,pack=CLIPLIB.pack,clips=pack.clips,ts=t/1000;
   const wcat=WEAPONS[un.weapon]&&WEAPONS[un.weapon].cat;
   const stance=wcat==='Pistolas'?'1h':wcat==='Cuerpo a cuerpo'?'Melee':'2h';
+  const gdX=un.dx!=null?un.dx:un.x,gdY=un.dy!=null?un.dy:un.y;
+  const gdt=(ud._gaitLastT!=null&&t-ud._gaitLastT>0)?Math.min(100,t-ud._gaitLastT):16.7;
+  const gstep=Math.hypot(gdX-(ud._gaitX!=null?ud._gaitX:gdX),gdY-(ud._gaitY!=null?ud._gaitY:gdY));
+  const gspeed=gstep/(gdt/1000);
+  ud._gaitLastT=t;ud._gaitX=gdX;ud._gaitY=gdY;
+  if(!REDUCED_MOTION){
+    if(un._turning)ud._gaitPhase=(ud._gaitPhase||0)+gdt/1000;
+    else if(gstep>0.0005)ud._gaitPhase=(ud._gaitPhase||0)+gstep/0.42;
+    if(ud._gaitPhase>10000)ud._gaitPhase%=1;
+  }
+  const walking=!REDUCED_MOTION&&(gspeed>0.15||moving||un._turning);
   let key=null,ct=0;
   if(!un.alive){
     key=un._deathKind==='expl'?'deathExpl':'death';
@@ -6268,13 +6417,8 @@ function driveClipSoldier(un,mesh,t,moving){
     key=(wcat==='Cuerpo a cuerpo')?'hitMelee':(un._hitKind==='expl'?'hitExpl':(un._hitKind==='burst'?'hitBurst':'hit'));ct=(t-un._hitT)/1000;
   } else if(G&&G.over&&G.winner===un.team){
     key='victory';ct=(ts+ud.clipPhase)%clips.victory.dur;
-  } else if(moving||un._turning){
-    /* Girando sin desplazarse también suena el clip de paso, un poco más
-       lento: es el pasito de ajuste del giro. Los clips de giro del
-       original (turn1h/turn2h/turnMelee, 90° y 180°) están en el paquete,
-       pero el giro se sigue resolviendo en código porque es continuo
-       hacia cualquier orientación, no solo en cuartos de vuelta. */
-    key='walk'+stance;ct=((moving?ts:ts*0.85)+ud.clipPhase)%clips[key].dur;
+  } else if(walking){
+    key='walk'+stance;ct=((ud._gaitPhase||0)+ud.clipPhase)%clips[key].dur;
   } else {
     /* Reposo por postura: cada postura alterna su segundo reposo una de
        cada cuatro veces (2h idle2h2, 1h idle1h2, cuerpo a cuerpo
@@ -7588,14 +7732,14 @@ window.__render3D=function(){
     const rx=un.dx!=null?un.dx:un.x, ry=un.dy!=null?un.dy:un.y;
     mesh.position.x=w2cx(rx);mesh.position.z=w2cx(ry);
     if(mesh.userData.hpArc){const f=Math.max(0,Math.min(1,un.hp/un.maxHp));mesh.userData.hpArc.geometry.setDrawRange(0,Math.floor(64*6*f));mesh.userData.hpArc.visible=un.alive;}
-    const moving=Math.abs(un.x-rx)>0.03||Math.abs(un.y-ry)>0.03;
-    mesh.position.y=0.05+(moving&&!REDUCED_MOTION?Math.abs(Math.sin(t/90+un.id))*0.05:0);
+    const ud=mesh.userData;
+    const moving=Math.abs(un.x-rx)>0.03||Math.abs(un.y-ry)>0.03||!!un._drawPath;
+    mesh.position.y=0.05+(moving&&!REDUCED_MOTION?Math.abs(Math.sin((ud._gaitPhase||0)*Math.PI*2+un.id))*0.045:0);
     const yaw=advanceUnitYaw(un,t);
     mesh.rotation.y=-yaw;
     const turnLean=(un._turning&&!REDUCED_MOTION)?Math.sin((un._turnProg||0)*Math.PI)*0.07*(un._turnDelta>=0?1:-1):0;
     mesh.rotation.z=turnLean;
     if(un._turning&&!REDUCED_MOTION)mesh.position.y+=Math.sin((un._turnProg||0)*Math.PI)*0.025;
-    const ud=mesh.userData;
     if(ud.baseChev)ud.baseChev.visible=!!un.alive;
     if(ud.real){if(CLIPLIB.ready)driveClipSoldier(un,mesh,t,moving);else driveRealSoldier(un,mesh,t,moving||!!un._turning);fitLiveGun3(un,mesh);}
     else if(un.alive){
@@ -7847,7 +7991,7 @@ document.getElementById('quickSkirmishBtn').onclick=()=>quickStart('skirmish');
 /* Reparto del original (17 personajes del IPA) con clase, traje y si es jugable. */
 const LS_CHARS='csn_chars_v1';
 let CHAR_PREFS={};
-function loadChars(){try{const r=lsGet(LS_CHARS);return r?JSON.parse(r):{};}catch(e){return {};}}
+function loadChars(){try{const r=JSON.parse(lsGet(LS_CHARS)||'{}');if(!r||typeof r!=='object'||Array.isArray(r))return {};const out={};for(const role of Object.keys(r)){const v=r[role];if(typeof v!=='string')continue;if(charsForRole(role).some(c=>c.name===v||c.key===v))out[role]=v;}return out;}catch(e){return {};}}
 function saveChars(v){try{lsSet(LS_CHARS,JSON.stringify(v));}catch(e){}}
 /* Personajes nuevos propios de CSN: nombre, clase (cuerpo del IPA) y rol. */
 const OWN_CAST=[
@@ -8164,7 +8308,6 @@ function tutHide(){const b=document.getElementById('tutBubble');if(b)b.style.dis
   const b=document.getElementById('tutBubble');if(!b)return;
   b.querySelectorAll('[data-tut]').forEach(btn=>btn.onclick=()=>{const k=btn.dataset.tut;const t=document.getElementById('tutText');if(t)t.textContent=TUT_TEXTS[k]||'';toast(TUT_TEXTS[k]||'');});
   const d=document.getElementById('tutDone');if(d)d.onclick=tutHide;
-  if(!lsGet('radsoldiers_tut'))setTimeout(tutShow,1200);
 })();
 (function wireOrigMenu(){
   const q=document.getElementById('mnuQuick');if(q)q.onclick=()=>quickStart('almacen');

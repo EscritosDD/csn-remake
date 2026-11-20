@@ -14,11 +14,11 @@ Estado actual (verificado, no prometido):
 
 | Área | Estado |
 |---|---|
-| Motor de reglas | 6/6 tests propios (`bench/rules.test.js`) |
+| Motor de reglas | 18/18 tests propios (`bench/rules.test.js`) |
 | Tableros | 19, todos simétricos 180° y sin solapes (`bench/boards.js`) |
 | Datos (personajes, naciones, skins, misiones, voces) | 6/6 (`bench/data.test.js`) |
 | 3D | `window.__csn3d` con `units:8` y `geo:true` en todos los mapas |
-| Soldados | **Un solo cuerpo del IPA (Soldier_Light) con 7 uniformes del original** y proporciones por clase (ROLE_LOOK 0,84-1,30); las 7 mallas de clase están extraídas pero **no se pueden usar todavía** (ver §5) |
+| Soldados | **7 mallas por clase del IPA** (malla + rig + textura + escala), con 5 diseños propios jugables y proporciones por rol (ROLE_LOOK 0,84-1,30); receta cerrada en §11 |
 | Interfaz | Portada centrada con logo del original, menú en columna, campaña por capítulos con arte y progreso, Cuartel visual, Armería en pestañas, setup en rejilla y HUD con **barra inferior de acciones** |
 | Audio | 195 clips del IPA (armas, voces por personaje, ambiente, música) |
 
@@ -243,26 +243,18 @@ cuerpo distinto del original, pero se leen como siete soldados distintos.
 |---|---|---|
 | Armas del original en 3D | **Hecho** | 23 mallas en `assets/weapons/*.obj` con su textura; en partida se anclan por la culata, se escalan por categoría y el fogonazo va al final del cañón. Verificado con sonda: 8 armas reales en escena |
 | Carátulas en la Armería | **Hecho** | 38 PNG en `assets/weapons/covers/` (arte `item_weapon_*` del IPA); 31 fichas con arte y 6 con render 3D de respaldo |
-| Cuerpos de clase | **6 de 7** | Francotirador, Artillero, Espía, Médico, Ingeniero y Capitán cargan su malla del IPA; el Comando usa la malla base (`CLASS_MODEL_SKIP`) |
+| Cuerpos de clase | **7 de 7** | Cada rol carga su malla del IPA con rig y textura; `CLASS_MODEL_SKIP` ya no existe |
 | Causa raíz del destrozo de mallas | **Resuelta** | el buffer de índices del IPA es un **triangle strip**: 2923 índices → 1456 triángulos (antes 974 con 480 degenerados) |
-| Verificación | **TODO OK** | sintaxis 0 · 19/19 tableros · reglas 6/6 · datos 6/6 · humo 3D con `units:8` |
+| Verificación | **TODO OK** | sintaxis 0 · 19/19 tableros · reglas 18/18 · datos 6/6 · humo 3D con `units:8` |
 
-### El Comando: lo que se sabe
+### El Comando: resuelto
 
-`Agent_Heavy` trae **17 huesos y 17 bind poses** (los recuentos cuadran), pero la
-cadena derivada de sus bind poses no las reproduce: el error de
-`boneWorld × boneInverse` es **3,6 en la cabeza** (en las otras seis clases es
-0,00000). Se probaron orden de huesos, espejo X, escala horneada, `bone.scale`,
-transposición de bind poses, `bindMatrix` de la malla, normalización de la
-escala global del esqueleto y retargeting por delta. Todos fallan solo en esta
-malla, así que el problema está en los datos del IPA para ese personaje, no en
-el cargador.
-
-**Vías que quedan**: (a) hornear su esqueleto con el pipeline que produjo
-`assets/soldier_rig.json`; (b) usar su malla **sin skinning** en pose fija
-(sólida, pero sin animación de miembros) y animarla con un truco de
-transformación del grupo; (c) dejarlo con la malla base, que es el estado
-actual.
+`Agent_Heavy` trae 17 huesos y 17 bind poses, pero su cadena no las reproducía
+(error de `boneWorld × boneInverse` de 3,6 en la cabeza). La solución definitiva
+está en la receta de §11: `boneInverses` autoconstantes calculados desde los
+mundos derivados del propio rig, con retargeting por delta de los clips. El
+Comando usa hoy su malla y su animación como las otras seis clases;
+`CLASS_MODEL_SKIP` desapareció.
 
 
 ## 11. Receta definitiva de las 7 mallas de clase (cerrado)
@@ -286,7 +278,7 @@ funciona, en orden:
 6. **`bone.scale`** en el juego y **retargeting por delta** de los clips
    (`q = rest_clase · (rest_base⁻¹ · q_clip)`).
 
-Verificado: sintaxis 0, 19/19 tableros, reglas 6/6, datos 6/6, humo 3D, y
+Verificado: sintaxis 0, 19/19 tableros, reglas 18/18, datos 6/6, humo 3D, y
 capturas de las siete clases en partida (Comando, Francotirador, Médico,
 Ingeniero, Artillero, Espía, Capitán).
 

@@ -41,12 +41,17 @@ Write-Host "`nVerificando..." -ForegroundColor Cyan
 powershell -ExecutionPolicy Bypass -File "bench\VERIFICAR.ps1"
 if ($LASTEXITCODE -ne 0) {
   Write-Host "`nLa verificacion FALLO. No commiteo; deshago el patch." -ForegroundColor Red
+  git apply -R $Patch 2>&1 | Out-String | Write-Host
   git checkout -- .
   exit 1
 }
 
-# 5) commit y push
-git add -A
+# 5) commit y push (solo lo que toco el patch)
+$modificados = git diff --name-only --diff-filter=ACMRT
+$nuevos = git ls-files --others --exclude-standard
+$cambios = @($modificados) + @($nuevos) | Where-Object { $_ } | Select-Object -Unique
+if (-not $cambios) { Fallo "el patch no produjo cambios" }
+git add -- $cambios
 git commit -m $Mensaje | Out-String | Write-Host
 git push -u origin $Rama 2>&1 | Out-String | Write-Host
 if ($LASTEXITCODE -ne 0) { Fallo "no pude empujar la rama $Rama" }

@@ -9,7 +9,7 @@ Qué hay aquí y para qué sirve. Si vienes nuevo, lee en este orden.
 | **[Examen_para_continuar.md](Examen_para_continuar.md)** | **El informe de traspaso.** Estado real verificado, cómo ejecutar y verificar, arquitectura por líneas, tareas pendientes, los problemas abiertos con todo lo probado, y las recetas que funcionan (mallas de clase, armas) |
 | [ARQUITECTURA.md](ARQUITECTURA.md) | Dónde está cada bloque del código (funciones y líneas reales) y las trampas al editar |
 | [Equilibrio_medido.md](Equilibrio_medido.md) | Cifras de balance por modo y mapa, con n y metodología |
-| [Catalogo_habilidades_original.md](Catalogo_habilidades_original.md) | Las 44 habilidades del original y su estado en CSN |
+| [Catalogo_habilidades_original.md](Catalogo_habilidades_original.md) | Las 52 habilidades del original: 22 implementadas en CSN y el resto pendiente |
 | [COMO_TRABAJAR_CON_ZAI.md](COMO_TRABAJAR_CON_ZAI.md) | Flujo con rama de pruebas: aplicar patch, verlo, promoverlo a main o descartarlo |
 | [Prompt_arranque_Z.ai.md](Prompt_arranque_Z.ai.md) | **Prompt listo para pegar** si el trabajo lo retoma otra IA (reglas de la casa y tareas priorizadas) |
 
@@ -20,7 +20,7 @@ Qué hay aquí y para qué sirve. Si vienes nuevo, lee en este orden.
 | [Diseno_del_juego.md](Diseno_del_juego.md) | Reglas, modos, economía y estructura de partida |
 | [Arsenal_real.md](Arsenal_real.md) | Las 37 armas con sus datos reales y su traducción al juego |
 | [Estetica_original.md](Estetica_original.md) | Paletas y aspecto del original |
-| [Arte_visual.md](Arte_visual.md) | Inventario de arte (mucha referencia vive en `_original/`, en el repo) |
+| [Arte_visual.md](Arte_visual.md) | Material en uso (mallas, mapas, audio, UI) y referencia histórica |
 | [Informe_CSN_vs_original.md](Informe_CSN_vs_original.md) | Comparación lado a lado con RAD Soldiers |
 
 ## Auditorías y capturas

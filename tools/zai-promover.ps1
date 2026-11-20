@@ -30,6 +30,7 @@ if ($resp -ne "SI") { Write-Host "Cancelado. main no se ha tocado." -ForegroundC
 
 git checkout main
 if ($LASTEXITCODE -ne 0) { Write-Host "No pude cambiar a main." -ForegroundColor Red; exit 1 }
+$antes = (git rev-parse HEAD).Trim()
 
 git merge --no-ff $Rama -m "Merge $Rama"
 if ($LASTEXITCODE -ne 0) {
@@ -41,7 +42,7 @@ Write-Host "`nVerificando main antes de empujar..." -ForegroundColor Cyan
 powershell -ExecutionPolicy Bypass -File "bench\VERIFICAR.ps1"
 if ($LASTEXITCODE -ne 0) {
   Write-Host "La verificacion FALLO. Deshago el merge; main no se empuja." -ForegroundColor Red
-  git reset --hard HEAD~1
+  git reset --hard $antes
   exit 1
 }
 

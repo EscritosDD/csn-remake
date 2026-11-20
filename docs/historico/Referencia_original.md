@@ -276,7 +276,7 @@ Comparado con `Diseno_del_juego.md` y `Arsenal_real.md` (vida 100, energía 6–
 
 ## 8. Inventario a alto nivel de los `.assets` de Unity
 
-Archivos en `rad-soldiers-unity3d-unpacked-quickbms.zip` (113 MB en total), extraídos a `/tmp` solo para esta auditoría, sin copiar nada al proyecto:
+Archivos en `rad-soldiers-unity3d-unpacked-quickbms.zip` (113 MB en total), extraídos a `/tmp` para la auditoría; parte de ese material (mallas, texturas, audio y mapas) está hoy integrado en `assets/` por decisión del autor:
 
 | Archivo | Tamaño | Objetos | Contenido principal |
 |---|---|---|---|

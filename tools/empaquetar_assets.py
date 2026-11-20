@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Empaqueta las mallas decimadas (weld/<n>_D_*.npy) como assets del juego:
-OBJ con X invertida + winding compensado (parseOBJ3), rig de 20 huesos en el
+OBJ con X invertida y caras invertidas, para que parseOBJ3 (niega X, lee caras
+directas y recalcula normales) deje volumen positivo; rig de 20 huesos en el
 orden del rig base espejado en X, skinning por proximidad (4 influencias) y
 textura PNG. Clases: Heavy_Gunner→Artillero, Shadow_Sentinel→Espía,
 Ghillie_Guardian→Francotirador."""
@@ -9,20 +10,10 @@ import json, os
 import numpy as np
 import trimesh
 from scipy.spatial import cKDTree
+from rig_base import RIG_BASE_BONES, RIG_PARENTS
 
-RIG_BASE_BONES = [
-    "Bip001", "Bip001 Pelvis", "Bip001 Spine", "Bip001 Spine1",
-    "Bip001 Neck", "Bip001 Head",
-    "Bip001 L Clavicle", "Bip001 L UpperArm", "Bip001 L Forearm", "Bip001 L Hand",
-    "Bip001 R Clavicle", "Bip001 R UpperArm", "Bip001 R Forearm", "Bip001 R Hand",
-    "Bip001 L Thigh", "Bip001 L Calf", "Bip001 L Foot",
-    "Bip001 R Thigh", "Bip001 R Calf", "Bip001 R Foot",
-]
-RIG_PARENTS = [-1, 0, 1, 2, 3, 4,
-               5, 6, 7, 8,
-               5, 10, 11, 12,
-               1, 14, 15,
-               1, 17, 18]
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+WELD = os.path.join(ROOT, "weld")
 
 # (x, y, z) fraccionales sobre la altura, humanoide estándar — igual que el
 # pipeline validado, con brazos ligeramente caídos para la pose de armas.
@@ -55,7 +46,7 @@ MAP = {  # fichero de salida (clase del juego) <- modelo Meshy
     "Francotirador":  "Ghillie_Guardian",
 }
 
-OUT = "/home/z/my-project/work/assets_juego"
+OUT = os.path.join(ROOT, "assets_juego")
 os.makedirs(OUT, exist_ok=True)
 
 def build_rig(verts):
@@ -84,9 +75,9 @@ def auto_skin(verts, world):
     return idx.astype(np.int32), w.astype(np.float32)
 
 for clase, mesh_name in MAP.items():
-    V = np.load(f"weld/{mesh_name}_D_V.npy").astype(np.float64)
-    F = np.load(f"weld/{mesh_name}_D_F.npy").astype(np.int64)
-    UV = np.load(f"weld/{mesh_name}_D_UV.npy")
+    V = np.load(os.path.join(WELD, f"{mesh_name}_D_V.npy")).astype(np.float64)
+    F = np.load(os.path.join(WELD, f"{mesh_name}_D_F.npy")).astype(np.int64)
+    UV = np.load(os.path.join(WELD, f"{mesh_name}_D_UV.npy"))
 
     bones, world = build_rig(V)
     si, sw = auto_skin(V, world)
@@ -95,9 +86,9 @@ for clase, mesh_name in MAP.items():
     m = trimesh.Trimesh(vertices=V, faces=F, process=False)
     N = np.asarray(m.vertex_normals, dtype=np.float64)
 
-    # --- OBJ: X invertida + winding compensado (parseOBJ3 lee v3,v2,v1) ---
+    # --- OBJ: X invertida y caras invertidas (parseOBJ3 lee v1,v2,v3) ---
     obj = [f"# CSN — modelo propio de Dani (Meshy) decimado por el pipeline zai",
-           f"# clase {clase} · fuente {mesh_name} · 4000 tris · X invertida y winding compensado"]
+           f"# clase {clase} · fuente {mesh_name} · 4000 tris · X invertida y caras invertidas"]
     for v in V:
         obj.append("v %.6f %.6f %.6f" % (-v[0], v[1], v[2]))
     for uv in UV:
@@ -105,8 +96,7 @@ for clase, mesh_name in MAP.items():
     for n in N:
         obj.append("vn %.6f %.6f %.6f" % (-n[0], n[1], n[2]))
     for f in F:
-        a, b, c = f[0], f[1], f[2]   # DIRECTO: parseOBJ3 lee (C,B,A) y el
-        # espejo X invierte el winding; lectura inversa lo compensa -> CCW
+        a, b, c = f[2], f[1], f[0]
         obj.append("f %d/%d/%d %d/%d/%d %d/%d/%d" % (
             a+1, a+1, a+1, b+1, b+1, b+1, c+1, c+1, c+1))
     with open(f"{OUT}/{clase}.obj", "w", encoding="utf-8") as fh:

@@ -8,8 +8,8 @@ triángulos cada uno, cuando el objetivo del juego es 2.000–5.000**, y hay que
 
 | Fichero | Qué es |
 |---|---|
-| `zai_adelgazar_modelos.py` | El pipeline: decima la malla a 2k–5k tris, genera el OBJ con la X ya invertida (regla de `parseOBJ3`), el rig de 20 huesos **en el orden del rig base** y la textura |
-| `validar_salida_motor.py` | Valida la salida contra las reglas del motor (réplica de `parseOBJ3`): orden de huesos, pesos, round-trip de la X, watertight, rango de triángulos |
+| `zai_adelgazar_modelos.py` | El pipeline: decima la malla a 2k–5k tris, genera el OBJ con la X invertida y las caras invertidas (regla de `parseOBJ3`), el rig de 20 huesos **en el orden del rig base** y la textura |
+| `validar_assets_reales.py` | Valida la salida contra las reglas del motor (réplica de `parseOBJ3`): orden de huesos, pesos, round-trip de la X, rango de triángulos y UV |
 | `guia_rapida.md` | Los 5 comandos exactos para tus 3 modelos |
 
 ## Lo que hace el pipeline (y por qué)
@@ -19,12 +19,13 @@ cerrada de las 7 mallas de clase):
 
 1. **Decimación por quadrics** (`fast_simplification`, algoritmo de Garland
    que es el estándar de Blender) a `--tri-target 4000` por defecto.
-2. **OBJ con la X ya invertida**: `parseOBJ3` en `index.html` niega el eje X
+2. **OBJ con la X invertida**: `parseOBJ3` en `index.html` niega el eje X
    (`P.push([-(+p[1]), ...])`), así que la malla se escribe espejada para que
    al parsearla vuelva a la geometría correcta.
-3. **Winding compensado**: `parseOBJ3` recorre los índices de las caras en
-   orden inverso (`for(i=3;i>=1;i--)`); sin compensarlo verías el modelo con
-   las caras culled (se vería hueco).
+3. **Caras invertidas**: `parseOBJ3` lee los índices directos
+   (`for(i=1;i<=3;i++)`) y recalcula las normales desde la geometría; por eso
+   el OBJ se escribe con el orden de caras invertido para dejar volumen
+   positivo y caras visibles en el juego.
 4. **Rig de 20 huesos en el ORDEN del rig base** (`Bip001…`, el de
    `assets/soldier_rig.json`): los clips de `soldier_clips.json` se aplican
    **por índice de hueso**, no por nombre, así que este orden es innegociable.
