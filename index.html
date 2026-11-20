@@ -2295,7 +2295,7 @@ function damage(target,dmg,srcLabel,srcTeam){
   const expl=/explos|M67|salpicadura|barril|RPG|AT4|M72|M203|M32/i.test(srcLabel||'');
   target._hitKind=expl?'expl':(/M249|M240|PKM|MG3/.test(srcLabel||'')?'burst':'bullet');
   /* Impacto seco del original (bala), solo en dano no explosivo. */
-  if(!expl){try{auPlay('sfx/weapons/bullet_hit_0'+(1+Math.floor(Math.random()*2))+'.mp3',0.25);}catch(e){}}
+  if(!expl&&(!CLIPLIB.ready||window.__noClips||REDUCED_MOTION||VIEW_MODE!=='3d')){try{auPlay('sfx/weapons/bullet_hit_0'+(1+Math.floor(Math.random()*2))+'.mp3',0.25);}catch(e){}}
   if(target.hp<=0&&target._deathT==null){target._deathT=FX.t;target._deathKind=expl?'expl':'bullet';}
   if(target.x!=null){fxFloat(target.x,target.y,'−'+dmg,'#ffd9d2');fxBurst(target.x,target.y,7,'#ffb199');}
   log(srcLabel+' hace <b>'+dmg+'</b> de daño a '+target.role+' ('+target.team+'). Le quedan '+Math.max(0,target.hp)+' PV.');
@@ -2333,11 +2333,10 @@ function tryShoot(shooter,target,weaponName,multiplier,opts){
   if(!freeCost)spendEnergy(shooter,w.cost);shooter.hasShot=true;if(shooter.invisible){shooter.invisible=false;log('La invisibilidad del Espía se rompe al disparar.');}
   if(w.once)shooter.onceUsed=true;
   const f=angleToFacing(target.x-shooter.x,target.y-shooter.y);if(f!=null)shooter.facing=f;
-  shooter._shootT=FX.t;shooter._shootW=weaponName;shooter._fireKey=fireClipFor(weaponName);auWeapon(w.cat,weaponName);if(Math.random()<0.3)auVoice(shooter,'firing',0.4);
-  if(target.x!=null){
-    fxTracer(shooter,target);fxBurst(shooter.x,shooter.y,3,'#ffe9a8');
-    if(typeof fx3Shot==='function')fx3Shot(shooter,target,w.cat);
-  }
+  shooter._shootT=FX.t;shooter._shootW=weaponName;shooter._shootCat=w.cat;shooter._shootAt=target&&target.x!=null?{x:target.x,y:target.y}:null;shooter._fireKey=fireClipFor(weaponName);
+  const fireClipNow=CLIPLIB.ready&&CLIPLIB.pack&&CLIPLIB.pack.clips&&CLIPLIB.pack.clips[shooter._fireKey];
+  const deferredFire=!!(fireClipNow&&fireClipNow.events&&fireClipNow.events.length&&!window.__noClips&&!REDUCED_MOTION&&VIEW_MODE==='3d');
+  if(!deferredFire){const m3=T3&&T3.units&&T3.units.get?T3.units.get(shooter.id):null;fireWeaponFeedback(shooter,m3&&m3.userData,true);}
   const roll=rng()*100;
   let hit=false;
   if(roll<p){
@@ -4941,6 +4940,9 @@ function isSoftwareGL3(renderer){
     return /SwiftShader|llvmpipe|Software|Mesa/i.test(rStr);
   }catch(e){return false;}
 }
+function isMobileGL3(){
+  try{return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent||'')||Math.min(innerWidth||0,innerHeight||0)<=640;}catch(e){return false;}
+}
 let _toonGrad=null;
 function toonGrad3(){
   if(!_toonGrad&&typeof THREE!=='undefined'){
@@ -5254,7 +5256,7 @@ function makeSoldier3(un){
    cuando este era Y o Z y tomaba siempre positivo el omitido, que puede
    ser negativo. Con el decodificador corregido, el idle de referencia
    (Take 001) cae a RMS 0,0049 contra la pose de bind, sin alinear nada.
-   Los 22 clips que usa el juego van ya convertidos en
+   Los 40 clips del original van ya convertidos en
    assets/soldier_clips.json: cada clave lleva horneada la conversión de
    frames entre el espacio de los clips y el de este rig (verificada en
    la pose de bind con error ≤0,25°), y el movimiento de raíz entra como
@@ -6167,7 +6169,7 @@ function makeRealSoldier3(un){
     }
   }
   }
-  g.userData={real:true,body:null,segs:segs,selRing:selRing,baseMesh:base,contactSh:contactSh,baseChev:chev,bones:bones,mesh3:mesh,gun:gun,bindLocal:bindLocal,baseRestQ:baseRestQ,baseRestWorldQ:baseRestWorldQ,isClassRig:!!baseRestQ,bindWorldQ:bindWorldQ,parents:parents,sourceParents:sourceParents,sourcePoseQ:data.bones.map(()=>new THREE.Quaternion()),sourceWorldQ:data.bones.map(()=>new THREE.Quaternion()),targetWorldQ:data.bones.map(()=>new THREE.Quaternion()),targetLocalQ:data.bones.map(()=>new THREE.Quaternion()),byName:byName,curQ:bindLocal.map(q=>q.clone()),curRootP:new THREE.Vector3(),walkPh:Math.random()*6.28,bindPos:data.bones.map(b=>new THREE.Vector3(b.pos[0],b.pos[1],b.pos[2])),curDelta:new THREE.Vector3(),clipPhase:Math.random()*10};
+  g.userData={real:true,body:null,segs:segs,selRing:selRing,baseMesh:base,contactSh:contactSh,baseChev:chev,bones:bones,mesh3:mesh,gun:gun,bindLocal:bindLocal,baseRestQ:baseRestQ,baseRestWorldQ:baseRestWorldQ,isClassRig:!!baseRestQ,bindWorldQ:bindWorldQ,parents:parents,sourceParents:sourceParents,sourcePoseQ:data.bones.map(()=>new THREE.Quaternion()),sourceWorldQ:data.bones.map(()=>new THREE.Quaternion()),targetWorldQ:data.bones.map(()=>new THREE.Quaternion()),targetLocalQ:data.bones.map(()=>new THREE.Quaternion()),byName:byName,curQ:bindLocal.map(q=>q.clone()),curRootP:new THREE.Vector3(),walkPh:Math.random()*6.28,bindPos:data.bones.map(b=>new THREE.Vector3(b.pos[0],b.pos[1],b.pos[2])),curDelta:new THREE.Vector3(),clipPhase:Math.random()*10,hitColor:mat.color.clone()};
   return g;
 }
 /* Si la librería three.js no llega a cargar (sin red, CDN caído), el juego
@@ -6199,6 +6201,12 @@ function boneTargetQ(ud,idx,R){
 }
 function driveRealSoldier(un,mesh,t,moving){
   const ud=mesh.userData,ts=t/1000;
+  const rdt=(ud._realLastT!=null&&(t-ud._realLastT)>0)?Math.min(100,t-ud._realLastT):16.7;
+  ud._realLastT=t;
+  ud._firePulse=clipPulse(ud._firePulse,180,rdt);
+  ud._flashPulse=clipPulse(ud._flashPulse,90,rdt);
+  ud._hitPulse=clipPulse(ud._hitPulse,260,rdt);
+  ud._deathPulse=clipPulse(ud._deathPulse,420,rdt);
   let name='idle',ct=0;
   if(!un.alive){name='death';ct=un._deathT!=null?(t-un._deathT)/1000:9;}
   else if(un._shootT!=null&&(t-un._shootT)<1150){name='fire';ct=(t-un._shootT)/1000;}
@@ -6276,9 +6284,11 @@ function driveRealSoldier(un,mesh,t,moving){
     ud.bones[i].quaternion.copy(ud.curQ[i]);
   }
   ud.curRootP.lerp(rootOff,k);ud.bones[0].position.copy(ud.curRootP);
-  const firing=name==='fire';
   if(ud.gun&&ud.gun.userData&&ud.gun.userData.flash){
-    ud.gun.userData.flash.material.opacity=firing&&ct<0.09?0.95:0;
+    ud.gun.userData.flash.material.opacity=Math.min(0.95,(ud._flashPulse||0)*0.95);
+  }
+  if(ud.hitColor&&_hitWhite&&ud.mesh3.material.color){
+    ud.mesh3.material.color.copy(ud.hitColor).lerp(_hitWhite,Math.min(0.55,(ud._hitPulse||0)*0.55));
   }
   ud.mesh3.material.opacity=un.invisible?0.45:1;
   ud.mesh3.material.transparent=!!un.invisible;
@@ -6291,7 +6301,7 @@ function driveRealSoldier(un,mesh,t,moving){
   } else {ud.segs.forEach(s=>{s.visible=false;});ud.selRing.visible=false;}
 }
 /* ================= LOS CLIPS DEL ORIGINAL, REPRODUCIÉNDOSE =================
-   [los clips viajan como archivo: assets/soldier_clips.json] trae 22 clips del IPA ya convertidos a este
+   [los clips viajan como archivo: assets/soldier_clips.json] trae 40 clips del IPA ya convertidos a este
    rig (reposo a una y dos manos, paso, disparo por familia de arma,
    impacto de bala, de ráfaga y de explosión, muerte por bala y por
    explosión, lanzar granada, desplegar torreta, interactuar, recoger y
@@ -6332,6 +6342,60 @@ function driveRealSoldier(un,mesh,t,moving){
 const CLIPLIB={ready:false,pack:null};
 const CLIP_BLEND_MS=200,CLIP_BLEND_DEATH_MS=140;
 const _cq=HAS_THREE?new THREE.Quaternion():null,_cq2=HAS_THREE?new THREE.Quaternion():null,_cv=HAS_THREE?new THREE.Vector3():null,_cv2=HAS_THREE?new THREE.Vector3():null,_cv3=HAS_THREE?new THREE.Vector3():null;
+const CLIP_EVENT_LOG=[];
+if(typeof window!=='undefined')window.__csnEvents=CLIP_EVENT_LOG;
+const _hitWhite=HAS_THREE?new THREE.Color(0xffffff):null;
+function clipPulse(v,ms,dt){return Math.max(0,(v||0)-dt/ms);}
+function fireWeaponFeedback(un,ud,full){
+  const shooter=(un&&un.x!=null)?un:null,target=shooter&&shooter._shootAt,cat=shooter&&shooter._shootCat;
+  if(full&&shooter){auWeapon(cat,shooter._shootW);if(Math.random()<0.3)auVoice(shooter,'firing',0.4);}
+  if(ud){
+    ud._firePulse=Math.max(ud._firePulse||0,full?1:0.42);
+    ud._flashPulse=1;
+  }
+  if(shooter&&target&&target.x!=null){
+    if(full){fxBurst(shooter.x,shooter.y,3,'#ffe9a8');if(typeof fx3Shot==='function')fx3Shot(shooter,target,cat);}
+    fxTracer(shooter,target);
+  }
+}
+function clipEventFeedback(un,ud,key,clip,e,ct,t){
+  const f=e.f||'';let acted=false;
+  if(f==='PlayWeaponFire'||(f==='OnAnimEvent'&&e.i===10)||f==='PlayFiring'){
+    if(key==='throw'||key==='deploy'||key==='interact')ud._firePulse=Math.max(ud._firePulse||0,0.4);
+    else if(f!=='PlayFiring')fireWeaponFeedback(un,ud,f==='PlayWeaponFire');
+    else ud._firePulse=Math.max(ud._firePulse||0,0.35);
+    acted=true;
+  } else if(f==='PlayHit'||f==='PlayPain'||f==='PlayBulletBy'){
+    ud._hitPulse=1;
+    if(f==='PlayHit'){try{auPlay('sfx/weapons/bullet_hit_0'+(1+Math.floor(Math.random()*2))+'.mp3',0.25);}catch(e){}}
+    acted=true;
+  } else if(f==='PlayBodyFall'||f==='PlayDeath'||f==='PlayWeaponDrop'){
+    ud._deathPulse=1;
+    if(!REDUCED_MOTION&&un.x!=null)fxBurst(un.x,un.y,f==='PlayWeaponDrop'?3:6,'#9c8f7b');
+    acted=true;
+  } else if(f==='PlayAppreciation'){
+    auVoice(un,'thanks',0.5);acted=true;
+  }
+  if(acted){
+    if(CLIP_EVENT_LOG.length>=160)CLIP_EVENT_LOG.shift();
+    CLIP_EVENT_LOG.push({u:un.id||0,k:key,f:f,i:e.i||0,ct:+ct.toFixed(3),t:Math.round(t)});
+  }
+}
+function dispatchClipEvents(un,ud,clip,key,ct,t){
+  if(!clip||!clip.events||!clip.events.length||!ud)return;
+  if(!(G&&G.units&&G.units.indexOf(un)>=0))return;
+  let st=ud._clipEventState;
+  if(!st||st.key!==key){st={key:key,ct:ct,seen:{}};ud._clipEventState=st;}
+  if(ct<st.ct-0.08)st.seen={};
+  for(let i=0;i<clip.events.length;i++){
+    const e=clip.events[i];
+    if(!st.seen[i]&&e.t<=ct+0.0005){
+      st.seen[i]=1;
+      clipEventFeedback(un,ud,key,clip,e,ct,t);
+    }
+  }
+  st.ct=ct;
+}
 function clipTrackAt(tr,t){
   const ts=tr.t;
   if(t<=ts[0])return 0;
@@ -6344,8 +6408,18 @@ function sampleClipQuat(tr,t,out){
   const i=clipTrackAt(tr,t),a=tr.q[i];
   if(i>=tr.q.length-1||t<=tr.t[i]){out.set(a[0],a[1],a[2],a[3]);return out;}
   const b=tr.q[i+1];
-  _cq.set(b[0],b[1],b[2],b[3]);
-  out.set(a[0],a[1],a[2],a[3]).slerp(_cq,(t-tr.t[i])/(tr.t[i+1]-tr.t[i]));
+  let ax=a[0],ay=a[1],az=a[2],aw=a[3];
+  let bx=b[0],by=b[1],bz=b[2],bw=b[3];
+  let cos=ax*bx+ay*by+az*bz+aw*bw;
+  if(cos<0){bx=-bx;by=-by;bz=-bz;bw=-bw;cos=-cos;}
+  const alpha=(t-tr.t[i])/(tr.t[i+1]-tr.t[i]);
+  let s0,s1;
+  if(cos>0.9995){s0=1-alpha;s1=alpha;}
+  else{
+    const theta=Math.acos(Math.max(-1,Math.min(1,cos))),sin=Math.sin(theta);
+    s0=Math.sin((1-alpha)*theta)/sin;s1=Math.sin(alpha*theta)/sin;
+  }
+  out.set(s0*ax+s1*bx,s0*ay+s1*by,s0*az+s1*bz,s0*aw+s1*bw);
   return out;
 }
 function sampleClipPos(tr,t,out){
@@ -6417,6 +6491,10 @@ function driveClipSoldier(un,mesh,t,moving){
     key=(wcat==='Cuerpo a cuerpo')?'hitMelee':(un._hitKind==='expl'?'hitExpl':(un._hitKind==='burst'?'hitBurst':'hit'));ct=(t-un._hitT)/1000;
   } else if(G&&G.over&&G.winner===un.team){
     key='victory';ct=(ts+ud.clipPhase)%clips.victory.dur;
+  } else if(un._turning&&clips['turn'+stance+'L']){
+    const arc=shortestArc((un._turnTo||0)-(un._turnFrom||0));
+    const turnKey=Math.abs(arc)>2.3?('turn'+stance+'180'):('turn'+stance+(arc>0?'L':'R'));
+    key=clips[turnKey]?turnKey:'turn'+stance+'L';ct=(un._turnProg||0)*clips[key].dur;
   } else if(walking){
     key='walk'+stance;ct=((ud._gaitPhase||0)+ud.clipPhase)%clips[key].dur;
   } else {
@@ -6468,6 +6546,11 @@ function driveClipSoldier(un,mesh,t,moving){
   ud._clipLastT=t;
   const baseK=(key==='death'||key==='deathExpl')?0.5:0.45;
   const k=REDUCED_MOTION?1:1-Math.pow(1-baseK,dtMs/16.7);
+  ud._firePulse=clipPulse(ud._firePulse,180,dtMs);
+  ud._flashPulse=clipPulse(ud._flashPulse,90,dtMs);
+  ud._hitPulse=clipPulse(ud._hitPulse,260,dtMs);
+  ud._deathPulse=clipPulse(ud._deathPulse,420,dtMs);
+  dispatchClipEvents(un,ud,clip,key,ct,t);
   const retarget=!!(ud.isClassRig&&ud.baseRestWorldQ&&ud.sourcePoseQ);
   for(let i=0;i<ud.bones.length;i++){
     const tr=clip.rot[pack.bones[i]];
@@ -6505,9 +6588,11 @@ function driveClipSoldier(un,mesh,t,moving){
   const rootBase=ud.bindPos[0],pelvOff=ud.bindPos[1];
   rootBonePositionForClip(rootBase,pelvOff,ud.curDelta,_cv.copy(pelvOff).applyQuaternion(ud.bones[0].quaternion),_cv2);
   ud.bones[0].position.copy(_cv2);
-  const firing=key.indexOf('fire')===0;
   if(ud.gun&&ud.gun.userData&&ud.gun.userData.flash){
-    ud.gun.userData.flash.material.opacity=(firing&&ct<0.09)?0.95:0;
+    ud.gun.userData.flash.material.opacity=Math.min(0.95,(ud._flashPulse||0)*0.95);
+  }
+  if(ud.hitColor&&_hitWhite&&ud.mesh3.material.color){
+    ud.mesh3.material.color.copy(ud.hitColor).lerp(_hitWhite,Math.min(0.55,(ud._hitPulse||0)*0.55));
   }
   ud.mesh3.material.opacity=un.invisible?0.45:1;
   ud.mesh3.material.transparent=!!un.invisible;
@@ -6642,7 +6727,7 @@ function poseSpriteAim(un,grp){
      en el mismo fotograma, sin retrasos ni sobrescrituras. */
 const _gpDir=HAS_THREE?new THREE.Vector3():null,_gpTwoH=HAS_THREE?new THREE.Vector3():null,_gpFwd=HAS_THREE?new THREE.Vector3(1,0,0):null;
 const _gpUp=HAS_THREE?new THREE.Vector3(0,1,0):null,_gpZ=HAS_THREE?new THREE.Vector3():null,_gpY=HAS_THREE?new THREE.Vector3():null;
-const _gpOrigin=HAS_THREE?new THREE.Vector3():null,_gpQuat=HAS_THREE?new THREE.Quaternion():null,_gpMat=HAS_THREE?new THREE.Matrix4():null;
+const _gpOrigin=HAS_THREE?new THREE.Vector3():null,_gpQuat=HAS_THREE?new THREE.Quaternion():null,_gpRecoil=HAS_THREE?new THREE.Quaternion():null,_gpMat=HAS_THREE?new THREE.Matrix4():null;
 const _gpRPalm=HAS_THREE?new THREE.Vector3():null,_gpLPalm=HAS_THREE?new THREE.Vector3():null,_gpFA=HAS_THREE?new THREE.Vector3():null;
 const _gpPalmR=HAS_THREE?new THREE.Vector3(-0.103,0.016,0):null,_gpPalmL=HAS_THREE?new THREE.Vector3(-0.102,0.016,0):null;
 function _smooth01(e0,e1,x){const t=Math.max(0,Math.min(1,(x-e0)/(e1-e0)));return t*t*(3-2*t);}
@@ -6707,8 +6792,9 @@ function fitGunToHand3(un,grp,isLive){
     roleAvg:(lk.s[0]+lk.s[1]+lk.s[2])/3
   });
   if(!pose)return;
-  if(isLive&&un._shootT!=null&&typeof FX!=='undefined'&&(FX.t-un._shootT)>=0&&(FX.t-un._shootT)<220){
-    pose.origin.addScaledVector(pose.dir,-0.045*(1-(FX.t-un._shootT)/220));
+  if(isLive&&ud._firePulse>0){
+    pose.origin.addScaledVector(pose.dir,-0.055*ud._firePulse);
+    pose.quat.multiply(_gpRecoil.setFromAxisAngle(_gpUp,0.035*ud._firePulse));
   }
   ud.gun.position.copy(pose.origin);
   ud.gun.quaternion.copy(pose.quat);
@@ -7545,7 +7631,7 @@ function init3D(){
   const wrap=document.getElementById('glWrap');if(!wrap)return false;
   const renderer=new THREE.WebGLRenderer({antialias:true});
   const isSw=isSoftwareGL3(renderer);
-  renderer.setPixelRatio(isSw?1:Math.min(window.devicePixelRatio||1,2));
+  renderer.setPixelRatio(isSw?1:Math.min(isMobileGL3()?1.5:(window.devicePixelRatio||1),2));
   renderer.outputColorSpace=THREE.SRGBColorSpace;
   renderer.toneMapping=THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure=1.08;
@@ -7763,7 +7849,7 @@ window.__render3D=function(){
     T3.lastRender=t;
     T3.renderer.render(T3.scene,T3.camera);
   }
-  try{const _s=skState(G.map.theme);window.__csn3d={theme:G.map.theme,geo:!!(_s&&_s.ready),units:T3.units?T3.units.size:0,tris:T3.renderer.info.render.triangles,calls:T3.renderer.info.render.calls,sw:T3.isSw,frame:((window.__csn3d&&window.__csn3d.frame)||0)+1};}catch(e){}
+  try{const _s=skState(G.map.theme);window.__csn3d={theme:G.map.theme,geo:!!(_s&&_s.ready),units:T3.units?T3.units.size:0,tris:T3.renderer.info.render.triangles,calls:T3.renderer.info.render.calls,sw:T3.isSw,frame:((window.__csn3d&&window.__csn3d.frame)||0)+1,ev:CLIP_EVENT_LOG.length,evLast:CLIP_EVENT_LOG[CLIP_EVENT_LOG.length-1]||null};}catch(e){}
 };
 /* ================= ATAJOS DE TECLADO EN PARTIDA ================= */
 const _keysHeld={};
@@ -7841,7 +7927,7 @@ function buildDemo(){
   try{renderer=new THREE.WebGLRenderer({antialias:true});}
   catch(e){demoStatus('Tu dispositivo no ha podido abrir WebGL, así que el 3D no puede mostrarse aquí: dentro de la partida seguirás viendo el tablero clásico, con las mismas reglas.');return false;}
   const isSw=isSoftwareGL3(renderer);
-  renderer.setPixelRatio(isSw?1:Math.min(window.devicePixelRatio||1,2));
+  renderer.setPixelRatio(isSw?1:Math.min(isMobileGL3()?1.5:(window.devicePixelRatio||1),2));
   renderer.outputColorSpace=THREE.SRGBColorSpace;
   renderer.toneMapping=THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure=1.08;

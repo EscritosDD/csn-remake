@@ -14,6 +14,10 @@ const prefix = process.argv[3] || ('cap_' + mapId);
 const waitMs = Number(process.argv[4] || 10000);
 const uiMode = mapId.startsWith('ui:') ? mapId.slice(3) : null;
 const moveMode = mapId.startsWith('move:') ? mapId.slice(5) : null;
+const combatMode = mapId.startsWith('combat:') ? mapId.slice(7) : null;
+const mobileArg = mapId.startsWith('mobile:') ? mapId.slice(7) : null;
+const software = /^(1|true|yes)$/i.test(process.env.CSN_SOFTWARE || '') || !!(mobileArg && mobileArg.startsWith('sw:'));
+const mobileMode = mobileArg ? (mobileArg.startsWith('sw:') ? mobileArg.slice(3) : mobileArg) : null;
 const PORT = 9360 + Math.floor(Math.random() * 40);
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
@@ -24,9 +28,13 @@ const result = {
   vistaClasica: 'skip',
   png3d: 0,
   pngUi: 0,
+  pngMobile: 0,
   png2d: 0,
   ui: null,
   move: null,
+  combat: null,
+  mobile: null,
+  software: software,
   tex: null,
   errores: []
 };
@@ -57,7 +65,7 @@ try {
   if (!/^[A-Za-z0-9_:-]+$/.test(mapId)) throw new Error('mapId no valido');
   fs.mkdirSync(CAP, { recursive: true });
   profile = fs.mkdtempSync(path.join(os.tmpdir(), 'csn-chrome-cap-'));
-  chrome = spawn(CHROME, [
+  const chromeArgs = [
     '--remote-debugging-port=' + PORT,
     '--window-size=' + WINDOW,
     '--window-position=40,40',
@@ -66,9 +74,11 @@ try {
     '--disable-background-timer-throttling',
     '--disable-backgrounding-occluded-windows',
     '--disable-renderer-backgrounding',
-    '--disable-features=CalculateNativeWinOcclusion',
-    '--user-data-dir=' + profile
-  ], { stdio: 'ignore' });
+    '--disable-features=CalculateNativeWinOcclusion'
+  ];
+  if (software) chromeArgs.push('--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader');
+  chromeArgs.push('--user-data-dir=' + profile);
+  chrome = spawn(CHROME, chromeArgs, { stdio: 'ignore' });
   chrome.on('error', e => { spawnError = e; });
 
   const wsUrl = await getWs();
@@ -106,6 +116,11 @@ try {
 
   await send('Page.enable');
   await send('Runtime.enable');
+  if (mobileMode) {
+    await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 2, mobile: true, screenOrientation: { type: 'portraitPrimary', angle: 0 } });
+    await send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 });
+    try { await send('Emulation.setEmitTouchEventsForMouse', { enabled: true, configuration: 'mobile' }); } catch {}
+  }
   await send('Page.navigate', { url: BASE_URL });
   await sleep(3000);
   try { await send('Page.bringToFront'); } catch {}
@@ -114,7 +129,8 @@ try {
   await sleep(10000);
   try { await send('Page.bringToFront'); } catch {}
 
-  if (uiMode) {
+  let mobileStart = null;
+  if (uiMode || mobileMode) {
     const screens = {
       nation: "localStorage.removeItem('radsoldiers_nation');location.reload();",
       menu: "showScreen('scr-play')",
@@ -124,11 +140,14 @@ try {
       how: "document.querySelector('#mainTabs [data-tab=\"how\"]').click()",
       pieces: "document.querySelector('#mainTabs [data-tab=\"viewer\"]').click();document.querySelector('#viewerKinds [data-kind=\"pieces\"]').click()",
       game: "quickStart('almacen')",
+      game3d: "quickStart('skirmish')",
       resume: "quickStart('almacen');document.querySelector('#mainTabs [data-tab=\"viewer\"]').click();document.querySelector('#mainTabs [data-tab=\"play\"]').click()"
     };
-    if (!screens[uiMode]) throw new Error('Pantalla ui no valida: ' + uiMode);
-    await ev(screens[uiMode]);
-    await sleep(waitMs);
+    const screenKey = mobileMode === 'game' ? 'game3d' : (mobileMode || uiMode);
+    if (!screens[screenKey]) throw new Error('Pantalla ui no valida: ' + screenKey);
+    await ev(screens[screenKey]);
+    if (mobileMode) mobileStart = { frame: await ev('(window.__csn3d&&window.__csn3d.frame)||0'), ms: Date.now() };
+    else await sleep(waitMs);
   } else if (/^campana:\d+$/.test(mapId)) {
     const missionNumber = Number(mapId.split(':')[1]);
     if (!Number.isInteger(missionNumber) || missionNumber < 1 || missionNumber > 6) {
@@ -143,20 +162,28 @@ try {
     const launched = await ev("(function(){const b=document.getElementById('launchBtn');if(!b)return 0;b.click();return 1})()");
     if (launched !== 1) throw new Error('No se encontro el boton para desplegar la mision.');
   } else {
-    await ev("window.quickStart(" + JSON.stringify(moveMode || mapId) + ")");
+    await ev("window.quickStart(" + JSON.stringify(moveMode || combatMode || mapId) + ")");
   }
 
   await sleep(waitMs);
+  result.errores = errs.slice(0, 5);
   if (moveMode) {
-    await ev("(function(){const u=G.units.find(x=>x.alive&&x.team===G.turn&&x.energy>0);if(!u)return 'no unit';selectUnit(u);const cells=[...reachable(u,u.energy).entries()].filter(e=>e[1]>0);cells.sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));const c=cells[0];if(!c)return 'no tile';const xy=c[0].split(',').map(Number);const p={unitId:u.id,from:[u.x,u.y],to:xy,samples:[]};window.__moveProbe=p;const t0=performance.now();function step(){const m=T3.units&&T3.units.get(u.id),ud=m&&m.userData;p.samples.push({t:Math.round(performance.now()-t0),lx:u.x,ly:u.y,x:+(u.dx!=null?u.dx:u.x).toFixed(4),y:+(u.dy!=null?u.dy:u.y).toFixed(4),f:u.facing,yaw:+(u._dispYaw||0).toFixed(4),turn:!!u._turning,clip:(ud&&ud._clipKey)||null});if(performance.now()-t0<2600)requestAnimationFrame(step);else p.done=true;}boardTileClick({x:xy[0],y:xy[1]});requestAnimationFrame(step);return 'ok';})()");
+    await ev("(function(){const u=G.units.find(x=>x.alive&&x.team===G.turn&&x.energy>0);if(!u)return 'no unit';selectUnit(u);const cells=[...reachable(u,u.energy).entries()].filter(e=>e[1]>0);cells.sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));const c=cells[0];if(!c)return 'no tile';const xy=c[0].split(',').map(Number);const p={unitId:u.id,from:[u.x,u.y],to:xy,samples:[]};window.__moveProbe=p;const t0=performance.now();function step(){const m=T3.units&&T3.units.get(u.id),ud=m&&m.userData;p.samples.push({t:Math.round(performance.now()-t0),lx:u.x,ly:u.y,x:+(u.dx!=null?u.dx:u.x).toFixed(4),y:+(u.dy!=null?u.dy:u.y).toFixed(4),f:u.facing,yaw:+(u._dispYaw||0).toFixed(4),turn:!!u._turning,clip:(ud&&ud._clipKey)||null,ct:+(ud&&ud._clipCt||0).toFixed(3)});if(performance.now()-t0<2600)requestAnimationFrame(step);else p.done=true;}boardTileClick({x:xy[0],y:xy[1]});requestAnimationFrame(step);return 'ok';})()");
     await sleep(3300);
     const rawMove = await ev('JSON.stringify(window.__moveProbe||{})');
     try { result.move = JSON.parse(rawMove); } catch { result.move = rawMove; }
   }
+  if (combatMode) {
+    const fired = await ev("(function(){const shooter=G.units.find(u=>u.alive&&u.team===G.turn&&u.weapon);if(!shooter)return 'no shooter';const target=G.units.find(u=>u.alive&&u.team!==shooter.team&&u.role);if(!target)return 'no target';const dirs=[[1,0],[-1,0],[0,1],[0,-1]];const spot=dirs.map(d=>[shooter.x+d[0],shooter.y+d[1]]).find(p=>p[0]>=0&&p[1]>=0&&p[0]<W&&p[1]<H&&!blocked(p[0],p[1])&&!G.units.some(o=>o!==target&&o.alive&&o.x===p[0]&&o.y===p[1]));if(!spot)return 'no spot';target.x=spot[0];target.y=spot[1];target.dx=spot[0];target.dy=spot[1];selectUnit(shooter);window.__csnEvents.length=0;const p={unitId:shooter.id,targetId:target.id,weapon:shooter.weapon,samples:[],events:[],ok:false};window.__combatProbe=p;const t0=performance.now();function step(){const m=T3&&T3.units&&T3.units.get(shooter.id),ud=m&&m.userData,mt=T3&&T3.units&&T3.units.get(target.id),ut=mt&&mt.userData;p.samples.push({t:Math.round(performance.now()-t0),key:(ud&&ud._clipKey)||null,ct:+(ud&&ud._clipCt||0).toFixed(3),ev:window.__csnEvents.length,flash:+((ud&&ud._flashPulse)||0).toFixed(2),recoil:+((ud&&ud._firePulse)||0).toFixed(2),hit:+((ud&&ud._hitPulse)||0).toFixed(2),keyT:(ut&&ut._clipKey)||null,ctT:+(ut&&ut._clipCt||0).toFixed(3),hitT:+((ut&&ut._hitPulse)||0).toFixed(2)});if(performance.now()-t0<2600)requestAnimationFrame(step);else{p.done=true;p.events=window.__csnEvents.slice();p.ok=p.events.some(e=>e.f==='PlayWeaponFire');}}const fired=tryShoot(shooter,target,shooter.weapon,null,{freeCost:true,silent:true,noReturn:true});p.fired=!!fired;if(!fired){p.done=true;return 'no fire';}requestAnimationFrame(step);return 'ok';})()");
+    if (fired !== 'ok') result.errores.push('combate: ' + fired);
+    await sleep(3300);
+    const rawCombat = await ev('JSON.stringify(window.__combatProbe||{})');
+    try { result.combat = JSON.parse(rawCombat); } catch { result.combat = rawCombat; }
+  }
   let state = await ev('JSON.stringify(window.__csn3d)');
   let tries = 0;
   let parsed = null;
-  while (!uiMode && tries < 3) {
+  while (!uiMode && !mobileMode && tries < 3) {
     try { parsed = JSON.parse(state); } catch { parsed = null; }
     if (parsed && parsed.units > 0) break;
     tries++;
@@ -166,18 +193,29 @@ try {
     state = await ev('JSON.stringify(window.__csn3d)');
   }
 
-  const shotSize = await shot(prefix + (uiMode ? '_ui' : '_3d'));
+  const shotSize = await shot(prefix + (mobileMode ? '_mobile' : uiMode ? '_ui' : '_3d'));
   result.csn3d = state;
-  result.png3d = uiMode ? 0 : shotSize;
+  result.png3d = uiMode || mobileMode ? 0 : shotSize;
   result.pngUi = uiMode ? shotSize : 0;
-  if (uiMode) {
+  result.pngMobile = mobileMode ? shotSize : 0;
+  if (uiMode || mobileMode) {
     const uiState = await ev("JSON.stringify({step:document.body.dataset.step,state:document.body.dataset.state,count:document.getElementById('stepCount')?.textContent,label:document.getElementById('stepLabel')?.textContent,detail:document.getElementById('stepDetail')?.textContent,screen:[...document.querySelectorAll('.screen.on')].map(s=>s.id)})");
     try { result.ui = JSON.parse(uiState); } catch { result.ui = uiState; }
+  }
+  if (mobileMode) {
+    try { parsed = JSON.parse(state); } catch { parsed = null; }
+    const rawMobile = await ev("JSON.stringify((function(){const b=document.getElementById('board'),br=b&&b.getBoundingClientRect(),acts=[...document.querySelectorAll('.actions button')].map(e=>e.getBoundingClientRect().height).filter(h=>h>0),tabs=[...document.querySelectorAll('nav.tabs button')].map(e=>e.getBoundingClientRect().height).filter(h=>h>0),de=document.documentElement;return {w:innerWidth,h:innerHeight,dpr:devicePixelRatio,touch:'ontouchstart' in window,scrollW:de.scrollWidth,clientW:de.clientWidth,board:br?{x:+br.x.toFixed(1),y:+br.y.toFixed(1),w:+br.width.toFixed(1),h:+br.height.toFixed(1),shown:br.width>0&&br.height>0}:null,actions:{count:acts.length,min:acts.length?Math.min(...acts):0},tabs:{count:tabs.length,min:tabs.length?Math.min(...tabs):0},sw:!!(window.__csn3d&&window.__csn3d.sw),fps:0};})())");
+    try {
+      result.mobile = JSON.parse(rawMobile);
+      if (mobileStart && result.mobile && parsed && parsed.frame > mobileStart.frame) {
+        result.mobile.fps = +((parsed.frame - mobileStart.frame) / ((Date.now() - mobileStart.ms) / 1000)).toFixed(1);
+      }
+    } catch { result.mobile = rawMobile; }
   }
 
   let want2d = false;
   try { parsed = JSON.parse(state); } catch { parsed = null; }
-  want2d = !uiMode && (process.argv.includes('--2d') || !(parsed && parsed.units > 0));
+  want2d = !uiMode && !mobileMode && (process.argv.includes('--2d') || !(parsed && parsed.units > 0));
   if (want2d) {
     result.vistaClasica = await ev("(function(){const b=document.querySelector('#viewSeg button[data-view=\"2d\"]');if(!b)return 'no btn';b.click();return 'ok'})()");
     await sleep(1500);
@@ -196,12 +234,19 @@ try {
     try { result.tex = JSON.parse(rawTex); } catch { result.tex = rawTex; }
   }
 
-  result.errores = errs.slice(0, 5);
   const sceneOk = uiMode ? true : !!(parsed && parsed.units > 0);
-  const pngOk = uiMode ? result.pngUi > 0 : result.png3d > 0;
+  const pngOk = uiMode ? result.pngUi > 0 : mobileMode ? result.pngMobile > 0 : result.png3d > 0;
   const moveOk = !moveMode || !!(result.move && result.move.samples && result.move.samples.length > 10);
-  result.ok = sceneOk && pngOk && moveOk && errs.length === 0;
+  const combatOk = !combatMode || !!(result.combat && result.combat.ok && result.combat.samples && result.combat.samples.length > 10 && result.combat.events && result.combat.events.length > 0);
+  const mobileOk = !mobileMode || !!(result.mobile && result.mobile.w <= 430 && result.mobile.scrollW <= result.mobile.clientW + 2 && (!result.mobile.board || !result.mobile.board.shown || result.mobile.board.w <= result.mobile.w + 2) && (!result.mobile.actions.count || result.mobile.actions.min >= 44));
+  const geoOk = !mobileMode || mobileMode !== 'game' || !!(parsed && parsed.geo === true);
+  const softwareOk = !software || !!(parsed && parsed.sw === true);
+  result.ok = sceneOk && pngOk && moveOk && combatOk && mobileOk && geoOk && softwareOk && errs.length === 0;
   if (moveMode && !moveOk) result.errores.push('movimiento sin muestras');
+  if (combatMode && !combatOk) result.errores.push('combate sin eventos de clip');
+  if (mobileMode && !mobileOk) result.errores.push('movil: layout fuera de viewport');
+  if (mobileMode && !geoOk) result.errores.push('movil: geometria del mapa no lista');
+  if (software && !softwareOk) result.errores.push('swiftshader no activo');
   if (!result.ok && errs.length === 0) result.errores.push('escena o captura vacia');
 } catch (e) {
   result.errores.push(String(e.message || e).slice(0, 200));

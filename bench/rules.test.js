@@ -13,7 +13,7 @@ function loadEngine() {
   const idx = code.indexOf(mark);
   assert.ok(idx > 0, 'INIT marker must exist');
   code = code.slice(0, idx);
-  code += '\n;globalThis.__api={startGame,endTurn,checkWin,coverLevel,isFlanked,hasLOS,smokeBlocksLOS,throwSmoke,placeMine,checkMines,throwFlash,damage,tryShoot,guideDrone,scoreDominationFor,domControl,screenStateFor,classicBoardMetrics,classicTileFromPoint,fitViewerDistance,viewerCenterOffset,gameplayModelPresentation,rootBonePositionForClip,validatedRigBoneInverses,resetCamState,resetCam3D,ROLES,WEAPONS,NATIONS,DOM_ZONES,DOM_TARGET,ESCORT_EXT,ESCORT_DRONE_HP,ESCORT_DRONE_MAXHP,get G(){return G;},get T3(){return T3;},set T3(v){T3=v;},setBuild3D(fn){window.__build3D=fn;},setTHREE(v){globalThis.THREE=v;},get setup(){return setup;},set myNation(v){myNation=v;},mkSquad(n){return DEFAULT_SQUADS[n].map(r=>({role:r,weapon:ROLES[r].weapons[0]}));}};';
+  code += '\n;globalThis.__api={startGame,endTurn,checkWin,coverLevel,isFlanked,hasLOS,smokeBlocksLOS,throwSmoke,placeMine,checkMines,throwFlash,damage,tryShoot,guideDrone,scoreDominationFor,domControl,screenStateFor,classicBoardMetrics,classicTileFromPoint,fitViewerDistance,viewerCenterOffset,gameplayModelPresentation,rootBonePositionForClip,validatedRigBoneInverses,sampleClipQuat,clipTrackAt,resetCamState,resetCam3D,ROLES,WEAPONS,NATIONS,DOM_ZONES,DOM_TARGET,ESCORT_EXT,ESCORT_DRONE_HP,ESCORT_DRONE_MAXHP,get G(){return G;},get T3(){return T3;},set T3(v){T3=v;},setBuild3D(fn){window.__build3D=fn;},dispatchClipEvents,get CLIP_EVENT_LOG(){return CLIP_EVENT_LOG;},fireClipFor,setTHREE(v){globalThis.THREE=v;},get setup(){return setup;},set myNation(v){myNation=v;},mkSquad(n){return DEFAULT_SQUADS[n].map(r=>({role:r,weapon:ROLES[r].weapons[0]}));}};';
 
   const magic = () => {
     const f = () => {};
@@ -120,6 +120,16 @@ test('clip root keeps a rig root offset while following pelvis motion', () => {
     result,
   );
   assert.deepEqual(result, { x: 0, y: 1.005, z: 0 });
+});
+
+test('clip quaternion sampling interpolates even when output aliases scratch', () => {
+  const api = loadEngine();
+  const track = { t: [0, 1], q: [[1, 0, 0, 0], [0, 0, 0, 1]] };
+  const out = { x: 0, y: 0, z: 0, w: 0, set(x, y, z, w) { this.x = x; this.y = y; this.z = z; this.w = w; return this; } };
+  api.sampleClipQuat(track, 0.5, out);
+  assert.ok(Math.abs(out.x - Math.SQRT1_2) < 0.001);
+  assert.ok(Math.abs(out.w - Math.SQRT1_2) < 0.001);
+  assert.ok(Math.abs(Math.hypot(out.x, out.y, out.z, out.w) - 1) < 0.001);
 });
 
 test('screen state preserves a live game when returning to Play', () => {
@@ -368,4 +378,38 @@ test('dead shooters cannot fire', () => {
   const target = G.units.find(u => u.team === 'B');
   shooter.alive = false;
   assert.equal(api.tryShoot(shooter, target, 'M4A1', null), false);
+});
+
+test('weapon families select their authored firing clip', () => {
+  const api = loadEngine();
+  const pick = cat => Object.keys(api.WEAPONS).find(name => api.WEAPONS[name].cat === cat);
+  assert.equal(api.fireClipFor(pick('Pistolas')), 'fire1h');
+  assert.equal(api.fireClipFor(pick('Ametralladoras')), 'fireMini');
+  api.WEAPONS.Katana = { cat: 'Cuerpo a cuerpo' };
+  assert.equal(api.fireClipFor('Katana'), 'fireMelee');
+});
+
+test('clip events fire once per crossing and reset when the clip rewinds', () => {
+  const api = loadEngine();
+  api.myNation = api.NATIONS[0];
+  Object.assign(api.setup, { mode: 'eliminacion', fmt: 2, opp: 'local', map: 'almacen', difficulty: 'normal' });
+  api.startGame(api.mkSquad(2), api.mkSquad(2));
+  const un = api.G.units[0];
+  const ud = {};
+  const clip = { events: [{ f: 'PlayFoley', t: 0.1 }, { f: 'PlayWeaponFire', t: 0.5 }, { f: 'OnAnimEvent', i: 10, t: 0.5 }] };
+  const before = api.CLIP_EVENT_LOG.length;
+  api.dispatchClipEvents(un, ud, clip, 'fire2h', 0.2, 1000);
+  assert.equal(api.CLIP_EVENT_LOG.length, before);
+  api.dispatchClipEvents(un, ud, clip, 'fire2h', 0.6, 1010);
+  let fired = api.CLIP_EVENT_LOG.slice(before).filter(e => e.f === 'PlayWeaponFire');
+  assert.equal(fired.length, 1);
+  assert.equal(ud._firePulse, 1);
+  assert.equal(ud._flashPulse, 1);
+  api.dispatchClipEvents(un, ud, clip, 'fire2h', 0.7, 1020);
+  fired = api.CLIP_EVENT_LOG.slice(before).filter(e => e.f === 'PlayWeaponFire');
+  assert.equal(fired.length, 1);
+  api.dispatchClipEvents(un, ud, clip, 'fire2h', 0, 1030);
+  api.dispatchClipEvents(un, ud, clip, 'fire2h', 0.6, 1040);
+  fired = api.CLIP_EVENT_LOG.slice(before).filter(e => e.f === 'PlayWeaponFire');
+  assert.equal(fired.length, 2);
 });

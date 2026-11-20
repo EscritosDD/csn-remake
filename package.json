@@ -6,8 +6,9 @@
   "scripts": {
     "dev": "node server.js",
     "build": "node bench/check-syntax.js",
-    "lint": "node --check server.js && node --check _capture_all.mjs && node --check bench/winding.test.js && node --check bench/xss.test.js && node --check bench/ui.test.js && node --check bench/movement.test.js && node bench/check-syntax.js",
-    "test": "node --test bench/data.test.js bench/rules.test.js bench/winding.test.js bench/xss.test.js bench/ui.test.js bench/movement.test.js",
+    "lint": "node --check server.js && node --check _capture_all.mjs && node --check bench/winding.test.js && node --check bench/xss.test.js && node --check bench/ui.test.js && node --check bench/movement.test.js && node --check bench/clips.test.js && node --check bench/combat.test.js && node --check bench/mobile.test.js && node bench/check-syntax.js",
+    "test": "node --test bench/data.test.js bench/rules.test.js bench/winding.test.js bench/xss.test.js bench/ui.test.js bench/movement.test.js bench/clips.test.js bench/combat.test.js bench/mobile.test.js",
+    "clips": "python tools/validar_clips.py",
     "verify": "powershell -ExecutionPolicy Bypass -File bench/VERIFICAR.ps1",
     "start": "node server.js"
   }

@@ -8,25 +8,29 @@ Write-Host "== CSN · verificacion completa ==" -ForegroundColor Cyan
 
 $fail = 0
 
-Write-Host "`n[1/6] Sintaxis del script inline" -ForegroundColor Yellow
+Write-Host "`n[1/9] Sintaxis del script inline" -ForegroundColor Yellow
 node bench/check-syntax.js
 if ($LASTEXITCODE -ne 0) { $fail++ }
 
-Write-Host "`n[2/6] Tableros (19, simetria 180 y solapes)" -ForegroundColor Yellow
+Write-Host "`n[2/9] Tableros (19, simetria 180 y solapes)" -ForegroundColor Yellow
 $boards = node bench/boards.js 2>&1
 $okBoards = ($boards | Select-String " ok " | Measure-Object).Count
 $boards | Select-Object -Last 3
 if ($okBoards -lt 19) { $fail++; Write-Host "  tableros ok: $okBoards (esperado 19)" -ForegroundColor Red }
 
-Write-Host "`n[3/6] Reglas (motor)" -ForegroundColor Yellow
+Write-Host "`n[3/9] Reglas (motor)" -ForegroundColor Yellow
 node bench/rules.test.js 2>&1 | Select-String "pass|fail"
 if ($LASTEXITCODE -ne 0) { $fail++ }
+node bench/combat.test.js 2>&1 | Select-String "pass|fail"
+if ($LASTEXITCODE -ne 0) { $fail++ }
+node bench/mobile.test.js 2>&1 | Select-String "pass|fail"
+if ($LASTEXITCODE -ne 0) { $fail++ }
 
-Write-Host "`n[4/6] Datos (personajes, naciones, skins, misiones, voces)" -ForegroundColor Yellow
+Write-Host "`n[4/9] Datos (personajes, naciones, skins, misiones, voces)" -ForegroundColor Yellow
 node bench/data.test.js 2>&1 | Select-String "pass|fail"
 if ($LASTEXITCODE -ne 0) { $fail++ }
 
-Write-Host "`n[5/6] Humo 3D en navegador (headless)" -ForegroundColor Yellow
+Write-Host "`n[5/9] Humo 3D en navegador (headless)" -ForegroundColor Yellow
 $alive = $false
 try { $r = Invoke-WebRequest -Uri "http://127.0.0.1:8000/" -UseBasicParsing -TimeoutSec 4; $alive = ($r.StatusCode -eq 200) } catch { $alive = $false }
 if (-not $alive) {
@@ -48,7 +52,11 @@ try {
   Write-Host "  captura: JSON no valido · $($_.Exception.Message)" -ForegroundColor Red
 }
 
-Write-Host "`n[6/6] Movimiento 3D y texturas (headless)" -ForegroundColor Yellow
+Write-Host "`n[6/9] Clips originales (40 contra el IPA historico)" -ForegroundColor Yellow
+python tools/validar_clips.py
+if ($LASTEXITCODE -ne 0) { $fail++ }
+
+Write-Host "`n[7/9] Movimiento 3D y texturas (headless)" -ForegroundColor Yellow
 $mvOut = & node _capture_all.mjs move:skirmish MOVE 8000 2>&1
 $mvCode = $LASTEXITCODE
 if ($mvCode -ne 0) { $fail++; Write-Host "  captura movimiento: exit $mvCode" -ForegroundColor Red }
@@ -65,7 +73,40 @@ try {
   Write-Host "  movimiento: JSON no valido · $($_.Exception.Message)" -ForegroundColor Red
 }
 
+Write-Host "`n[8/9] Combate 3D y eventos del clip (headless)" -ForegroundColor Yellow
+$cbOut = & node _capture_all.mjs combat:skirmish COMBAT 8000 2>&1
+$cbCode = $LASTEXITCODE
+if ($cbCode -ne 0) { $fail++; Write-Host "  captura combate: exit $cbCode" -ForegroundColor Red }
+try {
+  $cbLine = $cbOut | Where-Object { "$_" -match "^\{" } | Select-Object -Last 1
+  $cb = "$cbLine" | ConvertFrom-Json -ErrorAction Stop
+  $cbEvents = if ($cb.combat -and $cb.combat.events) { $cb.combat.events.Count } else { 0 }
+  Write-Host ("  eventos: " + $cbEvents + " · muestras: " + @($cb.combat.samples).Count) -ForegroundColor DarkYellow
+  if ($cb.ok -ne $true) { $fail++; Write-Host "  combate: ok=false · $($cb.errores -join ' | ')" -ForegroundColor Red }
+  elseif ($cbEvents -lt 1) { $fail++; Write-Host "  combate: sin eventos de clip" -ForegroundColor Red }
+} catch {
+  $fail++
+  Write-Host "  combate: JSON no valido · $($_.Exception.Message)" -ForegroundColor Red
+}
+
+Write-Host "`n[9/9] Movil y SwiftShader (headless)" -ForegroundColor Yellow
+$mbOut = & node _capture_all.mjs mobile:sw:game MOBILE_SW 8000 2>&1
+$mbCode = $LASTEXITCODE
+if ($mbCode -ne 0) { $fail++; Write-Host "  captura movil: exit $mbCode" -ForegroundColor Red }
+try {
+  $mbLine = $mbOut | Where-Object { "$_" -match "^\{" } | Select-Object -Last 1
+  $mb = "$mbLine" | ConvertFrom-Json -ErrorAction Stop
+  $mbState = "$($mb.csn3d)" | ConvertFrom-Json -ErrorAction Stop
+  Write-Host ("  viewport: " + $mb.mobile.w + "x" + $mb.mobile.h + " · fps: " + $mb.mobile.fps + " · sw: " + $mbState.sw) -ForegroundColor DarkYellow
+  if ($mb.ok -ne $true) { $fail++; Write-Host "  movil: ok=false · $($mb.errores -join ' | ')" -ForegroundColor Red }
+  elseif ($mbState.sw -ne $true) { $fail++; Write-Host "  movil: SwiftShader no activo" -ForegroundColor Red }
+  elseif ([double]$mb.mobile.fps -lt 5) { $fail++; Write-Host "  movil: fps demasiado bajo ($($mb.mobile.fps))" -ForegroundColor Red }
+} catch {
+  $fail++
+  Write-Host "  movil: JSON no valido · $($_.Exception.Message)" -ForegroundColor Red
+}
+
 Write-Host "`n== RESULTADO ==" -ForegroundColor Cyan
-if ($fail -eq 0) { Write-Host "TODO OK: sintaxis, 19 tableros, reglas, datos, humo 3D y movimiento." -ForegroundColor Green }
+if ($fail -eq 0) { Write-Host "TODO OK: sintaxis, 19 tableros, reglas, datos, clips, humo 3D, movimiento, combate y movil/SwiftShader." -ForegroundColor Green }
 else { Write-Host "FALLOS: $fail bloque(s). Revisa la salida de arriba." -ForegroundColor Red }
 exit $fail

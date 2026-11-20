@@ -1,0 +1,329 @@
+{
+ "total": 40,
+ "rootScale": 0.5122,
+ "sourceCommit": "850b401759a426d283458efea57d4dd29a7df769",
+ "sourcePath": "referencia_original/datos/animaciones_alineadas",
+ "clips": [
+  {
+   "key": "commanderOrder",
+   "source": "Commander_Order",
+   "file": "Commander_Order.json",
+   "duration": 3.8,
+   "events": 2,
+   "copies": 2,
+   "rootTransform": "authored"
+  },
+  {
+   "key": "death",
+   "source": "Death_Bullet",
+   "file": "Death_Bullet.json",
+   "duration": 1.0667,
+   "events": 7,
+   "copies": 4
+  },
+  {
+   "key": "deathExpl",
+   "source": "Death_Explosion",
+   "file": "Death_Explosion.json",
+   "duration": 3.0667,
+   "events": 6,
+   "copies": 4
+  },
+  {
+   "key": "deploy",
+   "source": "Deploy",
+   "file": "Deploy.json",
+   "duration": 0.6,
+   "events": 5,
+   "copies": 4
+  },
+  {
+   "key": "fire1h",
+   "source": "1H_Fire_Light",
+   "file": "1H_Fire_Light.json",
+   "duration": 2.0333,
+   "events": 10,
+   "copies": 4
+  },
+  {
+   "key": "fire1hBurst",
+   "source": "1H_Fire_Burst",
+   "file": "1H_Fire_Burst.json",
+   "duration": 2.8333,
+   "events": 18,
+   "copies": 4
+  },
+  {
+   "key": "fire1hHeavy",
+   "source": "1H_Fire_Heavy",
+   "file": "1H_Fire_Heavy.json",
+   "duration": 2.0333,
+   "events": 7,
+   "copies": 4
+  },
+  {
+   "key": "fire2h",
+   "source": "2H_Fire_Light",
+   "file": "2H_Fire_Light.json",
+   "duration": 3.4,
+   "events": 14,
+   "copies": 4
+  },
+  {
+   "key": "fireBurst",
+   "source": "2H_Fire_Burst",
+   "file": "2H_Fire_Burst.json",
+   "duration": 3.5667,
+   "events": 23,
+   "copies": 4
+  },
+  {
+   "key": "fireHeavy",
+   "source": "2H_Fire_Heavy",
+   "file": "2H_Fire_Heavy.json",
+   "duration": 2.8333,
+   "events": 13,
+   "copies": 4
+  },
+  {
+   "key": "fireMelee",
+   "source": "Melee_Fire",
+   "file": "Melee_Fire.json",
+   "duration": 2.1667,
+   "events": 7,
+   "copies": 4
+  },
+  {
+   "key": "fireMini",
+   "source": "2H_Fire_MiniGun",
+   "file": "2H_Fire_MiniGun.json",
+   "duration": 3.2333,
+   "events": 56,
+   "copies": 4
+  },
+  {
+   "key": "fireShoulder",
+   "source": "2H_Fire_ShoulderMount",
+   "file": "2H_Fire_ShoulderMount.json",
+   "duration": 4.3667,
+   "events": 12,
+   "copies": 4
+  },
+  {
+   "key": "hit",
+   "source": "Hit",
+   "file": "Hit.json",
+   "duration": 0.9,
+   "events": 6,
+   "copies": 4
+  },
+  {
+   "key": "hitBurst",
+   "source": "Hit_Burst",
+   "file": "Hit_Burst.json",
+   "duration": 1.6667,
+   "events": 12,
+   "copies": 4
+  },
+  {
+   "key": "hitExpl",
+   "source": "Hit_Explosion",
+   "file": "Hit_Explosion.json",
+   "duration": 3.1667,
+   "events": 6,
+   "copies": 4
+  },
+  {
+   "key": "hitMelee",
+   "source": "Hit_Melee",
+   "file": "Hit_Melee.json",
+   "duration": 1.8333,
+   "events": 4,
+   "copies": 4
+  },
+  {
+   "key": "idle1h",
+   "source": "1H_Idle_01",
+   "file": "1H_Idle_01.json",
+   "duration": 2.5,
+   "events": 0,
+   "copies": 4
+  },
+  {
+   "key": "idle1h2",
+   "source": "1H_Idle_02",
+   "file": "1H_Idle_02.json",
+   "duration": 4.2333,
+   "events": 1,
+   "copies": 4
+  },
+  {
+   "key": "idle2h",
+   "source": "2H_Idle_01",
+   "file": "2H_Idle_01.json",
+   "duration": 2.5,
+   "events": 0,
+   "copies": 4
+  },
+  {
+   "key": "idle2h2",
+   "source": "2H_Idle_02",
+   "file": "2H_Idle_02.json",
+   "duration": 2.6667,
+   "events": 1,
+   "copies": 4
+  },
+  {
+   "key": "idleMelee",
+   "source": "Melee_Idle_01",
+   "file": "Melee_Idle_01.json",
+   "duration": 2.5,
+   "events": 0,
+   "copies": 4
+  },
+  {
+   "key": "idleMelee2",
+   "source": "Melee_Idle_02",
+   "file": "Melee_Idle_02.json",
+   "duration": 3.5667,
+   "events": 1,
+   "copies": 4
+  },
+  {
+   "key": "interact",
+   "source": "Interact",
+   "file": "Interact.json",
+   "duration": 2.0667,
+   "events": 4,
+   "copies": 4
+  },
+  {
+   "key": "pickup",
+   "source": "1H_PickUp",
+   "file": "1H_PickUp.json",
+   "duration": 2.3333,
+   "events": 0,
+   "copies": 1
+  },
+  {
+   "key": "reference",
+   "source": "Take 001",
+   "file": "Take_001.json",
+   "duration": 4.73333,
+   "events": 0,
+   "copies": 3
+  },
+  {
+   "key": "throw",
+   "source": "Throw",
+   "file": "Throw.json",
+   "duration": 1.6,
+   "events": 6,
+   "copies": 4
+  },
+  {
+   "key": "turn1h180",
+   "source": "1H_Turn_180",
+   "file": "1H_Turn_180.json",
+   "duration": 0.6667,
+   "events": 4,
+   "copies": 4
+  },
+  {
+   "key": "turn1hL",
+   "source": "1H_Turn_L",
+   "file": "1H_Turn_L.json",
+   "duration": 0.6667,
+   "events": 4,
+   "copies": 4
+  },
+  {
+   "key": "turn1hR",
+   "source": "1H_Turn_R",
+   "file": "1H_Turn_R.json",
+   "duration": 0.6667,
+   "events": 4,
+   "copies": 4
+  },
+  {
+   "key": "turn2h180",
+   "source": "2H_Turn_180",
+   "file": "2H_Turn_180.json",
+   "duration": 0.6667,
+   "events": 4,
+   "copies": 4
+  },
+  {
+   "key": "turn2hL",
+   "source": "2H_Turn_L",
+   "file": "2H_Turn_L.json",
+   "duration": 0.6667,
+   "events": 4,
+   "copies": 4
+  },
+  {
+   "key": "turn2hR",
+   "source": "2H_Turn_R",
+   "file": "2H_Turn_R.json",
+   "duration": 0.6667,
+   "events": 4,
+   "copies": 4
+  },
+  {
+   "key": "turnMelee180",
+   "source": "Melee_Turn_180",
+   "file": "Melee_Turn_180.json",
+   "duration": 0.6667,
+   "events": 4,
+   "copies": 4
+  },
+  {
+   "key": "turnMeleeL",
+   "source": "Melee_Turn_L",
+   "file": "Melee_Turn_L.json",
+   "duration": 0.6667,
+   "events": 4,
+   "copies": 4
+  },
+  {
+   "key": "turnMeleeR",
+   "source": "Melee_Turn_R",
+   "file": "Melee_Turn_R.json",
+   "duration": 0.6667,
+   "events": 4,
+   "copies": 4
+  },
+  {
+   "key": "victory",
+   "source": "Victory",
+   "file": "Victory.json",
+   "duration": 6.7333,
+   "events": 6,
+   "copies": 4
+  },
+  {
+   "key": "walk1h",
+   "source": "1H_Walk",
+   "file": "1H_Walk.json",
+   "duration": 0.4,
+   "events": 4,
+   "copies": 4
+  },
+  {
+   "key": "walk2h",
+   "source": "2H_Walk",
+   "file": "2H_Walk.json",
+   "duration": 0.4,
+   "events": 4,
+   "copies": 4
+  },
+  {
+   "key": "walkMelee",
+   "source": "Melee_Walk",
+   "file": "Melee_Walk.json",
+   "duration": 0.4,
+   "events": 4,
+   "copies": 4
+  }
+ ]
+}

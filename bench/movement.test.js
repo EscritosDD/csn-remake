@@ -25,6 +25,14 @@ test('el paso de la marcha sigue la distancia real', () => {
   assert.match(html, /\|\|!!un\._drawPath/);
 });
 
+test('los giros usan los clips reales de 90 y 180 grados', () => {
+  assert.match(html, /un\._turning&&clips\['turn'\+stance\+'L'\]/);
+  assert.match(html, /Math\.abs\(arc\)>2\.3\?\('turn'\+stance\+'180'\)/);
+  assert.match(html, /'turn'\+stance\+\(arc>0\?'L':'R'\)/);
+  assert.match(html, /ct=\(un\._turnProg\|\|0\)\*clips\[key\]\.dur/);
+  assert.match(capture, /clip:\(ud&&ud\._clipKey\)\|\|null,ct:/);
+});
+
 test('las texturas de soldado evitan sangrado de atlas', () => {
   assert.match(html, /t\.generateMipmaps=false/);
   assert.match(html, /t\.minFilter=THREE\.LinearFilter/);
