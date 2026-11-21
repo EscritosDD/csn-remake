@@ -1,0 +1,86 @@
+:root{
+  --bg:#0e120c; --bg2:#151a12; --panel:#1a2016; --panel2:#212a1c; --line:#39452f;
+  --ink:#eef2e4; --muted:#a9b39a; --faint:#77836a;
+  --amber:#f2b234; --amber2:#d9961c; --olive:#8aa653; --olive2:#6d8a3e;
+  --teamA:#39c2d7; --teamB:#ff7a45; --danger:#e5484d; --good:#57c46a;
+  --paper:#f4f1e6;
+  --radius:10px;
+}
+
+@media (prefers-color-scheme: light){:root{ --bg:#e9eadf; --bg2:#dfe1d2; --panel:#f7f6ee; --panel2:#fffef8; --line:#c3c8ae; --ink:#1c2115; --muted:#55604a; --faint:#7c8770; }}
+
+*{box-sizing:border-box}
+
+html{scroll-behavior:smooth}
+
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Barlow',system-ui,sans-serif;font-size:16px;line-height:1.45}
+
+button,[role="button"],select,input,summary{min-height:40px}
+
+button{font-family:inherit;cursor:pointer}
+
+h1,h2,h3,.cond{font-family:'Barlow Condensed','Barlow',sans-serif;letter-spacing:.02em}
+
+.mono{font-family:'JetBrains Mono',monospace}
+
+.wrap{max-width:1280px;margin:0 auto;padding:0 16px 48px}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--ink);font-weight:700;font-size:15px;padding:10px 18px;text-decoration:none}
+
+.btn.primary{background:var(--amber);border-color:var(--amber);color:#1a1302}
+
+.btn.primary:hover{background:var(--amber2)}
+
+.btn.olive{background:var(--olive);border-color:var(--olive);color:#101503}
+
+.btn.ghost{background:transparent}
+
+.btn:disabled{opacity:.45;cursor:not-allowed}
+
+.btn.big{font-size:17px;padding:13px 24px}
+
+.btn.danger{border-color:var(--danger);color:var(--danger);background:transparent}
+
+.kbd{font-family:'JetBrains Mono';background:var(--bg2);border:1px solid var(--line);border-radius:4px;padding:1px 6px;font-size:12.5px}
+
+.btn{border-width:2px;box-shadow:0 4px 0 rgba(0,0,0,.32);transition:transform .08s, box-shadow .08s}
+
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.32)}
+
+.btn.primary{background:linear-gradient(180deg,#ffc94f,#f5a623);border-color:#8a5c06;color:#241703}
+
+.btn.primary:hover{background:linear-gradient(180deg,#ffd26b,#f7ae2e)}
+
+.btn.olive{background:linear-gradient(180deg,#a4c46a,#7fa845);border-color:#4d6625;color:#131a04}
+
+select{border-width:2px}
+
+@media (prefers-color-scheme: light){:root{--panelveil:rgba(247,246,238,.94)}}
+
+.btn{background:var(--panel2);border:1.5px solid var(--line);color:var(--ink);box-shadow:0 2px 0 rgba(0,0,0,.18)}
+
+.btn.primary{background:linear-gradient(180deg,#f7c44b,#e6a322);border-color:#a8710b;color:#201402;box-shadow:0 2px 0 #8a5b07}
+
+.btn.primary:hover{filter:brightness(1.05)}
+
+.btn.olive{background:linear-gradient(180deg,#98b55d,#77933f);border-color:#526928;color:#141c07;box-shadow:0 2px 0 #42561f}
+
+.btn.ghost{background:var(--panel2);border-color:var(--line);color:var(--ink)}
+
+.btn.danger{background:linear-gradient(180deg,#e9585c,#c9373c);border-color:#8f1e22;color:#fff8f4;box-shadow:0 2px 0 #76171a}
+
+.btn.danger:hover{filter:brightness(1.06)}
+
+.btn.primary{font-family:'Barlow Condensed','Barlow',sans-serif;text-transform:uppercase;letter-spacing:.05em;font-size:17px}
+
+.btn.primary.big{font-size:19px}
+
+.btn,nav.tabs button,.seg button,.actions button,.filters button,.viewer-list button,.mode-card button,.campaign-mission,.barrack-card button{min-height:44px}
+
+.btn{padding:11px 18px}
+
+:where(button,a,select,input,summary,[role="button"]):focus-visible{outline:3px solid var(--amber);outline-offset:2px;box-shadow:0 0 0 5px rgba(242,178,52,.18)}
+
+.btn:hover:not(:disabled),nav.tabs button:hover,.seg button:hover,.filters button:hover,.viewer-list button:hover{transform:translateY(-1px)}
+
+.btn:active:not(:disabled),nav.tabs button:active,.seg button:active{transform:translateY(1px)}

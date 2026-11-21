@@ -5,15 +5,17 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const root = path.dirname(__dirname);
-const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+const html = require('./source');
 const capture = fs.readFileSync(path.join(root, '_capture_all.mjs'), 'utf8');
+const cssFiles = ['layout.css', 'game.css', 'viewer.css', 'theme.css'];
+const css = cssFiles.map(name => fs.readFileSync(path.join(root, 'styles', name), 'utf8')).join('\n');
 
 test('el viewport movil mantiene controles tocables y tablero contenido', () => {
   assert.match(html, /<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"\/>/);
-  assert.match(html, /#glWrap canvas\{[^}]*touch-action:none/);
-  assert.match(html, /canvas#board\{[^}]*touch-action:manipulation/);
-  assert.match(html, /@media\(max-width:640px\)\{#glWrap\{aspect-ratio:1\/1;min-height:280px\}/);
-  assert.match(html, /min-height:44px/);
+  assert.match(css, /#glWrap canvas\{[^}]*touch-action:none/);
+  assert.match(css, /canvas#board\{[^}]*touch-action:manipulation/);
+  assert.match(css, /@media\(max-width:640px\)\{#glWrap\{aspect-ratio:1\/1;min-height:280px\}/);
+  assert.match(css, /min-height:44px/);
 });
 
 test('el render reduce resolucion en movil y en software', () => {

@@ -6,14 +6,14 @@ const path = require('node:path');
 const vm = require('node:vm');
 
 function loadEngine() {
-  const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
-  let code = (html.match(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/i) || [])[1];
-  assert.ok(code, 'inline script must exist in index.html');
+  let code = fs.readFileSync(path.join(__dirname, '..', 'src', 'main.js'), 'utf8');
+  assert.ok(code, 'src/main.js must exist');
+  code = code.replace(/^\s*import\s+[^;]+;\s*$/gm, '');
   const mark = '/* ================= INIT ================= */';
   const idx = code.indexOf(mark);
   assert.ok(idx > 0, 'INIT marker must exist');
   code = code.slice(0, idx);
-  code += '\n;globalThis.__api={startGame,endTurn,checkWin,coverLevel,isFlanked,hasLOS,smokeBlocksLOS,throwSmoke,placeMine,checkMines,throwFlash,damage,tryShoot,guideDrone,scoreDominationFor,domControl,screenStateFor,classicBoardMetrics,classicTileFromPoint,fitViewerDistance,viewerCenterOffset,gameplayModelPresentation,rootBonePositionForClip,validatedRigBoneInverses,sampleClipQuat,clipTrackAt,resetCamState,resetCam3D,ROLES,WEAPONS,NATIONS,DOM_ZONES,DOM_TARGET,ESCORT_EXT,ESCORT_DRONE_HP,ESCORT_DRONE_MAXHP,get G(){return G;},get T3(){return T3;},set T3(v){T3=v;},setBuild3D(fn){window.__build3D=fn;},dispatchClipEvents,get CLIP_EVENT_LOG(){return CLIP_EVENT_LOG;},fireClipFor,setTHREE(v){globalThis.THREE=v;},get setup(){return setup;},set myNation(v){myNation=v;},mkSquad(n){return DEFAULT_SQUADS[n].map(r=>({role:r,weapon:ROLES[r].weapons[0]}));}};';
+  code += '\n;globalThis.__api={startGame,endTurn,checkWin,coverLevel,isFlanked,hasLOS,smokeBlocksLOS,throwSmoke,placeMine,checkMines,throwFlash,damage,tryShoot,guideDrone,scoreDominationFor,domControl,screenStateFor,classicBoardMetrics,classicTileFromPoint,fitViewerDistance,viewerCenterOffset,gameplayModelPresentation,rootBonePositionForClip,validatedRigBoneInverses,sampleClipQuat,clipTrackAt,resetCamState,resetCam3D,ROLES,WEAPONS,NATIONS,DOM_ZONES,DOM_TARGET,ESCORT_EXT,ESCORT_DRONE_HP,ESCORT_DRONE_MAXHP,get G(){return G;},get T3(){return T3;},set T3(v){setT3(v);},setBuild3D(fn){window.__build3D=fn;},dispatchClipEvents,get CLIP_EVENT_LOG(){return CLIP_EVENT_LOG;},fireClipFor,setTHREE(v){globalThis.THREE=v;},get setup(){return setup;},set myNation(v){myNation=v;},mkSquad(n){return DEFAULT_SQUADS[n].map(r=>({role:r,weapon:ROLES[r].weapons[0]}));}};';
 
   const magic = () => {
     const f = () => {};
@@ -48,6 +48,23 @@ function loadEngine() {
   };
   sb.window = sb; sb.self = sb; sb.globalThis = sb;
   vm.createContext(sb);
+  const modules = [
+    'data/nations', 'data/weapons', 'data/roles', 'data/cast', 'data/maps', 'data/map-pieces', 'data/ui-copy', 'ui/ui-shell', 'game/board', 'game/combat', 'game/gadgets', 'game/missions', 'game/turn', 'game/ai-escort', 'game/ai', 'game/input',
+    'core/storage', 'core/rng', 'core/time', 'core/geometry', 'audio/sound',
+    'render2d/tiles', 'render2d/board', 'render2d/sprites', 'render2d/fx',
+    'render3d/scene', 'render3d/gun', 'render3d/assets-real', 'render3d/assets-geo', 'render3d/assets-meshy', 'render3d/env', 'render3d/assets-weapons', 'render3d/gun-pose', 'render3d/clips', 'render3d/retarget', 'render3d/soldiers', 'render3d/real-sprites', 'render3d/world-props', 'render3d/world', 'render3d/fx3d', 'render3d/camera3d'
+  ];
+  for (const name of modules) {
+    const src = fs.readFileSync(path.join(__dirname, '..', 'src', name + '.js'), 'utf8')
+      .replace(/^\s*import\s+[^;]+;\s*$/gm, '')
+      .replace(/^export\s+/gm, '');
+    const decls = [...src.matchAll(/^(async function|function|let|const|var)\s+([A-Za-z_$][\w$]*)/gm)]
+      .map(m => ({ n: m[2], mutable: m[1] === 'let' || m[1] === 'var' }));
+    const expose = decls.map(d => d.mutable
+      ? 'Object.defineProperty(globalThis,"' + d.n + '",{configurable:true,get:()=>' + d.n + ',set:v=>{' + d.n + '=v;}});'
+      : 'globalThis.' + d.n + '=' + d.n + ';').join('');
+    vm.runInContext(src + '\n;' + expose, sb, { filename: 'src/' + name + '.js' });
+  }
   vm.runInContext(code, sb, { filename: 'index.html' });
   return sb.__api;
 }

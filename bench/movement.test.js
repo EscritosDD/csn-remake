@@ -5,7 +5,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const root = path.dirname(__dirname);
-const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+const html = require('./source');
+const geometry = fs.readFileSync(path.join(root, 'src', 'core', 'geometry.js'), 'utf8');
 const capture = fs.readFileSync(path.join(root, '_capture_all.mjs'), 'utf8');
 
 test('el movimiento 3D sigue un camino de casillas', () => {
@@ -15,7 +16,7 @@ test('el movimiento 3D sigue un camino de casillas', () => {
   assert.match(html, /G\.units\.forEach\(un=>updateUnitDrawPosition\(un,drawNow\)\)/);
   assert.match(html, /un\._drawPath=pts;un\._drawSegs=segs;un\._drawLen=total/);
   assert.match(html, /un\._moveYaw=Math\.atan2\(s\.b\.y-s\.a\.y,s\.b\.x-s\.a\.x\)/);
-  assert.match(html, /function facingYaw\(u\)\{if\(u\._moveYaw!=null\)return u\._moveYaw/);
+  assert.match(geometry, /function facingYaw\(u\)\{if\(u\._moveYaw!=null\)return u\._moveYaw/);
 });
 
 test('el paso de la marcha sigue la distancia real', () => {

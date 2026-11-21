@@ -1,0 +1,47 @@
+.viewer-character-controls{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:end;margin-top:12px}
+
+.viewer-character-controls label{display:grid;gap:5px;color:var(--muted);font-size:13px;font-weight:600}
+
+.viewer-character-controls select{width:100%;min-width:0;background:var(--panel2);border:1px solid var(--line);border-radius:8px;color:var(--ink);padding:8px 10px}
+
+.viewer-skin-nav{display:flex;align-items:center;gap:8px}
+
+.viewer-skin-nav button{min-width:42px;border:1px solid var(--line);border-radius:8px;background:var(--panel2);color:var(--ink);font-size:20px}
+
+.viewer-skin-nav button:disabled{opacity:.45;cursor:default}
+
+.viewer-skin-name{min-width:120px;text-align:center;color:var(--muted);font-size:13px}
+
+.viewer-list{display:flex;flex-direction:column;gap:6px;max-height:620px;overflow:auto}
+
+.viewer-list button{background:var(--panel2);border:1.5px solid var(--line);border-radius:8px;color:var(--ink);padding:9px 12px;text-align:left;font-weight:600}
+
+.viewer-list button.on{border-color:var(--amber);background:color-mix(in srgb,var(--amber) 12%,var(--panel2))}
+
+.viewer-stage{min-width:0}
+
+.viewer-canvas{position:relative;height:min(62vh,560px);min-height:320px;overflow:hidden;border:2px solid var(--line);border-radius:12px;background:radial-gradient(ellipse at 50% 40%,#30392c,#11150f 72%);touch-action:none}
+
+.viewer-canvas canvas{display:block;width:100%;height:100%}
+
+.viewer-status{position:absolute;inset:0;display:grid;place-items:center;padding:20px;text-align:center;color:var(--muted);pointer-events:none}
+
+.viewer-meta{display:grid;grid-template-columns:minmax(0,1fr) 120px;gap:12px;align-items:center;margin-top:10px}
+
+.viewer-texture{width:120px;height:76px;object-fit:contain;background:#11150f;border:1px solid var(--line);border-radius:7px}
+
+.viewer-zoom{display:flex;align-items:center;gap:10px;margin-top:10px;color:var(--muted);font-size:13px}
+
+.viewer-zoom input{flex:1;min-width:80px;accent-color:var(--amber)}
+
+@media(max-width:700px){.viewer-character-controls{grid-template-columns:1fr}}
+
+@media(max-width:700px){.viewer-skin-nav{justify-content:center}}
+
+@media(max-width:700px){.viewer-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));max-height:220px}}
+
+@media(max-width:700px){.viewer-canvas{height:52vh;min-height:280px}}
+
+@media(max-width:700px){.viewer-meta{grid-template-columns:minmax(0,1fr) 90px}}
+
+@media(max-width:700px){.viewer-texture{width:90px}}

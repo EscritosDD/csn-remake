@@ -15,9 +15,9 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 
-const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
-let code = (html.match(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/i) || [])[1];
-if (!code) { console.error('No se encontró el <script> inline de index.html'); process.exit(1); }
+let code = fs.readFileSync(path.join(__dirname, '..', 'src', 'main.js'), 'utf8')
+  .replace(/^\s*import\s+[^;]+;\s*$/gm, '');
+if (!code) { console.error('No se encontró src/main.js'); process.exit(1); }
 // Cortar el INIT final (construcción de DOM/red): no hace falta para la lógica.
 const mark = '/* ================= INIT ================= */';
 const i = code.indexOf(mark);
@@ -100,7 +100,24 @@ sandbox.dispatchEvent = () => true; sandbox.requestIdleCallback = () => 0;
 sandbox.cancelIdleCallback = () => {}; sandbox.btoa = (s) => ''; sandbox.atob = (s) => '';
 
 vm.createContext(sandbox);
-vm.runInContext(code, sandbox, { filename: 'index.html' });
+const modules = [
+  'data/nations', 'data/weapons', 'data/roles', 'data/cast', 'data/maps', 'data/map-pieces', 'data/ui-copy', 'ui/ui-shell', 'game/board', 'game/combat', 'game/gadgets', 'game/missions', 'game/turn', 'game/ai-escort', 'game/ai', 'game/input',
+  'core/storage', 'core/rng', 'core/time', 'core/geometry', 'audio/sound',
+  'render2d/tiles', 'render2d/board', 'render2d/sprites', 'render2d/fx',
+  'render3d/scene', 'render3d/gun', 'render3d/assets-real', 'render3d/assets-geo', 'render3d/assets-meshy', 'render3d/env', 'render3d/assets-weapons', 'render3d/gun-pose', 'render3d/clips', 'render3d/retarget', 'render3d/soldiers', 'render3d/real-sprites', 'render3d/world-props', 'render3d/world', 'render3d/fx3d', 'render3d/camera3d'
+];
+for (const name of modules) {
+  const src = fs.readFileSync(path.join(__dirname, '..', 'src', name + '.js'), 'utf8')
+    .replace(/^\s*import\s+[^;]+;\s*$/gm, '')
+    .replace(/^export\s+/gm, '');
+  const decls = [...src.matchAll(/^(async function|function|let|const|var)\s+([A-Za-z_$][\w$]*)/gm)]
+    .map(m => ({ n: m[2], mutable: m[1] === 'let' || m[1] === 'var' }));
+  const expose = decls.map(d => d.mutable
+    ? 'Object.defineProperty(globalThis,"' + d.n + '",{configurable:true,get:()=>' + d.n + ',set:v=>{' + d.n + '=v;}});'
+    : 'globalThis.' + d.n + '=' + d.n + ';').join('');
+  vm.runInContext(src + '\n;' + expose, sandbox, { filename: 'src/' + name + '.js' });
+}
+vm.runInContext(code, sandbox, { filename: 'src/main.js' });
 const g = sandbox.__g;
 
 // ---- Driver de partida (ambos bandos por IA, dificultad simétrica) ----

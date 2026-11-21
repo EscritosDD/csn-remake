@@ -1,0 +1,217 @@
+.board-wrap{background:#12160f;border:1px solid var(--line);border-radius:var(--radius);padding:10px;position:relative}
+
+canvas#board{width:100%;height:auto;display:block;border-radius:6px;touch-action:manipulation;cursor:pointer;background:#1b2115}
+
+.turn-banner{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+
+.turn-pill{font-family:'Barlow Condensed';font-weight:700;font-size:20px;letter-spacing:.03em;padding:6px 14px;border-radius:8px;text-transform:uppercase}
+
+.turn-pill.A{background:color-mix(in srgb, var(--teamA) 22%, transparent);border:1.5px solid var(--teamA);color:var(--teamA)}
+
+.turn-pill.B{background:color-mix(in srgb, var(--teamB) 20%, transparent);border:1.5px solid var(--teamB);color:var(--teamB)}
+
+.beacon-meter{display:flex;gap:5px;align-items:center;font-size:13px;font-weight:700}
+
+.beacon-meter .pip{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--amber);display:inline-block}
+
+.beacon-meter .pip.full{background:var(--amber)}
+
+.side{display:flex;flex-direction:column;gap:12px}
+
+.unit-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px}
+
+.unit-card h3{margin:0;font-size:21px;text-transform:uppercase;display:flex;align-items:center;gap:8px}
+
+.hpbar{height:12px;border-radius:6px;background:var(--bg2);border:1px solid var(--line);overflow:hidden;margin:8px 0 4px}
+
+.hpbar i{display:block;height:100%;background:var(--good);transition:width .3s}
+
+.hpbar i.low{background:var(--danger)}
+
+.epips{display:flex;gap:4px;margin:6px 0;flex-wrap:wrap}
+
+.epips i{width:20px;height:10px;border-radius:3px;background:var(--amber);display:block}
+
+.epips i.off{background:var(--bg2);border:1px solid var(--line)}
+
+.actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:10px}
+
+.actions button{min-width:0}
+
+.unit-card{overflow-x:hidden}
+
+html,body{overflow-x:hidden}
+
+html.is-playing{overflow-y:hidden}
+
+.actions button{background:var(--panel2);border:1.5px solid var(--line);color:var(--ink);border-radius:8px;padding:10px 8px;font-weight:700;font-size:14px;text-align:left}
+
+.actions button small{display:block;font-weight:500;color:var(--muted);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+
+.actions button.on{border-color:var(--amber);box-shadow:0 0 0 1.5px var(--amber)}
+
+.actions button:disabled{opacity:.4}
+
+.roster{display:flex;flex-direction:column;gap:6px}
+
+.roster button{display:flex;align-items:center;gap:9px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;color:var(--ink);padding:8px 10px;text-align:left;font-size:14px}
+
+.roster button.sel{border-color:var(--amber)}
+
+.roster button.dead{opacity:.45}
+
+.roster .mini-hp{flex:1;height:7px;border-radius:4px;background:var(--bg);overflow:hidden}
+
+.roster .mini-hp i{display:block;height:100%;background:var(--good)}
+
+.log{background:#0b0e08;color:#cfe0b8;border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px;font-size:13.5px;height:190px;overflow-y:auto;font-family:'JetBrains Mono',monospace}
+
+@media(prefers-color-scheme:light){.log{background:#20261a;color:#d8e6c4}}
+
+.log div{margin-bottom:4px}
+
+.log .t{color:var(--amber)}
+
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin-top:8px}
+
+.legend span{display:inline-flex;align-items:center;gap:5px}
+
+.panel,.mode-card,.weapon,.unit-card,.skin-card{border-width:2px;border-radius:14px;box-shadow:0 4px 0 rgba(0,0,0,.16)}
+
+.board-wrap{background:linear-gradient(180deg,#2e3236,#1e2124);border:3px solid #0f1113;border-radius:16px;padding:12px;box-shadow:0 14px 34px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.10)}
+
+canvas#board{border-radius:10px;box-shadow:0 0 0 2px rgba(0,0,0,.45), inset 0 0 40px rgba(0,0,0,.25)}
+
+.turn-pill{border-width:2px;box-shadow:0 3px 0 rgba(0,0,0,.30)}
+
+.hpbar{height:14px;border-radius:999px;border-width:2px}
+
+.hpbar i{background:linear-gradient(180deg,#8df09a,#3fb950)}
+
+.hpbar i.low{background:linear-gradient(180deg,#ff9a8a,#e5484d)}
+
+.epips i{height:12px;border-radius:4px;box-shadow:inset 0 -3px 0 rgba(0,0,0,.25)}
+
+.epips i.off{box-shadow:none}
+
+.actions button{border-width:2px;border-radius:10px;box-shadow:0 3px 0 rgba(0,0,0,.20);padding:8px 8px;font-size:13px}
+
+.actions button:active{transform:translateY(2px);box-shadow:none}
+
+.roster button{border-width:1.5px}
+
+.log{border-width:2px;border-radius:12px}
+
+/* Sprites SVG de Argon dentro del juego */
+.sprite-strip{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:12px}
+
+@media(max-width:900px){.sprite-strip{grid-template-columns:repeat(4,1fr)}}
+
+@media(max-width:520px){.sprite-strip{grid-template-columns:repeat(3,1fr)}}
+
+.sprite-cell{margin:0;text-align:center;background:var(--panel2);border:1.5px solid var(--line);border-radius:10px;padding:6px 4px 8px}
+
+.sprite-cell img{width:100%;height:auto;display:block;border-radius:8px;background:radial-gradient(circle at 50% 28%,#3a4433,#20261a 80%)}
+
+.sprite-cell figcaption{font-weight:700;font-size:13px;font-family:'Barlow Condensed';letter-spacing:.03em;text-transform:uppercase}
+
+.sprite-cell figcaption small{display:block;font-family:'Barlow';font-weight:600;font-size:11px;letter-spacing:.02em;text-transform:none;color:var(--muted);margin-top:1px}
+
+.unit-sprite{width:112px;height:112px;object-fit:cover;object-position:50% 0%;float:right;margin:0 0 8px 12px;background:radial-gradient(circle at 50% 28%,#3a4433,#20261a 80%);border:2px solid var(--line);border-radius:12px;box-shadow:0 3px 0 rgba(0,0,0,.20)}
+
+.roster-portrait{width:46px;height:46px;flex:none;object-fit:cover;object-position:50% 0%;border-radius:9px;border:1.5px solid var(--line);background:radial-gradient(circle at 50% 28%,#3a4433,#20261a 80%)}
+
+.role-thumb{width:54px;height:54px;flex:none;object-fit:cover;object-position:50% 0%;border-radius:9px;border:1.5px solid var(--line);background:radial-gradient(circle at 50% 28%,#3a4433,#20261a 80%)}
+
+/* Tablero vivo: el marco respira con una luz cálida muy leve */
+.board-wrap{position:relative}
+
+.board-wrap::after{content:"";position:absolute;inset:0;border-radius:16px;pointer-events:none;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06), inset 0 -18px 34px rgba(0,0,0,.28)}
+
+/* Vista 3D real del tablero */
+.view-toggle{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;align-items:center}
+
+.view-toggle .seg{display:flex;gap:6px}
+
+#glWrap{width:100%;aspect-ratio:16/11;min-height:300px;border-radius:10px;overflow:hidden;background:#1d2522;box-shadow:0 0 0 2px rgba(0,0,0,.45);position:relative;user-select:none}
+
+#glWrap canvas{display:block;width:100%!important;height:100%!important;touch-action:none;cursor:pointer}
+
+.gl-badge{position:absolute;left:10px;bottom:10px;background:rgba(10,12,8,.84);color:#f2b234;border:1.5px solid #f2b234;border-radius:999px;padding:4px 12px;font-weight:700;font-size:12px;pointer-events:none;letter-spacing:.03em;z-index:3}
+
+.gl-controls{position:static;display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;flex:1 0 100%;margin-top:4px;pointer-events:auto}
+
+.gl-controls button{min-height:32px;padding:4px 9px;border-radius:8px;border:1.5px solid rgba(242,178,52,.6);background:rgba(16,20,16,.86);color:#eef2e4;font-weight:700;font-size:12px;font-family:'JetBrains Mono',monospace;box-shadow:0 2px 0 rgba(0,0,0,.4)}
+
+.gl-controls button:hover{border-color:#f2b234;color:#f2b234}
+
+.gl-overlay{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:2}
+
+.gl-unit-hud{position:absolute;transform:translate(-50%,-100%);display:flex;flex-direction:column;align-items:center;gap:2px;will-change:transform}
+
+.gl-hp-pill{display:flex;align-items:center;gap:3px;background:rgba(12,15,12,.86);border:1.5px solid rgba(255,255,255,.8);border-radius:999px;padding:2px 4px;box-shadow:0 2px 4px rgba(0,0,0,.45)}
+
+.gl-hp-dot{width:7px;height:7px;border-radius:50%;flex:none}
+
+.gl-hp-track{width:40px;height:5px;border-radius:3px;background:rgba(0,0,0,.6);overflow:hidden}
+
+.gl-hp-fill{height:100%;background:linear-gradient(180deg,#8df09a,#3fb950)}
+
+.gl-hp-fill.med{background:linear-gradient(180deg,#ffd466,#f2b234)}
+
+.gl-hp-fill.low{background:linear-gradient(180deg,#ff9a8a,#e5484d)}
+
+.gl-hp-num{font:700 10px/1 'JetBrains Mono',monospace;color:#eef2e4;white-space:nowrap}
+
+.gl-unit-tag{font:700 10px/1.2 'Barlow',sans-serif;color:#ffe485;background:rgba(16,14,6,.84);border-radius:4px;padding:1px 5px;white-space:nowrap}
+
+.gl-tooltip{position:absolute;transform:translate(-50%,-115%);background:rgba(12,15,12,.92);border:1.5px solid #f2b234;color:#eef2e4;border-radius:8px;padding:4px 9px;font:700 12px/1.3 'JetBrains Mono',monospace;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.5);z-index:5;display:none}
+
+.gl-tooltip.bad{border-color:#e5484d;color:#ffb4ad}
+
+.gl-tooltip.cov{border-color:#57c46a;color:#c7f7ce}
+
+.gl-float{position:absolute;transform:translate(-50%,-50%);font:800 15px/1 'JetBrains Mono',monospace;text-shadow:0 2px 0 #090b08, 0 -1px 0 #090b08, 1px 0 0 #090b08, -1px 0 0 #090b08;white-space:nowrap;will-change:transform,opacity}
+
+@media(max-width:640px){#glWrap{aspect-ratio:1/1;min-height:280px}}
+
+@media(max-width:640px){.gl-controls{justify-content:flex-start}}
+
+@media(max-width:640px){.gl-controls button{min-height:28px;padding:2px 7px;font-size:11px}}
+
+/* Escenario 3D en vivo en la primera pantalla */
+#demoWrap{width:100%;aspect-ratio:16/8;min-height:240px;border-radius:10px;overflow:hidden;background:#1d2522;box-shadow:0 0 0 2px rgba(0,0,0,.45);position:relative;margin-top:10px}
+
+#demoWrap canvas{display:block;width:100%!important;height:100%!important}
+
+@media(max-width:640px){#demoWrap{aspect-ratio:4/3;min-height:220px}}
+
+#glFail{display:none;border:1.5px solid var(--danger);border-radius:10px;padding:10px 13px;margin-bottom:10px;font-size:14.5px;background:color-mix(in srgb, var(--danger) 10%, var(--panel))}
+
+.actions button{background:var(--panel2);border:1.5px solid var(--line);color:var(--ink)}
+
+.actions button small{color:var(--muted)}
+
+.actions button.on{background:linear-gradient(180deg,#f7c44b,#e6a322);border-color:#a8710b;color:#201402}
+
+.actions button.on small{color:#4d3806}
+
+.panel,.mode-card,.weapon,.unit-card,.skin-card,.modal-box,.howto>div,.nation-card{background-color:var(--panel)}
+
+.actionBar{display:none;gap:10px;overflow-x:auto;align-items:stretch;position:fixed;left:0;right:0;bottom:0;z-index:60;padding:10px 16px;background:var(--panel);border-top:2px solid var(--line);box-shadow:0 -6px 18px rgba(0,0,0,.28)}
+
+body[data-state="playing"] .actionBar{display:flex}
+
+body[data-state="playing"]{padding-bottom:0;overflow-y:hidden}
+
+body[data-state="playing"] #gameArea{height:max(180px,calc(100dvh - var(--csn-play-header,68px) - var(--csn-play-footer,88px)));margin-top:0!important;overflow-y:auto;overscroll-behavior:contain}
+
+@supports not (height:100dvh){body[data-state="playing"] #gameArea{height:max(180px,calc(100vh - var(--csn-play-header,68px) - var(--csn-play-footer,88px)))}}
+
+.actionBar .actions{display:flex;gap:8px;margin:0;width:100%}
+
+.actionBar .actions button{flex:0 0 186px;min-width:0}
+
+.actionBar>p{width:100%}
+
+.actions button{padding:11px 10px}

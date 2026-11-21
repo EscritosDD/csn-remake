@@ -47,7 +47,7 @@ const inside = (base, target) => {
 
 const allowed = (rel) => {
   const parts = rel.split(path.sep).filter(Boolean);
-  if (parts[0] === 'assets') return true;
+  if (parts[0] === 'assets' || parts[0] === 'styles' || parts[0] === 'src') return true;
   return parts.length === 1 && (parts[0] === 'index.html' || parts[0] === 'favicon.ico');
 };
 

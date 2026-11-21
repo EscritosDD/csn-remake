@@ -13,13 +13,14 @@
 'use strict';
 const fs = require('fs');
 const path = require('path');
+const vm = require('vm');
 
-const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
-
-// --- 1. Extraer MAP_DEFS del juego (datos reales, no una copia) ---
-const m = html.match(/const MAP_DEFS=(\{[\s\S]*?\n\});/);
-if (!m) { console.error('FALLO: no se pudo extraer MAP_DEFS de index.html'); process.exit(1); }
-const MAP_DEFS = eval('(' + m[1] + ')');
+// --- 1. Cargar MAP_DEFS del juego (datos reales, no una copia) ---
+const sb = {};
+vm.createContext(sb);
+vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'src', 'data', 'maps.js'), 'utf8').replace(/^export\s+/gm, '') + '\n;globalThis.MAP_DEFS=MAP_DEFS;', sb);
+const MAP_DEFS = sb.MAP_DEFS;
+if (!MAP_DEFS) { console.error('FALLO: no se pudo cargar MAP_DEFS de src/data/maps.js'); process.exit(1); }
 
 // --- 2. Constantes del juego (citas de línea en index.html) ---
 const W = 12, H = 12;                                                       // L1039

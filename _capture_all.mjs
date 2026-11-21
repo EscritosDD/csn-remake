@@ -121,7 +121,8 @@ try {
   await send('Page.enable');
   await send('Runtime.enable');
   if (mobileMode) {
-    await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 2, mobile: true, screenOrientation: { type: 'portraitPrimary', angle: 0 } });
+    const dpr = Number(process.env.CSN_DPR || (software ? 1 : 2)) || 2;
+    await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: dpr, mobile: true, screenOrientation: { type: 'portraitPrimary', angle: 0 } });
     await send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 });
     try { await send('Emulation.setEmitTouchEventsForMouse', { enabled: true, configuration: 'mobile' }); } catch {}
   }
@@ -166,6 +167,14 @@ try {
       await ev("document.querySelector('#viewerKinds [data-kind=\"roles\"]').click()");
       await sleep(350);
     }
+    if (mobileMode === 'game') {
+      for (let i = 0; i < 24; i++) {
+        let g = null;
+        try { g = JSON.parse(await ev('JSON.stringify(window.__csn3d||{})')); } catch {}
+        if (g && g.geo === true) break;
+        await sleep(500);
+      }
+    }
     if (mobileMode) mobileStart = { frame: await ev('(window.__csn3d&&window.__csn3d.frame)||0'), ms: Date.now() };
     else await sleep(waitMs);
   } else if (/^campana:\d+$/.test(mapId)) {
@@ -188,8 +197,8 @@ try {
   await sleep(waitMs);
   result.errores = errs.slice(0, 5);
   if (moveMode) {
-    await ev("(function(){const u=G.units.find(x=>x.alive&&x.team===G.turn&&x.energy>0);if(!u)return 'no unit';selectUnit(u);const cells=[...reachable(u,u.energy).entries()].filter(e=>e[1]>0);cells.sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));const c=cells[0];if(!c)return 'no tile';const xy=c[0].split(',').map(Number);const p={unitId:u.id,from:[u.x,u.y],to:xy,samples:[]};window.__moveProbe=p;const t0=performance.now();function step(){const m=T3.units&&T3.units.get(u.id),ud=m&&m.userData;p.samples.push({t:Math.round(performance.now()-t0),lx:u.x,ly:u.y,x:+(u.dx!=null?u.dx:u.x).toFixed(4),y:+(u.dy!=null?u.dy:u.y).toFixed(4),f:u.facing,yaw:+(u._dispYaw||0).toFixed(4),turn:!!u._turning,clip:(ud&&ud._clipKey)||null,ct:+(ud&&ud._clipCt||0).toFixed(3)});if(performance.now()-t0<2600)requestAnimationFrame(step);else p.done=true;}boardTileClick({x:xy[0],y:xy[1]});requestAnimationFrame(step);return 'ok';})()");
-    await sleep(3300);
+    await ev("(function(){const u=G.units.find(x=>x.alive&&x.team===G.turn&&x.energy>0);if(!u)return 'no unit';selectUnit(u);const cells=[...reachable(u,u.energy).entries()].filter(e=>e[1]>0);cells.sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));const c=cells[0];if(!c)return 'no tile';const xy=c[0].split(',').map(Number);const p={unitId:u.id,from:[u.x,u.y],to:xy,samples:[]};window.__moveProbe=p;const t0=performance.now();function step(){const m=T3.units&&T3.units.get(u.id),ud=m&&m.userData;p.samples.push({t:Math.round(performance.now()-t0),lx:u.x,ly:u.y,x:+(u.dx!=null?u.dx:u.x).toFixed(4),y:+(u.dy!=null?u.dy:u.y).toFixed(4),f:u.facing,yaw:+(u._dispYaw||0).toFixed(4),turn:!!u._turning,clip:(ud&&ud._clipKey)||null,ct:+(ud&&ud._clipCt||0).toFixed(3)});if(performance.now()-t0<3200)requestAnimationFrame(step);else p.done=true;}boardTileClick({x:xy[0],y:xy[1]});requestAnimationFrame(step);return 'ok';})()");
+    await sleep(3900);
     const rawMove = await ev('JSON.stringify(window.__moveProbe||{})');
     try { result.move = JSON.parse(rawMove); } catch { result.move = rawMove; }
   }

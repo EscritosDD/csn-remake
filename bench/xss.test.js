@@ -6,7 +6,7 @@ const path = require('node:path');
 const vm = require('node:vm');
 
 const root = path.dirname(__dirname);
-const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+const html = require('./source');
 
 function extraerFn(src, nombre) {
   const inicio = src.indexOf('function ' + nombre + '(');

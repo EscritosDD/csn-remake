@@ -11,7 +11,22 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const ROOT = path.join(__dirname, '..');
-const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+const html = require('./source');
+let dataPromise;
+function loadData() {
+  if (!dataPromise) {
+    dataPromise = Promise.all([
+      import('../src/data/nations.js'),
+      import('../src/data/weapons.js'),
+      import('../src/data/roles.js'),
+      import('../src/data/cast.js'),
+      import('../src/data/maps.js'),
+      import('../src/data/map-pieces.js'),
+      import('../src/data/ui-copy.js')
+    ]).then(mods => Object.assign({}, ...mods));
+  }
+  return dataPromise;
+}
 
 function block(marker, endMark) {
   const i = html.indexOf(marker);
@@ -21,53 +36,48 @@ function block(marker, endMark) {
   return html.slice(i, j);
 }
 
-test('12 naciones con personalidad propia', () => {
-  const b = block('const NATIONS=[', '];');
-  const ids = [...b.matchAll(/\{id:'([a-z]{2})'/g)].map(m => m[1]);
-  assert.equal(ids.length, 12, 'deben ser 12 naciones');
-  const pers = [...b.matchAll(/pers:\{name:'([^']+)'/g)].map(m => m[1]);
-  assert.equal(pers.length, 12, 'cada nacion debe tener personalidad');
-  for (const p of pers) assert.ok(p.length > 2, 'personalidad vacia');
+test('12 naciones con personalidad propia', async () => {
+  const { NATIONS } = await loadData();
+  assert.equal(NATIONS.length, 12, 'deben ser 12 naciones');
+  assert.equal(NATIONS.filter(n => /^[a-z]{2}$/.test(n.id)).length, 12);
+  assert.equal(NATIONS.filter(n => n.pers && n.pers.name).length, 12, 'cada nacion debe tener personalidad');
+  for (const n of NATIONS) assert.ok(n.pers.name.length > 2, 'personalidad vacia');
 });
 
-test('reparto: 17 personajes del original y 18 propios', () => {
-  const orig = block('const ORIG_CAST=[', '];');
-  const own = block('const OWN_CAST=[', '];');
-  const nOrig = (orig.match(/\{name:'/g) || []).length;
-  const nOwn = (own.match(/\{name:'/g) || []).length;
-  assert.equal(nOrig, 17, 'deben ser 17 personajes del IPA');
-  assert.equal(nOwn, 18, 'deben ser 18 personajes propios');
-  assert.equal((own.match(/bio:'/g) || []).length, 18, 'cada personaje propio debe tener bio');
-  assert.equal((orig.match(/bio:'/g) || []).length, 17, 'cada personaje del original debe tener bio');
-  for (const m of own.matchAll(/role:'([^']+)'/g)) {
-    assert.ok(['Francotirador', 'Artillero', 'Espía', 'Médico', 'Ingeniero', 'Comando', 'Capitán'].includes(m[1]), 'rol invalido: ' + m[1]);
+test('reparto: 17 personajes del original y 18 propios', async () => {
+  const { ORIG_CAST, OWN_CAST } = await loadData();
+  assert.equal(ORIG_CAST.length, 17, 'deben ser 17 personajes del IPA');
+  assert.equal(OWN_CAST.length, 18, 'deben ser 18 personajes propios');
+  assert.equal(OWN_CAST.filter(c => c.bio).length, 18, 'cada personaje propio debe tener bio');
+  assert.equal(ORIG_CAST.filter(c => c.bio).length, 17, 'cada personaje del original debe tener bio');
+  for (const c of OWN_CAST) {
+    assert.ok(['Francotirador', 'Artillero', 'Espía', 'Médico', 'Ingeniero', 'Comando', 'Capitán'].includes(c.role), 'rol invalido: ' + c.role);
   }
 });
 
-test('tres skins y todas sin pasivas', () => {
-  const b = block('const SKINS={', '};');
-  const keys = [...b.matchAll(/\n ([a-z]+):\{name:/g)].map(m => m[1]);
-  assert.deepEqual(keys.sort(), ['camuflaje', 'clase', 'estandar', 'nacion'], 'skins: ' + keys.join(','));
-  assert.equal((b.match(/Sin pasiva/g) || []).length, 4, 'las cuatro skins dicen "Sin pasiva"');
+test('tres skins y todas sin pasivas', async () => {
+  const { SKINS } = await loadData();
+  const keys = Object.keys(SKINS).sort();
+  assert.deepEqual(keys, ['camuflaje', 'clase', 'estandar', 'nacion'], 'skins: ' + keys.join(','));
+  assert.equal(Object.values(SKINS).filter(s => /Sin pasiva/.test(s.desc)).length, 4, 'las cuatro skins dicen "Sin pasiva"');
 });
 
-test('6 misiones de campana con mapa, objetivo y formato validos', () => {
-  const b = block('const CAMPAIGN_MISSIONS=[', '];');
-  const ms = [...b.matchAll(/map:'([^']+)',objective:'([^']+)',fmt:(\d)/g)];
-  assert.equal(ms.length, 6, 'deben ser 6 misiones');
-  const maps = new Set([...html.matchAll(/^ ([a-z0-9]+):\{id:'/gm)].map(m => m[1]));
-  for (const [, map, obj, fmt] of ms) {
-    assert.ok(maps.has(map), 'mapa inexistente: ' + map);
-    assert.ok(['eliminacion', 'baliza', 'dominacion', 'escolta'].includes(obj), 'objetivo invalido: ' + obj);
-    assert.ok([2, 4, 5].includes(Number(fmt)), 'formato invalido: ' + fmt);
+test('6 misiones de campana con mapa, objetivo y formato validos', async () => {
+  const { CAMPAIGN_MISSIONS, MAP_DEFS } = await loadData();
+  assert.equal(CAMPAIGN_MISSIONS.length, 6, 'deben ser 6 misiones');
+  const maps = new Set(Object.keys(MAP_DEFS));
+  for (const m of CAMPAIGN_MISSIONS) {
+    assert.ok(maps.has(m.map), 'mapa inexistente: ' + m.map);
+    assert.ok(['eliminacion', 'baliza', 'dominacion', 'escolta'].includes(m.objective), 'objetivo invalido: ' + m.objective);
+    assert.ok([2, 4, 5].includes(Number(m.fmt)), 'formato invalido: ' + m.fmt);
   }
 });
 
-test('cada personaje tiene su voz extraida', () => {
-  const map = block('const CHAR_VOICE={', '};');
-  const pairs = [...map.matchAll(/'([^']+)':'([^']+)'/g)];
+test('cada personaje tiene su voz extraida', async () => {
+  const { CHAR_VOICE } = await loadData();
+  const pairs = Object.entries(CHAR_VOICE);
   assert.ok(pairs.length >= 35, 'deben estar los 17 del original y los 18 propios');
-  for (const [, name, slug] of pairs) {
+  for (const [name, slug] of pairs) {
     for (const ev of ['select', 'confirm', 'pain', 'death', 'firing', 'thanks']) {
       const f = path.join(ROOT, 'assets', 'audio', 'voice', slug, ev + '.mp3');
       assert.ok(fs.existsSync(f), 'falta voz ' + slug + '/' + ev + '.mp3 (' + name + ')');
@@ -79,6 +89,16 @@ test('el servidor sirve GLB/GLTF con MIME correcto', () => {
   const server = fs.readFileSync(path.join(ROOT, 'server.js'), 'utf8');
   assert.match(server, /'\.glb':\s*'model\/gltf-binary'/);
   assert.match(server, /'\.gltf':\s*'model\/gltf\+json'/);
+});
+
+test('el servidor sirve styles/ y src/ sin abrir _original/ ni bench/', () => {
+  const server = fs.readFileSync(path.join(ROOT, 'server.js'), 'utf8');
+  assert.match(server, /parts\[0\] === 'assets' \|\| parts\[0\] === 'styles' \|\| parts\[0\] === 'src'/);
+  assert.doesNotMatch(server, /parts\[0\] === '_original'/);
+  assert.doesNotMatch(server, /parts\[0\] === 'bench'/);
+  assert.ok(fs.existsSync(path.join(ROOT, 'src', 'package.json')));
+  const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'src', 'package.json'), 'utf8'));
+  assert.equal(pkg.type, 'module');
 });
 
 test('las 23 armas tienen calibracion por bounds reales', () => {

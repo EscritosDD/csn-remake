@@ -5,15 +5,26 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const root = path.dirname(__dirname);
-const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+const html = require('./source');
 const capture = fs.readFileSync(path.join(root, '_capture_all.mjs'), 'utf8');
+const cssFiles = ['layout.css', 'game.css', 'viewer.css', 'theme.css'];
+const css = cssFiles.map(name => fs.readFileSync(path.join(root, 'styles', name), 'utf8')).join('\n');
+let uiDataPromise;
+function loadUiData() {
+  if (!uiDataPromise) uiDataPromise = import('../src/data/ui-copy.js');
+  return uiDataPromise;
+}
 
-test('el indicador de pasos tiene progreso real', () => {
+test('el indicador de pasos tiene progreso real', async () => {
+  const { STEP_META } = await loadUiData();
   assert.match(html, /id="stepHint"[^>]*data-step="nation"/);
   for (const id of ['stepCount', 'stepLabel', 'stepDetail']) assert.match(html, new RegExp('id="' + id + '"'));
   assert.match(html, /class="step-dots"[^>]*><i><\/i><i><\/i><i><\/i><i><\/i>/);
-  assert.match(html, /const STEP_META=\{/);
-  for (const step of ['nation', 'mode', 'squad', 'battle']) assert.match(html, new RegExp(step + ':\\{n:[1-4],label:'));
+  assert.deepEqual(Object.keys(STEP_META), ['nation', 'mode', 'squad', 'battle']);
+  ['nation', 'mode', 'squad', 'battle'].forEach((step, i) => {
+    assert.equal(STEP_META[step].n, i + 1);
+    assert.ok(STEP_META[step].label.length > 2);
+  });
   assert.match(html, /function setStep\(step,detail\)\{/);
   assert.match(html, /document\.body\.dataset\.step=flowStep/);
   assert.match(html, /chip\.dataset\.step=flowStep/);
@@ -50,9 +61,9 @@ test('las vueltas contextuales siguen al jugador', () => {
 });
 
 test('los controles tienen foco visible y tamaño cómodo', () => {
-  assert.match(html, /:focus-visible/);
-  assert.match(html, /min-height:44px/);
-  assert.match(html, /nav\.tabs button:hover/);
+  assert.match(css, /:focus-visible/);
+  assert.match(css, /min-height:44px/);
+  assert.match(css, /nav\.tabs button:hover/);
 });
 
 test('las capturas permiten monitoreo móvil y de reglas', () => {

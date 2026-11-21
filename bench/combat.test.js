@@ -5,7 +5,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const root = path.dirname(__dirname);
-const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+const html = require('./source');
 const capture = fs.readFileSync(path.join(root, '_capture_all.mjs'), 'utf8');
 
 test('los eventos reales del clip alimentan el feedback de combate', () => {

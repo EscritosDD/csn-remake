@@ -5,7 +5,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const root = path.dirname(__dirname);
-const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+const html = require('./source');
 const ids = ['03', '04', '05', '06', '08', '09', '10', '11'];
 const grids = new Map(ids.map(id => [id, JSON.parse(fs.readFileSync(path.join(root, 'assets', 'maps', id + '_grid.json'), 'utf8'))]));
 
