@@ -1,6 +1,7 @@
 export * from './ai-escort.js';
 export * from './ai.js';
 export * from './board.js';
+export * from './chars.js';
 export * from './combat.js';
 export * from './gadgets.js';
 export * from './input.js';
