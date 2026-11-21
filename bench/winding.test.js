@@ -60,7 +60,9 @@ class Geometry {
 const ctx = { THREE: { BufferGeometry: Geometry, Float32BufferAttribute: Attr } };
 vm.createContext(ctx);
 vm.runInContext(extraerFn(html, 'parseOBJ3') + '\nthis.parseOBJ3 = parseOBJ3;', ctx);
+vm.runInContext(extraerFn(html, 'parseOBJStatic') + '\nthis.parseOBJStatic = parseOBJStatic;', ctx);
 const parseOBJ3 = ctx.parseOBJ3;
+const parseOBJStatic = ctx.parseOBJStatic;
 
 function metricas(geo) {
   const pos = geo.position.array;
@@ -155,4 +157,32 @@ test('Hipster Dave: arma acoplada a la mano en el visor', () => {
 test('updateHover3D: cobertura sin ReferenceError', () => {
   assert.match(html, /cls=covLvl>0\?'cov':'';/);
   assert.doesNotMatch(html, /cls=cov\?'cov':'';/);
+});
+
+test('parseOBJStatic corrige winding negativo y recalcula normales', () => {
+  const obj = [
+    'v 0 0 0', 'v 1 0 0', 'v 0 1 0', 'v 0 0 1',
+    'vt 0 0', 'vt 1 0', 'vt 0 1',
+    'vn 0 0 1',
+    'f 1/1/4 2/2/4 3/3/4',
+    'f 1/1/4 4/2/4 2/3/4',
+    'f 1/1/4 3/2/4 4/3/4',
+    'f 2/1/4 4/2/4 3/3/4'
+  ].join('\n');
+  const m = metricas(parseOBJStatic(obj));
+  assert.ok(m.volumen > 0, 'volumen firmado ' + m.volumen.toFixed(4));
+  assert.ok(m.ratio > 0.9, 'normales alineadas ' + (m.ratio * 100).toFixed(1) + '%');
+});
+
+test('las 23 armas tienen volumen positivo con parseOBJStatic', () => {
+  const dir = path.join(root, 'assets', 'weapons');
+  const files = fs.readdirSync(dir).filter(f => f.toLowerCase().endsWith('.obj'));
+  assert.equal(files.length, 23);
+  for (const file of files) {
+    const txt = fs.readFileSync(path.join(dir, file), 'latin1');
+    const geo = parseOBJStatic(txt);
+    const m = metricas(geo);
+    assert.ok(m.volumen > 0, file + ': volumen ' + m.volumen.toFixed(4));
+    assert.ok(Array.from(geo.normal.array).every(Number.isFinite), file + ': normales no finitas');
+  }
 });

@@ -1,32 +1,39 @@
-﻿=== ACTUALIZACION FINAL 21/11/2026 ===
+﻿=== ACTUALIZACION FINAL 21/11/2026 (SEGUNDA PASADA) ===
 Gates finales ejecutados tras la ultima edicion:
   npm run lint                         -> OK, 2 bloques <script>, 0 errores
-  npm test                             -> tests 68, pass 68, fail 0
+  npm test                             -> tests 77, pass 77, fail 0
   powershell -ExecutionPolicy Bypass -File bench\VERIFICAR.ps1
                                        -> TODO OK 13/13
-  node _capture_all.mjs viewer:audit-all VIEWAUDIT3 8000
+  node _capture_all.mjs viewer:audit-all VIEWAUDIT_FINAL 8000
                                        -> ok=True, modelos=4, errores=[]
   git diff --check                     -> sin errores (solo avisos CRLF)
-  python tools\auditar_assets_3d.py    -> 338 OBJ, sin_caras=0, NaN=0, rigs=13, png=305, glb=0
 
-Cierre por rondas:
-  R1  reparados 11 OBJ con f=0 desde mallas IPA; auditoria global generada
-  R2  mount() con pose de reposo y bounds deformados; materiales opacos/sRGB
-  R3  MIME GLB/GLTF en server.js; sin originales ni loader local, NO cerrado en falso
-  R4  23 calibraciones de armas por bounds; sin barracksOffset/Scale en gameplay
-  R5  debugGrid 3D, sin props sobre geo IPA, sombras normalBias=0.02, tex 512
-  R6  winding global de OBJ + viewer:audit-all integrado en VERIFICAR.ps1
+Cierre actual:
+  - 7 cuerpos IPA restaurados; Meshy solo en assets/personajes_propios/
+  - parseOBJStatic corrige winding negativo y recalcula normales
+  - materiales de personajes/armas con alphaTest:0 y FrontSide
+  - armas: GUN_MESH_CACHE por fichero, canon +X, grip (0,0,0), meshPivot=[0,0,0]
+  - Meshy sin pose/clip/retarget ni acople (sculptedWeapon:true)
+  - Textbook Kate = Medico; Sister Florence usa entry.rigPose, no entry.name
+  - setup con selector de personaje por ranura (setup.squadChars)
+  - viewer: el label ya no borra #viewerWeaponSelect al cambiar de texto
 
-Pendiente real para mañana:
-  - Meshy/GLB sin fuentes originales sin soldar
-  - anti-clipping scale=0.86 no aplicado a unidades
-  - atlas PNG con alpha no regenerado desde _original/pipeline.py
-  - viewer:audit-all sondea 4 modelos, no los 35 personajes y 23 armas completos
-  - revision visual humana de ?debugWeapons=1 y ?debugGrid=1
+Capturas reales generadas en docs\capturas:
+  FIX_visor_hipster_ui_ui.png      FIX_visor_soap_svd_ui_ui.png
+  FIX_visor_sneaky_mp5_ui_ui.png   FIX_visor_meshy09_ui_ui.png
+  FIX_visor_mp5k_ui_ui.png         FIX_visor_minigun_ui_ui.png
+  FIX_setup_selector_ui_ui.png     FIX_skirmish11_3d.png
 
-Informe completo: docs\ESTADO_SESION_2026-11-21.md
+Pendiente real (FASE 2, no iniciada):
+  - A) Stance por categoria, optgroup y fabrica unica buildOriginalCharacter3D
+  - B) materiales/silueta/Ghost y luz por mapa
+  - C) cinta BFS con CanAttackAfterMove, inercia del visor y camara tactica
+  - D) GLTFLoader local y loader .glb prioritario
+  - E) colisiones/pathfinding 1:1 en los 19 tableros
 
-git status --short al cierre:
+Sin commits. Informe completo: docs\ESTADO_SESION_2026-11-21.md
+
+git status --short del cierre anterior (historico):
  M README.md
  M _capture_all.mjs
  M bench/VERIFICAR.ps1

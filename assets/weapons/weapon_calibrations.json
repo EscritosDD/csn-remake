@@ -1,13 +1,11 @@
 {
   "AssaultRifle": {
-    "socket": "Bip001 R Hand",
-    "supportSocket": "Bip001 L Hand",
     "scale": 0.6957812463761395,
     "targetLength": 0.54,
     "meshPivot": [
-      0.522,
-      -0.064415,
-      1.5000000000015001e-06
+      0.0,
+      0.0,
+      0.0
     ],
     "gripOffset": [
       0.0,
@@ -33,14 +31,12 @@
     ]
   },
   "Rifle": {
-    "socket": "Bip001 R Hand",
-    "supportSocket": "Bip001 L Hand",
     "scale": 0.571354204690818,
     "targetLength": 0.54,
     "meshPivot": [
-      0.669305,
-      -0.04785149999999999,
-      1.000000000001e-06
+      0.0,
+      0.0,
+      0.0
     ],
     "gripOffset": [
       0.0,
@@ -66,14 +62,12 @@
     ]
   },
   "Pistol": {
-    "socket": "Bip001 R Hand",
-    "supportSocket": "Bip001 L Hand",
     "scale": 0.24417866436596103,
     "targetLength": 0.21,
     "meshPivot": [
-      0.750965,
-      -0.04941499999999999,
-      5.000000000005e-07
+      0.0,
+      0.0,
+      0.0
     ],
     "gripOffset": [
       0.0,
@@ -99,14 +93,12 @@
     ]
   },
   "SniperRifle_weapon": {
-    "socket": "Bip001 R Hand",
-    "supportSocket": "Bip001 L Hand",
     "scale": 0.6373841753443865,
     "targetLength": 0.72,
     "meshPivot": [
-      0.839259,
-      -0.0647845,
-      1.000000000001e-06
+      0.0,
+      0.0,
+      0.0
     ],
     "gripOffset": [
       0.0,
@@ -132,14 +124,12 @@
     ]
   },
   "Shotgun": {
-    "socket": "Bip001 R Hand",
-    "supportSocket": "Bip001 L Hand",
     "scale": 0.7031745518316993,
     "targetLength": 0.5,
     "meshPivot": [
-      0.539301,
-      -0.064555,
-      5.000000000005e-07
+      0.0,
+      0.0,
+      0.0
     ],
     "gripOffset": [
       0.0,
@@ -165,14 +155,12 @@
     ]
   },
   "RPG": {
-    "socket": "Bip001 R Hand",
-    "supportSocket": "Bip001 L Hand",
     "scale": 0.9835024115744944,
     "targetLength": 0.74,
     "meshPivot": [
-      0.266615,
-      5.000000000005e-07,
-      -0.0616235
+      0.0,
+      0.0,
+      0.0
     ],
     "gripOffset": [
       0.0,
@@ -198,14 +186,12 @@
     ]
   },
   "Crossbow": {
-    "socket": "Bip001 R Hand",
-    "supportSocket": "Bip001 L Hand",
     "scale": 0.6588895734019458,
     "targetLength": 0.6,
     "meshPivot": [
-      0.597285,
-      -0.083972,
-      1.000000000001e-06
+      0.0,
+      0.0,
+      0.0
     ],
     "gripOffset": [
       0.0,
@@ -231,14 +217,12 @@
     ]
   },
   "SledgeHammer": {
-    "socket": "Bip001 R Hand",
-    "supportSocket": "Bip001 L Hand",
     "scale": 0.5880790495858453,
     "targetLength": 0.6,
     "meshPivot": [
-      0.141962,
-      -0.2784425,
-      5.000000000005e-07
+      0.0,
+      0.0,
+      0.0
     ],
     "gripOffset": [
       0.0,
@@ -264,14 +248,12 @@
     ]
   },
   "Uzi": {
-    "socket": "Bip001 R Hand",
-    "supportSocket": "Bip001 L Hand",
     "scale": 0.7716876379927547,
     "targetLength": 0.36,
     "meshPivot": [
-      0.298651,
-      -0.011149499999999993,
-      5.000000000005e-07
+      0.0,
+      0.0,
+      0.0
     ],
     "gripOffset": [
       0.0,
@@ -297,14 +279,12 @@
     ]
   },
   "Revolver": {
-    "socket": "Bip001 R Hand",
-    "supportSocket": "Bip001 L Hand",
     "scale": 0.19336607051600196,
     "targetLength": 0.21,
     "meshPivot": [
-      0.961843,
-      -0.07970849999999999,
-      -6.299999999999362e-05
+      0.0,
+      0.0,
+      0.0
     ],
     "gripOffset": [
       0.0,
@@ -330,14 +310,12 @@
     ]
   },
   "RiotShotgun": {
-    "socket": "Bip001 R Hand",
-    "supportSocket": "Bip001 L Hand",
     "scale": 0.7536476546484987,
     "targetLength": 0.5,
     "meshPivot": [
-      0.589994,
-      -0.041801500000000005,
-      0.011344999999999997
+      0.0,
+      0.0,
+      0.0
     ],
     "gripOffset": [
       0.0,
@@ -363,14 +341,12 @@
     ]
   },
   "M95": {
-    "socket": "Bip001 R Hand",
-    "supportSocket": "Bip001 L Hand",
     "scale": 0.5772625887340792,
     "targetLength": 0.72,
     "meshPivot": [
-      0.879183,
-      -0.0717295,
-      1.9999999999881224e-06
+      0.0,
+      0.0,
+      0.0
     ],
     "gripOffset": [
       0.0,
@@ -396,14 +372,12 @@
     ]
   },
   "LightMachineGun": {
-    "socket": "Bip001 R Hand",
-    "supportSocket": "Bip001 L Hand",
     "scale": 0.6976351259285906,
     "targetLength": 0.64,
     "meshPivot": [
-      0.641567,
-      -0.0337775,
-      -0.029345999999999997
+      0.0,
+      0.0,
+      0.0
     ],
     "gripOffset": [
       0.0,
@@ -429,14 +403,12 @@
     ]
   },
   "Molotov": {
-    "socket": "Bip001 R Hand",
-    "supportSocket": "Bip001 L Hand",
     "scale": 1.1639167194308915,
     "targetLength": 0.5,
     "meshPivot": [
-      0.17627,
-      -0.126857,
-      0.021859999999999997
+      0.0,
+      0.0,
+      0.0
     ],
     "gripOffset": [
       0.0,
@@ -462,14 +434,12 @@
     ]
   },
   "Knife": {
-    "socket": "Bip001 R Hand",
-    "supportSocket": "Bip001 L Hand",
     "scale": 1.2070588803321824,
     "targetLength": 0.6,
     "meshPivot": [
-      0.073359,
-      -0.150182,
-      -5.000000000005e-07
+      0.0,
+      0.0,
+      0.0
     ],
     "gripOffset": [
       0.0,
@@ -495,14 +465,12 @@
     ]
   },
   "Katana": {
-    "socket": "Bip001 R Hand",
-    "supportSocket": "Bip001 L Hand",
     "scale": 0.2510136768985419,
     "targetLength": 0.6,
     "meshPivot": [
-      0.18842,
-      -0.611426,
-      8.000000000001062e-06
+      0.0,
+      0.0,
+      0.0
     ],
     "gripOffset": [
       0.0,
@@ -528,14 +496,12 @@
     ]
   },
   "WoodAxe": {
-    "socket": "Bip001 R Hand",
-    "supportSocket": "Bip001 L Hand",
     "scale": 0.702191304999134,
     "targetLength": 0.6,
     "meshPivot": [
-      0.19773,
-      -0.26683900000000005,
-      -0.0
+      0.0,
+      0.0,
+      0.0
     ],
     "gripOffset": [
       0.0,
@@ -561,14 +527,12 @@
     ]
   },
   "MP5K": {
-    "socket": "Bip001 R Hand",
-    "supportSocket": "Bip001 L Hand",
     "scale": 0.9151642719868216,
     "targetLength": 0.36,
     "meshPivot": [
-      0.336873,
-      -0.045427999999999996,
-      5.000000000005e-07
+      0.0,
+      0.0,
+      0.0
     ],
     "gripOffset": [
       0.0,
@@ -594,14 +558,12 @@
     ]
   },
   "Chainsaw": {
-    "socket": "Bip001 R Hand",
-    "supportSocket": "Bip001 L Hand",
     "scale": 0.6843096911938468,
     "targetLength": 0.6,
     "meshPivot": [
-      0.171265,
-      -0.296196,
-      -0.014643000000000003
+      0.0,
+      0.0,
+      0.0
     ],
     "gripOffset": [
       0.0,
@@ -627,14 +589,12 @@
     ]
   },
   "Minigun": {
-    "socket": "Bip001 R Hand",
-    "supportSocket": "Bip001 L Hand",
     "scale": 0.754256244416736,
     "targetLength": 0.64,
     "meshPivot": [
-      0.773014,
-      0.1055255,
-      0.06279599999999999
+      0.0,
+      0.0,
+      0.0
     ],
     "gripOffset": [
       0.0,
@@ -660,14 +620,12 @@
     ]
   },
   "BaseballBat_SOURCE": {
-    "socket": "Bip001 R Hand",
-    "supportSocket": "Bip001 L Hand",
     "scale": 0.6230827225391867,
     "targetLength": 0.6,
     "meshPivot": [
-      0.056428,
-      -0.27304,
-      -1.2000000000001593e-05
+      0.0,
+      0.0,
+      0.0
     ],
     "gripOffset": [
       0.0,
@@ -693,14 +651,12 @@
     ]
   },
   "SpikedClub_weapon": {
-    "socket": "Bip001 R Hand",
-    "supportSocket": "Bip001 L Hand",
-    "scale": 1.6709601058274732,
+    "scale": 0.6181030006840339,
     "targetLength": 0.6,
     "meshPivot": [
-      0.177741,
-      -0.0033814999999999956,
-      0.226572
+      0.0,
+      0.0,
+      0.0
     ],
     "gripOffset": [
       0.0,
@@ -726,14 +682,12 @@
     ]
   },
   "FragGrenade": {
-    "socket": "Bip001 R Hand",
-    "supportSocket": "Bip001 L Hand",
     "scale": 2.5779441411063506,
     "targetLength": 0.5,
     "meshPivot": [
-      0.061091,
-      -0.021648499999999994,
-      -0.0
+      0.0,
+      0.0,
+      0.0
     ],
     "gripOffset": [
       0.0,

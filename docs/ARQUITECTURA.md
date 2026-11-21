@@ -1,6 +1,6 @@
 # Arquitectura de CSN (para quien siga el proyecto)
 
-Todo el juego vive en **`index.html`** (un solo archivo, ~7.000 lineas de
+Todo el juego vive en **`index.html`** (un solo archivo, ~10.000 lineas de
 script inline) mas la carpeta `assets/`. Three.js r158 esta vendorizado en
 `assets/three.min.js`. No hay build: se sirve con cualquier servidor de
 estaticos (`python -m http.server 8000`) y se abre en el navegador.
@@ -91,10 +91,14 @@ estaticos (`python -m http.server 8000`) y se abre en el navegador.
   `_tex.png`, con escala en `assets/soldier_scales.json`.
 - `mount()` pone la pose de reposo antes de medir bounds y usa
   `SkinnedMesh.computeBoundingBox()` transformado por `matrixWorld`.
-- `makeRealGun3()` y `fitGunToHand3()` leen
-  `assets/weapons/weapon_calibrations.json`: socket anatomico `Bip001 R Hand`,
-  escala por longitud real y `gripOffset`. Los campos `barracks*` solo son de
-  escaparate.
+- `makeRealGun3()` y `makeGunAnchor()` leen
+  `assets/weapons/weapon_calibrations.json`: `meshPivot=[0,0,0]`, escala por
+  eje maximo del bounds real y `gripOffset`. Ya no hay `socket`,
+  `supportSocket` ni offsets de Barracks en gameplay.
+- Todas las armas comparten el mismo holder: cañon `+X`, escala una sola vez y
+  empuñadura `(0,0,0)`; el visor no crea un arma procedural paralela.
+- Los personajes Meshy no reciben pose, clips, retarget ni acople de arma: su
+  `sculptedWeapon` deshabilita el selector de arma del visor.
 - La vista 3D es la principal; la 2D es alternativa.
 - Depuracion: `?debugGrid=1` dibuja la rejilla 2D y el grupo 3D
   `debugGrid3D`; `?debugWeapons=1` marca el origen del arma y muestra su
@@ -113,7 +117,7 @@ python tools\auditar_assets_3d.py
 `VERIFICAR.ps1` comprueba sintaxis, 19 tableros, reglas, datos, winding,
 rejillas IPA, capturas `debugGrid`, humo 3D, **auditoria del visor**, clips,
 movimiento, combate y movil/SwiftShader. El ultimo cierre dio **TODO OK
-13/13**, `npm test` **68/68** y `viewer:audit-all` `ok=True` con 4 modelos.
+13/13**, `npm test` **77/77** y `viewer:audit-all` `ok=True` con 4 modelos.
 El balance se mide con
 `bench/harness.js <modo> <mapa> <partidas> <formato>` y las capturas con
 `_capture_all.mjs`.
@@ -135,3 +139,9 @@ El balance se mide con
 8. **No cerrar en falso**: si falta el original `.glb` o la fuente Meshy sin
    soldar, se documenta como pendiente; no se inventa un loader ni se copia
    un modelo sobre el rig IPA.
+9. **Materiales**: personajes y armas del visor usan `alphaTest:0`,
+   `transparent:false`, `opacity:1` y `FrontSide`; no se reintroduzca
+   `alphaTest:0.5` ni `DoubleSide` en esas mallas.
+10. **Visor**: no llamar a `viewer`/`selectModel` desde `_capture_all.mjs`
+   porque viven fuera del scope global; usar el DOM (`#viewerCharacterSelect`,
+   `#viewerWeaponSelect`, `#viewerKinds`, `#viewerList`).

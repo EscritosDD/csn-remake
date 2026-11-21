@@ -30,7 +30,10 @@ powershell -ExecutionPolicy Bypass -File bench/VERIFICAR.ps1
 `VERIFICAR.ps1` hace 13 comprobaciones: sintaxis, 19 tableros, reglas, datos,
 winding, suite npm, rejillas IPA, capturas `debugGrid`, clips, humo 3D,
 auditoría del visor, movimiento, combate y móvil/SwiftShader. Último cierre:
-**TODO OK 13/13**, **68/68 tests** y `viewer:audit-all ok=True`.
+**TODO OK 13/13**, **77/77 tests** y `viewer:audit-all ok=True` (4 modelos).
+Los siete cuerpos IPA han sido restaurados, Meshy sigue aislado en
+`assets/personajes_propios/`, los materiales usan `alphaTest:0` y las armas
+comparten cañón `+X` con empuñadura `(0,0,0)`.
 
 Depuración en el navegador: `?debugGrid=1` muestra rejillas 2D/3D y
 `?debugWeapons=1` marca el socket real de cada arma.
@@ -54,7 +57,9 @@ Depuración en el navegador: `?debugGrid=1` muestra rejillas 2D/3D y
   (Eliminación, Baliza, Dominación, Escolta). Resultados en
   `docs/Equilibrio_medido.md` (muestras de n≥30).
 - **Capturas**: `node _capture_all.mjs <mapa|campana:N> <prefijo> [ms]`.
-  Captura en 3D y solo baja a 2D si la 3D no arranca.
+  Captura en 3D y solo baja a 2D si la 3D no arranca. También están los modos
+  `ui:hipster`, `ui:soap`, `ui:sneaky`, `ui:meshy09`, `ui:mp5k`, `ui:minigun`
+  y `ui:setup` para revisar armas, diseños propios y selector de personaje.
 
 ## Documentos clave
 

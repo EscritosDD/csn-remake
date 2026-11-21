@@ -52,14 +52,11 @@ def main():
     for name, target in TARGETS.items():
         minimum, maximum = bounds(os.path.join(WEAPONS, name + ".obj"))
         size = [maximum[axis] - minimum[axis] for axis in range(3)]
-        length = max(size[0], size[2], 0.001)
-        center = [(minimum[axis] + maximum[axis]) / 2 for axis in range(3)]
+        length = max(size[0], size[1], size[2], 0.001)
         calibrations[name] = {
-            "socket": "Bip001 R Hand",
-            "supportSocket": "Bip001 L Hand",
             "scale": target / length,
             "targetLength": target,
-            "meshPivot": [-minimum[0], -center[2], -center[1]],
+            "meshPivot": [0.0, 0.0, 0.0],
             "gripOffset": [0.0, 0.0, 0.0],
             "sourceBounds": {"min": minimum, "max": maximum},
             "sourceDims": size,

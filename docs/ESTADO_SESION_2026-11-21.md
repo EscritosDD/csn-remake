@@ -13,6 +13,48 @@ La sesión se cerró con el plan maestro de 6 rondas ejecutado en lo que es veri
 | R5 — Escena y capturas | Cerrada en código | `debugGrid` 3D, sin props procedurales sobre geo IPA, sombras/alpha/textura 512 |
 | R6 — Verificación | Cerrada | Winding estructural de todo OBJ, `viewer:audit-all`, `VERIFICAR.ps1` ampliado |
 
+## Cierre complementario de los 5 bugs y FASE 2
+
+Tras la ronda R6 se aplicaron cinco correcciones quirúrgicas, sin modularizar
+`index.html` (los tests lo parsean por texto) y sin commits:
+
+1. `parseOBJStatic` corrige winding negativo por volumen firmado y recalcula
+   normales; materiales de personajes/armas con `alphaTest:0`.
+2. `Textbook Kate` vuelve a ser `Médico`; los cinco diseños Meshy conservan su
+   malla/rig/textura, no reciben pose/clips/retarget y llevan
+   `sculptedWeapon:true`, por lo que el visor deshabilita el acople de arma.
+3. Cargador de armas compartido (`GUN_MESH_CACHE` por fichero),
+   `makeGunAnchor()` y holder único: cañón `+X`, empuñadura `(0,0,0)` y sin
+   `viewerWeaponCacheKey` ni arma procedural duplicada en el visor.
+4. `mount()` reengancha el modelo, lo centra en `(0,0,0)` y alinea la
+   plataforma con `bounds.min.y-center.y-0.02`.
+5. Configuración permite elegir personaje por ranura con `<select
+   data-kind="char">`, `setup.squadChars` y `charForKey(role,key)`.
+
+Además se restauraron desde `326224f` los tres cuerpos IPA sobrescritos
+(`Artillero`, `Espia`, `Francotirador`) y `assets/soldier/` volvió a contener
+solo los 7 cuerpos originales. Se eliminó el branch por nombre de
+`entry.name==='Sister Florence'` usando `entry.rigPose`.
+
+Auditoría del visor: el fallo `Cannot read properties of null (reading
+'replaceChildren')` venía de asignar `textContent` al `<label>` que contenía
+`#viewerWeaponSelect`. Ahora el texto vive en `#viewerWeaponLabelText`. Las
+capturas del visor usan interacción DOM pura porque `viewer`/`selectModel` no
+son globales.
+
+Capturas reales generadas en `docs/capturas/`: `FIX_visor_hipster_ui_ui.png`,
+`FIX_visor_soap_svd_ui_ui.png`, `FIX_visor_sneaky_mp5_ui_ui.png`,
+`FIX_visor_meshy09_ui_ui.png`, `FIX_visor_mp5k_ui_ui.png`,
+`FIX_visor_minigun_ui_ui.png`, `FIX_setup_selector_ui_ui.png` y
+`FIX_skirmish11_3d.png`.
+
+Pendiente de la FASE 2 (no iniciada): A) posturas por categoría de arma,
+selector con `<optgroup>` y fábrica única `buildOriginalCharacter3D`; B)
+materiales/silueta/Ghost e iluminación; C) cinta BFS con
+`CanAttackAfterMove`, inercia del visor y cámara táctica; D) `GLTFLoader`
+local y loader `.glb` prioritario; E) colisiones y pathfinding 1:1 en los 19
+tableros.
+
 ## Cambios por ronda
 
 ### R1 — Auditoría global y reparación de mallas
@@ -33,7 +75,7 @@ La sesión se cerró con el plan maestro de 6 rondas ejecutado en lo que es veri
   - actualiza matrices y esqueletos;
   - excluye armas marcadas con `isViewerGun`;
   - usa `SkinnedMesh.computeBoundingBox()` y transforma el bounds por `matrixWorld`, en vez de medir la geometría sin deformar.
-- `makeSkinnedModel()` usa `FrontSide`, `alphaTest:0.5`, sRGB forzado en la textura y sin transparencia.
+- `makeSkinnedModel()` usa `FrontSide`, `alphaTest:0`, sRGB forzado en la textura y sin transparencia.
 - Ya no existe el patrón `oldCentered`; el centrado es siempre `viewerCenterOffset(center)`.
 
 ### R3 — Meshy / GLB
@@ -45,7 +87,7 @@ La sesión se cerró con el plan maestro de 6 rondas ejecutado en lo que es veri
 
 - Creado `tools/generate_weapon_calibrations.py`.
 - Creado `assets/weapons/weapon_calibrations.json` con 23 entradas.
-- Cada entrada guarda `socket`, `supportSocket`, `scale`, `targetLength`, `meshPivot`, `gripOffset`, bounds y dimensiones reales.
+- Cada entrada guarda `scale`, `targetLength`, `meshPivot=[0,0,0]`, `gripOffset`, bounds y dimensiones reales; no hay `socket` ni `supportSocket`.
 - `makeRealGun3()` usa la calibración tanto en partida como en visor: ya no aplica `barracksOffset`/`barracksScale`.
 - `fitGunToHand3()` usa `Bip001 R Hand` como socket anatómico y `gripOffset` de calibración.
 - Añadido `?debugWeapons=1`: marca el origen del arma y muestra por consola la calibración usada.
@@ -56,7 +98,7 @@ La sesión se cerró con el plan maestro de 6 rondas ejecutado en lo que es veri
 - `buildThemedProps3()` solo se llama cuando **no** hay geometría IPA visible (`!geoShown`).
 - Sombras con `bias=-0.0005` y `normalBias=0.02`.
 - Texturas procedurales `procTex3` a 512×512 salvo sombras (128×128).
-- `alphaTest:0.5` en personajes y armas.
+- `alphaTest:0` en personajes y armas (el atlas IPA con alpha no debe enmascararse).
 - Ojo: la escala anti-clipping global de unidades (`0.86`) y la generación de PNG con alpha desde el pipeline quedan como **pendientes explícitos**, no se marcan como hechas.
 
 ### R6 — Verificación
@@ -71,16 +113,16 @@ La sesión se cerró con el plan maestro de 6 rondas ejecutado en lo que es veri
 | Gate | Resultado |
 |---|---|
 | `npm run lint` | OK · 2 bloques `<script>` · 0 errores de sintaxis |
-| `npm test` | **68/68** tests · 0 fallos |
-| `node --test bench/winding.test.js` | 11/11, incluido el escaneo global de OBJ |
+| `npm test` | **77/77** tests · 0 fallos |
+| `node --test bench/winding.test.js` | 13/13, incluido el escaneo global de OBJ y el winding de 23 armas |
 | `npm run verify` (`VERIFICAR.ps1`) | **TODO OK 13/13** |
 | Capturas `debugGrid` | `skirmish03`, `04`, `09`, `11` con `ok=True` y 0 errores JS |
-| Humo 3D | `skirmish05` · `geo=true` · 8 unidades · 50.459 tris |
+| Humo 3D | `csn3d` · `geo=true` · 8 unidades · 45.483 tris |
 | `viewer:audit-all` | `ok=True` · 4 modelos auditados · 0 errores |
 | Clips | 40 clips originales, 20 huesos, eventos y root motion validados |
-| Movimiento | 157 muestras · 8 texturas |
-| Combate | 6 eventos · 157 muestras |
-| Móvil / SwiftShader | 390×844 · 18,2 fps · `sw=True` |
+| Movimiento | muestras >0 (varían por ejecución) · 8 texturas |
+| Combate | 6 eventos · muestras >0 (varían por ejecución) |
+| Móvil / SwiftShader | 390×844 · fps variable · `sw=True` |
 | `git diff --check` | Sin errores; solo avisos CRLF conocidos |
 
 ## Archivos nuevos o modificados
@@ -124,7 +166,7 @@ La sesión se cerró con el plan maestro de 6 rondas ejecutado en lo que es veri
 1. **Revisión visual humana**: abrir `?debugWeapons=1` y `?debugGrid=1`, comparar encuadre del visor, arma en mano y aristas del mapa.
 2. **Meshy**: si Dani aporta originales `.glb/.gltf` sin soldar, implementar loader local y animación por pieza; no copiar nada sobre `assets/soldier/`.
 3. **Anti-clipping**: decidir si la escala `0.86` se aplica al modelo completo o solo a obstáculos; hoy no está aplicada a unidades.
-4. **Alpha PNG**: regenerar atlas desde `_original/pipeline.py` con Transform real y alpha; hoy solo hay `alphaTest` en materiales.
+4. **Alpha PNG**: regenerar atlas desde `_original/pipeline.py` con Transform real y alpha; los materiales ya usan `alphaTest:0` por decisión de Dani.
 5. **Simulación ampliada**: extender `map-collision.test.js` a los 19 tableros, barriles y muestras `dx,dy`; hoy cubre 8 rejillas IPA + 19 tableros de configuración.
 6. **Commit**: revisar el diff completo y hacer commits por fase cuando Dani lo autorice.
 

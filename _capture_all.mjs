@@ -105,6 +105,7 @@ try {
     const p = send('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true });
     const to = new Promise(r => setTimeout(() => r({ TIMEOUT: 1 }), t));
     const r = await Promise.race([p, to]);
+    if (r.result?.exceptionDetails) errs.push(String(r.result.exceptionDetails.exception?.description || '').slice(0, 140));
     return r.TIMEOUT ? 'TIMEOUT' : (r.result?.result?.value ?? null);
   };
   const shot = async name => {
@@ -140,7 +141,12 @@ try {
       setup: "openSetup('eliminacion')",
       barracks: "document.getElementById('mnuBarracks').click()",
       viewer: "document.querySelector('#mainTabs [data-tab=\"viewer\"]').click()",
-      hipster: "(function(){document.querySelector('#mainTabs [data-tab=\"viewer\"]').click();return selectModel('roles','original:01')})()",
+      hipster: "(async function(){document.querySelector('#mainTabs [data-tab=\"viewer\"]').click();await new Promise(r=>setTimeout(r,1500));const s=document.getElementById('viewerCharacterSelect');s.value='original:01';s.dispatchEvent(new Event('change',{bubbles:true}));return s.value;})()",
+      soap: "(async function(){document.querySelector('#mainTabs [data-tab=\"viewer\"]').click();await new Promise(r=>setTimeout(r,1500));const c=document.getElementById('viewerCharacterSelect');c.value='original:03';c.dispatchEvent(new Event('change',{bubbles:true}));await new Promise(r=>setTimeout(r,1800));const w=document.getElementById('viewerWeaponSelect');w.value='SVD Dragunov';w.dispatchEvent(new Event('change',{bubbles:true}));return c.value+'|SVD Dragunov';})()",
+      sneaky: "(async function(){document.querySelector('#mainTabs [data-tab=\"viewer\"]').click();await new Promise(r=>setTimeout(r,1500));const c=document.getElementById('viewerCharacterSelect');c.value='original:06';c.dispatchEvent(new Event('change',{bubbles:true}));await new Promise(r=>setTimeout(r,1800));const w=document.getElementById('viewerWeaponSelect');w.value='MP5';w.dispatchEvent(new Event('change',{bubbles:true}));return c.value+'|MP5';})()",
+      meshy09: "(async function(){document.querySelector('#mainTabs [data-tab=\"viewer\"]').click();await new Promise(r=>setTimeout(r,1500));const c=document.getElementById('viewerCharacterSelect');c.value='own:09';c.dispatchEvent(new Event('change',{bubbles:true}));return c.value;})()",
+      mp5k: "(async function(){document.querySelector('#mainTabs [data-tab=\"viewer\"]').click();await new Promise(r=>setTimeout(r,1500));document.querySelector('#viewerKinds [data-kind=\"weapons\"]').click();await new Promise(r=>setTimeout(r,1500));const b=[...document.querySelectorAll('#viewerList button')].find(x=>x.textContent.includes('MP5K'));if(!b)throw new Error('no MP5K');b.click();return b.textContent;})()",
+      minigun: "(async function(){document.querySelector('#mainTabs [data-tab=\"viewer\"]').click();await new Promise(r=>setTimeout(r,1500));document.querySelector('#viewerKinds [data-kind=\"weapons\"]').click();await new Promise(r=>setTimeout(r,1500));const b=[...document.querySelectorAll('#viewerList button')].find(x=>x.textContent.includes('Minigun'));if(!b)throw new Error('no Minigun');b.click();return b.textContent;})()",
       how: "document.querySelector('#mainTabs [data-tab=\"how\"]').click()",
       pieces: "document.querySelector('#mainTabs [data-tab=\"viewer\"]').click();document.querySelector('#viewerKinds [data-kind=\"pieces\"]').click()",
       game: "quickStart('almacen')",
@@ -262,7 +268,7 @@ try {
   const softwareOk = !software || !!(parsed && parsed.sw === true);
   const viewerOk = !auditMode || !!(result.viewerAudit && Array.isArray(result.viewerAudit.models) && result.viewerAudit.models.length > 0 && result.viewerAudit.models.every(m => {
     if (!Number.isFinite(m.vol) || m.transparent !== false || m.opacity !== 1) return false;
-    if (m.kind === 'roles' || m.kind === 'weapons') return m.side === 0 && m.alphaTest >= 0.5 && (m.kind !== 'roles' || m.vol > 0);
+    if (m.kind === 'roles' || m.kind === 'weapons') return m.side === 0 && m.alphaTest === 0 && (m.kind !== 'roles' || m.vol > 0);
     return m.size.every(Number.isFinite);
   }));
   result.ok = sceneOk && pngOk && moveOk && combatOk && mobileOk && geoOk && softwareOk && viewerOk && errs.length === 0;

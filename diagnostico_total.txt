@@ -1,0 +1,896 @@
+﻿=== 1. GIT STATUS Y ULTIMOS COMMITS ===
+4348ed6 desarrollo
+5b3decf open code 19:30 20/11/2026
+16c8232 opencode work
+a9dfd87 desarrollo open code
+4fac4b9 auditor├¡a profunda: bugs encontrados y corregidos
+434211a personajes por rol: textura y l├│gica in game
+
+=== 2. DECLARACIONES DE PERSONAJES / ROLES / SETUP ===
+
+--- const ROLE_MODEL_FILES ---
+const ROLE_MODEL_FILES={'Francotirador':'Francotirador','Artillero':'Artillero','Esp├¡a':'Espia','M├®dico':'Medico','Ingeniero':'Ingeniero','Comando':'Comando','Capit├ín':'Capitan'}
+
+--- const MESHY_CAST ---
+const MESHY_CAST=[
+ {key:'own:09',label:'Dise├▒o Meshy 09',name:'Dise├▒o Meshy 09',role:'Francotirador',mesh:'Francotirador',texture:'assets/personajes_propios/Francotirador_tex.png',bio:'Dise├▒o propio de Dani.',play:true},
+ {key:'own:10',label:'Dise├▒o Meshy 10',name:'Dise├▒o Meshy 10',role:'Artillero',mesh:'Artillero',texture:'assets/personajes_propios/Artillero_tex.png',bio:'Dise├▒o propio de Dani.',play:true},
+ {key:'own:11',label:'Dise├▒o Meshy 11',name:'Dise├▒o Meshy 11',role:'Esp├¡a',mesh:'Espia',texture:'assets/personajes_propios/Espia_tex.png',bio:'Dise├▒o propio de Dani.',play:true},
+ {key:'own:12',label:'Dise├▒o Meshy 12',name:'Dise├▒o Meshy 12',role:'M├®dico',mesh:'Medico',texture:'assets/personajes_propios/Medico_tex.png',bio:'Dise├▒o propio de Dani.',play:true},
+ {key:'own:13',label:'Dise├▒o Meshy 13',name:'Dise├▒o Meshy 13',role:'Ingeniero',mesh:'Ingeniero',texture:'assets/personajes_propios/Ingeniero_tex.png',bio:'Dise├▒o propio de Dani.',play:true}
+]
+
+--- const ORIG_CAST ---
+const ORIG_CAST=[
+ {name:'Hipster Dave',body:'Soldier_Light',outfit:'Soldier_Light_d / DeltaForce / Veteran',role:'Francotirador',bio:'Gafas verdes, pelo naranja y un fusil enorme. Cara de enfado permanente.',play:true},
+  {name:'Archie Fletcher',body:'Soldier_Light_Rambo',outfit:'Rambo / DeerHunter',role:'Francotirador',bio:'Rambo de mercadillo: cinta en la cabeza y m├ís valor que punter├¡a.',play:true},
+  {name:'Soap',body:'Soldier_SAS',outfit:'Soldier_SAS',role:'Francotirador',bio:'El nombre que todos recuerdan y nadie explica.',play:true},
+  {name:'Spud',body:'Soldier_Spud',outfit:'Soldier_ForestCamo',role:'Francotirador',bio:'Patata de nombre, roca de aguante.',play:true},
+ {name:'Ivan Tkilya',body:'Soldier_Heavy',outfit:'Soldier_heavy / GermanSpecialForces',role:'Artillero',bio:'Pesado de manual: donde se planta, hay que rodearlo.',play:true},
+  {name:'Mme La Hacque',body:'Agent_Light',outfit:'Agent_light / JewelThief',role:'Esp├¡a',bio:'Elegancia francesa con un cuchillo en la bota.',play:true},
+ {name:'Sneaky Pete',body:'Agent_Light',outfit:'Agent_light (base)',role:'Esp├¡a',bio:'Nadie le vio llegar; nadie le vio irse.',play:true},
+ {name:'Sister Florence',body:'Medic',outfit:'Medic / Medic_Rescue',role:'M├®dico',bio:'Reza por ti y luego te cose la herida.',play:true},
+  {name:'Riot Medic',body:'Medic_therapist',outfit:'Medic_therapist',role:'M├®dico',bio:'Casco antidisturbios y camilla blindada.',play:true},
+  {name:'Textbook Kate',body:'Medic',outfit:'Medic (variante)',role:'Francotirador',bio:'Se sabe el manual de memoria; por eso dispara mejor.',play:true},
+ {name:'Big Time Taschmann',body:'Engineer',outfit:'Engineer / Spetsnaz',role:'Ingeniero',bio:'Maza m├ís alta que su torso y sonrisa de oreja a oreja.',play:true},
+  {name:'Megan McNick',body:'Engineer_Light',outfit:'Engineer_Light / Trinity',role:'Ingeniero',bio:'Ingeniera de Trinity: torretas antes que palabras.',play:true},
+  {name:'Carlito Grosso',body:'Engineer_Heavy',outfit:'Engineer_Heavy / EOD',role:'Ingeniero',bio:'Siempre vuelve con el blindaje puesto.',play:true},
+ {name:'Riot Agent',body:'Agent_Heavy',outfit:'Agent_Heavy / Skin1',role:'Comando',bio:'Antidisturbios: escudo primero, preguntas despu├®s.',play:true},
+  {name:'Riot Engineer',body:'Engineer (RiotCop)',outfit:'Engineer_RiotCop',role:'Ingeniero',bio:'Convierte una calle en una fortaleza en tres turnos.',play:true},
+ {name:'Commander (M)',body:'Commander',outfit:'Commander / Latino / Asian / African',role:'Capit├ín',bio:'Manda con la voz y con el ejemplo.',play:true},
+  {name:'Commander (F)',body:'Commander_F',outfit:'Commander_F / Latino / Asian / African',role:'Capit├ín',bio:'Misma autoridad, otro acento.',play:true}
+]
+
+--- const VIEWER_BODY_FILE ---
+const VIEWER_BODY_FILE={
+    'Soldier_SAS':'Soldier_SAS.obj',
+    'Soldier_Spud':'Soldier_Spud.obj',
+    'Soldier_Heavy':'Soldier_Heavy.obj',
+    'Soldier_Light_Rambo':'Soldier_Light_Rambo.obj',
+    'Agent_Light':'Agent_Light.obj',
+    'Medic_therapist':'Medic_therapist_1248v.obj',
+    'Engineer_Light':'Engineer_Light.obj',
+    'Engineer_Heavy':'Engineer_Heavy.obj',
+    'Engineer (RiotCop)':'Engineer_RiotCop.obj',
+    'CommanderM':'CommanderM.obj',
+    'Commander_F':'CommanderF.obj'
+  }
+
+--- const VIEWER_BODY_ROLE ---
+const VIEWER_BODY_ROLE={'Medic':'M├®dico','Engineer':'Ingeniero','Agent_Heavy':'Comando','Commander':'Capit├ín'}
+
+=== 3. FUNCIONES CLAVE ACTUALES EN index.html ===
+
+--- squadRows ---
+function squadRows(containerId,team){
+  const el=$('#'+containerId);el.innerHTML='';
+  const def=DEFAULT_SQUADS[setup.fmt];
+  for(let i=0;i<setup.fmt;i++){
+    const row=document.createElement('div');row.className='squad-row';
+    const role=def[i];
+    row.innerHTML='<div class="slot-num">'+(i+1)+'</div>'+
+      '<img class="sq-ico" src="'+(rolePortraitURL(role)||'assets/ui/retrato_capitan.png')+'" alt=""/>'+
+      '<select data-team="'+team+'" data-slot="'+i+'" data-kind="role">'+ROLE_NAMES.map(r=>'<option '+(r===role?'selected':'')+'>'+r+'</option>').join('')+'</select>'+
+      '<select data-team="'+team+'" data-slot="'+i+'" data-kind="weapon"></select><small class="sq-char"></small>';
+    el.appendChild(row);
+    const wsel=row.querySelector('[data-kind="weapon"]');
+    const fill=()=>{const r=row.querySelector('[data-kind="role"]').value;wsel.innerHTML=ROLES[r].weapons.map(w=>'<option>'+w+'</option>').join('');
+      const ico=row.querySelector('.sq-ico');if(ico)ico.src=(rolePortraitURL(r,characterForRole(r,i))||'assets/ui/retrato_capitan.png');
+      const cl=row.querySelector('.sq-char');if(cl)cl.textContent=(CHAR_PREFS[r]||(charsForRole(r)[0]||{}).name||'');};
+    row.querySelector('[data-kind="role"]').onchange=fill;fill();
+  }
+}
+
+--- readSquad ---
+function readSquad(team){
+  const out=[];
+  document.querySelectorAll('select[data-team="'+team+'"]').forEach(()=>{});
+  for(let i=0;i<setup.fmt;i++){
+    const role=document.querySelector('select[data-team="'+team+'"][data-slot="'+i+'"][data-kind="role"]').value;
+    const weapon=document.querySelector('select[data-team="'+team+'"][data-slot="'+i+'"][data-kind="weapon"]').value;
+    out.push({role,weapon});
+  }
+  return out;
+}
+
+--- charsForRole ---
+function charsForRole(role){
+  const orig=ORIG_CAST.filter(c=>c.play&&c.role===role).map(c=>Object.assign({},c,{texture:CAST_TEXTURE_FILE[c.name]||''}));
+  const meshy=MESHY_CAST.filter(c=>c.play&&c.role===role);
+  const own=OWN_CAST.filter(c=>c.role===role);
+  return orig.concat(meshy).concat(own);
+}
+
+--- characterForRole ---
+function characterForRole(role,slot){
+  const opts=charsForRole(role);if(!opts.length)return null;
+  const prefs=(typeof CHAR_PREFS!=='undefined'&&CHAR_PREFS)?CHAR_PREFS:{};
+  const chosen=opts.find(c=>c.name===prefs[role]||c.key===prefs[role]);
+  return chosen||opts[slot%opts.length];
+}
+
+--- makeUnit ---
+function makeUnit(team,def,i,nation,skin){
+  const list=spawnsFor(team);const sp=list[i%list.length]||(team==='A'?SPAWNS_A[0]:SPAWNS_B[0]);
+  const ch=characterForRole(def.role,i);
+  const role=ROLES[def.role];
+  const body=BODIES[role.body]||BODIES.medio;
+  let hp=body.hp,maxHp=body.hp,energy=body.energy,maxEnergy=body.energy,vetLevel=0;
+  /* Veterania de campa├▒a: solo tu escuadra, por posici├│n, acumulada al sobrevivir misiones */
+  if(team==='A'&&setup.mode==='campana'){const c=loadCampaign();vetLevel=(c.vet&&c.vet[i])||0;if(vetLevel>0){maxHp+=vetLevel*25;hp=maxHp;maxEnergy+=vetLevel;energy=maxEnergy;}}
+  /* Dificultad de la IA: solo la escuadra rival cuando juega la m├íquina */
+  if(team==='B'&&setup.opp==='ia'){if(setup.difficulty==='veterano'){maxEnergy+=1;energy=maxEnergy;}else if(setup.difficulty==='elite'){maxEnergy+=2;energy=maxEnergy;maxHp+=25;hp=maxHp;}}
+  const u={id:++uid,team,role:def.role,name:ch?ch.name:def.role,charKey:characterKey(ch),charName:ch?ch.name:def.role,charBio:ch?ch.bio:'',charTexture:ch&&ch.texture?ch.texture:'',charMesh:ch&&ch.mesh?ch.mesh:'',charAbilities:charAbilitiesFor(ch),weapon:def.weapon,skin:skin||'nacion',x:sp.x,y:sp.y,dx:sp.x,dy:sp.y,hp:hp,maxHp:maxHp,
+    energy:energy,maxEnergy:maxEnergy,alive:true,invisible:false,invisTurns:0,suppressed:false,stunned:false,stunFresh:false,vetLevel:vetLevel,slotIndex:i,
+    grenades:def.role==='Comando'?2:1,flashes:def.role==='Comando'?2:0,smokes:def.role==='Esp├¡a'?2:0,mines:def.role==='Ingeniero'?2:0,covers:def.role==='Ingeniero'?2:0,gases:def.role==='Artillero'?2:0,sweeps:def.role==='Esp├¡a'?1:0,molotovs:def.role==='Artillero'?2:0,crates:def.role==='M├®dico'?2:0,teleports:def.role==='Esp├¡a'?1:0,shields:def.role==='Comando'?1:0,arty:def.role==='Artillero'?2:0,bees:def.role==='Esp├¡a'?1:0,tranqs:def.role==='Esp├¡a'?1:0,water:def.role==='Comando'?2:0,toolkits:def.role==='Ingeniero'?2:0,orbitals:def.role==='Artillero'?1:0,heals:2,revives:1,captainUsed:false,movedThisTurn:false,
+    specialUsedTurn:false,onceUsed:false,nation,hasShot:false,
+    facing:team==='A'?0:2,overwatch:false,returnKey:'',body:role.body,moveCost:body.moveCost};
+  applyCharacterAbilities(u);
+  return u;
+}
+
+--- parseOBJ3 ---
+function parseOBJ3(txt,skin){
+  const P=[],UV=[],idxMap={};
+  const pos=[],uv=[],si=[],sw=[],outIdx=[];
+  txt.split('\n').forEach(line=>{
+    const p=line.trim().split(/\s+/);
+    if(p[0]==='v')P.push([-(+p[1]),+p[2],+p[3]]);
+    else if(p[0]==='vt')UV.push([+p[1],+p[2]]);
+    else if(p[0]==='f'){
+      for(let i=1;i<=3;i++){
+        const t=p[i].split('/');const vi=+t[0]-1,ti=+t[1]-1,ni=+t[2]-1;
+        const key=vi+'/'+ti+'/'+ni;
+        if(idxMap[key]==null){
+          idxMap[key]=pos.length/3;
+          pos.push(P[vi][0],P[vi][1],P[vi][2]);
+          if(UV[ti])uv.push(Math.min(0.998,Math.max(0.002,UV[ti][0])),Math.min(0.998,Math.max(0.002,UV[ti][1])));else uv.push(0.5,0.5);
+          for(let k=0;k<4;k++){si.push(skin.skinIndex[vi*4+k]);sw.push(skin.skinWeight[vi*4+k]);}
+        }
+        outIdx.push(idxMap[key]);
+      }
+    }
+  });
+  let vol=0;
+  for(let i=0;i<outIdx.length;i+=3){
+    const a=outIdx[i]*3,b=outIdx[i+1]*3,c=outIdx[i+2]*3;
+    vol+=(pos[a]*(pos[b+1]*pos[c+2]-pos[b+2]*pos[c+1])-pos[a+1]*(pos[b]*pos[c+2]-pos[b+2]*pos[c])+pos[a+2]*(pos[b]*pos[c+1]-pos[b+1]*pos[c]))/6;
+  }
+  if(vol<0)for(let i=0;i<outIdx.length;i+=3){const t=outIdx[i+1];outIdx[i+1]=outIdx[i+2];outIdx[i+2]=t;}
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+  g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));
+  g.setAttribute('skinIndex',new THREE.Float32BufferAttribute(si,4));
+  g.setAttribute('skinWeight',new THREE.Float32BufferAttribute(sw,4));
+  g.setIndex(outIdx);
+  g.computeVertexNormals();
+  return g;
+}
+
+--- parseOBJStatic ---
+function parseOBJStatic(txt){
+  const P=[],UV=[],NO=[],idxMap={};
+  const pos=[],uv=[],nor=[],outIdx=[];
+  txt.split(/\r?\n/).forEach(line=>{
+    const p=line.trim().split(/\s+/);
+    if(p[0]==='v')P.push([+p[1],+p[2],+p[3]]);
+    else if(p[0]==='vt')UV.push([+p[1],+p[2]]);
+    else if(p[0]==='vn')NO.push([+p[1],+p[2],+p[3]]);
+    else if(p[0]==='f'){
+      for(let i=1;i<p.length;i++){
+        const t=p[i].split('/');
+        const vi=parseInt(t[0],10)-1,ti=parseInt(t[1],10)-1,ni=parseInt(t[2],10)-1;
+        if(!(vi>=0&&P[vi]))continue;
+        const key=vi+'/'+ti+'/'+ni;
+        if(idxMap[key]==null){
+          idxMap[key]=pos.length/3;
+          pos.push(P[vi][0],P[vi][1],P[vi][2]);
+          if(UV[ti])uv.push(UV[ti][0],UV[ti][1]);else uv.push(0,0);
+          if(NO[ni])nor.push(NO[ni][0],NO[ni][1],NO[ni][2]);else nor.push(0,1,0);
+        }
+        outIdx.push(idxMap[key]);
+      }
+    }
+  });
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+  g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));
+  g.setAttribute('normal',new THREE.Float32BufferAttribute(nor,3));
+  g.setIndex(outIdx);
+  return g;
+}
+
+--- makeSkinnedModel ---
+function makeSkinnedModel(geometry,data,texture,options={}){
+  const model=new THREE.Group();
+  const bones=data.bones.map(b=>{
+    const bone=new THREE.Bone();
+    bone.name=b.name;
+    bone.position.fromArray(b.pos);
+    bone.quaternion.fromArray(b.quat);
+    if(b.scale)bone.scale.fromArray(b.scale);
+    return bone;
+  });
+  data.bones.forEach((b,i)=>{if(b.parent>=0)bones[b.parent].add(bones[i]);});
+  const inverses=validatedRigBoneInverses(data,bones);
+  const skeleton=new THREE.Skeleton(data.skinBones.map(i=>bones[i]),inverses);
+  if(texture)texture.colorSpace=THREE.SRGBColorSpace;
+  const mesh=new THREE.SkinnedMesh(geometry,new THREE.MeshStandardMaterial({
+    map:texture,roughness:0.85,metalness:0.02,transparent:false,opacity:1,depthWrite:true,alphaTest:0.5,
+    side:THREE.FrontSide
+  }));
+  mesh.add(bones[0]);
+  mesh.bind(skeleton,new THREE.Matrix4());
+  mesh.frustumCulled=false;
+  mesh.castShadow=true;
+  model.add(mesh);
+  const parents=data.bones.map(b=>b.parent);
+  const bindLocal=data.bones.map(b=>new THREE.Quaternion(b.quat[0],b.quat[1],b.quat[2],b.quat[3]));
+  const bindWorldQ=worldRotationsFromLocal(bindLocal,parents);
+  const baseRestQ=options.baseRestQ||null;
+  const sourceParents=baseRestQ?(options.baseParents||parents):parents;
+  model.userData={
+    bones,bindLocal,
+    curQ:data.bones.map(b=>new THREE.Quaternion(b.quat[0],b.quat[1],b.quat[2],b.quat[3])),
+    bindPos:data.bones.map(b=>new THREE.Vector3(b.pos[0],b.pos[1],b.pos[2])),
+    curDelta:new THREE.Vector3(),mesh3:mesh,meshy:!!options.meshy,
+    animatable:!!options.animatable,idleClipKey:options.idleClipKey||'idle2h',idleRole:options.idleRole,
+    baseRestQ,baseRestWorldQ:baseRestQ?worldRotationsFromLocal(baseRestQ,sourceParents):null,
+    bindWorldQ,parents,sourceParents,
+    sourcePoseQ:data.bones.map(()=>new THREE.Quaternion()),
+    sourceWorldQ:data.bones.map(()=>new THREE.Quaternion()),
+    targetWorldQ:data.bones.map(()=>new THREE.Quaternion()),
+    targetLocalQ:data.bones.map(()=>new THREE.Quaternion()),
+    isClassRig:!!baseRestQ,grip:!!options.grip,role:options.role||'',gun:null,
+    byName:Object.fromEntries(bones.map((bone,index)=>[bone.name,index]))
+  };
+  return model;
+}
+
+--- loadRealSoldier ---
+function loadRealSoldier(){
+  if(typeof THREE==='undefined')return;
+  REAL.texByRole={};REAL.byRole={};REAL.castTex={};
+  fetch('assets/soldier_scales.json').then(r=>r.json()).then(sc=>{ROLE_SCALES=sc||{};}).catch(()=>{});
+  fetch('assets/soldier_clips.json').then(r=>{if(!r.ok)throw new Error('clips');return r.json();}).then(pack=>{CLIPLIB.pack=pack;CLIPLIB.ready=true;}).catch(()=>{});
+  const texLoad=(path)=>new Promise(res=>{new THREE.TextureLoader().load(path,t=>{
+    t.colorSpace=THREE.SRGBColorSpace;t.generateMipmaps=false;
+    t.minFilter=THREE.LinearFilter;t.magFilter=THREE.LinearFilter;
+    t.wrapS=THREE.ClampToEdgeWrapping;t.wrapT=THREE.ClampToEdgeWrapping;
+    res(t);
+  },undefined,()=>res(null));});
+  const loadRole=(role,file)=>Promise.all([
+    fetch('assets/soldier/'+file+'.obj').then(r=>{if(!r.ok)throw new Error('obj');return r.text();}),
+    fetch('assets/soldier/'+file+'_rig.json').then(r=>{if(!r.ok)throw new Error('rig');return r.json();}),
+    texLoad('assets/soldier/'+file+'_tex.png')
+  ]).then(([objTxt,data,tex])=>{
+    const geo=parseOBJ3(objTxt,data);
+    REAL.byRole[role]={data:data,geo:geo,tex:tex};
+    return role;
+  }).catch(()=>null);
+  Promise.all([
+    fetch('assets/soldier.obj').then(r=>{if(!r.ok)throw new Error('obj');return r.text();}),
+    fetch('assets/soldier_rig.json').then(r=>{if(!r.ok)throw new Error('rig');return r.json();}),
+    texLoad('assets/soldier/outfits/base.png')
+  ]).then(([objTxt,data,baseTex])=>{
+    REAL.data=data;REAL.geo=parseOBJ3(objTxt,data);REAL.tex=baseTex||null;REAL.ready=true;
+    return Promise.all(Object.entries(ROLE_MODEL_FILES).map(([role,file])=>loadRole(role,file)));
+  }).then(list=>{
+    /* Uniformes por clase como respaldo si faltara su textura. */
+    return Promise.all(Object.entries(ROLE_OUTFIT_FILES).map(([role,file])=>
+      file==='base'?Promise.resolve([role,null]):texLoad('assets/soldier/outfits/'+file+'.png').then(t=>[role,t])
+    ));
+  }).then(pairs=>{
+    (pairs||[]).forEach(([role,t])=>{if(t)REAL.texByRole[role]=t;});
+    return Promise.all([
+      Promise.all(Object.values(CAST_TEXTURE_FILE).map(file=>texLoad('assets/soldier/cast/'+file).then(t=>[file,t]))),
+      Promise.all(MESHY_CAST.map(c=>loadMeshyModel(c.mesh)))
+    ]).then(([casts])=>{
+      (casts||[]).forEach(([file,t])=>{if(t)REAL.castTex[file]=t;});
+    });
+  }).then(()=>{
+    Object.keys(PORTRAIT_CACHE).forEach(k=>delete PORTRAIT_CACHE[k]);
+    REAL_SPRITES.cache={};REAL_SPRITES.failed=false;
+    if(typeof buildSpriteStrip==='function')buildSpriteStrip();
+    if(typeof rebuildDemo==='function')rebuildDemo();
+    if(G&&T3&&VIEW_MODE==='3d')build3DWorld();
+    if(G){updateUI();draw();}
+  }).catch(()=>{});
+}
+
+--- makeRealGun3 ---
+function makeRealGun3(weapon,preservePivot){
+  const file=WEAPON_MESH_FILE[weapon]; if(!file)return null;
+  const cached=GUN_MESH_CACHE[weapon]; if(cached!==undefined)return cached;
+  GUN_MESH_CACHE[weapon]=null; /* cargando */
+  fetch('assets/weapons/'+file+'.obj').then(r=>{if(!r.ok)throw new Error('obj');return r.text();}).then(txt=>{
+    const geo=parseOBJStatic(txt);
+    geo.computeBoundingBox();
+    const bb=geo.boundingBox, size=new THREE.Vector3(); bb.getSize(size);
+    const long=Math.max(size.x,size.z,0.001);
+    const cat=(WEAPONS[weapon]||{}).cat||'Fusiles de asalto';
+    const target=WEAPON_LEN[cat]||0.6;
+    const k=target/long;
+    const meta=weaponMeta(file);
+    const cal=weaponCalibration(file)||{
+      socket:'Bip001 R Hand',supportSocket:'Bip001 L Hand',scale:k,
+      meshPivot:[-bb.min.x,-(bb.min.z+bb.max.z)/2,-(bb.min.y+bb.max.y)/2],
+      gripOffset:[0,0,0]
+    };
+    const mat=new THREE.MeshStandardMaterial({color:0x9a9a9a,roughness:0.72,metalness:0.25,alphaTest:0.5});
+    const texLoad=new THREE.TextureLoader();
+    texLoad.load('assets/weapons/'+file+'_tex.png',t=>{t.colorSpace=THREE.SRGBColorSpace;mat.map=t;mat.color.set(0xffffff);mat.needsUpdate=true;},undefined,()=>{});
+    const mesh=new THREE.Mesh(geo,mat);
+    const pivot=cal.meshPivot||[0,0,0];
+    mesh.position.set(pivot[0],pivot[1],pivot[2]);
+    const holder=new THREE.Group();
+    holder.add(mesh);
+    holder.scale.setScalar(cal.scale||k);
+    holder.rotation.x=-Math.PI/2;
+    holder.userData={file:file,meta:meta||null,calibration:cal,pivot:pivot};
+    GUN_MESH_CACHE[weapon]=holder;
+    if(gunSwapWaiters[weapon]){gunSwapWaiters[weapon].forEach(fn=>{try{fn(holder);}catch(e){}});gunSwapWaiters[weapon]=[];}
+  }).catch(()=>{delete GUN_MESH_CACHE[weapon];});
+  return null;
+}
+
+--- attachRealGun ---
+function attachRealGun(un,gun){
+  const apply=(holder)=>{
+    if(!gun||!gun.parent)return;
+    try{
+      const keep=[];
+      gun.children.forEach(ch=>{if(ch.userData&&ch.userData.isFlash)keep.push(ch);else ch.visible=false;});
+      const g2=holder.clone(true);
+      g2.userData={isRealGun:true,file:holder.userData.file,meta:holder.userData.meta};
+      gun.add(g2);
+      gun.userData.file=g2.userData.file;
+      gun.userData.meta=g2.userData.meta;
+      if(gun.userData.flash){const cat=(WEAPONS[un.weapon]||{}).cat||'Fusiles de asalto';gun.userData.flash.position.x=(WEAPON_LEN[cat]||0.6)*0.96;gun.userData.flash.position.y=0;}
+    }catch(e){}
+  };
+  const holder=makeRealGun3(un.weapon);
+  if(holder)apply(holder);
+  else{
+    if(!gunSwapWaiters[un.weapon])gunSwapWaiters[un.weapon]=[];
+    gunSwapWaiters[un.weapon].push(apply);
+  }
+}
+
+--- fitGunToHand3 ---
+function fitGunToHand3(un,grp,isLive){
+  if(!HAS_THREE)return;
+  const ud=grp&&grp.userData;if(!ud||!ud.gun||!ud.byName||!ud.bones)return;
+  const parent=ud.gun.parent;if(!parent)return;
+  if(grp.updateWorldMatrix)grp.updateWorldMatrix(true,true);else grp.updateMatrixWorld(true);
+  const bR=ud.bones[ud.byName['Bip001 R Hand']];
+  const bFA=ud.bones[ud.byName['Bip001 R Forearm']];
+  if(!bR||!bFA)return;
+  /* Socket anat├│mico del rig IPA: la mano derecha. Los metadatos de
+     Barracks solo se usan en la armer├¡a; aqu├¡ manda la calibraci├│n real. */
+  const gunFile=ud.gun.userData.file||(un&&WEAPON_MESH_FILE[un.weapon]);
+  const cal=ud.gun.userData.calibration||weaponCalibration(gunFile);
+  const socket=cal&&cal.socket?cal.socket:'Bip001 R Hand';
+  const bS=socket&&ud.byName[socket]!==undefined?ud.bones[ud.byName[socket]]:null;
+  if(bS){
+    _gpRPalm.setFromMatrixPosition(bS.matrixWorld);
+    parent.worldToLocal(_gpRPalm);
+    const off=cal&&cal.gripOffset?cal.gripOffset:[0,0,0];
+    ud.gun.position.set(_gpRPalm.x+off[0],_gpRPalm.y+off[1],_gpRPalm.z+off[2]);
+    bS.getWorldQuaternion(_gpSocketQ);
+    parent.getWorldQuaternion(_gpParentQ);
+    ud.gun.quaternion.copy(_gpParentQ.invert().multiply(_gpSocketQ));
+    return;
+  }
+  _gpRPalm.copy(_gpPalmR).applyMatrix4(bR.matrixWorld);
+  parent.worldToLocal(_gpRPalm);
+  _gpFA.setFromMatrixPosition(bFA.matrixWorld);
+  parent.worldToLocal(_gpFA);
+  const bL=ud.bones[ud.byName['Bip001 L Hand']];
+  let hasL=false;
+  if(bL){
+    _gpLPalm.copy(_gpPalmL).applyMatrix4(bL.matrixWorld);
+    parent.worldToLocal(_gpLPalm);
+    hasL=true;
+  }
+  const lk=roleLook(un.role);
+  const ck=ud._clipKey||'';
+  const is1h=(ud.gun.userData.cat==='Pistolas');
+  const force1h=(ck==='death'||ck==='deathExpl'||ck==='hit'||ck==='hitBurst'||ck==='hitExpl'||ck==='throw'||ck==='deploy'||ck==='interact'||ck==='victory'||ck==='pickup');
+  const pose=gunPoseFromHand(_gpRPalm,_gpFA,ud.gun.userData.grip,hasL?_gpLPalm:null,{
+    is1h:is1h,
+    force1h:force1h,
+    roleH:lk.s[1],
+    roleAvg:(lk.s[0]+lk.s[1]+lk.s[2])/3
+  });
+  if(!pose)return;
+  if(isLive&&ud._firePulse>0){
+    pose.origin.addScaledVector(pose.dir,-0.055*ud._firePulse);
+    pose.quat.multiply(_gpRecoil.setFromAxisAngle(_gpUp,0.035*ud._firePulse));
+  }
+  ud.gun.position.copy(pose.origin);
+  ud.gun.quaternion.copy(pose.quat);
+}
+
+--- mount ---
+function mount(model){
+    while(viewer.spin.children.length)viewer.spin.remove(viewer.spin.children[0]);
+    if(model.userData&&model.userData.bones&&model.userData.bindLocal&&CLIPLIB.ready)
+      poseViewerRest(model,model.userData.idleClipKey||'idle2h',0);
+    model.updateMatrixWorld(true);
+    model.traverse(object=>{
+      if(object.isSkinnedMesh&&object.skeleton)object.skeleton.update();
+    });
+    model.updateMatrixWorld(true);
+    const bounds=new THREE.Box3();
+    const meshBounds=new THREE.Box3();
+    model.traverse(object=>{
+      if(!object.isMesh||!object.geometry)return;
+      /* El arma equipada no entra en el encuadre: si contara, el ca├▒├│n
+         desplazar├¡a el centro y el soldado quedar├¡a descentrado. */
+      let p=object.parent;
+      while(p&&p!==model){if(p.userData&&p.userData.isViewerGun)return;p=p.parent;}
+      if(object.isSkinnedMesh){
+        if(object.computeBoundingBox)object.computeBoundingBox();
+        if(object.boundingBox&&!object.boundingBox.isEmpty()){
+          meshBounds.copy(object.boundingBox).applyMatrix4(object.matrixWorld);
+        }else meshBounds.setFromObject(object,true);
+      }else meshBounds.setFromObject(object,true);
+      bounds.union(meshBounds);
+    });
+    const size=new THREE.Vector3(),center=new THREE.Vector3();
+    bounds.getSize(size);bounds.getCenter(center);
+    if(!Number.isFinite(size.x)||Math.max(size.x,size.y,size.z)<0.001)throw new Error('El modelo no contiene geometr├¡a visible.');
+    const centerOffset=viewerCenterOffset(center);
+    const centered=new THREE.Group();
+    centered.position.set(centerOffset.x,centerOffset.y,centerOffset.z);
+    centered.add(model);
+    viewer.spin.add(centered);
+    centered.updateMatrixWorld(true);
+    viewer.idleActor=viewer.kind==='roles'&&model.userData.animatable?model:null;
+    viewer.gripActor=viewer.kind==='roles'&&model.userData.grip?model:null;
+    if(viewer.meshyFill)viewer.meshyFill.intensity=viewer.kind==='roles'&&model.userData.meshy?1.8:0;
+    if(viewer.meshyRim)viewer.meshyRim.intensity=viewer.kind==='roles'&&model.userData.meshy?2.2:0;
+    viewer.idleClipKey=model.userData.idleClipKey||'idle2h';
+    if(viewer.gripActor&&viewer.gripActor.userData.gun)
+      fitGunToHand3(viewer.gripActor.userData.gripUnit,viewer.gripActor,false);
+    viewer.spin.rotation.set(viewer.kind==='weapons'?0.25:0,-0.55,0);
+    const platformRadius=Math.max(0.35,Math.max(size.x,size.z)*0.72);
+    viewer.platform.scale.set(platformRadius,platformRadius,1);
+    viewer.platform.position.y=-size.y/2-0.035;
+    resize();
+    viewer.baseDistance=fitViewerDistance(size,viewer.camera.fov,viewer.camera.aspect);
+    updateCamera();
+    viewer.renderer.render(viewer.scene,viewer.camera);
+    refreshTexturePreview();
+    setStatus('',false);
+  }
+
+--- makeViewerOriginal ---
+async function makeViewerOriginal(entry,skin){
+    /* La geometr├¡a la decide el cuerpo (entry.body), no el rol: cada
+       personaje muestra la malla de su cuerpo. Los 4 roles IPA usan
+       REAL.byRole; los cuerpos variantes se cargan de bodies/; el
+       cuerpo Soldier_Light usa el soldado gen├®rico (REAL). */
+    let source=null,bodyGeo=null;
+    if(entry.bodyFile){
+      bodyGeo=await loadViewerBody(entry.bodyFile);
+    }else if(entry.bodyRole){
+      source=REAL.byRole[entry.bodyRole];
+      if(!source)throw new Error('El modelo de clase '+entry.bodyRole+' todav├¡a no est├í disponible.');
+    }else{
+      source=REAL;
+    }
+    let texture=null;
+    if(skin.key&&skin.key.indexOf('cast:')===0){
+      const texturePath='assets/soldier/cast/'+skin.key.slice(5);
+      if(viewer.textures[texturePath])texture=viewer.textures[texturePath];
+      else{
+        texture=await new Promise((resolve,reject)=>{
+          new THREE.TextureLoader().load(texturePath,resolve,undefined,reject);
+        });
+        texture.colorSpace=THREE.SRGBColorSpace;
+        viewer.textures[texturePath]=texture;
+      }
+    }else if(skin.key==='native'&&source){
+      texture=source.tex;
+    }
+    if(!texture)throw new Error('El modelo no tiene una textura disponible.');
+    /* Solo el cuerpo Soldier_Light del repo (Hipster Dave, el soldado
+       gen├®rico) usa el modelo con esqueleto y pose de reposo animada.
+       Sister Florence se monta tambi├®n con esqueleto, pero con la pose
+       de reposo retargetizada y sin animaci├│n, para que el arma se
+       enganche a sus manos. El resto sigue siendo malla est├ítica:
+       forzar animatable en todos es lo que descabal├│ los modelos. */
+    if(!entry.bodyFile&&!entry.bodyRole){
+      const model=makeViewerRiggedModel(source.geo.clone(),source.data,texture,{animatable:true,grip:true});
+      model.scale.setScalar(1.15);
+      const mesh=model.userData.mesh3;
+      model.remove(mesh);
+      const spin=new THREE.Group();
+      spin.rotation.y=Math.PI/2;
+      model.add(spin);
+      const tilt=new THREE.Group();
+      tilt.rotation.x=-Math.PI/2;
+      spin.add(tilt);
+      mesh.scale.setScalar(0.95);
+      tilt.add(mesh);
+      return model;
+    }
+    if(entry.name==='Sister Florence'&&source){
+      const started=Date.now();
+      while(!CLIPLIB.ready&&Date.now()-started<5000)await wait(50);
+      const baseData=sameRigBoneOrder(REAL.data&&REAL.data.bones,source.data.bones)?REAL.data:null;
+      const baseRestQ=baseData?baseData.bones.map(b=>new THREE.Quaternion(b.quat[0],b.quat[1],b.quat[2],b.quat[3])):null;
+      const baseParents=baseData?baseData.bones.map(b=>b.parent):null;
+      const model=makeViewerRiggedModel(source.geo.clone(),source.data,texture,{
+        baseRestQ,baseParents,grip:true,role:entry.role
+      });
+      model.scale.setScalar(1.15);
+      const mesh=model.userData.mesh3;
+      model.remove(mesh);
+      const spin=new THREE.Group();
+      spin.rotation.y=Math.PI/2;
+      const lk=roleLook(entry.role);
+      if(lk&&lk.s)spin.scale.set(lk.s[0],lk.s[1],lk.s[2]);
+      model.add(spin);
+      const tilt=new THREE.Group();
+      tilt.rotation.x=-Math.PI/2;
+      spin.add(tilt);
+      mesh.scale.setScalar(0.95);
+      tilt.add(mesh);
+      poseViewerRest(model,'idle2h',0);
+      model.userData.gripUnit={role:entry.role,weapon:''};
+      return model;
+    }
+    const geometry=bodyGeo?bodyGeo.clone():(source?source.geo.clone():null);
+    if(!geometry)throw new Error('El modelo no tiene una geometr├¡a disponible.');
+    geometry.deleteAttribute('skinIndex');
+    geometry.deleteAttribute('skinWeight');
+    geometry.computeVertexNormals();
+    const mesh=new THREE.Mesh(geometry,new THREE.MeshStandardMaterial({
+      map:texture,roughness:0.85,metalness:0.02,transparent:false,opacity:1,depthWrite:true,
+      side:THREE.DoubleSide
+    }));
+    mesh.castShadow=true;
+    const model=new THREE.Group();
+    model.scale.setScalar(1.15);
+    const spin=new THREE.Group();spin.rotation.y=Math.PI/2;model.add(spin);
+    const tilt=new THREE.Group();tilt.rotation.x=-Math.PI/2;spin.add(tilt);
+    mesh.scale.setScalar(0.95);tilt.add(mesh);
+    model.userData.staticRole=true;
+    return model;
+  }
+
+--- loadViewerMeshy ---
+async function loadViewerMeshy(entry){
+    const base='assets/personajes_propios/'+entry.mesh;
+    const [response,rigResponse,texture]=await Promise.all([
+      fetch(base+'.obj'),fetch(base+'_rig.json'),
+      new Promise((resolve,reject)=>{
+        /* Cada dise├▒o Meshy es autocontenido en assets/personajes_propios/
+           (obj + rig + tex): la textura ya no es la de clase en
+           assets/soldier/, porque esas clases volvieron a ser del original. */
+        new THREE.TextureLoader().load(base+'_tex.png',resolve,undefined,reject);
+      })
+    ]);
+    if(!response.ok)throw new Error('No se pudo cargar el OBJ Meshy de '+entry.mesh+'.');
+    if(!rigResponse.ok)throw new Error('No se pudo cargar el rig Meshy de '+entry.mesh+'.');
+    texture.colorSpace=THREE.SRGBColorSpace;
+    const [objText,rawRig]=await Promise.all([response.text(),rigResponse.json()]);
+    const rig=normalizeMeshyRig(rawRig);
+    const geometry=parseViewerOBJ(objText,rig);
+    const started=Date.now();
+    while(!CLIPLIB.ready&&Date.now()-started<5000)await wait(50);
+    const baseData=sameRigBoneOrder(REAL.data&&REAL.data.bones,rig.bones)?REAL.data:null;
+    const baseRestQ=baseData?baseData.bones.map(b=>new THREE.Quaternion(b.quat[0],b.quat[1],b.quat[2],b.quat[3])):null;
+    const baseParents=baseData?baseData.bones.map(b=>b.parent):null;
+    const model=makeViewerRiggedModel(geometry,rig,texture,{
+      meshy:true,grip:true,role:entry.role,baseRestQ,baseParents
+    });
+    if(rig.bones[1].pos[2]>rig.bones[1].pos[1]+0.1)model.rotation.x=-Math.PI/2;
+    poseViewerRest(model,'idle2h',0);
+    model.userData.gripUnit={role:entry.role,weapon:''};
+    return model;
+  }
+
+--- syncViewerGun ---
+async function syncViewerGun(model,entry,token){
+    const wanted=viewer.weapon||'';
+    const current=(model.userData&&model.userData.viewerGunWeapon)||'';
+    if(current===wanted)return;
+    if(model.userData&&model.userData.viewerGun){
+      model.remove(model.userData.viewerGun);
+      if(model.userData.gun===model.userData.viewerGun)model.userData.gun=null;
+      model.userData.viewerGun=null;
+      model.userData.viewerGunWeapon='';
+    }
+    if(!wanted)return;
+    const meshFile=WEAPON_MESH_FILE[wanted];
+    if(!meshFile)return;
+    const cacheKey=viewerWeaponCacheKey(meshFile);
+    if(!GUN_MESH_CACHE[cacheKey]){
+      const started=Date.now();
+      while(GUN_MESH_CACHE[cacheKey]===null&&Date.now()-started<10000){
+        if(token!==viewer.selection)return;
+        await wait(100);
+      }
+      if(GUN_MESH_CACHE[cacheKey]===false)throw new Error('No se pudo cargar la malla de esta arma.');
+      if(!GUN_MESH_CACHE[cacheKey])throw new Error('La carga de la malla tard├│ demasiado.');
+    }
+    const holder=GUN_MESH_CACHE[cacheKey].clone(true);
+    const gunMeta=holder.userData.meta||weaponMeta(meshFile);
+    let gunGroup;
+    if(model.userData&&model.userData.grip){
+      gunGroup=makeGunProp3({role:entry.role,weapon:wanted});
+      gunGroup.userData.isViewerGun=true;
+      gunGroup.children.forEach(ch=>{ch.visible=false;});
+      gunGroup.add(holder);
+    }else{
+      gunGroup=new THREE.Group();
+      gunGroup.userData.isViewerGun=true;
+      if(entry.mesh){
+        const front=VIEWER_MESHY_FRONT[entry.mesh]||1;
+        gunGroup.position.set(0,0.62,front*0.14);
+        gunGroup.rotation.y=front>0?-Math.PI/2:Math.PI/2;
+      }else{
+        gunGroup.position.set(0.14,0.62,-0.02);
+      }
+      gunGroup.add(holder);
+    }
+    gunGroup.userData.file=meshFile;
+    gunGroup.userData.meta=gunMeta;
+    if(DEBUG_WEAPONS){
+      const marker=new THREE.Mesh(new THREE.SphereGeometry(0.045,12,8),new THREE.MeshBasicMaterial({color:0xff3300,depthTest:false}));
+      marker.userData.isViewerGun=true;
+      gunGroup.add(marker);
+      console.info('[debugWeapons]',meshFile,gunMeta&&gunMeta.attachmentJoint,holder.userData.calibration);
+    }
+    model.add(gunGroup);
+    model.userData.viewerGun=gunGroup;
+    model.userData.viewerGunWeapon=wanted;
+    if(model.userData.grip){
+      model.userData.gun=gunGroup;
+      model.userData.gripUnit={role:entry.role,weapon:wanted};
+      fitGunToHand3(model.userData.gripUnit,model,false);
+    }
+  }
+
+--- poseViewerRest ---
+function poseViewerRest(model,clipKey,ct){
+    const pack=CLIPLIB.pack,clip=pack&&pack.clips&&pack.clips[clipKey];
+    const ud=model&&model.userData;
+    if(!clip||!ud||!ud.bones||!ud.bindLocal)return false;
+    const tq=new THREE.Quaternion();
+    const retarget=!!(ud.isClassRig&&ud.baseRestWorldQ&&ud.sourcePoseQ);
+    const rootP=new THREE.Vector3(),rootT=new THREE.Vector3(),pelvis=new THREE.Vector3();
+    for(let n=0;n<24;n++){
+      for(let i=0;i<ud.bones.length;i++){
+        const tr=clip.rot[pack.bones[i]];
+        const restQ=retarget?ud.baseRestQ[i]:ud.bindLocal[i];
+        if(tr)sampleClipQuat(tr,ct,tq);else tq.copy(restQ);
+        if(retarget){
+          ud.sourcePoseQ[i].copy(tq);
+        }else{
+          ud.bones[i].quaternion.copy(tq);
+        }
+      }
+      if(retarget){
+        retargetPoseToRig(ud.sourcePoseQ,ud.baseRestWorldQ,ud.bindWorldQ,ud.sourceParents,ud.parents,ud.sourceWorldQ,ud.targetWorldQ,ud.targetLocalQ);
+        for(let i=0;i<ud.bones.length;i++)ud.bones[i].quaternion.copy(ud.targetLocalQ[i]);
+      }
+      if(clip.root)sampleClipPos(clip.root,ct,rootT);else rootT.set(0,0,0);
+      rootP.copy(ud.curDelta).lerp(rootT,0.45);
+      pelvis.copy(ud.bindPos[1]);
+      rootBonePositionForClip(ud.bindPos[0],pelvis,rootP,rootT.copy(pelvis).applyQuaternion(ud.bones[0].quaternion),ud.bones[0].position);
+    }
+    ud._clipKey=clipKey;
+    model.updateMatrixWorld(true);
+    return true;
+  }
+
+--- REFERENCIAS A attachRealGun / makeRealGun3 / gun en makeRealSoldier3 ---
+
+=== 4. AUDITORIA DE PERSONAJES (soldier vs bodies vs personajes_propios) ===
+assets/soldier.obj | v=1211 vt=1211 vn=1211 f=1456 (3v:1456) badIdx=0 nan=0 | volRaw=0.0738 volNegX=-0.0738 | X[-0.44,0.44] Y[-0.21,0.32] Z[0.00,1.14] | f0="f 173/173/173 1014/1014/1014 783/783/783"
+assets/soldier/Artillero.obj | v=1970 vt=1970 vn=1970 f=4000 (3v:4000) badIdx=0 nan=0 | volRaw=-0.0606 volNegX=0.0606 | X[-0.29,0.30] Y[-0.32,0.33] Z[0.00,1.14] | f0="f 2/2/2 5/5/5 1/1/1"
+assets/soldier/Capitan.obj | v=1218 vt=1218 vn=0 f=1490 (3v:1490) badIdx=0 nan=0 | volRaw=-0.0166 volNegX=0.0166 | X[-0.29,0.29] Y[-0.17,0.23] Z[0.00,1.14] | f0="f 775/775 30/30 774/774"
+assets/soldier/Comando.obj | v=869 vt=869 vn=0 f=1200 (3v:1200) badIdx=0 nan=0 | volRaw=-0.0601 volNegX=0.0601 | X[-0.31,0.31] Y[-0.20,0.21] Z[0.00,1.14] | f0="f 286/286 274/274 128/128"
+assets/soldier/Espia.obj | v=2003 vt=2003 vn=2003 f=4000 (3v:4000) badIdx=0 nan=0 | volRaw=-0.0607 volNegX=0.0607 | X[-0.24,0.25] Y[-0.20,0.21] Z[0.00,1.14] | f0="f 1/1/1 3/3/3 9/9/9"
+assets/soldier/Francotirador.obj | v=1988 vt=1988 vn=1988 f=4000 (3v:4000) badIdx=0 nan=0 | volRaw=-0.0461 volNegX=0.0461 | X[-0.49,0.49] Y[-0.16,0.17] Z[0.00,1.14] | f0="f 2/2/2 7/7/7 1/1/1"
+assets/soldier/Ingeniero.obj | v=1321 vt=1321 vn=0 f=1842 (3v:1842) badIdx=0 nan=0 | volRaw=-0.1103 volNegX=0.1103 | X[-0.46,0.46] Y[-0.31,0.31] Z[-0.00,1.13] | f0="f 51/51 50/50 117/117"
+assets/soldier/Medico.obj | v=1410 vt=1410 vn=0 f=1692 (3v:1692) badIdx=0 nan=0 | volRaw=-0.0426 volNegX=0.0426 | X[-0.38,0.38] Y[-0.21,0.18] Z[-0.00,1.14] | f0="f 1225/1225 73/73 885/885"
+assets/soldier/bodies/Agent_Light.obj | v=1271 vt=1271 vn=1271 f=1534 (3v:1534) badIdx=0 nan=0 | volRaw=0.7077 volNegX=-0.7077 | X[-0.84,0.84] Y[-0.59,0.41] Z[-0.00,3.55] | f0="f 267/267/267 1104/1104/1104 1105/1105/1105"
+assets/soldier/bodies/CommanderF.obj | v=1315 vt=1315 vn=1315 f=1550 (3v:1550) badIdx=0 nan=0 | volRaw=0.0784 volNegX=-0.0784 | X[-0.44,0.44] Y[-0.18,0.44] Z[-0.00,1.69] | f0="f 1270/1270/1270 1269/1269/1269 630/630/630"
+assets/soldier/bodies/CommanderM.obj | v=1218 vt=1218 vn=0 f=1484 (3v:1484) badIdx=0 nan=0 | volRaw=0.1722 volNegX=-0.1722 | X[-0.47,0.47] Y[-0.27,0.38] Z[0.00,1.86] | f0="f 774/774 30/30 775/775"
+assets/soldier/bodies/Engineer_Heavy.obj | v=1498 vt=1498 vn=1498 f=1488 (3v:1488) badIdx=0 nan=0 | volRaw=0.1836 volNegX=-0.1836 | X[-0.46,0.46] Y[-0.39,0.28] Z[-0.01,1.13] | f0="f 1129/1129/1129 777/777/777 1130/1130/1130"
+assets/soldier/bodies/Engineer_Light.obj | v=1356 vt=1356 vn=1356 f=1454 (3v:1454) badIdx=0 nan=0 | volRaw=0.0466 volNegX=-0.0466 | X[-0.44,0.44] Y[-0.18,0.15] Z[-0.01,1.15] | f0="f 744/744/744 743/743/743 745/745/745"
+assets/soldier/bodies/Engineer_RiotCop.obj | v=1096 vt=1096 vn=1096 f=1482 (3v:1482) badIdx=0 nan=0 | volRaw=0.1117 volNegX=-0.1117 | X[-0.47,0.47] Y[-0.30,0.20] Z[-0.01,1.14] | f0="f 107/107/107 85/85/85 84/84/84"
+assets/soldier/bodies/Medic_therapist_1248v.obj | v=1248 vt=1248 vn=1248 f=1687 (3v:1687) badIdx=0 nan=0 | volRaw=0.0590 volNegX=-0.0590 | X[-0.44,0.44] Y[-0.24,0.11] Z[-0.00,1.29] | f0="f 30/30/30 37/37/37 38/38/38"
+assets/soldier/bodies/Soldier_Heavy.obj | v=1037 vt=1037 vn=1037 f=1552 (3v:1552) badIdx=0 nan=0 | volRaw=0.2844 volNegX=-0.2844 | X[-0.49,0.49] Y[-0.39,0.48] Z[0.01,1.27] | f0="f 255/255/255 896/896/896 157/157/157"
+assets/soldier/bodies/Soldier_Light_Rambo.obj | v=1023 vt=1023 vn=1023 f=1382 (3v:1382) badIdx=0 nan=0 | volRaw=0.0693 volNegX=-0.0693 | X[-0.44,0.44] Y[-0.18,0.32] Z[0.00,1.19] | f0="f 962/962/962 826/826/826 963/963/963"
+assets/soldier/bodies/Soldier_SAS.obj | v=1234 vt=1234 vn=0 f=1430 (3v:1430) badIdx=0 nan=0 | volRaw=0.1253 volNegX=-0.1253 | X[-0.44,0.44] Y[-0.22,0.36] Z[0.00,1.13] | f0="f 55/55 1014/1014 1015/1015"
+assets/soldier/bodies/Soldier_Spud.obj | v=1065 vt=1065 vn=0 f=1492 (3v:1492) badIdx=0 nan=0 | volRaw=0.1692 volNegX=-0.1692 | X[-0.44,0.44] Y[-0.27,0.42] Z[0.00,1.17] | f0="f 697/697 700/700 1063/1063"
+assets/personajes_propios/Artillero.obj | v=1970 vt=1970 vn=1970 f=4000 (3v:4000) badIdx=0 nan=0 | volRaw=-0.2065 volNegX=0.2065 | X[-0.44,0.45] Y[0.00,1.71] Z[-0.49,0.48] | f0="f 2/2/2 5/5/5 1/1/1"
+assets/personajes_propios/Espia.obj | v=2003 vt=2003 vn=2003 f=4000 (3v:4000) badIdx=0 nan=0 | volRaw=-0.2064 volNegX=0.2064 | X[-0.37,0.37] Y[0.00,1.71] Z[-0.31,0.31] | f0="f 1/1/1 3/3/3 9/9/9"
+assets/personajes_propios/Francotirador.obj | v=1988 vt=1988 vn=1988 f=4000 (3v:4000) badIdx=0 nan=0 | volRaw=-0.1567 volNegX=0.1567 | X[-0.74,0.74] Y[0.00,1.71] Z[-0.25,0.24] | f0="f 2/2/2 7/7/7 1/1/1"
+assets/personajes_propios/Ingeniero.obj | v=1986 vt=1986 vn=1986 f=4000 (3v:4000) badIdx=0 nan=0 | volRaw=-0.0753 volNegX=0.0753 | X[-0.30,0.30] Y[-0.23,0.23] Z[0.00,1.14] | f0="f 3/3/3 2/2/2 1/1/1"
+assets/personajes_propios/Medico.obj | v=1995 vt=1995 vn=1995 f=4000 (3v:4000) badIdx=0 nan=0 | volRaw=-0.0505 volNegX=0.0505 | X[-0.24,0.24] Y[-0.22,0.22] Z[0.00,1.14] | f0="f 6/6/6 1/1/1 3/3/3"
+
+=== 5. RIGS: soldier_rig vs soldier/*_rig vs personajes_propios/*_rig ===
+assets/soldier_rig.json | vertsRig=1211 bones=20 skinBones=18 | [0]=0,0,0 [1]=0,0,0.358 | p6=4 p10=4 p14=2 p17=2
+assets/soldier/Artillero_rig.json | vertsRig=1970 bones=20 skinBones=18 | [0]=0,0,0 [1]=0,0,0.358 | p6=4 p10=4 p14=2 p17=2
+assets/soldier/Capitan_rig.json | vertsRig=1218 bones=20 skinBones=20 | [0]=0,0,0 [1]=0,0,0.219 | p6=4 p10=4 p14=2 p17=2
+assets/soldier/Comando_rig.json | vertsRig=869 bones=20 skinBones=20 | [0]=0,0,0.539 [1]=0,0,0 | p6=4 p10=4 p14=2 p17=2
+assets/soldier/Espia_rig.json | vertsRig=2003 bones=20 skinBones=18 | [0]=0,0,0 [1]=0,0,0.358 | p6=4 p10=4 p14=2 p17=2
+assets/soldier/Francotirador_rig.json | vertsRig=1988 bones=20 skinBones=18 | [0]=0,0,0 [1]=0,0,0.358 | p6=4 p10=4 p14=2 p17=2
+assets/soldier/Ingeniero_rig.json | vertsRig=1321 bones=20 skinBones=20 | [0]=0,0,0 [1]=0,0,0.364 | p6=4 p10=4 p14=2 p17=2
+assets/soldier/Medico_rig.json | vertsRig=1410 bones=20 skinBones=20 | [0]=0,0,0 [1]=0,-0.07,0.509 | p6=4 p10=4 p14=2 p17=2
+assets/personajes_propios/Artillero_rig.json | vertsRig=1970 bones=20 skinBones=20 | [0]=0.004,0.856,-0.008 [1]=0,0,0 | p6=5 p10=5 p14=1 p17=1
+assets/personajes_propios/Espia_rig.json | vertsRig=2003 bones=20 skinBones=20 | [0]=0.003,0.856,-0.002 [1]=0,0,0 | p6=5 p10=5 p14=1 p17=1
+assets/personajes_propios/Francotirador_rig.json | vertsRig=1988 bones=20 skinBones=20 | [0]=0.003,0.855,-0.002 [1]=0,0,0 | p6=5 p10=5 p14=1 p17=1
+assets/personajes_propios/Ingeniero_rig.json | vertsRig=1986 bones=20 skinBones=18 | [0]=0,0,0 [1]=0,0,0.358 | p6=4 p10=4 p14=2 p17=2
+assets/personajes_propios/Medico_rig.json | vertsRig=1995 bones=20 skinBones=18 | [0]=0,0,0 [1]=0,0,0.358 | p6=4 p10=4 p14=2 p17=2
+
+=== 6. AUDITORIA DE LAS 23 ARMAS (assets/weapons/*.obj) ===
+assets/weapons/AssaultRifle.obj | v=201 vt=201 vn=201 f=135 (3v:135) badIdx=0 nan=0 | volRaw=0.0002 volNegX=-0.0002 | X[-0.52,0.25] Y[-0.05,0.05] Z[-0.09,0.21] | f0="f 79/79/79 38/38/38 17/17/17"
+assets/weapons/BaseballBat_SOURCE.obj | v=179 vt=179 vn=179 f=101 (3v:101) badIdx=0 nan=0 | volRaw=-0.0008 volNegX=0.0008 | X[-0.06,0.06] Y[-0.05,0.05] Z[-0.21,0.75] | f0="f 153/153/153 152/152/152 50/50/50"
+assets/weapons/Chainsaw.obj | v=334 vt=334 vn=334 f=252 (3v:252) badIdx=0 nan=0 | volRaw=0.0012 volNegX=-0.0012 | X[-0.17,0.14] Y[-0.13,0.16] Z[-0.14,0.73] | f0="f 84/84/84 71/71/71 212/212/212"
+assets/weapons/Crossbow.obj | v=696 vt=696 vn=696 f=439 (3v:439) badIdx=0 nan=0 | volRaw=0.0033 volNegX=-0.0033 | X[-0.60,0.31] Y[-0.31,0.31] Z[-0.06,0.22] | f0="f 45/45/45 9/9/9 271/271/271"
+assets/weapons/FragGrenade.obj | v=123 vt=123 vn=0 f=75 (3v:75) badIdx=0 nan=0 | volRaw=0.0001 volNegX=-0.0001 | X[-0.06,0.08] Y[-0.06,0.06] Z[-0.08,0.12] | f0="f 18/18 17/17 19/19"
+assets/weapons/Katana.obj | v=142 vt=142 vn=142 f=84 (3v:84) badIdx=0 nan=0 | volRaw=0.0011 volNegX=-0.0011 | X[-0.19,0.13] Y[-0.12,0.12] Z[-0.58,1.81] | f0="f 53/53/53 52/52/52 13/13/13"
+assets/weapons/Knife.obj | v=114 vt=114 vn=114 f=65 (3v:65) badIdx=0 nan=0 | volRaw=0.0002 volNegX=-0.0002 | X[-0.07,0.05] Y[-0.02,0.02] Z[-0.10,0.40] | f0="f 29/29/29 70/70/70 32/32/32"
+assets/weapons/LightMachineGun.obj | v=246 vt=246 vn=246 f=167 (3v:167) badIdx=0 nan=0 | volRaw=-0.0027 volNegX=0.0027 | X[-0.64,0.28] Y[-0.11,0.17] Z[-0.19,0.26] | f0="f 41/41/41 39/39/39 40/40/40"
+assets/weapons/M95.obj | v=620 vt=620 vn=620 f=373 (3v:373) badIdx=0 nan=0 | volRaw=0.0031 volNegX=-0.0031 | X[-0.88,0.37] Y[-0.14,0.14] Z[-0.08,0.23] | f0="f 36/36/36 261/261/261 262/262/262"
+assets/weapons/MP5K.obj | v=204 vt=204 vn=204 f=112 (3v:112) badIdx=0 nan=0 | volRaw=0.0003 volNegX=-0.0003 | X[-0.34,0.06] Y[-0.04,0.04] Z[-0.09,0.18] | f0="f 2/2/2 35/35/35 3/3/3"
+assets/weapons/Minigun.obj | v=527 vt=527 vn=527 f=318 (3v:318) badIdx=0 nan=0 | volRaw=-0.0041 volNegX=0.0041 | X[-0.77,0.08] Y[-0.27,0.15] Z[-0.31,0.10] | f0="f 433/433/433 432/432/432 274/274/274"
+assets/weapons/Molotov.obj | v=51 vt=51 vn=51 f=27 (3v:27) badIdx=0 nan=0 | volRaw=-0.0002 volNegX=0.0002 | X[-0.18,0.07] Y[-0.12,0.07] Z[-0.09,0.34] | f0="f 8/8/8 4/4/4 6/6/6"
+assets/weapons/Pistol.obj | v=196 vt=196 vn=196 f=116 (3v:116) badIdx=0 nan=0 | volRaw=0.0178 volNegX=-0.0178 | X[-0.75,0.11] Y[-0.07,0.07] Z[-0.25,0.35] | f0="f 6/6/6 7/7/7 2/2/2"
+assets/weapons/RPG.obj | v=254 vt=254 vn=254 f=170 (3v:170) badIdx=0 nan=0 | volRaw=0.0056 volNegX=-0.0056 | X[-0.27,0.49] Y[-0.13,0.25] Z[-0.13,0.13] | f0="f 112/112/112 111/111/111 16/16/16"
+assets/weapons/Revolver.obj | v=137 vt=137 vn=137 f=99 (3v:99) badIdx=0 nan=0 | volRaw=-0.0011 volNegX=0.0011 | X[-0.96,0.12] Y[-0.14,0.14] Z[-0.26,0.42] | f0="f 89/89/89 87/87/87 88/88/88"
+assets/weapons/Rifle.obj | v=405 vt=405 vn=405 f=236 (3v:236) badIdx=0 nan=0 | volRaw=0.0006 volNegX=-0.0006 | X[-0.67,0.28] Y[-0.04,0.04] Z[-0.07,0.16] | f0="f 23/23/23 18/18/18 188/188/188"
+assets/weapons/RiotShotgun.obj | v=204 vt=204 vn=204 f=110 (3v:110) badIdx=0 nan=0 | volRaw=0.0001 volNegX=-0.0001 | X[-0.59,0.07] Y[-0.06,0.03] Z[-0.06,0.14] | f0="f 121/121/121 119/119/119 120/120/120"
+assets/weapons/Shotgun.obj | v=210 vt=210 vn=210 f=151 (3v:151) badIdx=0 nan=0 | volRaw=0.0005 volNegX=-0.0005 | X[-0.54,0.17] Y[-0.05,0.05] Z[-0.06,0.19] | f0="f 170/170/170 169/169/169 107/107/107"
+assets/weapons/SledgeHammer.obj | v=98 vt=98 vn=98 f=59 (3v:59) badIdx=0 nan=0 | volRaw=0.0002 volNegX=-0.0002 | X[-0.14,0.14] Y[-0.09,0.09] Z[-0.23,0.79] | f0="f 77/77/77 76/76/76 54/54/54"
+assets/weapons/SniperRifle_weapon.obj | v=583 vt=583 vn=583 f=359 (3v:359) badIdx=0 nan=0 | volRaw=0.0027 volNegX=-0.0027 | X[-0.84,0.29] Y[-0.09,0.09] Z[-0.08,0.21] | f0="f 18/18/18 57/57/57 1/1/1"
+assets/weapons/SpikedClub_weapon.obj | v=331 vt=331 vn=331 f=196 (3v:196) badIdx=0 nan=0 | volRaw=0.0064 volNegX=-0.0064 | X[-0.18,0.16] Y[-0.71,0.26] Z[-0.18,0.18] | f0="f 10/10/10 2/2/2 9/9/9"
+assets/weapons/Uzi.obj | v=195 vt=195 vn=195 f=114 (3v:114) badIdx=0 nan=0 | volRaw=0.0002 volNegX=-0.0002 | X[-0.30,0.17] Y[-0.03,0.03] Z[-0.18,0.20] | f0="f 30/30/30 14/14/14 31/31/31"
+assets/weapons/WoodAxe.obj | v=126 vt=126 vn=126 f=77 (3v:77) badIdx=0 nan=0 | volRaw=0.0004 volNegX=-0.0004 | X[-0.20,0.12] Y[-0.03,0.03] Z[-0.16,0.69] | f0="f 28/28/28 29/29/29 30/30/30"
+
+=== 7. METADATOS DE ARMAS Y PNGs DE HIPSTER DAVE ===
+assets/weapons/weapon_metadata.json (10375B): {
+  "Assault Rifle": {
+    "attachmentJoint": "gunBone_R",
+    "barracksOffset": [
+      -0.2,
+      0.0,
+      0.0
+    ],
+    "barracksRotation": [
+      0.0,
+      0.0,
+      180.0
+    ],
+    "barracksScale": [
+      1.4,
+      1.4,
+      1.4
+    ],
+    "muzzleJointName": "gunMuzzleBone",
+    "muzzleJointNameB": "gunMuzzleBone",
+    "sourceBundle": "BasicWeapons.assetbundle",
+    "weaponId": "com.warchestgames.radtactics.assaultrifle"
+  },
+  "Baseball Bat": {
+    "attachmentJoint": "gunBone_R",
+    "barracksOffset": [
+      -0.35,
+      0.0,
+      0.0
+    ],
+    "barracksRotation": [
+      180.0,
+      -90.0,
+      0.0
+    ],
+    "barracksScale": [
+      1.4,
+      1.4,
+      1.4
+    ],
+    "muzzleJointName": "",
+    "muzzleJointNameB": "",
+    "sourceBundle": "Weapons.assetbundle",
+    "weaponId": "com.warchestgames.radtactics.baseballbat"
+  },
+  "Chainsaw": {
+    "attachmentJoint": "gunBone_R",
+    "barracksOffset": [
+      -0.4,
+      0.0,
+      0.0
+    ],
+    "barracksRotation": [
+      180.0,
+      -90.0,
+      0.0
+    ],
+    "barracksScale": [
+      1.4,
+      1.4,
+      1.4
+    ],
+    "muzzleJointName": "",
+   
+assets/weapons/weapon_calibrations.json (13609B): {
+  "AssaultRifle": {
+    "socket": "Bip001 R Hand",
+    "supportSocket": "Bip001 L Hand",
+    "scale": 0.6957812463761395,
+    "targetLength": 0.54,
+    "meshPivot": [
+      0.522,
+      -0.064415,
+      1.5000000000015001e-06
+    ],
+    "gripOffset": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "sourceBounds": {
+      "min": [
+        -0.522,
+        -0.054246,
+        -0.0857
+      ],
+      "max": [
+        0.254106,
+        0.054243,
+        0.21453
+      ]
+    },
+    "sourceDims": [
+      0.776106,
+      0.108489,
+      0.30023
+    ]
+  },
+  "Rifle": {
+    "socket": "Bip001 R Hand",
+    "supportSocket": "Bip001 L Hand",
+    "scale": 0.571354204690818,
+    "targetLength": 0.54,
+    "meshPivot": [
+      0.669305,
+      -0.04785149999999999,
+      1.000000000001e-06
+    ],
+    "gripOffset": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "sourceBounds": {
+      "min": [
+        -0.669305,
+        -0.042449,
+        -0.066834
+      ],
+      "max": [
+        0.275818,
+        0.042447,
+        0.162537
+      ]
+    },
+    "sourceDims": [
+      0.945123,
+      0.084896,
+      0.229371
+    ]
+  },
+  "Pistol": {
+    "socket
+assets/soldier/cast/Soldier_Light_Veteran_d.png | 105968B | 256x256 depth=8 colorType=6 (2=RGB,6=RGBA)
+assets/soldier/cast/Soldier_Light_DeltaForce_d.png | 117303B | 256x256 depth=8 colorType=6 (2=RGB,6=RGBA)
+assets/soldier/outfits/base.png | 123467B | 256x256 depth=8 colorType=6 (2=RGB,6=RGBA)

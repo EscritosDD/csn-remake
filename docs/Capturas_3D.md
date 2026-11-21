@@ -20,6 +20,12 @@ node _capture_all.mjs ui:menu UI_menu 1500
 node _capture_all.mjs ui:setup UI_setup 1500
 node _capture_all.mjs ui:barracks UI_cuartel 1500
 node _capture_all.mjs ui:viewer UI_visor 5000
+node _capture_all.mjs ui:hipster FIX_visor_hipster_ui 4000
+node _capture_all.mjs ui:soap FIX_visor_soap_svd_ui 4000
+node _capture_all.mjs ui:sneaky FIX_visor_sneaky_mp5_ui 4000
+node _capture_all.mjs ui:meshy09 FIX_visor_meshy09_ui 4000
+node _capture_all.mjs ui:mp5k FIX_visor_mp5k_ui 4000
+node _capture_all.mjs ui:minigun FIX_visor_minigun_ui 4000
 node _capture_all.mjs ui:pieces UI_piezas 5000
 node _capture_all.mjs ui:game UI_partida 4000
 node _capture_all.mjs ui:resume UI_reanudar 4000
@@ -60,7 +66,12 @@ convierte al indice interno de cero a cinco y comprueba el numero antes de
 desplegar.
 `ui:<pantalla>` captura menu, setup, cuartel, visor, piezas, partida o
 reanudar partida y guarda `<prefijo>_ui.png`; los mapas y las misiones guardan
-`<prefijo>_3d.png`.
+`<prefijo>_3d.png`. Los modos `ui:hipster`, `ui:soap`, `ui:sneaky`,
+`ui:meshy09`, `ui:mp5k` y `ui:minigun` seleccionan personaje/arma mediante el
+DOM del visor (`#viewerCharacterSelect`, `#viewerWeaponSelect`,
+`#viewerKinds`, `#viewerList`) porque `viewer` y `selectModel` no son globales.
+El cierre actual generó `FIX_visor_*_ui.png`, `FIX_setup_selector_ui_ui.png` y
+`FIX_skirmish11_3d.png`.
 `viewer:audit-all` recorre personajes, armas, props y piezas y guarda la
 auditoria en el JSON de resultado (`viewer`, `viewerAudit`) además del PNG.
 `move:`, `combat:` y `mobile:` capturan muestras de marcha, eventos de clip y
@@ -96,5 +107,6 @@ Y `G.units` da las posiciones: `G.units.map(u => [u.team, u.role, u.x, u.y])`.
 `powershell -ExecutionPolicy Bypass -File bench\VERIFICAR.ps1` comprueba
 sintaxis, tableros, reglas, datos, winding, rejillas IPA, capturas `debugGrid`,
 humo 3D, auditoría del visor, clips, movimiento, combate y móvil/SwiftShader.
-Último cierre: **TODO OK 13/13**, con `viewer:audit-all ok=True` (4 modelos).
+Último cierre: **TODO OK 13/13**, **77/77 tests**, con `viewer:audit-all
+ok=True` (4 modelos) y capturas reales de visor/setup/skirmish generadas.
 Es la forma rápida de saber si algo se ha roto sin mirar imágenes.
