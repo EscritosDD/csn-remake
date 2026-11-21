@@ -12,7 +12,8 @@ const CAP = process.env.CSN_CAPTURE_DIR || path.join(ROOT, 'docs', 'capturas');
 const mapId = process.argv[2] || 'skirmish';
 const prefix = process.argv[3] || ('cap_' + mapId);
 const waitMs = Number(process.argv[4] || 10000);
-const uiMode = mapId.startsWith('ui:') ? mapId.slice(3) : null;
+const auditMode = mapId.startsWith('viewer:');
+const uiMode = auditMode || (mapId.startsWith('ui:') ? mapId.slice(3) : null);
 const moveMode = mapId.startsWith('move:') ? mapId.slice(5) : null;
 const combatMode = mapId.startsWith('combat:') ? mapId.slice(7) : null;
 const mobileArg = mapId.startsWith('mobile:') ? mapId.slice(7) : null;
@@ -31,6 +32,8 @@ const result = {
   pngMobile: 0,
   png2d: 0,
   ui: null,
+  viewer: null,
+  viewerAudit: null,
   move: null,
   combat: null,
   mobile: null,
@@ -137,15 +140,26 @@ try {
       setup: "openSetup('eliminacion')",
       barracks: "document.getElementById('mnuBarracks').click()",
       viewer: "document.querySelector('#mainTabs [data-tab=\"viewer\"]').click()",
+      hipster: "(function(){document.querySelector('#mainTabs [data-tab=\"viewer\"]').click();return selectModel('roles','original:01')})()",
       how: "document.querySelector('#mainTabs [data-tab=\"how\"]').click()",
       pieces: "document.querySelector('#mainTabs [data-tab=\"viewer\"]').click();document.querySelector('#viewerKinds [data-kind=\"pieces\"]').click()",
       game: "quickStart('almacen')",
       game3d: "quickStart('skirmish')",
       resume: "quickStart('almacen');document.querySelector('#mainTabs [data-tab=\"viewer\"]').click();document.querySelector('#mainTabs [data-tab=\"play\"]').click()"
     };
-    const screenKey = mobileMode === 'game' ? 'game3d' : (mobileMode || uiMode);
+    const screenKey = auditMode ? 'viewer' : (mobileMode === 'game' ? 'game3d' : (mobileMode || uiMode));
     if (!screens[screenKey]) throw new Error('Pantalla ui no valida: ' + screenKey);
     await ev(screens[screenKey]);
+    if (auditMode) {
+      for (const kind of ['roles', 'weapons', 'props', 'pieces']) {
+        await ev("document.querySelector('#viewerKinds [data-kind=\"" + kind + "\"]').click()");
+        await sleep(350);
+        await ev("(function(){const b=document.querySelector('#viewerList button');if(b){b.click();return b.textContent;}return '';})()");
+        await sleep(750);
+      }
+      await ev("document.querySelector('#viewerKinds [data-kind=\"roles\"]').click()");
+      await sleep(350);
+    }
     if (mobileMode) mobileStart = { frame: await ev('(window.__csn3d&&window.__csn3d.frame)||0'), ms: Date.now() };
     else await sleep(waitMs);
   } else if (/^campana:\d+$/.test(mapId)) {
@@ -174,7 +188,7 @@ try {
     try { result.move = JSON.parse(rawMove); } catch { result.move = rawMove; }
   }
   if (combatMode) {
-    const fired = await ev("(function(){const shooter=G.units.find(u=>u.alive&&u.team===G.turn&&u.weapon);if(!shooter)return 'no shooter';const target=G.units.find(u=>u.alive&&u.team!==shooter.team&&u.role);if(!target)return 'no target';const dirs=[[1,0],[-1,0],[0,1],[0,-1]];const spot=dirs.map(d=>[shooter.x+d[0],shooter.y+d[1]]).find(p=>p[0]>=0&&p[1]>=0&&p[0]<W&&p[1]<H&&!blocked(p[0],p[1])&&!G.units.some(o=>o!==target&&o.alive&&o.x===p[0]&&o.y===p[1]));if(!spot)return 'no spot';target.x=spot[0];target.y=spot[1];target.dx=spot[0];target.dy=spot[1];selectUnit(shooter);window.__csnEvents.length=0;const p={unitId:shooter.id,targetId:target.id,weapon:shooter.weapon,samples:[],events:[],ok:false};window.__combatProbe=p;const t0=performance.now();function step(){const m=T3&&T3.units&&T3.units.get(shooter.id),ud=m&&m.userData,mt=T3&&T3.units&&T3.units.get(target.id),ut=mt&&mt.userData;p.samples.push({t:Math.round(performance.now()-t0),key:(ud&&ud._clipKey)||null,ct:+(ud&&ud._clipCt||0).toFixed(3),ev:window.__csnEvents.length,flash:+((ud&&ud._flashPulse)||0).toFixed(2),recoil:+((ud&&ud._firePulse)||0).toFixed(2),hit:+((ud&&ud._hitPulse)||0).toFixed(2),keyT:(ut&&ut._clipKey)||null,ctT:+(ut&&ut._clipCt||0).toFixed(3),hitT:+((ut&&ut._hitPulse)||0).toFixed(2)});if(performance.now()-t0<2600)requestAnimationFrame(step);else{p.done=true;p.events=window.__csnEvents.slice();p.ok=p.events.some(e=>e.f==='PlayWeaponFire');}}const fired=tryShoot(shooter,target,shooter.weapon,null,{freeCost:true,silent:true,noReturn:true});p.fired=!!fired;if(!fired){p.done=true;return 'no fire';}requestAnimationFrame(step);return 'ok';})()");
+    const fired = await ev("(function(){const shooter=G.units.find(u=>u.alive&&u.team===G.turn&&u.weapon);if(!shooter)return 'no shooter';const target=G.units.find(u=>u.alive&&u.team!==shooter.team&&u.role);if(!target)return 'no target';const dirs=[[1,0],[-1,0],[0,1],[0,-1]];const spot=dirs.map(d=>[shooter.x+d[0],shooter.y+d[1]]).find(p=>p[0]>=0&&p[1]>=0&&p[0]<W&&p[1]<H&&!blocked(p[0],p[1])&&!G.units.some(o=>o!==target&&o.alive&&o.x===p[0]&&o.y===p[1]));if(!spot)return 'no spot';target.x=spot[0];target.y=spot[1];target.dx=spot[0];target.dy=spot[1];selectUnit(shooter);window.__csnEvents.length=0;const fireKey=fireClipFor(shooter.weapon);const p={unitId:shooter.id,targetId:target.id,weapon:shooter.weapon,fireKey,fireEvents:!!(CLIPLIB.pack&&CLIPLIB.pack.clips&&CLIPLIB.pack.clips[fireKey]&&CLIPLIB.pack.clips[fireKey].events&&CLIPLIB.pack.clips[fireKey].events.length),view:VIEW_MODE,reduced:REDUCED_MOTION,noClips:!!window.__noClips,samples:[],events:[],ok:false};window.__combatProbe=p;const t0=performance.now();function step(){const m=T3&&T3.units&&T3.units.get(shooter.id),ud=m&&m.userData,mt=T3&&T3.units&&T3.units.get(target.id),ut=mt&&mt.userData;p.samples.push({t:Math.round(performance.now()-t0),key:(ud&&ud._clipKey)||null,ct:+(ud&&ud._clipCt||0).toFixed(3),ev:window.__csnEvents.length,flash:+((ud&&ud._flashPulse)||0).toFixed(2),recoil:+((ud&&ud._firePulse)||0).toFixed(2),hit:+((ud&&ud._hitPulse)||0).toFixed(2),keyT:(ut&&ut._clipKey)||null,ctT:+(ut&&ut._clipCt||0).toFixed(3),hitT:+((ut&&ut._hitPulse)||0).toFixed(2)});p.events=window.__csnEvents.slice();p.ok=p.events.some(e=>e.f==='PlayWeaponFire');if(performance.now()-t0<2600)requestAnimationFrame(step);else{p.done=true;}}const fired=tryShoot(shooter,target,shooter.weapon,null,{freeCost:true,silent:true,noReturn:true});p.fired=!!fired;if(!fired){p.done=true;return 'no fire';}requestAnimationFrame(step);return 'ok';})()");
     if (fired !== 'ok') result.errores.push('combate: ' + fired);
     await sleep(3300);
     const rawCombat = await ev('JSON.stringify(window.__combatProbe||{})');
@@ -201,6 +215,11 @@ try {
   if (uiMode || mobileMode) {
     const uiState = await ev("JSON.stringify({step:document.body.dataset.step,state:document.body.dataset.state,count:document.getElementById('stepCount')?.textContent,label:document.getElementById('stepLabel')?.textContent,detail:document.getElementById('stepDetail')?.textContent,screen:[...document.querySelectorAll('.screen.on')].map(s=>s.id)})");
     try { result.ui = JSON.parse(uiState); } catch { result.ui = uiState; }
+  }
+  if (uiMode) {
+    const viewerState = await ev("(function(){try{const v=window.__csnViewer&&window.__csnViewer.state;if(!v)return JSON.stringify({error:'sin viewer'});const models=[];Object.keys(v.models||{}).forEach(kind=>{Object.keys(v.models[kind]||{}).forEach(k=>{const m=v.models[kind][k],mesh=(m.userData&&m.userData.mesh3)||m.getObjectByProperty('isSkinnedMesh',true)||m.getObjectByProperty('isMesh',true);if(!mesh||!mesh.geometry)return;const g=mesh.geometry,p=g.attributes&&g.attributes.position&&g.attributes.position.array,idx=g.index&&g.index.array;let vol=0;if(p&&idx){for(let i=0;i<idx.length;i+=3){const a=idx[i]*3,b=idx[i+1]*3,c=idx[i+2]*3;vol+=(p[a]*(p[b+1]*p[c+2]-p[b+2]*p[c+1])-p[a+1]*(p[b]*p[c+2]-p[b+2]*p[c])+p[a+2]*(p[b]*p[c+1]-p[b+1]*p[c]))/6;}}const box=new THREE.Box3().setFromObject(m),size=new THREE.Vector3();box.getSize(size);models.push({kind,key:k,vol:+vol.toFixed(3),size:[+size.x.toFixed(3),+size.y.toFixed(3),+size.z.toFixed(3)],side:mesh.material.side,transparent:!!mesh.material.transparent,opacity:+mesh.material.opacity.toFixed(2),alphaTest:+(mesh.material.alphaTest||0).toFixed(2),grip:!!(m.userData&&m.userData.grip),gun:!!(m.userData&&m.userData.viewerGun),meshy:!!(m.userData&&m.userData.meshy)});});});return JSON.stringify({name:v.name,kind:v.kind,models});}catch(e){return JSON.stringify({error:String(e.message||e)});}})()");
+    try { result.viewer = JSON.parse(viewerState); } catch { result.viewer = viewerState; }
+    if (auditMode) result.viewerAudit = result.viewer;
   }
   if (mobileMode) {
     try { parsed = JSON.parse(state); } catch { parsed = null; }
@@ -241,12 +260,18 @@ try {
   const mobileOk = !mobileMode || !!(result.mobile && result.mobile.w <= 430 && result.mobile.scrollW <= result.mobile.clientW + 2 && (!result.mobile.board || !result.mobile.board.shown || result.mobile.board.w <= result.mobile.w + 2) && (!result.mobile.actions.count || result.mobile.actions.min >= 44));
   const geoOk = !mobileMode || mobileMode !== 'game' || !!(parsed && parsed.geo === true);
   const softwareOk = !software || !!(parsed && parsed.sw === true);
-  result.ok = sceneOk && pngOk && moveOk && combatOk && mobileOk && geoOk && softwareOk && errs.length === 0;
+  const viewerOk = !auditMode || !!(result.viewerAudit && Array.isArray(result.viewerAudit.models) && result.viewerAudit.models.length > 0 && result.viewerAudit.models.every(m => {
+    if (!Number.isFinite(m.vol) || m.transparent !== false || m.opacity !== 1) return false;
+    if (m.kind === 'roles' || m.kind === 'weapons') return m.side === 0 && m.alphaTest >= 0.5 && (m.kind !== 'roles' || m.vol > 0);
+    return m.size.every(Number.isFinite);
+  }));
+  result.ok = sceneOk && pngOk && moveOk && combatOk && mobileOk && geoOk && softwareOk && viewerOk && errs.length === 0;
   if (moveMode && !moveOk) result.errores.push('movimiento sin muestras');
   if (combatMode && !combatOk) result.errores.push('combate sin eventos de clip');
   if (mobileMode && !mobileOk) result.errores.push('movil: layout fuera de viewport');
   if (mobileMode && !geoOk) result.errores.push('movil: geometria del mapa no lista');
   if (software && !softwareOk) result.errores.push('swiftshader no activo');
+  if (auditMode && !viewerOk) result.errores.push('auditoria de visor incompleta');
   if (!result.ok && errs.length === 0) result.errores.push('escena o captura vacia');
 } catch (e) {
   result.errores.push(String(e.message || e).slice(0, 200));

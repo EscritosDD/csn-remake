@@ -1,0 +1,649 @@
+﻿=== ACTUALIZACION FINAL 21/11/2026 ===
+Gates finales ejecutados tras la ultima edicion:
+  npm run lint                         -> OK, 2 bloques <script>, 0 errores
+  npm test                             -> tests 68, pass 68, fail 0
+  powershell -ExecutionPolicy Bypass -File bench\VERIFICAR.ps1
+                                       -> TODO OK 13/13
+  node _capture_all.mjs viewer:audit-all VIEWAUDIT3 8000
+                                       -> ok=True, modelos=4, errores=[]
+  git diff --check                     -> sin errores (solo avisos CRLF)
+  python tools\auditar_assets_3d.py    -> 338 OBJ, sin_caras=0, NaN=0, rigs=13, png=305, glb=0
+
+Cierre por rondas:
+  R1  reparados 11 OBJ con f=0 desde mallas IPA; auditoria global generada
+  R2  mount() con pose de reposo y bounds deformados; materiales opacos/sRGB
+  R3  MIME GLB/GLTF en server.js; sin originales ni loader local, NO cerrado en falso
+  R4  23 calibraciones de armas por bounds; sin barracksOffset/Scale en gameplay
+  R5  debugGrid 3D, sin props sobre geo IPA, sombras normalBias=0.02, tex 512
+  R6  winding global de OBJ + viewer:audit-all integrado en VERIFICAR.ps1
+
+Pendiente real para mañana:
+  - Meshy/GLB sin fuentes originales sin soldar
+  - anti-clipping scale=0.86 no aplicado a unidades
+  - atlas PNG con alpha no regenerado desde _original/pipeline.py
+  - viewer:audit-all sondea 4 modelos, no los 35 personajes y 23 armas completos
+  - revision visual humana de ?debugWeapons=1 y ?debugGrid=1
+
+Informe completo: docs\ESTADO_SESION_2026-11-21.md
+
+git status --short al cierre:
+ M README.md
+ M _capture_all.mjs
+ M bench/VERIFICAR.ps1
+ M bench/boards.js
+ M bench/data.test.js
+ M bench/movement.test.js
+ M bench/rules.test.js
+ M bench/winding.test.js
+ M docs/ARQUITECTURA.md
+ M docs/COMO_TRABAJAR_CON_ZAI.md
+ M docs/Capturas_3D.md
+ M docs/Examen_para_continuar.md
+ M docs/Prompt_arranque_Z.ai.md
+ M docs/README.md
+ M index.html
+ M package.json
+ M server.js
+?? assets/maps/03_grid.json
+?? assets/maps/04_grid.json
+?? assets/maps/05_grid.json
+?? assets/maps/06_grid.json
+?? assets/maps/08_grid.json
+?? assets/maps/09_grid.json
+?? assets/maps/10_grid.json
+?? assets/maps/11_grid.json
+?? assets/props/DeployableCover.obj
+?? assets/props/DeployableCover_d.png
+?? assets/props/GatlingTurret.obj
+?? assets/props/MGTurret_d.png
+?? assets/props/ObjectiveRocket.obj
+?? assets/props/RemoteCharge.obj
+?? assets/props/RemoteCharge_d.png
+?? assets/props/RiotShieldBot.obj
+?? assets/props/RiotShieldBot_d.png
+?? assets/props/RocketTurret.obj
+?? assets/props/RocketTurret_d.png
+?? assets/props/Rocket_d.png
+?? assets/props/SpiderMine.obj
+?? assets/props/SpiderMine_d.png
+?? assets/props/UAV.obj
+?? assets/props/UAV_d.png
+?? assets/soldier/bodies/CommanderM.obj
+?? assets/soldier/bodies/Soldier_SAS.obj
+?? assets/soldier/bodies/Soldier_Spud.obj
+?? assets/soldier/cast/ArmAttach_1_d.png
+?? assets/soldier/cast/HeadAttach_2_d.png
+?? assets/soldier/cast/RadioAttach_1_d.png
+?? assets/soldier/cast/ShoulderAttach_1_d.png
+?? assets/soldier/cast/Soldier_Decon_d.png
+?? assets/soldier/cast/Soldier_ForestCamo_d.png
+?? assets/soldier/cast/Soldier_SAS_Decon_d.png
+?? assets/soldier/cast/Soldier_SAS_Veteran_d.png
+?? assets/soldier/cast/Soldier_SAS_d.png
+?? assets/soldier/cast/Soldier_Veteran_d.png
+?? assets/soldier/cast/Soldier_d.png
+?? assets/weapons/weapon_calibrations.json
+?? assets/weapons/weapon_metadata.json
+?? auditoria_dump.txt
+?? auditoria_mapas_fisicas.txt
+?? auditoria_meshy_armas.txt
+?? auditoria_original.txt
+?? auditoria_original_detalle.txt
+?? auditoria_sockets.txt
+?? bench/map-collision.test.js
+?? docs/ESTADO_SESION_2026-11-21.md
+?? docs/auditoria_global_3d.md
+?? revision_opencode.txt
+?? tools/auditar_assets_3d.py
+?? tools/extract_maps_grid.py
+?? tools/generate_weapon_calibrations.py
+?? tools/repair_zero_face_objs.py
+
+=== 1. GIT STATUS Y ULTIMOS COMMITS (HISTORICO) ===
+ M _capture_all.mjs
+ M bench/VERIFICAR.ps1
+ M bench/winding.test.js
+ M index.html
+?? assets/props/DeployableCover.obj
+?? assets/props/DeployableCover_d.png
+?? assets/props/GatlingTurret.obj
+?? assets/props/MGTurret_d.png
+?? assets/props/ObjectiveRocket.obj
+?? assets/props/RemoteCharge.obj
+?? assets/props/RemoteCharge_d.png
+?? assets/props/RiotShieldBot.obj
+?? assets/props/RiotShieldBot_d.png
+?? assets/props/RocketTurret.obj
+?? assets/props/RocketTurret_d.png
+?? assets/props/Rocket_d.png
+?? assets/props/SpiderMine.obj
+?? assets/props/SpiderMine_d.png
+?? assets/props/UAV.obj
+?? assets/props/UAV_d.png
+?? assets/soldier/bodies/CommanderM.obj
+?? assets/soldier/bodies/Soldier_SAS.obj
+?? assets/soldier/bodies/Soldier_Spud.obj
+?? assets/soldier/cast/ArmAttach_1_d.png
+?? assets/soldier/cast/HeadAttach_2_d.png
+?? assets/soldier/cast/RadioAttach_1_d.png
+?? assets/soldier/cast/ShoulderAttach_1_d.png
+?? assets/soldier/cast/Soldier_Decon_d.png
+?? assets/soldier/cast/Soldier_ForestCamo_d.png
+?? assets/soldier/cast/Soldier_SAS_Decon_d.png
+?? assets/soldier/cast/Soldier_SAS_Veteran_d.png
+?? assets/soldier/cast/Soldier_SAS_d.png
+?? assets/soldier/cast/Soldier_Veteran_d.png
+?? assets/soldier/cast/Soldier_d.png
+?? assets/weapons/weapon_metadata.json
+?? auditoria_dump.txt
+?? auditoria_mapas_fisicas.txt
+?? auditoria_meshy_armas.txt
+?? auditoria_original.txt
+?? auditoria_original_detalle.txt
+?? auditoria_sockets.txt
+5b3decf open code 19:30 20/11/2026
+16c8232 opencode work
+a9dfd87 desarrollo open code
+4fac4b9 auditor├¡a profunda: bugs encontrados y corregidos
+434211a personajes por rol: textura y l├│gica in game
+
+=== 2. FUNCIONES ACTUALES EN index.html ===
+
+--- makeSkinnedModel ---
+function makeSkinnedModel(geometry,data,texture,options={}
+
+--- makeRealGun3 ---
+function makeRealGun3(weapon,preservePivot){
+  const file=WEAPON_MESH_FILE[weapon]; if(!file)return null;
+  const cached=GUN_MESH_CACHE[weapon]; if(cached!==undefined)return cached;
+  GUN_MESH_CACHE[weapon]=null; /* cargando */
+  fetch('assets/weapons/'+file+'.obj').then(r=>{if(!r.ok)throw new Error('obj');return r.text();}).then(txt=>{
+    const geo=parseOBJStatic(txt);
+    geo.computeBoundingBox();
+    const bb=geo.boundingBox, size=new THREE.Vector3(); bb.getSize(size);
+    const long=Math.max(size.x,size.z,0.001);
+    const cat=(WEAPONS[weapon]||{}).cat||'Fusiles de asalto';
+    const target=WEAPON_LEN[cat]||0.6;
+    const k=target/long;
+    const meta=weaponMeta(file);
+    const mat=new THREE.MeshStandardMaterial({color:0x9a9a9a,roughness:0.72,metalness:0.25});
+    const texLoad=new THREE.TextureLoader();
+    texLoad.load('assets/weapons/'+file+'_tex.png',t=>{t.colorSpace=THREE.SRGBColorSpace;mat.map=t;mat.color.set(0xffffff);mat.needsUpdate=true;},undefined,()=>{});
+    const mesh=new THREE.Mesh(geo,mat);
+    /* malla en Z arriba -> Y arriba */
+    const c=new THREE.Vector3(); bb.getCenter(c);
+    const pivot=[-bb.min.x,-c.z,-c.y];
+    const holder=new THREE.Group();
+    holder.add(mesh);
+    if(preservePivot){
+      /* El .obj conserva el pivote del prefab: no se recentra. Se usa el
+         offset/scale de UnitWeapon y el socket del esqueleto. */
+      const off=meta&&meta.barracksOffset?meta.barracksOffset:[0,0,0];
+      mesh.position.set(0,0,0);
+      holder.position.set(off[0],off[1],off[2]);
+      holder.scale.setScalar(meta&&meta.barracksScale?meta.barracksScale[0]:k);
+    }else{
+      /* La culata queda en el origen: el ca├▒├│n sale hacia +X. */
+      mesh.position.set(pivot[0],pivot[1],pivot[2]);
+      holder.scale.setScalar(k);
+    }
+    holder.rotation.x=-Math.PI/2;
+    holder.userData={file:file,meta:meta||null,pivot:pivot};
+    GUN_MESH_CACHE[weapon]=holder;
+    if(gunSwapWaiters[weapon]){gunSwapWaiters[weapon].forEach(fn=>{try{fn(holder);}catch(e){}});gunSwapWaiters[weapon]=[];}
+  }).catch(()=>{delete GUN_MESH_CACHE[weapon];});
+  return null;
+}
+
+--- fitGunToHand3 ---
+function fitGunToHand3(un,grp,isLive){
+  if(!HAS_THREE)return;
+  const ud=grp&&grp.userData;if(!ud||!ud.gun||!ud.byName||!ud.bones)return;
+  const parent=ud.gun.parent;if(!parent)return;
+  if(grp.updateWorldMatrix)grp.updateWorldMatrix(true,true);else grp.updateMatrixWorld(true);
+  const bR=ud.bones[ud.byName['Bip001 R Hand']];
+  const bFA=ud.bones[ud.byName['Bip001 R Forearm']];
+  if(!bR||!bFA)return;
+  /* Socket real de UnitWeapon: se ancla al hueso gunBone_R del esqueleto
+     (aliasado a la mano derecha en los rigs del repo) y se aplica el offset
+     de Barracks. Si el hueso o los metadatos no est├ín, sigue el ajuste
+     manual por palmas de abajo. */
+  const gunFile=ud.gun.userData.file||(un&&WEAPON_MESH_FILE[un.weapon]);
+  const meta=ud.gun.userData.meta||weaponMeta(gunFile);
+  const socket=meta&&meta.attachmentJoint;
+  const bS=socket&&ud.byName[socket]!==undefined?ud.bones[ud.byName[socket]]:null;
+  if(bS){
+    _gpRPalm.setFromMatrixPosition(bS.matrixWorld);
+    parent.worldToLocal(_gpRPalm);
+    const off=meta.barracksOffset||[0,0,0];
+    ud.gun.position.set(_gpRPalm.x+off[0],_gpRPalm.y+off[1],_gpRPalm.z+off[2]);
+    bS.getWorldQuaternion(_gpSocketQ);
+    parent.getWorldQuaternion(_gpParentQ);
+    ud.gun.quaternion.copy(_gpParentQ.invert().multiply(_gpSocketQ));
+    return;
+  }
+  _gpRPalm.copy(_gpPalmR).applyMatrix4(bR.matrixWorld);
+  parent.worldToLocal(_gpRPalm);
+  _gpFA.setFromMatrixPosition(bFA.matrixWorld);
+  parent.worldToLocal(_gpFA);
+  const bL=ud.bones[ud.byName['Bip001 L Hand']];
+  let hasL=false;
+  if(bL){
+    _gpLPalm.copy(_gpPalmL).applyMatrix4(bL.matrixWorld);
+    parent.worldToLocal(_gpLPalm);
+    hasL=true;
+  }
+  const lk=roleLook(un.role);
+  const ck=ud._clipKey||'';
+  const is1h=(ud.gun.userData.cat==='Pistolas');
+  const force1h=(ck==='death'||ck==='deathExpl'||ck==='hit'||ck==='hitBurst'||ck==='hitExpl'||ck==='throw'||ck==='deploy'||ck==='interact'||ck==='victory'||ck==='pickup');
+  const pose=gunPoseFromHand(_gpRPalm,_gpFA,ud.gun.userData.grip,hasL?_gpLPalm:null,{
+    is1h:is1h,
+    force1h:force1h,
+    roleH:lk.s[1],
+    roleAvg:(lk.s[0]+lk.s[1]+lk.s[2])/3
+  });
+  if(!pose)return;
+  if(isLive&&ud._firePulse>0){
+    pose.origin.addScaledVector(pose.dir,-0.055*ud._firePulse);
+    pose.quat.multiply(_gpRecoil.setFromAxisAngle(_gpUp,0.035*ud._firePulse));
+  }
+  ud.gun.position.copy(pose.origin);
+  ud.gun.quaternion.copy(pose.quat);
+}
+
+--- gunPoseFromHand ---
+function gunPoseFromHand(rPalm,fa,grip,lPalm,opts){
+  _gpDir.copy(rPalm).sub(fa);
+  if(_gpDir.lengthSq()<1e-6)return null;
+  _gpDir.normalize();
+  const is1h=!!(opts&&opts.is1h);
+  const roleH=(opts&&opts.roleH)||1;
+  const roleAvg=(opts&&opts.roleAvg)||1;
+  _gpDir.lerp(_gpFwd,is1h?0.30:0.32).normalize();
+  let w2h=0;
+  if(!is1h&&lPalm&&!(opts&&opts.force1h)){
+    const span=rPalm.distanceTo(lPalm)/roleAvg;
+    const ly=lPalm.y/roleH;
+    w2h=_smooth01(0.28,0.42,ly)*_smooth01(0.20,0.28,span)*(1-_smooth01(0.52,0.62,span));
+    if(w2h>0.001){
+      _gpTwoH.copy(lPalm).sub(rPalm);
+      if(_gpTwoH.lengthSq()>1e-6){
+        _gpTwoH.normalize();
+        _gpDir.lerp(_gpTwoH,w2h).normalize();
+      }
+    }
+  }
+  _gpZ.crossVectors(_gpDir,_gpUp);
+  if(_gpZ.lengthSq()<1e-4)_gpZ.set(0,0,1);else _gpZ.normalize();
+  _gpY.crossVectors(_gpZ,_gpDir).normalize();
+  const g=grip||{x:0.2,y:-0.05,scale:1};
+  const gs=g.scale||1;
+  _gpOrigin.copy(rPalm).addScaledVector(_gpDir,-g.x*gs).addScaledVector(_gpY,-g.y*gs);
+  _gpMat.makeBasis(_gpDir,_gpY,_gpZ);
+  _gpQuat.setFromRotationMatrix(_gpMat);
+  return {origin:_gpOrigin,dir:_gpDir,quat:_gpQuat};
+}
+
+--- retargetPoseToRig ---
+function retargetPoseToRig(sourcePoseQ,sourceRestWorldQ,targetRestWorldQ,sourceParents,targetParents,sourceWorldQ,targetWorldQ,targetLocalQ){
+  for(let i=0;i<sourcePoseQ.length;i++){
+    const sourceParent=sourceParents[i];
+    if(sourceParent>=0)sourceWorldQ[i].copy(sourceWorldQ[sourceParent]).multiply(sourcePoseQ[i]);
+    else sourceWorldQ[i].copy(sourcePoseQ[i]);
+    _retargetDelta.copy(sourceWorldQ[i])
+      .multiply(_retargetInverse.copy(sourceRestWorldQ[i]).invert())
+      .multiply(targetRestWorldQ[i]);
+    targetWorldQ[i].copy(_retargetDelta);
+    const targetParent=targetParents[i];
+    if(targetParent>=0)targetLocalQ[i].copy(targetWorldQ[targetParent]).invert().multiply(targetWorldQ[i]);
+    else targetLocalQ[i].copy(targetWorldQ[i]);
+  }
+}
+
+--- rootBonePositionForClip ---
+function rootBonePositionForClip(rootBase,pelvisOffset,delta,rotatedPelvis,out){
+  out.x=rootBase.x+pelvisOffset.x+delta.x-rotatedPelvis.x;
+  out.y=rootBase.y+pelvisOffset.y+delta.y-rotatedPelvis.y;
+  out.z=rootBase.z+pelvisOffset.z+delta.z-rotatedPelvis.z;
+  return out;
+}
+
+--- poseSpriteClip ---
+function poseSpriteClip(un,grp,clip,ct,clipKey){
+  const pack=CLIPLIB.pack;if(!pack||!clip)return false;
+  const ud=grp.userData;if(!ud||!ud.bones||!ud.bindLocal||!ud.curQ)return false;
+  ud._clipKey=clipKey||'';
+  const tq=new THREE.Quaternion(),tp=new THREE.Vector3(),tp2=new THREE.Vector3(),pelvis=new THREE.Vector3();
+  const retarget=!!(ud.isClassRig&&ud.baseRestWorldQ&&ud.sourcePoseQ);
+  for(let n=0;n<24;n++){
+    for(let i=0;i<ud.bones.length;i++){
+      const tr=clip.rot[pack.bones[i]];
+      const restQ=retarget?ud.baseRestQ[i]:ud.bindLocal[i];
+      if(tr)sampleClipQuat(tr,ct,tq);else tq.copy(restQ);
+      if(retarget){
+        ud.sourcePoseQ[i].copy(tq);
+      }else{
+        ud.curQ[i].slerp(tq,0.45);
+        ud.bones[i].quaternion.copy(ud.curQ[i]);
+      }
+    }
+    if(retarget){
+      retargetPoseToRig(ud.sourcePoseQ,ud.baseRestWorldQ,ud.bindWorldQ,ud.sourceParents,ud.parents,ud.sourceWorldQ,ud.targetWorldQ,ud.targetLocalQ);
+      for(let i=0;i<ud.bones.length;i++){
+        ud.curQ[i].slerp(ud.targetLocalQ[i],0.45);
+        ud.bones[i].quaternion.copy(ud.curQ[i]);
+      }
+    }
+    if(clip.root)sampleClipPos(clip.root,ct,tp);else tp.set(0,0,0);
+    ud.curDelta.lerp(tp,0.45);
+    pelvis.copy(ud.bindPos[1]);
+    rootBonePositionForClip(ud.bindPos[0],pelvis,ud.curDelta,tp2.copy(pelvis).applyQuaternion(ud.bones[0].quaternion),ud.bones[0].position);
+  }
+  return true;
+}
+
+--- mount ---
+function mount(model){
+    while(viewer.spin.children.length)viewer.spin.remove(viewer.spin.children[0]);
+    model.updateMatrixWorld(true);
+    model.traverse(object=>{
+      if(object.isSkinnedMesh&&object.skeleton)object.skeleton.update();
+    });
+    model.updateMatrixWorld(true);
+    const bounds=new THREE.Box3();
+    const meshBounds=new THREE.Box3();
+    model.traverse(object=>{
+      if(!object.isMesh||!object.geometry)return;
+      /* El arma equipada no entra en el encuadre: si contara, el ca├▒├│n
+         desplazar├¡a el centro y el soldado quedar├¡a descentrado. */
+      let p=object.parent;
+      while(p&&p!==model){if(p.userData&&p.userData.isViewerGun)return;p=p.parent;}
+      meshBounds.setFromObject(object,true);
+      bounds.union(meshBounds);
+    });
+    const size=new THREE.Vector3(),center=new THREE.Vector3();
+    bounds.getSize(size);bounds.getCenter(center);
+    if(!Number.isFinite(size.x)||Math.max(size.x,size.y,size.z)<0.001)throw new Error('El modelo no contiene geometr├¡a visible.');
+    const centerOffset=viewerCenterOffset(center);
+    const centered=new THREE.Group();
+    centered.position.set(centerOffset.x,centerOffset.y,centerOffset.z);
+    centered.add(model);
+    viewer.spin.add(centered);
+    centered.updateMatrixWorld(true);
+    viewer.idleActor=viewer.kind==='roles'&&model.userData.animatable?model:null;
+    viewer.gripActor=viewer.kind==='roles'&&model.userData.grip?model:null;
+    if(viewer.meshyFill)viewer.meshyFill.intensity=viewer.kind==='roles'&&model.userData.meshy?1.8:0;
+    if(viewer.meshyRim)viewer.meshyRim.intensity=viewer.kind==='roles'&&model.userData.meshy?2.2:0;
+    viewer.idleClipKey=model.userData.idleClipKey||'idle2h';
+    if(viewer.gripActor&&viewer.gripActor.userData.gun)
+      fitGunToHand3(viewer.gripActor.userData.gripUnit,viewer.gripActor,false);
+    viewer.spin.rotation.set(viewer.kind==='weapons'?0.25:0,-0.55,0);
+    const platformRadius=Math.max(0.35,Math.max(size.x,size.z)*0.72);
+    viewer.platform.scale.set(platformRadius,platformRadius,1);
+    viewer.platform.position.y=-size.y/2-0.035;
+    resize();
+    viewer.baseDistance=fitViewerDistance(size,viewer.camera.fov,viewer.camera.aspect);
+    updateCamera();
+    viewer.renderer.render(viewer.scene,viewer.camera);
+    refreshTexturePreview();
+    setStatus('',false);
+  }
+
+--- loadViewerMeshy ---
+async function loadViewerMeshy(entry){
+    const base='assets/personajes_propios/'+entry.mesh;
+    const [response,rigResponse,texture]=await Promise.all([
+      fetch(base+'.obj'),fetch(base+'_rig.json'),
+      new Promise((resolve,reject)=>{
+        /* Cada dise├▒o Meshy es autocontenido en assets/personajes_propios/
+           (obj + rig + tex): la textura ya no es la de clase en
+           assets/soldier/, porque esas clases volvieron a ser del original. */
+        new THREE.TextureLoader().load(base+'_tex.png',resolve,undefined,reject);
+      })
+    ]);
+    if(!response.ok)throw new Error('No se pudo cargar el OBJ Meshy de '+entry.mesh+'.');
+    if(!rigResponse.ok)throw new Error('No se pudo cargar el rig Meshy de '+entry.mesh+'.');
+    texture.colorSpace=THREE.SRGBColorSpace;
+    const [objText,rawRig]=await Promise.all([response.text(),rigResponse.json()]);
+    const rig=normalizeMeshyRig(rawRig);
+    const geometry=parseViewerOBJ(objText,rig);
+    const started=Date.now();
+    while(!CLIPLIB.ready&&Date.now()-started<5000)await wait(50);
+    const baseData=sameRigBoneOrder(REAL.data&&REAL.data.bones,rig.bones)?REAL.data:null;
+    const baseRestQ=baseData?baseData.bones.map(b=>new THREE.Quaternion(b.quat[0],b.quat[1],b.quat[2],b.quat[3])):null;
+    const baseParents=baseData?baseData.bones.map(b=>b.parent):null;
+    const model=makeViewerRiggedModel(geometry,rig,texture,{
+      meshy:true,grip:true,role:entry.role,baseRestQ,baseParents
+    });
+    if(rig.bones[1].pos[2]>rig.bones[1].pos[1]+0.1)model.rotation.x=-Math.PI/2;
+    poseViewerRest(model,'idle2h',0);
+    model.userData.gripUnit={role:entry.role,weapon:''};
+    return model;
+  }
+
+--- poseViewerRest ---
+function poseViewerRest(model,clipKey,ct){
+    const pack=CLIPLIB.pack,clip=pack&&pack.clips&&pack.clips[clipKey];
+    const ud=model&&model.userData;
+    if(!clip||!ud||!ud.bones||!ud.bindLocal)return false;
+    const tq=new THREE.Quaternion();
+    const retarget=!!(ud.isClassRig&&ud.baseRestWorldQ&&ud.sourcePoseQ);
+    const rootP=new THREE.Vector3(),rootT=new THREE.Vector3(),pelvis=new THREE.Vector3();
+    for(let n=0;n<24;n++){
+      for(let i=0;i<ud.bones.length;i++){
+        const tr=clip.rot[pack.bones[i]];
+        const restQ=retarget?ud.baseRestQ[i]:ud.bindLocal[i];
+        if(tr)sampleClipQuat(tr,ct,tq);else tq.copy(restQ);
+        if(retarget){
+          ud.sourcePoseQ[i].copy(tq);
+        }else{
+          ud.bones[i].quaternion.copy(tq);
+        }
+      }
+      if(retarget){
+        retargetPoseToRig(ud.sourcePoseQ,ud.baseRestWorldQ,ud.bindWorldQ,ud.sourceParents,ud.parents,ud.sourceWorldQ,ud.targetWorldQ,ud.targetLocalQ);
+        for(let i=0;i<ud.bones.length;i++)ud.bones[i].quaternion.copy(ud.targetLocalQ[i]);
+      }
+      if(clip.root)sampleClipPos(clip.root,ct,rootT);else rootT.set(0,0,0);
+      rootP.copy(ud.curDelta).lerp(rootT,0.45);
+      pelvis.copy(ud.bindPos[1]);
+      rootBonePositionForClip(ud.bindPos[0],pelvis,rootP,rootT.copy(pelvis).applyQuaternion(ud.bones[0].quaternion),ud.bones[0].position);
+    }
+    ud._clipKey=clipKey;
+    model.updateMatrixWorld(true);
+    return true;
+  }
+
+--- loadViewerBody ---
+async function loadViewerBody(file){
+    const path='assets/soldier/bodies/'+file;
+    if(viewer.bodyGeo[path])return viewer.bodyGeo[path];
+    const text=await fetch(path).then(r=>{if(!r.ok)throw new Error('No se pudo cargar el cuerpo '+file);return r.text();});
+    let count=0;
+    for(const line of text.split('\n')){if(line.startsWith('v '))count++;}
+    const skin={skinIndex:new Array(count*4).fill(0),skinWeight:new Array(count*4).fill(0)};
+    const geo=parseOBJ3(text,skin);
+    const pos=geo.attributes.position.array;
+    const zs=[];
+    for(let i=2;i<pos.length;i+=3)zs.push(pos[i]);
+    zs.sort((a,b)=>a-b);
+    const p95=zs[Math.floor(zs.length*0.95)]||1;
+    const scale=1.14/p95;
+    if(scale!==1)geo.scale(scale,scale,scale);
+    viewer.bodyGeo[path]=geo;
+    return geo;
+  }
+
+--- makeViewerOriginal ---
+async function makeViewerOriginal(entry,skin){
+    /* La geometr├¡a la decide el cuerpo (entry.body), no el rol: cada
+       personaje muestra la malla de su cuerpo. Los 4 roles IPA usan
+       REAL.byRole; los cuerpos variantes se cargan de bodies/; el
+       cuerpo Soldier_Light usa el soldado gen├®rico (REAL). */
+    let source=null,bodyGeo=null;
+    if(entry.bodyFile){
+      bodyGeo=await loadViewerBody(entry.bodyFile);
+    }else if(entry.bodyRole){
+      source=REAL.byRole[entry.bodyRole];
+      if(!source)throw new Error('El modelo de clase '+entry.bodyRole+' todav├¡a no est├í disponible.');
+    }else{
+      source=REAL;
+    }
+    let texture=null;
+    if(skin.key&&skin.key.indexOf('cast:')===0){
+      const texturePath='assets/soldier/cast/'+skin.key.slice(5);
+      if(viewer.textures[texturePath])texture=viewer.textures[texturePath];
+      else{
+        texture=await new Promise((resolve,reject)=>{
+          new THREE.TextureLoader().load(texturePath,resolve,undefined,reject);
+        });
+        texture.colorSpace=THREE.SRGBColorSpace;
+        viewer.textures[texturePath]=texture;
+      }
+    }else if(skin.key==='native'&&source){
+      texture=source.tex;
+    }
+    if(!texture)throw new Error('El modelo no tiene una textura disponible.');
+    /* Solo el cuerpo Soldier_Light del repo (Hipster Dave, el soldado
+       gen├®rico) usa el modelo con esqueleto y pose de reposo animada.
+       Sister Florence se monta tambi├®n con esqueleto, pero con la pose
+       de reposo retargetizada y sin animaci├│n, para que el arma se
+       enganche a sus manos. El resto sigue siendo malla est├ítica:
+       forzar animatable en todos es lo que descabal├│ los modelos. */
+    if(!entry.bodyFile&&!entry.bodyRole){
+      const model=makeViewerRiggedModel(source.geo.clone(),source.data,texture,{animatable:true,grip:true});
+      model.scale.setScalar(1.15);
+      const mesh=model.userData.mesh3;
+      model.remove(mesh);
+      const spin=new THREE.Group();
+      spin.rotation.y=Math.PI/2;
+      model.add(spin);
+      const tilt=new THREE.Group();
+      tilt.rotation.x=-Math.PI/2;
+      spin.add(tilt);
+      mesh.scale.setScalar(0.95);
+      tilt.add(mesh);
+      return model;
+    }
+    if(entry.name==='Sister Florence'&&source){
+      const started=Date.now();
+      while(!CLIPLIB.ready&&Date.now()-started<5000)await wait(50);
+      const baseData=sameRigBoneOrder(REAL.data&&REAL.data.bones,source.data.bones)?REAL.data:null;
+      const baseRestQ=baseData?baseData.bones.map(b=>new THREE.Quaternion(b.quat[0],b.quat[1],b.quat[2],b.quat[3])):null;
+      const baseParents=baseData?baseData.bones.map(b=>b.parent):null;
+      const model=makeViewerRiggedModel(source.geo.clone(),source.data,texture,{
+        baseRestQ,baseParents,grip:true,role:entry.role
+      });
+      model.scale.setScalar(1.15);
+      const mesh=model.userData.mesh3;
+      model.remove(mesh);
+      const spin=new THREE.Group();
+      spin.rotation.y=Math.PI/2;
+      const lk=roleLook(entry.role);
+      if(lk&&lk.s)spin.scale.set(lk.s[0],lk.s[1],lk.s[2]);
+      model.add(spin);
+      const tilt=new THREE.Group();
+      tilt.rotation.x=-Math.PI/2;
+      spin.add(tilt);
+      mesh.scale.setScalar(0.95);
+      tilt.add(mesh);
+      poseViewerRest(model,'idle2h',0);
+      model.userData.gripUnit={role:entry.role,weapon:''};
+      return model;
+    }
+    const geometry=bodyGeo?bodyGeo.clone():(source?source.geo.clone():null);
+    if(!geometry)throw new Error('El modelo no tiene una geometr├¡a disponible.');
+    geometry.deleteAttribute('skinIndex');
+    geometry.deleteAttribute('skinWeight');
+    geometry.computeVertexNormals();
+    const mesh=new THREE.Mesh(geometry,new THREE.MeshStandardMaterial({
+      map:texture,roughness:0.85,metalness:0.02,transparent:false,opacity:1,depthWrite:true,
+      side:THREE.DoubleSide
+    }));
+    mesh.castShadow=true;
+    const model=new THREE.Group();
+    model.scale.setScalar(1.15);
+    const spin=new THREE.Group();spin.rotation.y=Math.PI/2;model.add(spin);
+    const tilt=new THREE.Group();tilt.rotation.x=-Math.PI/2;spin.add(tilt);
+    mesh.scale.setScalar(0.95);tilt.add(mesh);
+    model.userData.staticRole=true;
+    return model;
+  }
+
+--- syncViewerGun ---
+async function syncViewerGun(model,entry,token){
+    const wanted=viewer.weapon||'';
+    const current=(model.userData&&model.userData.viewerGunWeapon)||'';
+    if(current===wanted)return;
+    if(model.userData&&model.userData.viewerGun){
+      model.remove(model.userData.viewerGun);
+      if(model.userData.gun===model.userData.viewerGun)model.userData.gun=null;
+      model.userData.viewerGun=null;
+      model.userData.viewerGunWeapon='';
+    }
+    if(!wanted)return;
+    const meshFile=WEAPON_MESH_FILE[wanted];
+    if(!meshFile)return;
+    const cacheKey=viewerWeaponCacheKey(meshFile);
+    if(!GUN_MESH_CACHE[cacheKey]){
+      const started=Date.now();
+      while(GUN_MESH_CACHE[cacheKey]===null&&Date.now()-started<10000){
+        if(token!==viewer.selection)return;
+        await wait(100);
+      }
+      if(GUN_MESH_CACHE[cacheKey]===false)throw new Error('No se pudo cargar la malla de esta arma.');
+      if(!GUN_MESH_CACHE[cacheKey])throw new Error('La carga de la malla tard├│ demasiado.');
+    }
+    const holder=GUN_MESH_CACHE[cacheKey].clone(true);
+    const gunMeta=holder.userData.meta||weaponMeta(meshFile);
+    let gunGroup;
+    if(model.userData&&model.userData.grip){
+      gunGroup=makeGunProp3({role:entry.role,weapon:wanted});
+      gunGroup.userData.isViewerGun=true;
+      gunGroup.children.forEach(ch=>{ch.visible=false;});
+      gunGroup.add(holder);
+    }else{
+      gunGroup=new THREE.Group();
+      gunGroup.userData.isViewerGun=true;
+      if(entry.mesh){
+        const front=VIEWER_MESHY_FRONT[entry.mesh]||1;
+        gunGroup.position.set(0,0.62,front*0.14);
+        gunGroup.rotation.y=front>0?-Math.PI/2:Math.PI/2;
+      }else{
+        gunGroup.position.set(0.14,0.62,-0.02);
+      }
+      gunGroup.add(holder);
+    }
+    gunGroup.userData.file=meshFile;
+    gunGroup.userData.meta=gunMeta;
+    model.add(gunGroup);
+    model.userData.viewerGun=gunGroup;
+    model.userData.viewerGunWeapon=wanted;
+    if(model.userData.grip){
+      model.userData.gun=gunGroup;
+      model.userData.gripUnit={role:entry.role,weapon:wanted};
+      fitGunToHand3(model.userData.gripUnit,model,false);
+    }
+  }
+
+=== 3. INSPECCION DE OBJS CLAVE ===
+assets/soldier.obj | size=188926B | v=1211 vt=1211 f=1456 nan=0 | X[-0.44,0.44] Y[-0.21,0.32] Z[0.00,1.14]
+assets/soldier/bodies/Soldier_SAS.obj | size=84886B | v=1234 vt=1234 f=0 nan=0 | X[-0.44,0.44] Y[-0.22,0.36] Z[0.00,1.13]
+assets/soldier/bodies/Soldier_Spud.obj | size=73323B | v=1065 vt=1065 f=0 nan=0 | X[-0.44,0.44] Y[-0.27,0.42] Z[0.00,1.17]
+assets/soldier/bodies/Soldier_Light_Rambo.obj | size=163425B | v=1023 vt=1023 f=1382 nan=0 | X[-0.44,0.44] Y[-0.18,0.32] Z[0.00,1.19]
+assets/personajes_propios/Francotirador.obj | size=342535B | v=1988 vt=1988 f=4000 nan=0 | X[-0.74,0.74] Y[0.00,1.71] Z[-0.25,0.24]
+assets/personajes_propios/Artillero.obj | size=340806B | v=1970 vt=1970 f=4000 nan=0 | X[-0.44,0.45] Y[0.00,1.71] Z[-0.49,0.48]
+assets/personajes_propios/Espia.obj | size=343496B | v=2003 vt=2003 f=4000 nan=0 | X[-0.37,0.37] Y[0.00,1.71] Z[-0.31,0.31]
+assets/personajes_propios/Medico.obj | size=343489B | v=1995 vt=1995 f=4000 nan=0 | X[-0.24,0.24] Y[-0.22,0.22] Z[0.00,1.14]
+assets/personajes_propios/Ingeniero.obj | size=342599B | v=1986 vt=1986 f=4000 nan=0 | X[-0.30,0.30] Y[-0.23,0.23] Z[0.00,1.14]
+assets/weapons/SniperRifle_weapon.obj | size=63650B | v=583 vt=583 f=359 nan=0 | X[-0.84,0.29] Y[-0.09,0.09] Z[-0.08,0.21]
+assets/weapons/AssaultRifle.obj | size=21843B | v=201 vt=201 f=135 nan=0 | X[-0.52,0.25] Y[-0.05,0.05] Z[-0.09,0.21]
+assets/weapons/Pistol.obj | size=20894B | v=196 vt=196 f=116 nan=0 | X[-0.75,0.11] Y[-0.07,0.07] Z[-0.25,0.35]
+
+=== 4. RIGS MESHY ACTUALES (root, pelvis, claviculas, muslos) ===
+Francotirador: bones=20 | [0]Bip001 pos=0.003,0.855,-0.002 | [1]Bip001 Pelvis pos=0,0,0 | p6=5 p10=5 p14=1 p17=1
+Artillero: bones=20 | [0]Bip001 pos=0.004,0.856,-0.008 | [1]Bip001 Pelvis pos=0,0,0 | p6=5 p10=5 p14=1 p17=1
+Espia: bones=20 | [0]Bip001 pos=0.003,0.856,-0.002 | [1]Bip001 Pelvis pos=0,0,0 | p6=5 p10=5 p14=1 p17=1
+Medico: bones=20 | [0]Bip001 pos=0,0,0 | [1]Bip001 Pelvis pos=0,0,0.358 | p6=4 p10=4 p14=2 p17=2
+Ingeniero: bones=20 | [0]Bip001 pos=0,0,0 | [1]Bip001 Pelvis pos=0,0,0.358 | p6=4 p10=4 p14=2 p17=2

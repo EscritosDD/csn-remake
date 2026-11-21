@@ -6,8 +6,8 @@ las usa). Este documento explica cómo volver a generarlas exactamente iguales.
 ## Cómo regenerarlas
 
 ```powershell
-# servidor estatico
-python -m http.server 8000 --bind 127.0.0.1
+# servidor del repo (sirve tambien GLB/GLTF con MIME correcto)
+node server.js
 
 # una captura: mapa y prefijo
 node _capture_all.mjs skirmish05 REAL_skirmish05
@@ -23,6 +23,25 @@ node _capture_all.mjs ui:viewer UI_visor 5000
 node _capture_all.mjs ui:pieces UI_piezas 5000
 node _capture_all.mjs ui:game UI_partida 4000
 node _capture_all.mjs ui:resume UI_reanudar 4000
+
+# rejilla 2D/3D de los mapas IPA: el flag se pasa por CSN_URL
+$env:CSN_URL = "http://127.0.0.1:8000/?debugGrid=1"
+node _capture_all.mjs skirmish03 GRID_03 6000
+node _capture_all.mjs skirmish04 GRID_04 6000
+node _capture_all.mjs skirmish09 GRID_09 6000
+node _capture_all.mjs skirmish11 GRID_11 6000
+Remove-Item Env:CSN_URL
+
+# auditoria del visor (personajes, armas, props y piezas)
+node _capture_all.mjs viewer:audit-all VIEWAUDIT_FINAL 8000
+
+# armas y movimiento/combate debugados
+$env:CSN_URL = "http://127.0.0.1:8000/?debugWeapons=1"
+node _capture_all.mjs ui:viewer VIEW_WEAPONS 8000
+Remove-Item Env:CSN_URL
+node _capture_all.mjs move:skirmish MOVE 8000
+node _capture_all.mjs combat:skirmish COMBAT 8000
+node _capture_all.mjs mobile:sw:game MOBILE_SW 8000
 
 # Si el servidor usa otro puerto, y para guardar en otra carpeta:
 $env:CSN_URL = "http://127.0.0.1:3000/"
@@ -42,6 +61,10 @@ desplegar.
 `ui:<pantalla>` captura menu, setup, cuartel, visor, piezas, partida o
 reanudar partida y guarda `<prefijo>_ui.png`; los mapas y las misiones guardan
 `<prefijo>_3d.png`.
+`viewer:audit-all` recorre personajes, armas, props y piezas y guarda la
+auditoria en el JSON de resultado (`viewer`, `viewerAudit`) además del PNG.
+`move:`, `combat:` y `mobile:` capturan muestras de marcha, eventos de clip y
+viewport móvil con SwiftShader.
 Cada ejecucion usa un perfil temporal aislado y lo intenta eliminar al cerrar
 Chrome.
 
@@ -71,6 +94,7 @@ Y `G.units` da las posiciones: `G.units.map(u => [u.team, u.role, u.x, u.y])`.
 ## Verificación sin capturas
 
 `powershell -ExecutionPolicy Bypass -File bench\VERIFICAR.ps1` comprueba
-sintaxis, tableros, reglas, datos y levanta un humo 3D que imprime el estado de
-`__csn3d` en consola. Es la forma rápida de saber si algo se ha roto sin mirar
-imágenes.
+sintaxis, tableros, reglas, datos, winding, rejillas IPA, capturas `debugGrid`,
+humo 3D, auditoría del visor, clips, movimiento, combate y móvil/SwiftShader.
+Último cierre: **TODO OK 13/13**, con `viewer:audit-all ok=True` (4 modelos).
+Es la forma rápida de saber si algo se ha roto sin mirar imágenes.

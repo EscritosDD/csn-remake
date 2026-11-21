@@ -242,22 +242,23 @@ test('M18A1 Claymore ignores allies and Escort drone, detonates only on enemy st
   const ally = G.units.find(u => u.team === 'A' && u !== eng);
   const enemy = G.units.find(u => u.team === 'B');
   eng.x = 4; eng.y = 5; eng.energy = 10;
-  api.placeMine(eng, 4, 4);
+  ally.x = 0; ally.y = 0;
+  api.placeMine(eng, 3, 5);
   assert.equal(G.mines.length, 1);
 
-  ally.x = 4; ally.y = 4;
+  ally.x = 3; ally.y = 5;
   const allyHp = ally.hp;
   api.checkMines(ally);
   assert.equal(ally.hp, allyHp);
   assert.equal(G.mines.length, 1);
 
   const droneHp = G.drone.hp;
-  G.drone.x = 4; G.drone.y = 4;
+  G.drone.x = 3; G.drone.y = 5;
   api.checkMines(G.drone);
   assert.equal(G.drone.hp, droneHp);
   assert.equal(G.mines.length, 1);
 
-  enemy.x = 4; enemy.y = 4;
+  enemy.x = 3; enemy.y = 5;
   const enemyHp = enemy.hp;
   api.checkMines(enemy);
   assert.equal(enemy.hp, enemyHp - 60);

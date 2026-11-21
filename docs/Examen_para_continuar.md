@@ -285,6 +285,38 @@ Ingeniero, Artillero, Espía, Capitán).
 ### Pendiente menor (no bloquea)
 
 - Confirmar de cerca Espía y Capitán y, si su silueta no cuadra, suavizar
-  `ROLE_LOOK` (la proporción extra puede exagerar el cuerpo real).
+   `ROLE_LOOK` (la proporción extra puede exagerar el cuerpo real).
 - Carátulas 3D para las seis armas sin arte original (lanzacohetes y
-  lanzagranadas).
+   lanzagranadas).
+
+## 12. Cierre de la sesión del 21/11/2026
+
+El estado detallado está en **`docs/ESTADO_SESION_2026-11-21.md`**. Lo que
+cambia respecto a las secciones anteriores:
+
+- **Rejillas IPA 1:1**: 8 mapas (`03/04/05/06/08/09/10/11`) con direcciones
+  corregidas (`N,E,S,W = 0,3,1,2`), aristas sólidas, cobertura direccional y
+  spawn por eje de mayor dispersión. `?debugGrid=1` muestra también rejilla 3D.
+- **Assets rotos**: 11 OBJ con `f=0` se repararon desde el IPA con
+  `tools/repair_zero_face_objs.py`. La auditoría global
+  (`docs/auditoria_global_3d.md`) da 338 OBJ, 0 sin caras y 0 NaN.
+- **Visor**: `mount()` usa pose de reposo y bounds de malla deformada;
+  `makeSkinnedModel()` usa materiales opacos sRGB con `alphaTest`.
+- **Armas**: 23 calibraciones reales en
+  `assets/weapons/weapon_calibrations.json`; `makeRealGun3()` ya no aplica
+  `barracksOffset`/`barracksScale`. `?debugWeapons=1` muestra el socket usado.
+- **Escena**: los props procedurales ya no se montan sobre geometría IPA;
+  sombras con `normalBias=0.02`, texturas 512 y `alphaTest` en materiales.
+- **Verificación**: `npm test` 68/68 y `bench/VERIFICAR.ps1` TODO OK 13/13,
+  incluida auditoría del visor. `viewer:audit-all` da `ok=True` con 4 modelos.
+
+### Lo que sigue abierto (no se cerró en falso)
+
+1. Meshy/GLB: no hay `.glb/.gltf` originales ni fuentes sin soldar; el MIME
+   está preparado pero no hay loader local ni retarget.
+2. Anti-clipping: la escala `0.86` no se aplicó a unidades; solo se redujeron
+   obstáculos y se ajustaron sombras/materiales.
+3. Alpha PNG: no se regeneraron atlas desde `_original/pipeline.py`.
+4. `viewer:audit-all` sondea un modelo por tipo, no los 35 personajes ni las
+   23 armas completas.
+5. Revisión visual humana pendiente de visor, arma en mano y rejilla 3D.

@@ -117,3 +117,22 @@ La forma barata y siempre disponible es `tools\zai-ver.ps1` (local).
    (`git diff main..zai/pruebas -- index.html`).
 4. Si algo se tuerce: copia de seguridad del repo en
    `D:\Juegos\CSN\_backup_repo` (espejo completo).
+
+## Actualización del 21/11/2026: verificación y fuentes
+
+- La batería mínima ya no es solo `VERIFICAR.ps1`: corre también
+  `npm run lint && npm test` y `python tools\auditar_assets_3d.py`.
+  `VERIFICAR.ps1` incluye ahora auditoría del visor (`viewer:audit-all`).
+- Último cierre: **TODO OK 13/13** y **68/68** tests. Si un cambio toca armas,
+  rejillas o visor, pide además una captura con `?debugWeapons=1` o
+  `?debugGrid=1` y revísala tú: Z.ai no ve WebGL.
+- **No aceptes parches por nombre** (`if (entry.name === ...)`) para arreglar
+  un arma o un personaje. La corrección va en datos (`weapon_calibrations.json`,
+  rejillas, rigs) o en el pipeline de assets.
+- IPA y Meshy siguen separados: la fuente de verdad es `assets/soldier/` y los
+  modelos propios solo `assets/personajes_propios/`. No se retargetea Meshy al
+  rig IPA ni se copia sobre él.
+- Si falta un original `.glb/.gltf` o la fuente previa a `weld_meshy.py`,
+  anótalo como bloqueo. No se marca Meshy como terminado "en falso".
+- Antes de promover, lee `docs/ESTADO_SESION_2026-11-21.md`: allí están los
+  pendientes reales (anti-clipping, alpha PNG y sondeo completo del visor).

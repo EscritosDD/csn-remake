@@ -1070,7 +1070,9 @@ const MESHY_CAST=[
 ];
 const CAST_TEXTURE_FILE={
  'Hipster Dave':'Soldier_Light_DeltaForce_d.png',
- 'Archie Fletcher':'Soldier_Light_Rambo_DeerHunter_d.png',
+  'Archie Fletcher':'Soldier_Light_Rambo_DeerHunter_d.png',
+  'Soap':'Soldier_SAS_d.png',
+  'Spud':'Soldier_d.png',
  'Ivan Tkilya':'Soldier_heavy_GermanSpecialForces_d.png',
  'Mme La Hacque':'Agent_light_JewelThief_d.png',
  'Sneaky Pete':'Agent_light_d.png',
@@ -1257,7 +1259,22 @@ const DOM_TARGET=10, DOM_MAX_ROUNDS=15;
 const ESCORT_START={x:1,y:5};
 const ESCORT_EXT=[{x:10,y:5},{x:11,y:5},{x:10,y:6},{x:11,y:6}];
 const ESCORT_MAX_ROUNDS=15, ESCORT_DRONE_MAXHP=240, ESCORT_DRONE_HP=240, ESCORT_GUIDES_PER_ROUND=2;
-function isExtraction(x,y){return ESCORT_EXT.some(t=>t.x===x&&t.y===y);}
+function isExtraction(x,y){return escortExt().some(t=>t.x===x&&t.y===y);}
+function domZones(){
+  if(!NATIVE_GRID)return DOM_ZONES;
+  const c=boardCenter();
+  return [
+    {id:'norte',name:'Depósito',tiles:[{x:Math.floor(W*0.25),y:Math.floor(H*0.33)}]},
+    {id:'centro',name:'Centro',tiles:BEACON.map(b=>({x:b.x,y:b.y}))},
+    {id:'sur',name:'Muelle',tiles:[{x:Math.floor(W*0.75),y:Math.floor(H*0.67)}]}
+  ];
+}
+function escortStart(){return NATIVE_GRID?{x:1,y:Math.floor(H/2)}:ESCORT_START;}
+function escortExt(){
+  if(!NATIVE_GRID)return ESCORT_EXT;
+  const y=Math.floor(H/2);
+  return [{x:W-2,y},{x:W-1,y},{x:W-2,y:y+1},{x:W-1,y:y+1}].filter(t=>t.x<W&&t.y<H);
+}
 /* ===== CAMPAÑA · OPERACIÓN LONDRES ===== */
 const CAMPAIGN_MISSIONS=[
  {title:'Primer contacto',map:'campana01',objective:'eliminacion',fmt:4,difficulty:'normal',brief:'Almacén industrial · Eliminación · 4 contra 4 · IA Normal. Aprende el tablero y elimina a la escuadra rival. Los supervivientes ganan su primera veterania.'},
@@ -1594,9 +1611,69 @@ function advanceUnitYaw(un,t){
 }
 
 /* ================= MAP ================= */
-const W=12,H=12;
-const BEACON=[{x:5,y:5},{x:6,y:5},{x:5,y:6},{x:6,y:6}];
-const TURRET_POS={x:5,y:5};
+let W=12,H=12;
+let BEACON=[{x:5,y:5},{x:6,y:5},{x:5,y:6},{x:6,y:6}];
+let TURRET_POS={x:5,y:5};
+let NATIVE_GRID=null;
+const GRID_CACHE={};
+const NATIVE_MAP_IDS={skirmish:'03',skirmish04:'04',skirmish05:'05',skirmish06:'06',skirmish08:'08',skirmish09:'09',skirmish10:'10',skirmish11:'11'};
+const DEBUG_GRID=typeof location!=='undefined'&&/(?:^|[?&])debugGrid(?:[=&]|$)/.test(location.search||'');
+const DEBUG_WEAPONS=typeof location!=='undefined'&&/(?:^|[?&])debugWeapons(?:[=&]|$)/.test(location.search||'');
+function setBoardSize(w,h){
+  W=w;H=h;
+  const cx=Math.floor((w-1)/2),cy=Math.floor((h-1)/2);
+  BEACON=[{x:cx,y:cy},{x:cx+1,y:cy},{x:cx,y:cy+1},{x:cx+1,y:cy+1}].filter(b=>b.x<w&&b.y<h);
+  TURRET_POS={x:BEACON[0].x,y:BEACON[0].y};
+  if(G){G.W=w;G.H=h;}
+}
+function applyNativeGrid(grid){
+  setBoardSize(grid.size[0],grid.size[1]);
+  NATIVE_GRID=grid;
+  if(grid.controlPoints&&grid.controlPoints.length){
+    const cx=Math.round(grid.controlPoints.reduce((a,p)=>a+p[1],0)/grid.controlPoints.length);
+    const cy=Math.round(grid.controlPoints.reduce((a,p)=>a+p[2],0)/grid.controlPoints.length);
+    BEACON=[{x:cx,y:cy},{x:cx+1,y:cy},{x:cx,y:cy+1},{x:cx+1,y:cy+1}].filter(b=>b.x>=0&&b.y>=0&&b.x<W&&b.y<H);
+    TURRET_POS={x:BEACON[0].x,y:BEACON[0].y};
+  }
+  if(grid.spawns&&grid.spawns.length&&!grid._spawnsByTeam){
+    const axis=(Math.max(...grid.spawns.map(s=>s[1]))-Math.min(...grid.spawns.map(s=>s[1])))>=(Math.max(...grid.spawns.map(s=>s[2]))-Math.min(...grid.spawns.map(s=>s[2])))?1:2;
+    const sorted=grid.spawns.slice().sort((a,b)=>a[axis]-b[axis]);
+    const half=Math.floor(sorted.length/2);
+    grid._spawnsByTeam={A:sorted.slice(0,half).map(s=>({x:s[1],y:s[2]})),B:sorted.slice(half).map(s=>({x:s[1],y:s[2]}))};
+  }
+}
+function nativeTile(x,y){
+  return NATIVE_GRID&&x>=0&&y>=0&&x<W&&y<H?NATIVE_GRID.tiles[y*W+x]:null;
+}
+function nativeEdgeBits(x,y,nx,ny){
+  const a=nativeTile(x,y),b=nativeTile(nx,ny);
+  if(!a||!b)return null;
+  if(nx===x+1)return [a[1]&2,b[1]&8,a[3],b[5]];
+  if(nx===x-1)return [a[1]&8,b[1]&2,a[5],b[3]];
+  if(ny===y+1)return [a[1]&4,b[1]&1,a[4],b[2]];
+  if(ny===y-1)return [a[1]&1,b[1]&4,a[2],b[4]];
+  return null;
+}
+function nativeSolidEdge(x,y,nx,ny){
+  const e=nativeEdgeBits(x,y,nx,ny);
+  return !!e&&!!(e[0]||e[1]);
+}
+function nativeBlocked(x,y){
+  const t=nativeTile(x,y);
+  return !!t&&t[1]===15;
+}
+function tileWorldY(x,y){
+  const t=nativeTile(Math.round(x),Math.round(y));
+  return t?t[0]/32:0;
+}
+function spawnsFor(team){
+  return NATIVE_GRID&&NATIVE_GRID._spawnsByTeam?(NATIVE_GRID._spawnsByTeam[team]||[]):(team==='A'?SPAWNS_A:SPAWNS_B);
+}
+function boardCenter(){return {x:(W-1)/2,y:(H-1)/2};}
+function preloadNativeGrids(){
+  return Promise.all(Object.values(NATIVE_MAP_IDS).map(id=>fetch('assets/maps/'+id+'_grid.json').then(r=>r.ok?r.json():null).then(j=>{if(j)GRID_CACHE[id]=j;}).catch(()=>{})));
+}
+preloadNativeGrids();
 /* Los trece tableros comparten baliza, torreta y zonas de despliegue, y
    los trece layouts guardan simetría de 180° (cada pieza en (x,y) tiene
    su pareja en (11−x,11−y)), así que ningún bando nace con ventaja. El
@@ -1957,7 +2034,15 @@ const MAP_DEFS={
     medkits:[[4,2],[7,9]]}
 };
 function buildMap(mapId){
+  setBoardSize(12,12);
+  NATIVE_GRID=null;
   const def=MAP_DEFS[mapId]||MAP_DEFS.almacen;
+  const nativeId=NATIVE_MAP_IDS[mapId];
+  const native=nativeId?GRID_CACHE[nativeId]:null;
+  if(native){
+    applyNativeGrid(native);
+    return {id:def.id,theme:def.theme||'warehouse',name:def.name,obstacles:[],barrels:[],medkits:[],turret:{x:TURRET_POS.x,y:TURRET_POS.y,owner:null},native:native};
+  }
   const walls=def.walls.map(([x,y])=>({x,y,type:'wall',hp:Infinity}));
   const shelves=def.shelves.map(([x,y])=>({x,y,type:'shelf',hp:Infinity}));
   const crates=def.crates.map(([x,y])=>({x,y,type:'crate',hp:50,maxHp:50}));
@@ -1970,7 +2055,16 @@ function barrelAt(x,y){return G.map.barrels.find(b=>b.alive&&b.x===x&&b.y===y);}
 function unitAt(x,y){return G.units.find(u=>u.alive&&u.x===x&&u.y===y);}
 function deployedAt(x,y){return G.deployed.find(t=>t.alive&&t.x===x&&t.y===y);}
 function droneAt(x,y){return (G&&G.drone&&G.drone.alive&&G.drone.x===x&&G.drone.y===y)?G.drone:null;}
-function blocked(x,y){return x<0||y<0||x>=W||y>=H||!!obAt(x,y)||!!unitAt(x,y)||!!deployedAt(x,y)||!!droneAt(x,y);}
+function blocked(x,y){return x<0||y<0||x>=W||y>=H||!!obAt(x,y)||nativeBlocked(x,y)||!!barrelAt(x,y)||!!unitAt(x,y)||!!deployedAt(x,y)||!!droneAt(x,y);}
+function canStep(x0,y0,x1,y1,ignoreActors){
+  if(x1<0||y1<0||x1>=W||y1>=H)return false;
+  if(Math.abs(x1-x0)+Math.abs(y1-y0)!==1)return false;
+  if(nativeSolidEdge(x0,y0,x1,y1))return false;
+  if(barrelAt(x1,y1))return false;
+  if(obAt(x1,y1)||nativeBlocked(x1,y1))return false;
+  if(!ignoreActors&&(unitAt(x1,y1)||deployedAt(x1,y1)||droneAt(x1,y1)))return false;
+  return true;
+}
 /* ===== M18 · HUMO =====
    La cortina de humo de la M18: dura 2 rondas completas (se disipa al
    empezar el turno de quien la lanzó en la segunda ronda siguiente,
@@ -2014,7 +2108,7 @@ function reachable(unit,budget){
   while(q.length){const c=q.shift();if(c.d+mc>budget)continue;
     dirs.forEach(([dx,dy])=>{const nx=c.x+dx,ny=c.y+dy,k=key(nx,ny);
       if(nx<0||ny<0||nx>=W||ny>=H||seen.has(k))return;
-      if(obAt(nx,ny)||unitAt(nx,ny)||deployedAt(nx,ny)||droneAt(nx,ny))return;
+      if(!canStep(c.x,c.y,nx,ny,false))return;
       seen.set(k,c.d+mc);q.push({x:nx,y:ny,d:c.d+mc});});}
   seen.delete(key(unit.x,unit.y));return seen;
 }
@@ -2033,7 +2127,7 @@ function drawMovePath(unit,from,to){
     for(const [dx,dy] of dirs){
       const nx=c.x+dx,ny=c.y+dy,k=key(nx,ny);
       if(nx<0||ny<0||nx>=W||ny>=H||prev.has(k))continue;
-      if(nx===tx&&ny===ty){}else if(obAt(nx,ny)||unitAt(nx,ny)||deployedAt(nx,ny)||droneAt(nx,ny))continue;
+      if(!canStep(c.x,c.y,nx,ny,nx===tx&&ny===ty))continue;
       prev.set(k,key(c.x,c.y));q.push({x:nx,y:ny});
     }
   }
@@ -2045,16 +2139,27 @@ function drawMovePath(unit,from,to){
 function startDrawMove(un,path){
   const now=FX.t||performance.now();
   un._drawLastX=un.x;un._drawLastY=un.y;
-  un._drawPath=[{x:un.dx!=null?un.dx:un.x,y:un.dy!=null?un.dy:un.y},...path.slice(1)];
+  if(!path||path.length<2){un._drawPath=null;un._drawSegs=[];un._drawLen=0;return;}
+  const from={x:un.dx!=null?un.dx:un.x,y:un.dy!=null?un.dy:un.y};
+  const a=path[0],b=path[1];
+  const start={x:from.x,y:from.y};
+  if(Math.abs(b.x-a.x)>=Math.abs(b.y-a.y))start.y=a.y;else start.x=a.x;
+  const pts=[start,...path.slice(1)];
+  const segs=[];let total=0;
+  for(let i=0;i<pts.length-1;i++){
+    const len=Math.abs(pts[i+1].x-pts[i].x)+Math.abs(pts[i+1].y-pts[i].y);
+    if(len>0.0001){segs.push({a:pts[i],b:pts[i+1],len});total+=len;}
+  }
+  un._drawPath=pts;un._drawSegs=segs;un._drawLen=total;
   un._drawPathT0=now;
-  un._drawPathDur=Math.max(120,(path.length-1)*DRAW_MOVE_MS_PER_TILE);
+  un._drawPathDur=Math.max(120,total*DRAW_MOVE_MS_PER_TILE);
 }
 function smoothDrawStep(p){return p*p*(3-2*p);}
 function updateUnitDrawPosition(un,now){
   if(un.dx==null){un.dx=un.x;un.dy=un.y;un._drawLastX=un.x;un._drawLastY=un.y;un._drawLastT=now;return;}
   if(un._drawLastX==null){un._drawLastX=un.x;un._drawLastY=un.y;}
   if(REDUCED_MOTION){
-    un.dx=un.x;un.dy=un.y;un._drawPath=null;un._moveYaw=null;
+    un.dx=un.x;un.dy=un.y;un._drawPath=null;un._drawSegs=[];un._moveYaw=null;
     un._drawLastX=un.x;un._drawLastY=un.y;un._drawLastT=now;return;
   }
   if(un.x!==un._drawLastX||un.y!==un._drawLastY){
@@ -2065,16 +2170,22 @@ function updateUnitDrawPosition(un,now){
       if(path&&path.length>1)startDrawMove(un,path);
     }
   }
-  const path=un._drawPath;
-  if(path&&path.length>1){
+  const segs=un._drawSegs||[];
+  if(segs.length&&un._drawLen>0){
     const raw=Math.max(0,Math.min(1,(now-(un._drawPathT0||now))/(un._drawPathDur||120)));
-    const q=smoothDrawStep(raw)*(path.length-1);
-    const i=Math.min(path.length-2,Math.floor(q)),f=q-i;
-    un.dx=path[i].x+(path[i+1].x-path[i].x)*f;
-    un.dy=path[i].y+(path[i+1].y-path[i].y)*f;
-    const sx=path[i+1].x-path[i].x,sy=path[i+1].y-path[i].y;
-    un._moveYaw=(Math.abs(sx)+Math.abs(sy)>0.01)?Math.atan2(sy,sx):null;
-    if(raw>=1){un.dx=un.x;un.dy=un.y;un._drawPath=null;un._moveYaw=null;}
+    let left=smoothDrawStep(raw)*un._drawLen;
+    for(let i=0;i<segs.length;i++){
+      const s=segs[i];
+      if(left<=s.len||i===segs.length-1){
+        const f=Math.max(0,Math.min(1,left/s.len));
+        un.dx=s.a.x+(s.b.x-s.a.x)*f;
+        un.dy=s.a.y+(s.b.y-s.a.y)*f;
+        un._moveYaw=Math.atan2(s.b.y-s.a.y,s.b.x-s.a.x);
+        break;
+      }
+      left-=s.len;
+    }
+    if(raw>=1){un.dx=un.x;un.dy=un.y;un._drawPath=null;un._drawSegs=[];un._moveYaw=null;}
   }else{
     const dt=now-(un._drawLastT||now);
     const k=1-Math.pow(0.02,dt/260);
@@ -2090,7 +2201,7 @@ function pathDist(a,b){ /* BFS distance ignoring units */
   const seen=new Set([a.x+','+a.y]);let q=[{x:a.x,y:a.y,d:0}];
   while(q.length){const c=q.shift();const dirs=[[1,0],[-1,0],[0,1],[0,-1]];
     for(const [dx,dy] of dirs){const nx=c.x+dx,ny=c.y+dy,k=nx+','+ny;
-      if(nx<0||ny<0||nx>=W||ny>=H||seen.has(k)||obAt(nx,ny))continue;
+      if(nx<0||ny<0||nx>=W||ny>=H||seen.has(k)||!canStep(c.x,c.y,nx,ny,true))continue;
       if(nx===b.x&&ny===b.y)return c.d+1;seen.add(k);q.push({x:nx,y:ny,d:c.d+1});}}
   return 99;
 }
@@ -2101,17 +2212,37 @@ function pathDist(a,b){ /* BFS distance ignoring units */
    IA tiene 4 estados (AIVisBlocked / CurrentlyVisible / NeverVisible / RecentlyVisible).
    CSN usa Bresenham por casillas (equivalente para el bloqueo por casilla) y la
    cobertura direccional de 4 niveles (0–3) con penalización [0,12,25,40]. */
-function hasLOS(a,b){
+function gridLineCells(a,b){
   let x0=a.x,y0=a.y,x1=b.x,y1=b.y;const dx=Math.abs(x1-x0),dy=Math.abs(y1-y0),sx=x0<x1?1:-1,sy=y0<y1?1:-1;let err=dx-dy,x=x0,y=y0,guard=0;
-  while(guard++<60){if(x===x1&&y===y1)return true;const e2=2*err;
+  const out=[{x,y}];
+  while(guard++<W+H+2){if(x===x1&&y===y1)break;const e2=2*err;
     if(e2>-dy){err-=dy;x+=sx;} if(e2<dx){err+=dx;y+=sy;}
-    if(x===x1&&y===y1)return true;
-    const o=obAt(x,y);if(o&&(o.type==='wall'||o.type==='shelf'))return false;}
+    out.push({x,y});}
+  return out;
+}
+function hasLOS(a,b){
+  const cells=gridLineCells(a,b);
+  if(NATIVE_GRID){
+    for(let i=0;i<cells.length;i++){
+      const t=nativeTile(cells[i].x,cells[i].y);
+      if(t&&i>0&&i<cells.length-1&&t[6])return false;
+      if(i===0||i===cells.length-1)continue;
+      const e=nativeEdgeBits(cells[i-1].x,cells[i-1].y,cells[i].x,cells[i].y);
+      if(e&&((e[0]||e[1])||Math.max(e[2],e[3])>=3))return false;
+    }
+    return true;
+  }
+  for(let i=1;i<cells.length-1;i++){const o=obAt(cells[i].x,cells[i].y);if(o&&(o.type==='wall'||o.type==='shelf'))return false;}
   return true;
 }
 function coverLevel(target,shooter){
-  /* Cobertura direccional de 4 niveles: solo cuenta el obstáculo pegado
-     al objetivo en la dirección de la que viene el tiro. */
+  if(NATIVE_GRID){
+    const dx=shooter.x-target.x,dy=shooter.y-target.y;
+    let nx=target.x,ny=target.y;
+    if(Math.abs(dx)>=Math.abs(dy))nx+=dx>=0?1:-1;else ny+=dy>=0?1:-1;
+    const e=nativeEdgeBits(target.x,target.y,nx,ny);
+    return e?Math.max(e[2],e[3]):0;
+  }
   let best=0;
   const dirs=[[1,0],[-1,0],[0,1],[0,-1]];
   for(const [dx,dy] of dirs){const o=obAt(target.x+dx,target.y+dy);if(!o)continue;
@@ -2200,7 +2331,7 @@ function canHealSpecial(u){return !!(u&&(u.role==='Médico'||hasCharIcon(u,'Char
 function canReviveSpecial(u){return !!(u&&((u.role==='Médico'&&!(u.charAbilities&&u.charAbilities.length))||hasCharIcon(u,'CharAbility_36_Revive_alpha')));}
 function canSnipeSpecial(u){return !!(u&&(u.role==='Francotirador'||hasCharIcon(u,'CharAbility_42_Sniper_Rifle_Specialization_alpha')));}
 function makeUnit(team,def,i,nation,skin){
-  const sp=team==='A'?SPAWNS_A[i]:SPAWNS_B[i];
+  const list=spawnsFor(team);const sp=list[i%list.length]||(team==='A'?SPAWNS_A[0]:SPAWNS_B[0]);
   const ch=characterForRole(def.role,i);
   const role=ROLES[def.role];
   const body=BODIES[role.body]||BODIES.medio;
@@ -2224,7 +2355,7 @@ function startGame(squadA,squadB){
   const campMission=setup.mode==='campana'?CAMPAIGN_MISSIONS[setup.campaignMission]:null;
   const matchSeed=((Math.random()*0x7fffffff)>>>0)||1;
   G={mode:setup.mode,opp:setup.opp,turn:'A',round:1,matchSeed,units:[],map:buildMap(setup.map),deployed:[],lootBoxes:[],lootDropped:{},
-     beacon:{A:0,B:0},dom:{A:0,B:0},stats:{A:{dmg:0,kills:0},B:{dmg:0,kills:0}},smoke:[],mines:[],drone:effSetupMode()==='escolta'?{isDrone:true,role:'Dron averiado',team:'A',x:ESCORT_START.x,y:ESCORT_START.y,dx:ESCORT_START.x,dy:ESCORT_START.y,hp:ESCORT_DRONE_HP,maxHp:ESCORT_DRONE_MAXHP,alive:true,invisible:false,weapon:null,facing:0,movesLeft:ESCORT_GUIDES_PER_ROUND,movedThisTurn:false,delivered:false}:null,difficulty:setup.opp==='ia'?setup.difficulty:'normal',campaignMission:setup.mode==='campana'?setup.campaignMission:null,campaignObjective:campMission?campMission.objective:null,
+     beacon:{A:0,B:0},dom:{A:0,B:0},stats:{A:{dmg:0,kills:0},B:{dmg:0,kills:0}},smoke:[],mines:[],drone:effSetupMode()==='escolta'?{isDrone:true,role:'Dron averiado',team:'A',x:escortStart().x,y:escortStart().y,dx:escortStart().x,dy:escortStart().y,hp:ESCORT_DRONE_HP,maxHp:ESCORT_DRONE_MAXHP,alive:true,invisible:false,weapon:null,facing:0,movesLeft:ESCORT_GUIDES_PER_ROUND,movedThisTurn:false,delivered:false}:null,difficulty:setup.opp==='ia'?setup.difficulty:'normal',campaignMission:setup.mode==='campana'?setup.campaignMission:null,campaignObjective:campMission?campMission.objective:null,
      selected:null,actionMode:'move',over:false,aiBusy:false,lastMoveUndo:null,rivalNation,
      names:{A:myNation.name+' (J1)',B:setup.mode==='guerra'?rivalNation.name+' (IA)':(setup.opp==='ia'?'Escuadra IA':'Jugador 2')}};
   document.body.dataset.state='playing';
@@ -2998,7 +3129,7 @@ function turretFire(ownerTeam){
 function scoreDominationFor(team){
   if(!G||effMode(G)!=='dominacion'||G.round<2)return;
   let pts=0;const held=[];
-  DOM_ZONES.forEach(z=>{if(domControl(z)===team){pts++;held.push(z.name);}});
+  domZones().forEach(z=>{if(domControl(z)===team){pts++;held.push(z.name);}});
   if(pts===3)pts++;
   if(pts>0){
     G.dom[team]+=pts;
@@ -3184,7 +3315,7 @@ function aiUnitAct(u){
       /* ESCOLTA (bando A): el Francotirador cubre desde atrás; el resto abre brecha, limpia barriles peligrosos, guía, repara y protege el dron */
       if(u.team==='A'&&drone){
         const d=drone;
-        const ext=ESCORT_EXT.slice().sort((a,b)=>pathDist(a,d)-pathDist(b,d))[0];
+        const ext=escortExt().slice().sort((a,b)=>pathDist(a,d)-pathDist(b,d))[0];
         const pathDistBrk=(a,b)=>{
           if(a.x===b.x&&a.y===b.y)return 0;
           const distM=new Int16Array(W*H).fill(999);
@@ -3340,7 +3471,7 @@ function aiUnitAct(u){
           const threat=enemies.find(e=>!e.stunned&&cheb(u,e)<=FLASH_RANGE&&!G.units.some(a=>a.alive&&a.team===u.team&&a!==u&&cheb(a,e)<=1));
           if(threat)throwFlash(u,threat.x,threat.y);
         }
-        const canExtractNow=ESCORT_EXT.some(e=>!blocked(e.x,e.y)&&dist(d,e)<=d.movesLeft);
+        const canExtractNow=escortExt().some(e=>!blocked(e.x,e.y)&&dist(d,e)<=d.movesLeft);
         if(canExtractNow){
           if(tryGuideFwd(2,true)&&(!G||G.over))return res();
         } else if(!u.movedThisTurn&&d.movesLeft>0&&u.energy>=2+moveCostOf(u)){
@@ -3458,16 +3589,16 @@ function aiUnitAct(u){
       let goal=target,goalZone=null;
       if(effMode(G)==='dominacion'){
         const allies=G.units.filter(a=>a.alive&&a.team===u.team);
-        const alreadyIn=DOM_ZONES.find(z=>inDomZone(u.x,u.y,z));
+        const alreadyIn=domZones().find(z=>inDomZone(u.x,u.y,z));
         const zoneLoad=(z)=>allies.filter(a=>a!==u&&(inDomZone(a.x,a.y,z)||a._domGoal===z.id)).length;
         const zoneOrder=u.team==='B'?['sur','centro','norte']:['norte','centro','sur'];
-        const homeZone=DOM_ZONES.find(z=>z.id===zoneOrder[0]);
+        const homeZone=domZones().find(z=>z.id===zoneOrder[0]);
         if(w.rng>=8){
           u._domGoal=homeZone.id;goal=nearestZTile(homeZone);goalZone=homeZone;
         } else if(alreadyIn&&(domControl(alreadyIn)!==u.team||zoneLoad(alreadyIn)===0)){
           u._domGoal=alreadyIn.id;goal=nearestZTile(alreadyIn);goalZone=alreadyIn;
         } else {
-          const cand=DOM_ZONES.slice().sort((a,b)=>{
+          const cand=domZones().slice().sort((a,b)=>{
             const aMine=domControl(a)===u.team?1:0,bMine=domControl(b)===u.team?1:0;
             if(aMine!==bMine)return aMine-bMine;
             const aSoloCentro=(G.round<=2&&a.id==='centro'&&zoneLoad(a)===0&&allies.length>=3)?1:0;
@@ -3510,7 +3641,7 @@ function aiUnitAct(u){
           let s=effPD*distW+d*0.45;
           if(u._prevPos&&u._prevPos.x===x&&u._prevPos.y===y)s+=5;
           if(effMode(G)==='dominacion'&&goalZone&&inDomZone(x,y,goalZone))s-=(w.rng>=8?2:8);
-          if(effMode(G)==='dominacion'&&DOM_ZONES.some(z=>inDomZone(x,y,z)))s-=(w.rng>=8?1:(hardAI?5:3));
+          if(effMode(G)==='dominacion'&&domZones().some(z=>inDomZone(x,y,z)))s-=(w.rng>=8?1:(hardAI?5:3));
           if(effMode(G)==='baliza'&&inBeacon(x,y))s-=(hardAI?5:3);
           if(!canRecruitSkip&&!lateStall){
             const dirCov=target?coverLevel(pos,target):0;
@@ -3593,7 +3724,7 @@ function aiUnitAct(u){
       if(unitHasAction(u,'mine')&&(u.mines||0)>0&&u.energy>=MINE_COST){
         const cands=[[1,0],[-1,0],[0,1],[0,-1]].map(d=>({x:u.x+d[0],y:u.y+d[1]})).filter(p=>p.x>=0&&p.y>=0&&p.x<W&&p.y<H&&!blocked(p.x,p.y)&&!mineAt(p.x,p.y)&&!(p.x===TURRET_POS.x&&p.y===TURRET_POS.y)&&!G.map.medkits.some(m=>!m.used&&m.x===p.x&&m.y===p.y));
         let bestM=null,bestMS=-1;
-        cands.forEach(p=>{let s=0;if(inBeacon(p.x,p.y))s+=3;if(DOM_ZONES.some(z=>inDomZone(p.x,p.y,z)))s+=3;if(effMode(G)==='escolta'&&isExtraction(p.x,p.y))s+=3;if(cheb(p,target)<cheb(u,target))s+=1;if(cheb(p,target)<=3)s+=2;if(s>bestMS){bestMS=s;bestM=p;}});
+        cands.forEach(p=>{let s=0;if(inBeacon(p.x,p.y))s+=3;if(domZones().some(z=>inDomZone(p.x,p.y,z)))s+=3;if(effMode(G)==='escolta'&&isExtraction(p.x,p.y))s+=3;if(cheb(p,target)<cheb(u,target))s+=1;if(cheb(p,target)<=3)s+=2;if(s>bestMS){bestMS=s;bestM=p;}});
         if(bestM&&(bestMS>=3||cheb(u,target)<=4))placeMine(u,bestM.x,bestM.y);
       }
       /* Comando: aturdidora M84 antes de abrir fuego. Busca la casilla
@@ -3936,9 +4067,9 @@ function updateUI(){
   if(effMode(G)!=='baliza'){bm.style.display='none';}
   else{bm.style.display='flex';bm.innerHTML='<span style="color:var(--teamA)">J1</span>'+[0,1,2,3,4].map(i=>'<i class="pip '+(G.beacon.A>i?'full':'')+'"></i>').join('')+'<span style="margin-left:8px;color:var(--teamB)">Rival</span>'+[0,1,2,3,4].map(i=>'<i class="pip '+(G.beacon.B>i?'full':'')+'"></i>').join('');}
   const dm=$('#domMeter');
-  if(dm){if(effMode(G)!=='dominacion'){dm.style.display='none';}else{dm.style.display='flex';dm.innerHTML='<span>⬢ Dominación · primero a '+DOM_TARGET+'</span><span class="dom-zone '+(G.dom.A>=G.dom.B?'A':'')+'">J1 '+G.dom.A+' pts</span><span class="dom-zone '+(G.dom.B>G.dom.A?'B':'')+'">Rival '+G.dom.B+' pts</span>'+DOM_ZONES.map(z=>{const c=domControl(z);return '<span class="dom-zone '+(c||'N')+'">'+z.name+': '+(c==='A'?'J1':c==='B'?'Rival':'en disputa')+'</span>';}).join('');}}
+  if(dm){if(effMode(G)!=='dominacion'){dm.style.display='none';}else{dm.style.display='flex';dm.innerHTML='<span>⬢ Dominación · primero a '+DOM_TARGET+'</span><span class="dom-zone '+(G.dom.A>=G.dom.B?'A':'')+'">J1 '+G.dom.A+' pts</span><span class="dom-zone '+(G.dom.B>G.dom.A?'B':'')+'">Rival '+G.dom.B+' pts</span>'+domZones().map(z=>{const c=domControl(z);return '<span class="dom-zone '+(c||'N')+'">'+z.name+': '+(c==='A'?'J1':c==='B'?'Rival':'en disputa')+'</span>';}).join('');}}
   const em=$('#escortMeter');
-  if(em){if(effMode(G)!=='escolta'||!G.drone){em.style.display='none';}else{em.style.display='flex';const dd=Math.min.apply(null,ESCORT_EXT.map(t2=>cheb(G.drone,t2)));em.innerHTML='<span>🤖 Escolta · la defensa aguanta '+ESCORT_MAX_ROUNDS+' rondas</span><span class="dom-zone '+(G.drone.hp>G.drone.maxHp*0.35?'A':'B')+'">Dron '+G.drone.hp+'/'+G.drone.maxHp+' PV</span>'+(G.drone.alive?('<span class="dom-zone N">⇪ a '+dd+' casillas de la extracción</span><span class="dom-zone N">Guiados esta ronda: '+(ESCORT_GUIDES_PER_ROUND-G.drone.movesLeft)+'/'+ESCORT_GUIDES_PER_ROUND+'</span>'):'<span class="dom-zone B">Dron destruido</span>');}}
+  if(em){if(effMode(G)!=='escolta'||!G.drone){em.style.display='none';}else{em.style.display='flex';const dd=Math.min.apply(null,escortExt().map(t2=>cheb(G.drone,t2)));em.innerHTML='<span>🤖 Escolta · la defensa aguanta '+ESCORT_MAX_ROUNDS+' rondas</span><span class="dom-zone '+(G.drone.hp>G.drone.maxHp*0.35?'A':'B')+'">Dron '+G.drone.hp+'/'+G.drone.maxHp+' PV</span>'+(G.drone.alive?('<span class="dom-zone N">⇪ a '+dd+' casillas de la extracción</span><span class="dom-zone N">Guiados esta ronda: '+(ESCORT_GUIDES_PER_ROUND-G.drone.movesLeft)+'/'+ESCORT_GUIDES_PER_ROUND+'</span>'):'<span class="dom-zone B">Dron destruido</span>');}}
   $('#endTurnBtn').disabled=G.aiBusy||G.over;
   const ub=$('#undoBtn');if(ub)ub.disabled=G.aiBusy||G.over||!G.lastMoveUndo||(G.opp==='ia'&&G.turn==='B');
   /* roster */
@@ -4305,18 +4436,42 @@ function draw(){
     for(let i=1;i<W;i++){ctx.moveTo(i*S+.5,0);ctx.lineTo(i*S+.5,boardH);ctx.moveTo(0,i*S+.5);ctx.lineTo(boardW,i*S+.5);}
     ctx.stroke();
   }
+  if(DEBUG_GRID){
+    ctx.strokeStyle='rgba(120,200,255,.35)';ctx.lineWidth=1;ctx.beginPath();
+    for(let i=1;i<W;i++){ctx.moveTo(i*S+.5,0);ctx.lineTo(i*S+.5,boardH);ctx.moveTo(0,i*S+.5);ctx.lineTo(boardW,i*S+.5);}
+    ctx.stroke();
+    if(NATIVE_GRID){
+      ctx.strokeStyle='rgba(255,84,84,.95)';ctx.lineWidth=3;ctx.beginPath();
+      for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+        const t=nativeTile(x,y);
+        if(!t)continue;
+        if(t[1]&1){ctx.moveTo(x*S,y*S);ctx.lineTo((x+1)*S,y*S);}
+        if(t[1]&2){ctx.moveTo((x+1)*S,y*S);ctx.lineTo((x+1)*S,(y+1)*S);}
+        if(t[1]&4){ctx.moveTo(x*S,(y+1)*S);ctx.lineTo((x+1)*S,(y+1)*S);}
+        if(t[1]&8){ctx.moveTo(x*S,y*S);ctx.lineTo(x*S,(y+1)*S);}
+      }
+      ctx.stroke();
+      ctx.font='700 9px monospace';ctx.textAlign='center';ctx.fillStyle='rgba(255,255,255,.85)';
+      for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+        const t=nativeTile(x,y);
+        if(!t||!t[6])continue;
+        ctx.fillText('V',x*S+S/2,y*S+S/2+3);
+      }
+      ctx.textAlign='left';
+    }
+  }
   /* luz cenital suave */
   const light=ctx.createRadialGradient(boardW*.32,boardH*.2,Math.min(boardW,boardH)*.08,boardW*.32,boardH*.2,Math.max(boardW,boardH)*.95);
   light.addColorStop(0,'rgba(255,244,214,.13)');light.addColorStop(1,'rgba(255,244,214,0)');
   ctx.fillStyle=light;ctx.fillRect(0,0,boardW,boardH);
   /* zonas de despliegue */
   const zone=(list,col)=>{list.forEach(s=>{rr(s.x*S+3,s.y*S+3,S-6,S-6,8);ctx.fillStyle=col;ctx.fill();});};
-  zone(SPAWNS_A,'rgba(57,194,215,.13)');zone(SPAWNS_B,'rgba(255,122,69,.13)');
+  zone(spawnsFor('A'),'rgba(57,194,215,.13)');zone(spawnsFor('B'),'rgba(255,122,69,.13)');
   /* baliza: zona ámbar con esquinas de mira */
   const beaconAlpha=REDUCED_MOTION?.16:(.13+.05*Math.sin(FX.t/520));
   BEACON.forEach(b=>{ctx.fillStyle='rgba(242,178,52,'+beaconAlpha.toFixed(3)+')';ctx.fillRect(b.x*S,b.y*S,S,S);});
   ctx.strokeStyle='#f2b234';ctx.lineWidth=4;
-  const bx=5*S,by=5*S,bs=2*S,cl=S*.3;
+  const bx=BEACON[0].x*S,by=BEACON[0].y*S,bs=2*S,cl=S*.3;
   [[bx,by,1,1],[bx+bs,by,-1,1],[bx,by+bs,1,-1],[bx+bs,by+bs,-1,-1]].forEach(c=>{
     ctx.beginPath();ctx.moveTo(c[0]+cl*c[2],c[1]);ctx.lineTo(c[0],c[1]);ctx.lineTo(c[0],c[1]+cl*c[3]);ctx.stroke();});
   rr(bx+6,by+bs-28,86,22,6);ctx.fillStyle='rgba(16,14,6,.82)';ctx.fill();
@@ -4324,19 +4479,22 @@ function draw(){
   /* Zona de extracción de Escolta: verde pulsante con su rótulo, en el este */
   if(effMode(G)==='escolta'){
     const extAlpha=REDUCED_MOTION?.18:(.15+.06*Math.sin(FX.t/520));
-    ESCORT_EXT.forEach(t2=>{ctx.fillStyle='rgba(87,196,106,'+extAlpha.toFixed(3)+')';ctx.fillRect(t2.x*S,t2.y*S,S,S);rr(t2.x*S+4,t2.y*S+4,S-8,S-8,10);ctx.strokeStyle='#57c46a';ctx.lineWidth=3;ctx.stroke();});
+    const ext=escortExt();
+    ext.forEach(t2=>{ctx.fillStyle='rgba(87,196,106,'+extAlpha.toFixed(3)+')';ctx.fillRect(t2.x*S,t2.y*S,S,S);rr(t2.x*S+4,t2.y*S+4,S-8,S-8,10);ctx.strokeStyle='#57c46a';ctx.lineWidth=3;ctx.stroke();});
+    const ex=Math.min(...ext.map(t=>t.x))*S,ey=Math.min(...ext.map(t=>t.y))*S;
     ctx.font='800 13px Barlow Condensed';ctx.textAlign='center';
-    rr(10*S+4,5*S-22,2*S-8,18,6);ctx.fillStyle='rgba(8,14,8,.85)';ctx.fill();
-    ctx.fillStyle='#57c46a';ctx.fillText('⇪ EXTRACCIÓN',11*S,5*S-9);ctx.textAlign='left';
+    rr(ex+4,ey-22,2*S-8,18,6);ctx.fillStyle='rgba(8,14,8,.85)';ctx.fill();
+    ctx.fillStyle='#57c46a';ctx.fillText('⇪ EXTRACCIÓN',ex+S,ey-9);ctx.textAlign='left';
   }
   /* Zonas de Dominación: anillo y letra por zona, teñidos por quién la controla ahora */
   if(effMode(G)==='dominacion'){
-    DOM_ZONES.forEach((z,zi)=>{
+    domZones().forEach((z,zi)=>{
       const c=domControl(z);
       const col=c==='A'?'#39c2d7':c==='B'?'#ff7a45':'#f4f1e6';
       z.tiles.forEach(t=>{rr(t.x*S+4,t.y*S+4,S-8,S-8,10);ctx.strokeStyle=col;ctx.lineWidth=3;ctx.stroke();ctx.fillStyle=c==='A'?'rgba(57,194,215,.14)':c==='B'?'rgba(255,122,69,.14)':'rgba(255,255,255,.07)';ctx.fill();});
       const anchor=z.tiles[0];
-      const lx=(z.id==='centro'?(5.5*S):(anchor.x*S+S/2)), ly=(z.id==='centro'?(5*S-8):(anchor.y*S+16));
+      const b0=BEACON[0];
+      const lx=(z.id==='centro'?((b0.x+1)*S):(anchor.x*S+S/2)), ly=(z.id==='centro'?(b0.y*S-8):(anchor.y*S+16));
       ctx.font='800 13px Barlow Condensed';ctx.textAlign='center';rr(lx-52,ly-13,104,18,6);ctx.fillStyle='rgba(10,12,8,.85)';ctx.fill();ctx.fillStyle=col;ctx.fillText('⬢ '+z.name.toUpperCase(),lx,ly);ctx.textAlign='left';
     });
   }
@@ -4930,7 +5088,7 @@ function drawSoldier(un,S){
    una sola lógica de partida para las dos vistas. */
 let VIEW_MODE='3d';
 let T3=null;
-function w2cx(x){return x-5.5;}
+function w2cx(x){return x-boardCenter().x;}
 function isSoftwareGL3(renderer){
   try{
     const gl=renderer&&renderer.getContext?renderer.getContext():null;
@@ -4979,7 +5137,7 @@ function procTex3(kind,arg){
   if(typeof THREE==='undefined')return null;
   try{
     const cv=document.createElement('canvas');
-    cv.width=cv.height=(kind==='shadow'?128:(kind==='apron'?512:256));
+    cv.width=cv.height=(kind==='shadow'?128:512);
     const g=cv.getContext('2d'),S=cv.width;
     if(kind==='shadow'){
       const rg2=g.createRadialGradient(S/2,S/2,S*0.08,S/2,S/2,S*0.48);
@@ -5291,6 +5449,12 @@ function parseOBJ3(txt,skin){
       }
     }
   });
+  let vol=0;
+  for(let i=0;i<outIdx.length;i+=3){
+    const a=outIdx[i]*3,b=outIdx[i+1]*3,c=outIdx[i+2]*3;
+    vol+=(pos[a]*(pos[b+1]*pos[c+2]-pos[b+2]*pos[c+1])-pos[a+1]*(pos[b]*pos[c+2]-pos[b+2]*pos[c])+pos[a+2]*(pos[b]*pos[c+1]-pos[b+1]*pos[c]))/6;
+  }
+  if(vol<0)for(let i=0;i<outIdx.length;i+=3){const t=outIdx[i+1];outIdx[i+1]=outIdx[i+2];outIdx[i+2]=t;}
   const g=new THREE.BufferGeometry();
   g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
   g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));
@@ -5432,6 +5596,9 @@ function loadSkirmishGeo(theme){
     const nv=header.verts;
     let off=4+hlen;
     st.pos=new Float32Array(buf,off,nv*3);off+=nv*3*4;
+    const mn=[Infinity,Infinity,Infinity],mx=[-Infinity,-Infinity,-Infinity];
+    for(let i=0;i<st.pos.length;i+=3)for(let k=0;k<3;k++){mn[k]=Math.min(mn[k],st.pos[i+k]);mx[k]=Math.max(mx[k],st.pos[i+k]);}
+    st.bounds={min:mn,max:mx};
     st.uv=new Float32Array(buf,off,nv*2);off+=nv*2*4;
     const nidx=header.groups.reduce((a,g)=>a+g.count,0);
     st.idx=new Uint32Array(buf,off,nidx);
@@ -5454,8 +5621,14 @@ function buildSkirmishGeo3(theme){
   }
   const mats=st.tex.map(t=>{const gt=toonGrad3();if(gt&&THREE.MeshToonMaterial)return new THREE.MeshToonMaterial({color:0xffffff,map:t,gradientMap:gt});return new THREE.MeshStandardMaterial({color:0xffffff,map:t,roughness:0.95,metalness:0.02});});
   const mesh=new THREE.Mesh(st.geo,mats);
-  mesh.scale.setScalar(st.scale);
-  mesh.position.y=0.02;
+  if(NATIVE_GRID&&st.bounds){
+    const sx=W/(st.bounds.max[0]-st.bounds.min[0]),sz=H/(st.bounds.max[2]-st.bounds.min[2]);
+    mesh.scale.set(sx,(sx+sz)/2,sz);
+    mesh.position.set(-(st.bounds.min[0]+st.bounds.max[0])*sx/2,0.02,-(st.bounds.min[2]+st.bounds.max[2])*sz/2);
+  } else {
+    mesh.scale.setScalar(st.scale);
+    mesh.position.y=0.02;
+  }
   mesh.receiveShadow=true;
   return mesh;
 }
@@ -5552,6 +5725,28 @@ const WEAPONS_ORIGINAL={
  'SpikedClub_weapon':{name:'Spiked Club',tex:'SpikedClub_d',texSize:[128,128],dims:[0.34,0.971,0.359],verts:331,cover:'item_weapon_spikedclub_alpha',cat:'Cuerpo a cuerpo',uses:[],roles:'sin asignar en el arsenal de CSN'},
  'FragGrenade':{name:'Frag Grenade',tex:'FragGrenade_d',texSize:[64,64],dims:[0.142,0.122,0.194],verts:123,cover:null,cat:'Consumible',uses:['Granada de fragmentación'],roles:'todos (consumible)',note:'Sin carátula en el original.'}
 };
+/* Metadatos reales de UnitWeapon extraídos de los assetbundles. Se cargan
+   en cuanto está disponible el JSON; mientras tanto los acoples usan la
+   configuración actual como respaldo. */
+let WEAPON_METADATA={};
+let WEAPON_CALIBRATIONS={};
+fetch('assets/weapons/weapon_metadata.json').then(r=>r.ok?r.json():{}).then(m=>{WEAPON_METADATA=m||{};}).catch(()=>{});
+fetch('assets/weapons/weapon_calibrations.json').then(r=>r.ok?r.json():{}).then(c=>{WEAPON_CALIBRATIONS=c||{};}).catch(()=>{});
+function weaponCalibration(file){return file&&WEAPON_CALIBRATIONS[file]||null;}
+function weaponMeta(file){
+  if(!file)return null;
+  const name=(WEAPONS_ORIGINAL[file]||{}).name||'';
+  if(WEAPON_METADATA[name])return WEAPON_METADATA[name];
+  if(WEAPON_METADATA[file])return WEAPON_METADATA[file];
+  const norm=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+  const key=norm(name)||norm(file);
+  if(!key)return null;
+  for(const [k,v] of Object.entries(WEAPON_METADATA)){
+    const nk=norm(k);
+    if(nk===key||key.includes(nk)||nk.includes(key))return v;
+  }
+  return null;
+}
 const WEAPON_THUMB_CACHE={};
 let _wThumbR=null;
 function renderWeaponThumb(weapon){
@@ -5730,9 +5925,10 @@ function makeSkinnedModel(geometry,data,texture,options={}){
   data.bones.forEach((b,i)=>{if(b.parent>=0)bones[b.parent].add(bones[i]);});
   const inverses=validatedRigBoneInverses(data,bones);
   const skeleton=new THREE.Skeleton(data.skinBones.map(i=>bones[i]),inverses);
+  if(texture)texture.colorSpace=THREE.SRGBColorSpace;
   const mesh=new THREE.SkinnedMesh(geometry,new THREE.MeshStandardMaterial({
-    map:texture,roughness:0.85,metalness:0.02,transparent:false,opacity:1,depthWrite:true,
-    side:options.meshy?THREE.DoubleSide:THREE.FrontSide
+    map:texture,roughness:0.85,metalness:0.02,transparent:false,opacity:1,depthWrite:true,alphaTest:0.5,
+    side:THREE.FrontSide
   }));
   mesh.add(bones[0]);
   mesh.bind(skeleton,new THREE.Matrix4());
@@ -5761,7 +5957,7 @@ function makeSkinnedModel(geometry,data,texture,options={}){
   };
   return model;
 }
-function makeRealGun3(weapon){
+function makeRealGun3(weapon,preservePivot){
   const file=WEAPON_MESH_FILE[weapon]; if(!file)return null;
   const cached=GUN_MESH_CACHE[weapon]; if(cached!==undefined)return cached;
   GUN_MESH_CACHE[weapon]=null; /* cargando */
@@ -5773,19 +5969,23 @@ function makeRealGun3(weapon){
     const cat=(WEAPONS[weapon]||{}).cat||'Fusiles de asalto';
     const target=WEAPON_LEN[cat]||0.6;
     const k=target/long;
-    const mat=new THREE.MeshStandardMaterial({color:0x9a9a9a,roughness:0.72,metalness:0.25});
+    const meta=weaponMeta(file);
+    const cal=weaponCalibration(file)||{
+      socket:'Bip001 R Hand',supportSocket:'Bip001 L Hand',scale:k,
+      meshPivot:[-bb.min.x,-(bb.min.z+bb.max.z)/2,-(bb.min.y+bb.max.y)/2],
+      gripOffset:[0,0,0]
+    };
+    const mat=new THREE.MeshStandardMaterial({color:0x9a9a9a,roughness:0.72,metalness:0.25,alphaTest:0.5});
     const texLoad=new THREE.TextureLoader();
     texLoad.load('assets/weapons/'+file+'_tex.png',t=>{t.colorSpace=THREE.SRGBColorSpace;mat.map=t;mat.color.set(0xffffff);mat.needsUpdate=true;},undefined,()=>{});
     const mesh=new THREE.Mesh(geo,mat);
-    /* malla en Z arriba -> Y arriba; centrada en el centro de su caja */
-    const c=new THREE.Vector3(); bb.getCenter(c);
-    /* la culata queda en el origen: el canon sale hacia +X. El holder ya
-       esta escalado por k, asi que el desplazamiento va sin escalar. */
-    mesh.position.set(-bb.min.x,-c.z,-c.y);
+    const pivot=cal.meshPivot||[0,0,0];
+    mesh.position.set(pivot[0],pivot[1],pivot[2]);
     const holder=new THREE.Group();
     holder.add(mesh);
-    holder.scale.setScalar(k);
+    holder.scale.setScalar(cal.scale||k);
     holder.rotation.x=-Math.PI/2;
+    holder.userData={file:file,meta:meta||null,calibration:cal,pivot:pivot};
     GUN_MESH_CACHE[weapon]=holder;
     if(gunSwapWaiters[weapon]){gunSwapWaiters[weapon].forEach(fn=>{try{fn(holder);}catch(e){}});gunSwapWaiters[weapon]=[];}
   }).catch(()=>{delete GUN_MESH_CACHE[weapon];});
@@ -5799,8 +5999,10 @@ function attachRealGun(un,gun){
       const keep=[];
       gun.children.forEach(ch=>{if(ch.userData&&ch.userData.isFlash)keep.push(ch);else ch.visible=false;});
       const g2=holder.clone(true);
-      g2.userData={isRealGun:true};
+      g2.userData={isRealGun:true,file:holder.userData.file,meta:holder.userData.meta};
       gun.add(g2);
+      gun.userData.file=g2.userData.file;
+      gun.userData.meta=g2.userData.meta;
       if(gun.userData.flash){const cat=(WEAPONS[un.weapon]||{}).cat||'Fusiles de asalto';gun.userData.flash.position.x=(WEAPON_LEN[cat]||0.6)*0.96;gun.userData.flash.position.y=0;}
     }catch(e){}
   };
@@ -6083,6 +6285,12 @@ function makeRealSoldier3(un){
   const bindWorldQ=worldRotationsFromLocal(bindLocal,parents);
   const baseRestWorldQ=baseRestQ?worldRotationsFromLocal(baseRestQ,sourceParents):null;
   const byName={};data.bones.forEach((b,i)=>{byName[b.name]=i;});
+  /* Los rigs del repo no traen los huesos gunBone_* del original; se
+     aliasan a la mano derecha para que los sockets de UnitWeapon puedan
+     resolver el anclaje real sin cambiar la jerarquía de los clips. */
+  if(byName.gunBone_R===undefined&&byName['Bip001 R Hand']!==undefined)byName.gunBone_R=byName['Bip001 R Hand'];
+  if(byName.gunMuzzleBone===undefined&&byName.gunBone_R!==undefined)byName.gunMuzzleBone=byName.gunBone_R;
+  if(byName.gunMuzzleBoneB===undefined&&byName.gunMuzzleBone!==undefined)byName.gunMuzzleBoneB=byName.gunMuzzleBone;
   /* Complexion por rol: se escalan huesos concretos (claviculas, columna,
      cabeza y piernas) para que cada clase tenga cuerpo propio sin tocar la
      malla del IPA. Valores suaves: hombros del artillero anchos, espi­a
@@ -6727,7 +6935,7 @@ function poseSpriteAim(un,grp){
      en el mismo fotograma, sin retrasos ni sobrescrituras. */
 const _gpDir=HAS_THREE?new THREE.Vector3():null,_gpTwoH=HAS_THREE?new THREE.Vector3():null,_gpFwd=HAS_THREE?new THREE.Vector3(1,0,0):null;
 const _gpUp=HAS_THREE?new THREE.Vector3(0,1,0):null,_gpZ=HAS_THREE?new THREE.Vector3():null,_gpY=HAS_THREE?new THREE.Vector3():null;
-const _gpOrigin=HAS_THREE?new THREE.Vector3():null,_gpQuat=HAS_THREE?new THREE.Quaternion():null,_gpRecoil=HAS_THREE?new THREE.Quaternion():null,_gpMat=HAS_THREE?new THREE.Matrix4():null;
+const _gpOrigin=HAS_THREE?new THREE.Vector3():null,_gpQuat=HAS_THREE?new THREE.Quaternion():null,_gpRecoil=HAS_THREE?new THREE.Quaternion():null,_gpMat=HAS_THREE?new THREE.Matrix4():null,_gpSocketQ=HAS_THREE?new THREE.Quaternion():null,_gpParentQ=HAS_THREE?new THREE.Quaternion():null;
 const _gpRPalm=HAS_THREE?new THREE.Vector3():null,_gpLPalm=HAS_THREE?new THREE.Vector3():null,_gpFA=HAS_THREE?new THREE.Vector3():null;
 const _gpPalmR=HAS_THREE?new THREE.Vector3(-0.103,0.016,0):null,_gpPalmL=HAS_THREE?new THREE.Vector3(-0.102,0.016,0):null;
 function _smooth01(e0,e1,x){const t=Math.max(0,Math.min(1,(x-e0)/(e1-e0)));return t*t*(3-2*t);}
@@ -6770,6 +6978,22 @@ function fitGunToHand3(un,grp,isLive){
   const bR=ud.bones[ud.byName['Bip001 R Hand']];
   const bFA=ud.bones[ud.byName['Bip001 R Forearm']];
   if(!bR||!bFA)return;
+  /* Socket anatómico del rig IPA: la mano derecha. Los metadatos de
+     Barracks solo se usan en la armería; aquí manda la calibración real. */
+  const gunFile=ud.gun.userData.file||(un&&WEAPON_MESH_FILE[un.weapon]);
+  const cal=ud.gun.userData.calibration||weaponCalibration(gunFile);
+  const socket=cal&&cal.socket?cal.socket:'Bip001 R Hand';
+  const bS=socket&&ud.byName[socket]!==undefined?ud.bones[ud.byName[socket]]:null;
+  if(bS){
+    _gpRPalm.setFromMatrixPosition(bS.matrixWorld);
+    parent.worldToLocal(_gpRPalm);
+    const off=cal&&cal.gripOffset?cal.gripOffset:[0,0,0];
+    ud.gun.position.set(_gpRPalm.x+off[0],_gpRPalm.y+off[1],_gpRPalm.z+off[2]);
+    bS.getWorldQuaternion(_gpSocketQ);
+    parent.getWorldQuaternion(_gpParentQ);
+    ud.gun.quaternion.copy(_gpParentQ.invert().multiply(_gpSocketQ));
+    return;
+  }
   _gpRPalm.copy(_gpPalmR).applyMatrix4(bR.matrixWorld);
   parent.worldToLocal(_gpRPalm);
   _gpFA.setFromMatrixPosition(bFA.matrixWorld);
@@ -7153,30 +7377,52 @@ function build3DWorld(){
       }
     }
   } else {
-    const plinth=box3(16,0.12,16,'#1f2428',0,-0.16,0,0.95);plinth.castShadow=false;world.add(plinth);
+    const plinth=box3(Math.max(16,W+2),0.12,Math.max(16,H+2),'#1f2428',0,-0.16,0,0.95);plinth.castShadow=false;world.add(plinth);
     const geoMesh=buildSkirmishGeo3(G.map.theme);
     if(geoMesh)world.add(geoMesh);
   }
-  /* props decorativos del tema, fuera de la cuadricula jugable */
-  try{buildThemedProps3(world,G.map.theme);}catch(e){}
+  if(DEBUG_GRID){
+    const dbg=new THREE.Group();dbg.name='debugGrid3D';
+    const fine=new THREE.LineBasicMaterial({color:0x35e0c8,transparent:true,opacity:0.72,depthTest:false});
+    const hard=new THREE.LineBasicMaterial({color:0xff3b5c,transparent:true,opacity:0.95,depthTest:false});
+    const segment=(a,b,mat)=>{
+      const g=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(a[0],a[1],a[2]),new THREE.Vector3(b[0],b[1],b[2])]);
+      const line=new THREE.Line(g,mat);line.renderOrder=999;dbg.add(line);
+    };
+    for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+      const cx=w2cx(x),cz=w2cx(y),yy=tileWorldY(x,y)+0.14,h=0.5;
+      segment([cx-h,yy,cz-h],[cx+h,yy,cz-h],fine);
+      segment([cx+h,yy,cz-h],[cx+h,yy,cz+h],fine);
+      segment([cx+h,yy,cz+h],[cx-h,yy,cz+h],fine);
+      segment([cx-h,yy,cz+h],[cx-h,yy,cz-h],fine);
+      [[x+1,y,cx+h,cz-h,cx+h,cz+h],[x-1,y,cx-h,cz-h,cx-h,cz+h],
+       [x,y+1,cx-h,cz+h,cx+h,cz+h],[x,y-1,cx-h,cz-h,cx+h,cz-h]].forEach(e=>{
+        if(nativeSolidEdge(x,y,e[0],e[1]))segment([e[2],yy+0.01,e[3]],[e[4],yy+0.01,e[5]],hard);
+      });
+    }
+    world.add(dbg);T3.debugGrid=dbg;
+  }
+  /* props decorativos del tema: solo en tableros sin geometria IPA */
+  if(!geoShown){try{buildThemedProps3(world,G.map.theme);}catch(e){}}
   /* zonas de despliegue */
   const zoneDisc=(list,col)=>{list.forEach(s=>{
     const p=new THREE.Mesh(new THREE.PlaneGeometry(0.94,0.94),new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:0.13,depthWrite:false}));
     p.rotation.x=-Math.PI/2;p.position.set(w2cx(s.x),0.055,w2cx(s.y));world.add(p);});};
-  zoneDisc(SPAWNS_A,0x39c2d7);zoneDisc(SPAWNS_B,0xff7a45);
+  zoneDisc(spawnsFor('A'),0x39c2d7);zoneDisc(spawnsFor('B'),0xff7a45);
   /* baliza: zona ámbar que pulsa */
   const beacon=new THREE.Mesh(new THREE.PlaneGeometry(1.94,1.94),new THREE.MeshBasicMaterial({color:0xf2b234,transparent:true,opacity:0.16,depthWrite:false}));
-  beacon.rotation.x=-Math.PI/2;beacon.position.set(w2cx(5.5),0.06,w2cx(5.5));world.add(beacon);T3.beacon=beacon;
+  const bx=BEACON[0].x+0.5,by=BEACON[0].y+0.5;
+  beacon.rotation.x=-Math.PI/2;beacon.position.set(w2cx(bx),0.06,w2cx(by));world.add(beacon);T3.beacon=beacon;
   /* Anillos de Dominación en 3D */
   T3.domRings=[];
-  if(effMode(G)==='dominacion'){DOM_ZONES.forEach(z=>{const anchor=z.id==='centro'?{x:5.5,y:5.5}:z.tiles[0];const ring=new THREE.Mesh(new THREE.TorusGeometry(z.id==='centro'?1.15:0.44,0.03,8,40),new THREE.MeshBasicMaterial({color:0xf4f1e6}));ring.rotation.x=Math.PI/2;ring.position.set(w2cx(anchor.x),0.07,w2cx(anchor.y));world.add(ring);T3.domRings.push({zone:z,ring:ring});});}
+  if(effMode(G)==='dominacion'){domZones().forEach(z=>{const anchor=z.id==='centro'?{x:BEACON[0].x+0.5,y:BEACON[0].y+0.5}:z.tiles[0];const ring=new THREE.Mesh(new THREE.TorusGeometry(z.id==='centro'?1.15:0.44,0.03,8,40),new THREE.MeshBasicMaterial({color:0xf4f1e6}));ring.rotation.x=Math.PI/2;ring.position.set(w2cx(anchor.x),0.07,w2cx(anchor.y));world.add(ring);T3.domRings.push({zone:z,ring:ring});});}
   [[0,-1.0,2.06,0.07],[0,1.0,2.06,0.07],[-1.0,0,0.07,2.06],[1.0,0,0.07,2.06]].forEach(e=>{
     const bar=new THREE.Mesh(new THREE.BoxGeometry(e[2],0.035,e[3]),new THREE.MeshBasicMaterial({color:0xf2b234}));
-    bar.position.set(w2cx(5.5)+e[0],0.03,w2cx(5.5)+e[1]);world.add(bar);
+    bar.position.set(w2cx(bx)+e[0],0.03,w2cx(by)+e[1]);world.add(bar);
   });
   /* Zona de extracción de Escolta en 3D */
   T3.extMats=null;T3.droneMesh=null;
-  if(effMode(G)==='escolta'){T3.extMats=[];ESCORT_EXT.forEach(t2=>{const p=new THREE.Mesh(new THREE.PlaneGeometry(0.94,0.94),new THREE.MeshBasicMaterial({color:0x57c46a,transparent:true,opacity:0.2,depthWrite:false}));p.rotation.x=-Math.PI/2;p.position.set(w2cx(t2.x),0.058,w2cx(t2.y));world.add(p);T3.extMats.push(p.material);});}
+  if(effMode(G)==='escolta'){T3.extMats=[];escortExt().forEach(t2=>{const p=new THREE.Mesh(new THREE.PlaneGeometry(0.94,0.94),new THREE.MeshBasicMaterial({color:0x57c46a,transparent:true,opacity:0.2,depthWrite:false}));p.rotation.x=-Math.PI/2;p.position.set(w2cx(t2.x),0.058,w2cx(t2.y));world.add(p);T3.extMats.push(p.material);});}
   /* plataforma y cañón de la torreta central */
   const plat=new THREE.Group();plat.position.set(w2cx(TURRET_POS.x),0,w2cx(TURRET_POS.y));world.add(plat);
   const platSh=makeContactShadow3(0.48,0.048);if(platSh)plat.add(platSh);
@@ -7242,11 +7488,11 @@ function build3DWorld(){
   /* soldados */
   G.units.forEach(un=>{
     const mesh=REAL.ready?makeRealSoldier3(un):makeSoldier3(un);
-    mesh.position.set(w2cx(un.x),0.05,w2cx(un.y));
+    mesh.position.set(w2cx(un.x),0.05+tileWorldY(un.x,un.y),w2cx(un.y));
     T3.unitsGroup.add(mesh);T3.units.set(un.id,mesh);
   });
   /* el dron de Escolta */
-  if(G.drone){const dm=makeDrone3();dm.position.set(w2cx(G.drone.x),0.42,w2cx(G.drone.y));T3.unitsGroup.add(dm);T3.droneMesh=dm;}
+  if(G.drone){const dm=makeDrone3();dm.position.set(w2cx(G.drone.x),0.42+tileWorldY(G.drone.x,G.drone.y),w2cx(G.drone.y));T3.unitsGroup.add(dm);T3.droneMesh=dm;}
   /* anillo de casilla al pasar el cursor */
   const hover=new THREE.Mesh(new THREE.TorusGeometry(0.42,0.02,8,36),new THREE.MeshBasicMaterial({color:0xffffff}));
   hover.rotation.x=Math.PI/2;hover.position.y=0.06;hover.visible=false;world.add(hover);T3.hoverRing=hover;
@@ -7521,7 +7767,7 @@ function updateHover3D(w,h){
       if(p>0){
         const flk=foe.role&&isFlanked(sel,foe),covLvl=coverLevel(foe,sel);
         txt='Acierto '+p+'% · '+w2.dmg+' daño'+(flk?' · ⚡ Flanqueo':covLvl>0?' · 🛡️ Cobertura '+covLvl+' (−'+[0,12,25,40][covLvl]+'%)':'');
-        cls=cov?'cov':'';
+        cls=covLvl>0?'cov':'';
       } else {
         txt=foe.invisible?'Invisible':(smokeBlocksLOS(sel,foe)?'Sin tiro · humo M18':'Sin tiro · fuera de alcance/VDV');
         cls='bad';
@@ -7648,7 +7894,7 @@ function init3D(){
   if(!isSw){
     sun.castShadow=true;
     sun.shadow.mapSize.set(1024,1024);
-    sun.shadow.bias=-0.0005;
+    sun.shadow.bias=-0.0005;sun.shadow.normalBias=0.02;
     sun.shadow.camera.left=-8.5;sun.shadow.camera.right=8.5;sun.shadow.camera.top=8.5;sun.shadow.camera.bottom=-8.5;
   }
   scene.add(sun);
@@ -7781,7 +8027,7 @@ window.__render3D=function(){
     m.position.x=w2cx(rx);m.position.z=w2cx(ry);
     m.rotation.y=-advanceUnitYaw(d,t);
     if(d.alive){
-      m.position.y=0.42+(REDUCED_MOTION?0:Math.sin(t/480)*0.03);m.rotation.z=0;
+      m.position.y=0.42+tileWorldY(rx,ry)+(REDUCED_MOTION?0:Math.sin(t/480)*0.03);m.rotation.z=0;
       if(!REDUCED_MOTION)m.userData.rotors.forEach((r,i)=>{r.rotation.y=t/55+i*1.3;});
       if(m.userData.light)m.userData.light.material.opacity=0.5+0.5*Math.abs(Math.sin(t/330));
     } else {m.position.y=0.12;m.rotation.z=0.55;}
@@ -7820,7 +8066,7 @@ window.__render3D=function(){
     if(mesh.userData.hpArc){const f=Math.max(0,Math.min(1,un.hp/un.maxHp));mesh.userData.hpArc.geometry.setDrawRange(0,Math.floor(64*6*f));mesh.userData.hpArc.visible=un.alive;}
     const ud=mesh.userData;
     const moving=Math.abs(un.x-rx)>0.03||Math.abs(un.y-ry)>0.03||!!un._drawPath;
-    mesh.position.y=0.05+(moving&&!REDUCED_MOTION?Math.abs(Math.sin((ud._gaitPhase||0)*Math.PI*2+un.id))*0.045:0);
+    mesh.position.y=0.05+tileWorldY(rx,ry)+(moving&&!REDUCED_MOTION?Math.abs(Math.sin((ud._gaitPhase||0)*Math.PI*2+un.id))*0.045:0);
     const yaw=advanceUnitYaw(un,t);
     mesh.rotation.y=-yaw;
     const turnLean=(un._turning&&!REDUCED_MOTION)?Math.sin((un._turnProg||0)*Math.PI)*0.07*(un._turnDelta>=0?1:-1):0;
@@ -7942,7 +8188,7 @@ function buildDemo(){
   scene.add(new THREE.HemisphereLight(0xd8ecff,0x3c462e,1.15));
   const sun=new THREE.DirectionalLight(0xffe8b8,1.8);
   sun.position.set(-6,12,5);
-  if(!isSw){sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.bias=-0.0005;}
+  if(!isSw){sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.bias=-0.0005;sun.shadow.normalBias=0.02;}
   scene.add(sun);
   const fill=new THREE.DirectionalLight(0x8ec5ff,0.55);fill.position.set(7,5,-6);scene.add(fill);
   const stage=new THREE.Group();scene.add(stage);
@@ -8122,22 +8368,22 @@ function characterForRole(role,slot){
 function characterKey(ch){return ch?(ch.key||((ch.own?'own:':'original:')+ch.name)):'';}
 const ORIG_CAST=[
  {name:'Hipster Dave',body:'Soldier_Light',outfit:'Soldier_Light_d / DeltaForce / Veteran',role:'Francotirador',bio:'Gafas verdes, pelo naranja y un fusil enorme. Cara de enfado permanente.',play:true},
- {name:'Archie Fletcher',body:'Soldier_Light',outfit:'Rambo / DeerHunter',role:'',bio:'Rambo de mercadillo: cinta en la cabeza y más valor que puntería.',play:false},
- {name:'Soap',body:'Soldier_Light',outfit:'Soldier_Light (base)',role:'',bio:'El nombre que todos recuerdan y nadie explica.',play:false},
- {name:'Spud',body:'Soldier_Light',outfit:'Soldier_Light (base)',role:'',bio:'Patata de nombre, roca de aguante.',play:false},
+  {name:'Archie Fletcher',body:'Soldier_Light_Rambo',outfit:'Rambo / DeerHunter',role:'Francotirador',bio:'Rambo de mercadillo: cinta en la cabeza y más valor que puntería.',play:true},
+  {name:'Soap',body:'Soldier_SAS',outfit:'Soldier_SAS',role:'Francotirador',bio:'El nombre que todos recuerdan y nadie explica.',play:true},
+  {name:'Spud',body:'Soldier_Spud',outfit:'Soldier_ForestCamo',role:'Francotirador',bio:'Patata de nombre, roca de aguante.',play:true},
  {name:'Ivan Tkilya',body:'Soldier_Heavy',outfit:'Soldier_heavy / GermanSpecialForces',role:'Artillero',bio:'Pesado de manual: donde se planta, hay que rodearlo.',play:true},
- {name:'Mme La Hacque',body:'Agent_Light',outfit:'Agent_light / JewelThief',role:'',bio:'Elegancia francesa con un cuchillo en la bota.',play:false},
+  {name:'Mme La Hacque',body:'Agent_Light',outfit:'Agent_light / JewelThief',role:'Espía',bio:'Elegancia francesa con un cuchillo en la bota.',play:true},
  {name:'Sneaky Pete',body:'Agent_Light',outfit:'Agent_light (base)',role:'Espía',bio:'Nadie le vio llegar; nadie le vio irse.',play:true},
  {name:'Sister Florence',body:'Medic',outfit:'Medic / Medic_Rescue',role:'Médico',bio:'Reza por ti y luego te cose la herida.',play:true},
- {name:'Riot Medic',body:'Medic_therapist',outfit:'Medic_therapist',role:'',bio:'Casco antidisturbios y camilla blindada.',play:false},
- {name:'Textbook Kate',body:'Medic',outfit:'Medic (variante)',role:'',bio:'Se sabe el manual de memoria; por eso dispara mejor.',play:false},
+  {name:'Riot Medic',body:'Medic_therapist',outfit:'Medic_therapist',role:'Médico',bio:'Casco antidisturbios y camilla blindada.',play:true},
+  {name:'Textbook Kate',body:'Medic',outfit:'Medic (variante)',role:'Francotirador',bio:'Se sabe el manual de memoria; por eso dispara mejor.',play:true},
  {name:'Big Time Taschmann',body:'Engineer',outfit:'Engineer / Spetsnaz',role:'Ingeniero',bio:'Maza más alta que su torso y sonrisa de oreja a oreja.',play:true},
- {name:'Megan McNick',body:'Engineer_Light',outfit:'Engineer_Light / Trinity',role:'',bio:'Ingeniera de Trinity: torretas antes que palabras.',play:false},
- {name:'Carlito Grosso',body:'Engineer_Heavy',outfit:'Engineer_Heavy / EOD',role:'',bio:'Siempre vuelve con el blindaje puesto.',play:false},
+  {name:'Megan McNick',body:'Engineer_Light',outfit:'Engineer_Light / Trinity',role:'Ingeniero',bio:'Ingeniera de Trinity: torretas antes que palabras.',play:true},
+  {name:'Carlito Grosso',body:'Engineer_Heavy',outfit:'Engineer_Heavy / EOD',role:'Ingeniero',bio:'Siempre vuelve con el blindaje puesto.',play:true},
  {name:'Riot Agent',body:'Agent_Heavy',outfit:'Agent_Heavy / Skin1',role:'Comando',bio:'Antidisturbios: escudo primero, preguntas después.',play:true},
- {name:'Riot Engineer',body:'Engineer (RiotCop)',outfit:'Engineer_RiotCop',role:'',bio:'Convierte una calle en una fortaleza en tres turnos.',play:false},
+  {name:'Riot Engineer',body:'Engineer (RiotCop)',outfit:'Engineer_RiotCop',role:'Ingeniero',bio:'Convierte una calle en una fortaleza en tres turnos.',play:true},
  {name:'Commander (M)',body:'Commander',outfit:'Commander / Latino / Asian / African',role:'Capitán',bio:'Manda con la voz y con el ejemplo.',play:true},
- {name:'Commander (F)',body:'Commander_F',outfit:'Commander_F / Latino / Asian / African',role:'',bio:'Misma autoridad, otro acento.',play:false}
+  {name:'Commander (F)',body:'Commander_F',outfit:'Commander_F / Latino / Asian / African',role:'Capitán',bio:'Misma autoridad, otro acento.',play:true}
 ];
 
 /* ---- Habilidades por personaje del original (Fase 1) ----
@@ -8202,20 +8448,19 @@ const CHARACTER_ABILITIES={
  'Commander (M)':[],
  'Commander (F)':[]
 };
-/* Drones y objetos que usan las habilidades. Solo la caja de botín
-   tiene modelo y textura extraídos del original (CommCrate, con
-   TreasureCrate_d.png); las torretas, el UAV, las minas, la carga y el
-   Shield-O-Bot se descargaban del servidor como prefabs y no hay ninguna
-   malla suya en el material extraído, así que no se inventa ninguna:
-   el visor muestra su icono y lo dice. */
+/* Drones y objetos que usan las habilidades. Todas estas mallas y texturas
+   están en los assetbundles del IPA (BasicAbilities, Abilities y Abilities02)
+   y se han extraído a assets/props/ con la convención del pipeline original. */
 const ABILITY_OBJECTS={
- 'uav':{name:'UAV',icon:'CharAbility_46_UAV_alpha',model:null,note:'Dron explorador. Modelo 3D no extraído del original (se descargaba del servidor).'},
- 'gatling':{name:'Torreta Gatling',icon:'CharAbility_16_Gatling_Turret_alpha',model:null,note:'Torreta desplegable. Modelo 3D no extraído del original (se descargaba del servidor).'},
- 'rocket':{name:'Torreta de cohetes',icon:'CharAbility_37_Rocket_Turret_alpha',model:null,note:'Torreta desplegable. Modelo 3D no extraído del original (se descargaba del servidor).'},
- 'mine':{name:'Mina',icon:'CharAbility_27_Landmines_alpha',model:null,note:'Mina oculta. Modelo 3D no extraído del original (se descargaba del servidor).'},
- 'charge':{name:'Carga remota',icon:'CharAbility_35_Remote_Charge_alpha',model:null,note:'Carga C4 oculta. Modelo 3D no extraído del original (se descargaba del servidor).'},
- 'shieldbot':{name:'Shield-O-Bot',icon:'CharAbility_51_RiotShield_alpha',model:null,note:'Robot escudo por control remoto. Modelo 3D no extraído del original (se descargaba del servidor).'},
- 'crate':{name:'Caja de botín',icon:'PlayerAbility_06_Health_Crate_alpha',model:'CommCrate_124tri.obj',tex:'TreasureCrate_d.png',note:'Caja de comandante / botín (CommCrate).'}
+ 'uav':{name:'UAV',icon:'CharAbility_46_UAV_alpha',model:'UAV',note:'Dron explorador (mesh_UAV de BasicAbilities).'},
+ 'gatling':{name:'Torreta Gatling',icon:'CharAbility_16_Gatling_Turret_alpha',model:'GatlingTurret',note:'Torreta desplegable (MGTurret de Abilities).'},
+ 'rocket':{name:'Torreta de cohetes',icon:'CharAbility_37_Rocket_Turret_alpha',model:'RocketTurret',note:'Torreta de cohetes desplegable (RocketTurretBase de Abilities).'},
+ 'mine':{name:'Mina',icon:'CharAbility_27_Landmines_alpha',model:'SpiderMine',note:'Mina oculta (SpiderMine de BasicAbilities).'},
+ 'charge':{name:'Carga remota',icon:'CharAbility_35_Remote_Charge_alpha',model:'RemoteCharge',note:'Carga C4 oculta (Box001 con RemoteCharge_d de BasicAbilities).'},
+ 'shieldbot':{name:'Shield-O-Bot',icon:'CharAbility_51_RiotShield_alpha',model:'RiotShieldBot',note:'Robot escudo por control remoto (RiotShieldBot de Abilities02).'},
+ 'cover':{name:'Cobertura desplegable',icon:'PlayerAbility_04_Deployo-Cover_alpha',model:'DeployableCover',note:'Cobertura desplegable (DeployableCover de BasicAbilities).'},
+ 'objective':{name:'Cohete objetivo',icon:'PlayerAbility_09_Orbital_Laser_alpha',model:'ObjectiveRocket',note:'Cohete objetivo del mapa (Rocket de BasicAbilities).'},
+ 'crate':{name:'Caja de botín',icon:'PlayerAbility_06_Health_Crate_alpha',model:'CommCrate_124tri',note:'Caja de comandante / botín (CommCrate).'}
 };
 /* Habilidades de caja del comandante (PlayerAbility, no de un personaje
    concreto): crean cajas en el mapa (salud, munición, analgésicos,
@@ -8816,10 +9061,11 @@ const MAP_PIECES=[
   const texturePreview=document.getElementById('viewerTexture');
   const viewer={
     renderer:null,scene:null,camera:null,spin:null,platform:null,meshyFill:null,meshyRim:null,
-    baseDistance:3,drag:null,lastFrame:0,selection:0,
+    baseDistance:3,drag:null,dragVel:0,lastFrame:0,selection:0,
     kind:'roles',name:'',skinIndex:0,weapon:'',idleActor:null,gripActor:null,idleClipKey:'idle2h',
     frameRequested:false,models:{roles:{},weapons:{},props:{},pieces:{}},textures:{},bodyGeo:{},pieceMap:'Skirmish_03'
   };
+  try{window.__csnViewer={get state(){return viewer;}};}catch(e){}
   /* Skins por cuerpo: cada cuerpo tiene solo sus variantes de outfit
      (archivos *_d.png del original, en assets/soldier/cast/). Las 8
      skins genéricas de antes eran outfits de Soldier_Light y no casan
@@ -8832,6 +9078,8 @@ const MAP_PIECES=[
      (Soldier_Light_Rambo.obj, de su bundle ArchieFletcherOutfits),
      una malla distinta de la de Hipster Dave (Soldier_Light.obj). */
   const VIEWER_BODY_SKINS={
+    'Soldier_SAS':['Soldier_SAS_d.png','Soldier_SAS_Decon_d.png','Soldier_SAS_Veteran_d.png'],
+    'Soldier_Spud':['Soldier_d.png','Soldier_Decon_d.png','Soldier_ForestCamo_d.png','Soldier_Veteran_d.png'],
     'Soldier_Light':['Soldier_Light_d.png','Soldier_Light_Decon_d.png','Soldier_Light_DeltaForce_d.png','Soldier_Light_Halloween_d.png','Soldier_Light_Spetsnaz_d.png','Soldier_Light_Veteran_d.png'],
     'Soldier_Light_Rambo':['Soldier_Light_Rambo_d.png','Soldier_Light_Rambo_Decon_d.png','Soldier_Light_Rambo_DeerHunter_d.png','Soldier_Light_Rambo_Veteran_d.png'],
     'Soldier_Heavy':['Soldier_heavy_d.png','Soldier_heavy_GermanSpecialForces_d.png','Soldier_Heavy_Decon_d.png','Soldier_Heavy_Veteran_d.png'],
@@ -8844,10 +9092,12 @@ const MAP_PIECES=[
     'Engineer_Heavy':['Engineer_Heavy2_d.png','Engineer_Heavy_Decon_d.png','Engineer_Heavy_EOD_d.png','Engineer_Heavy_Veteran_d.png'],
     'Engineer (RiotCop)':['Engineer_RiotCop_d.png','Engineer_RiotCop_Decon_d.png','Engineer_RiotCop_Skin1_d.png','Engineer_RiotCop_Veteran_d.png'],
     'Commander':['Commander_d.png','Commander_African_d.png','Commander_Asian_d.png','Commander_Latino_d.png'],
+    'CommanderM':['Commander_d.png','Commander_African_d.png','Commander_Asian_d.png','Commander_Latino_d.png'],
     'Commander_F':['Commander_F_d.png','Commander_F_African_d.png','Commander_F_Asian_d.png','Commander_F_Latino_d.png']
   };
-  /* Personajes del original (ORIG_CAST, sin Soap ni Spud: repetirían el
-     soldado genérico, mismo cuerpo Soldier_Light y misma textura base).
+  /* Personajes del original (ORIG_CAST, los 17, incluidos Soap y Spud).
+     Soap usa Soldier_SAS.obj y Spud usa Soldier_Spud.obj, extraídos de sus
+     propios bundles; antes se filtraban por parecerse al soldado genérico.
      Cada personaje muestra la malla de su cuerpo (body) y su textura
      propia (outfit, en assets/soldier/cast/); el rol solo se usa para
      mostrarlo y como respaldo cuando el cuerpo no trae rol. Los 3
@@ -8861,6 +9111,8 @@ const MAP_PIECES=[
      son una clase del repo). Los demás cuerpos usan REAL.byRole o el
      soldado genérico (REAL), según VIEWER_BODY_ROLE. */
   const VIEWER_BODY_FILE={
+    'Soldier_SAS':'Soldier_SAS.obj',
+    'Soldier_Spud':'Soldier_Spud.obj',
     'Soldier_Heavy':'Soldier_Heavy.obj',
     'Soldier_Light_Rambo':'Soldier_Light_Rambo.obj',
     'Agent_Light':'Agent_Light.obj',
@@ -8868,13 +9120,12 @@ const MAP_PIECES=[
     'Engineer_Light':'Engineer_Light.obj',
     'Engineer_Heavy':'Engineer_Heavy.obj',
     'Engineer (RiotCop)':'Engineer_RiotCop.obj',
+    'CommanderM':'CommanderM.obj',
     'Commander_F':'CommanderF.obj'
   };
-  /* Archie Fletcher usa el cuerpo Rambo (su bundle es
-     ArchieFletcherOutfits): ORIG_CAST lo pone como Soldier_Light,
-     pero su malla es Soldier_Light_Rambo.obj, distinta de la de
-     Hipster Dave. */
-  const VIEWER_BODY_OVERRIDE={'Archie Fletcher':'Soldier_Light_Rambo'};
+  /* Archie Fletcher y Commander (M) tienen cuerpo propio en sus bundles
+     (Soldier_Light_Rambo y Commander), distinto del cuerpo genérico. */
+  const VIEWER_BODY_OVERRIDE={'Archie Fletcher':'Soldier_Light_Rambo','Commander (M)':'CommanderM'};
   const VIEWER_BODY_ROLE={'Medic':'Médico','Engineer':'Ingeniero','Agent_Heavy':'Comando','Commander':'Capitán'};
   /* Armas por rol: las del propio juego (ROLES[rol].weapons, las que ofrece
      el setup de partida). Cada rol solo puede equipar las suyas: las de
@@ -8891,7 +9142,7 @@ const MAP_PIECES=[
      modelo, no siempre a +X como en los del IPA. */
   const VIEWER_MESHY_FRONT={Francotirador:1,Espia:1,Artillero:-1,Medico:1,Ingeniero:1};
   const viewerCharacters=[
-    ...ORIG_CAST.filter(c=>c.name!=='Soap'&&c.name!=='Spud').map((character,index)=>{
+    ...ORIG_CAST.map((character,index)=>{
       const role=character.role||VIEWER_ROLE_FALLBACK[character.name]||'';
       const body=VIEWER_BODY_OVERRIDE[character.name]||character.body;
       const bodyFile=VIEWER_BODY_FILE[body]||'';
@@ -8922,24 +9173,28 @@ const MAP_PIECES=[
     'Knife','Katana','WoodAxe','MP5K','Chainsaw','Minigun','BaseballBat_SOURCE',
     'SpikedClub_weapon','FragGrenade'
   ];
-  /* Objetos del original con modelo y textura extraídos: solo la caja de
-     botín (CommCrate). Las torretas, el UAV, las minas, la carga y el
-     Shield-O-Bot no tienen malla en el material extraído (se descargaban
-     del servidor), así que no hay entradas suyas aquí: sus habilidades
-     muestran el icono y lo dicen. La variante de 180 triángulos es la
-     misma caja (sin verificar si es la rota o la abierta). */
+  /* Objetos del original con modelo y textura extraídos. Las mallas de
+     habilidades viven en BasicAbilities/Abilities/Abilities02 y se exportan
+     a assets/props/ con X espejada y winding invertido, igual que pipeline.py. */
   const viewerPropFiles=[
-    {key:'CommCrate_124tri',label:'Caja de botín',file:'CommCrate_124tri.obj',tex:'TreasureCrate_d.png'},
-    {key:'CommCrate_180tri',label:'Caja de botín (variante)',file:'CommCrate_180tri.obj',tex:'TreasureCrate_d.png'}
+    {key:'CommCrate_124tri',label:'Caja de botín',file:'CommCrate_124tri.obj',tex:'TreasureCrate_d.png',note:'Caja de comandante / botín del original.'},
+    {key:'CommCrate_180tri',label:'Caja de botín (variante)',file:'CommCrate_180tri.obj',tex:'TreasureCrate_d.png',note:'Variante de 180 triángulos de la caja.'},
+    {key:'UAV',label:'UAV',file:'UAV.obj',tex:'UAV_d.png',note:'Dron explorador del original.'},
+    {key:'GatlingTurret',label:'Torreta Gatling',file:'GatlingTurret.obj',tex:'MGTurret_d.png',note:'Torreta Gatling del original.'},
+    {key:'RocketTurret',label:'Torreta de cohetes',file:'RocketTurret.obj',tex:'RocketTurret_d.png',note:'Torreta de cohetes del original.'},
+    {key:'SpiderMine',label:'Mina',file:'SpiderMine.obj',tex:'SpiderMine_d.png',note:'Mina desplegable del original.'},
+    {key:'RemoteCharge',label:'Carga remota',file:'RemoteCharge.obj',tex:'RemoteCharge_d.png',note:'Carga remota del original.'},
+    {key:'DeployableCover',label:'Cobertura desplegable',file:'DeployableCover.obj',tex:'DeployableCover_d.png',note:'Cobertura desplegable del original.'},
+    {key:'ObjectiveRocket',label:'Cohete objetivo',file:'ObjectiveRocket.obj',tex:'Rocket_d.png',note:'Cohete objetivo del mapa.'},
+    {key:'RiotShieldBot',label:'Shield-O-Bot',file:'RiotShieldBot.obj',tex:'RiotShieldBot_d.png',note:'Robot escudo del original.'}
   ];
   /* Ficha de habilidades de un personaje: icono, nombre y descripción;
-     si la habilidad usa un dron u objeto, lo dice y, si tiene modelo
-     (solo la caja), ofrece verlo. */
+     si la habilidad usa un dron u objeto, ofrece ver su malla extraída. */
   function abilityCardHTML(ability){
     const obj=ability.obj?ABILITY_OBJECTS[ability.obj]:null;
     const objLine=obj
       ?'<br><span class="sub">Objeto: '+obj.name+'. '+(obj.model
-        ?'<button type="button" data-viewer-prop="CommCrate_124tri" style="text-decoration:underline;cursor:pointer">Ver en 3D</button>'
+        ?'<button type="button" data-viewer-prop="'+obj.model+'" style="text-decoration:underline;cursor:pointer">Ver en 3D</button> · '+obj.note
         :obj.note)+'</span>'
       :'';
     return '<div class="ab-card on" style="display:flex;gap:8px;align-items:center;text-align:left"><img src="assets/ui/ability/'+ability.icon+'.png" alt="" style="width:34px;height:34px;flex:none"/><span><b>'+ability.n+'</b><br><small>'+ability.d+objLine+'</small></span></div>';
@@ -9018,7 +9273,14 @@ const MAP_PIECES=[
       if(viewer.idleActor&&idle)poseSpriteClip(null,viewer.idleActor,idle,(now/1000)%idle.dur,viewer.idleClipKey);
       if(viewer.gripActor&&viewer.gripActor.userData.gun)
         fitGunToHand3(viewer.gripActor.userData.gripUnit,viewer.gripActor,false);
-      if(!viewer.drag&&viewer.spin&&viewer.spin.children.length)viewer.spin.rotation.y+=(now-viewer.lastFrame)/1000*0.22;
+      const dt=viewer.lastFrame?Math.min(0.05,(now-viewer.lastFrame)/1000):0.016;
+      if(!viewer.drag&&viewer.spin&&viewer.spin.children.length){
+        viewer.spin.rotation.y+=dt*0.22;
+        if(Math.abs(viewer.dragVel)>1e-4){
+          viewer.spin.rotation.y+=viewer.dragVel*dt;
+          viewer.dragVel*=Math.exp(-dt/0.25);
+        }else viewer.dragVel=0;
+      }
       viewer.renderer.render(viewer.scene,viewer.camera);
       refreshTexturePreview();
     }
@@ -9040,6 +9302,8 @@ const MAP_PIECES=[
   }
   function mount(model){
     while(viewer.spin.children.length)viewer.spin.remove(viewer.spin.children[0]);
+    if(model.userData&&model.userData.bones&&model.userData.bindLocal&&CLIPLIB.ready)
+      poseViewerRest(model,model.userData.idleClipKey||'idle2h',0);
     model.updateMatrixWorld(true);
     model.traverse(object=>{
       if(object.isSkinnedMesh&&object.skeleton)object.skeleton.update();
@@ -9053,7 +9317,12 @@ const MAP_PIECES=[
          desplazaría el centro y el soldado quedaría descentrado. */
       let p=object.parent;
       while(p&&p!==model){if(p.userData&&p.userData.isViewerGun)return;p=p.parent;}
-      meshBounds.setFromObject(object,true);
+      if(object.isSkinnedMesh){
+        if(object.computeBoundingBox)object.computeBoundingBox();
+        if(object.boundingBox&&!object.boundingBox.isEmpty()){
+          meshBounds.copy(object.boundingBox).applyMatrix4(object.matrixWorld);
+        }else meshBounds.setFromObject(object,true);
+      }else meshBounds.setFromObject(object,true);
       bounds.union(meshBounds);
     });
     const size=new THREE.Vector3(),center=new THREE.Vector3();
@@ -9175,7 +9444,7 @@ const MAP_PIECES=[
         ?'Diseño Meshy independiente · '+entry.mesh+'.'
         :'Rol: '+(entry.role||'—')+'. '+(entry.bio||''))
       :kind==='props'
-        ?'Caja de comandante / botín del original: la crean las habilidades de caja del comandante (salud, munición, analgésicos, espíritu de equipo).'
+        ?(entry.note||'Objeto del original extraído de sus assetbundles.')
         :kind==='pieces'
           ?'Pieza de '+entry.m+' · '+entry.s[0]+' × '+entry.s[1]+' × '+entry.s[2]+' unidades (1 unidad = 1 casilla).'
           :entry.orig
@@ -9185,7 +9454,7 @@ const MAP_PIECES=[
       ?((entry.mesh
         ?('Malla '+entry.mesh+'.obj · Textura Meshy.')
         :('Malla '+entry.file+' · '+(entry.outfit?('Textura '+entry.outfit):entry.skins[Math.min(viewer.skinIndex,entry.skins.length-1)].label)+'.'))
-        +(viewer.weapon?(' Arma: '+viewer.weapon+' ('+((WEAPONS_ORIGINAL[WEAPON_MESH_FILE[viewer.weapon]]||{}).name||WEAPON_MESH_FILE[viewer.weapon])+').'):''))
+        +(viewer.weapon?(' Arma: '+viewer.weapon+' ('+((WEAPONS_ORIGINAL[WEAPON_MESH_FILE[viewer.weapon]]||{}).name||WEAPON_MESH_FILE[viewer.weapon])+')'+(weaponMeta(WEAPON_MESH_FILE[viewer.weapon])?' · socket '+weaponMeta(WEAPON_MESH_FILE[viewer.weapon]).attachmentJoint:'')+'.'):''))
       :kind==='props'
         ?('Malla '+entry.file+' · Textura '+entry.tex+'.')
         :kind==='pieces'
@@ -9368,7 +9637,7 @@ const MAP_PIECES=[
        enganche a sus manos. El resto sigue siendo malla estática:
        forzar animatable en todos es lo que descabaló los modelos. */
     if(!entry.bodyFile&&!entry.bodyRole){
-      const model=makeViewerRiggedModel(source.geo.clone(),source.data,texture,{animatable:true});
+      const model=makeViewerRiggedModel(source.geo.clone(),source.data,texture,{animatable:true,grip:true});
       model.scale.setScalar(1.15);
       const mesh=model.userData.mesh3;
       model.remove(mesh);
@@ -9431,7 +9700,7 @@ const MAP_PIECES=[
     if(GUN_MESH_CACHE[key]===undefined){
       // The shared loader resolves the file synchronously; this temporary alias leaves gameplay mappings unchanged.
       WEAPON_MESH_FILE[key]=file;
-      try{makeRealGun3(key);}
+      try{makeRealGun3(key,true);}
       finally{delete WEAPON_MESH_FILE[key];}
     }
     return key;
@@ -9470,6 +9739,7 @@ const MAP_PIECES=[
       if(!GUN_MESH_CACHE[cacheKey])throw new Error('La carga de la malla tardó demasiado.');
     }
     const holder=GUN_MESH_CACHE[cacheKey].clone(true);
+    const gunMeta=holder.userData.meta||weaponMeta(meshFile);
     let gunGroup;
     if(model.userData&&model.userData.grip){
       gunGroup=makeGunProp3({role:entry.role,weapon:wanted});
@@ -9487,6 +9757,14 @@ const MAP_PIECES=[
         gunGroup.position.set(0.14,0.62,-0.02);
       }
       gunGroup.add(holder);
+    }
+    gunGroup.userData.file=meshFile;
+    gunGroup.userData.meta=gunMeta;
+    if(DEBUG_WEAPONS){
+      const marker=new THREE.Mesh(new THREE.SphereGeometry(0.045,12,8),new THREE.MeshBasicMaterial({color:0xff3300,depthTest:false}));
+      marker.userData.isViewerGun=true;
+      gunGroup.add(marker);
+      console.info('[debugWeapons]',meshFile,gunMeta&&gunMeta.attachmentJoint,holder.userData.calibration);
     }
     model.add(gunGroup);
     model.userData.viewerGun=gunGroup;
@@ -9650,15 +9928,18 @@ const MAP_PIECES=[
     updateCamera();
   },{passive:false});
   stage.addEventListener('pointerdown',event=>{
-    viewer.drag={x:event.clientX,y:event.clientY};
+    viewer.drag={x:event.clientX,y:event.clientY,t:event.timeStamp};
+    viewer.dragVel=0;
     stage.setPointerCapture(event.pointerId);
   });
   stage.addEventListener('pointermove',event=>{
     if(!viewer.drag)return;
     const dx=event.clientX-viewer.drag.x,dy=event.clientY-viewer.drag.y;
-    viewer.drag={x:event.clientX,y:event.clientY};
+    const dt=Math.max(0.008,Math.min(0.05,(event.timeStamp-viewer.drag.t)/1000));
+    viewer.drag={x:event.clientX,y:event.clientY,t:event.timeStamp};
     viewer.spin.rotation.y+=dx*0.008;
     viewer.spin.rotation.x=Math.max(-0.65,Math.min(0.65,viewer.spin.rotation.x+dy*0.006));
+    viewer.dragVel=Math.max(-3,Math.min(3,dx*0.008/dt));
   });
   const stopDrag=()=>{viewer.drag=null;};
   stage.addEventListener('pointerup',stopDrag);

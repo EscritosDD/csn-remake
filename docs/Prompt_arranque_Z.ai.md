@@ -20,15 +20,20 @@ web de *RAD Soldiers* (Splash Damage / WarChest, 2012). Todo el juego está en u
 3. Ejecuta la verificación y no continúes si algo falla:
 
    ```bash
+   npm run lint
+   npm test
    node bench/check-syntax.js
    node bench/boards.js
    node bench/rules.test.js
    node bench/data.test.js
+   python tools/auditar_assets_3d.py
    ```
 
-   En Windows, además: `powershell -ExecutionPolicy Bypass -File bench/VERIFICAR.ps1`
-   (añade el humo 3D). Resultado esperado: sintaxis 0, tableros 19/19,
-   reglas 6/6, datos 6/6.
+   En Windows, además:
+   `powershell -ExecutionPolicy Bypass -File bench/VERIFICAR.ps1`
+   (añade humo 3D, capturas `debugGrid`, auditoría del visor, clips,
+   movimiento, combate y móvil/SwiftShader). Resultado esperado: sintaxis 0,
+   **68/68** tests y **TODO OK 13/13**.
 
 4. **No tienes navegador con WebGL ni GPU.** La vista 3D se verifica con Chrome
    real y capturas (`node _capture_all.mjs <mapa> <prefijo>`) en la máquina de
@@ -51,16 +56,29 @@ web de *RAD Soldiers* (Splash Damage / WarChest, 2012). Todo el juego está en u
 - **No uses arte de Muse/aistudio** en la interfaz.
 - **No reescribas la historia de git** ni toques `.git` (el repo arrastra
   ~204 MB de versiones antiguas; hay copia de seguridad en `_backup_repo`).
+- **Cero parches por nombre** (`if (entry.name === ...)`): armas y rejillas se
+  corrigen con datos de calibración/grid, no con excepciones en el motor.
+- **IPA y Meshy no se mezclan**: `assets/soldier/` es la fuente de verdad;
+  `assets/personajes_propios/` es el único sitio permitido para Meshy. No
+  retargetees Meshy al rig IPA.
+- **No cierres una ronda en falso**: si no hay original `.glb/.gltf` o fuente
+  Meshy sin soldar, documenta el bloqueo y sigue con otra tarea.
 
-## 3. Estado actual (verificado en la última sesión)
+## 3. Estado actual (verificado el 21/11/2026)
 
 - **7 clases con su malla del IPA** (Soldier_Light, Soldier_Heavy, Agent_Light,
   Agent_Heavy, Medic, Engineer, Commander), con su skinning y animación.
-- **23 armas 3D del original** en partida y **37 fichas** en la Armería (31 con
-  el arte `item_weapon_*` del original y 6 con render 3D).
-- 19 tableros de 12×12 (13 propios + 6 de campaña), 4 modos + guerra por
-  naciones, campaña de 6 misiones, 195 clips de audio.
-- Verificación: sintaxis 0, tableros 19/19, reglas 6/6, datos 6/6.
+- **11 OBJ que antes tenían 0 caras** se repararon desde bundles IPA; la
+  auditoría global da **338 OBJ, 0 sin caras, 0 NaN, 13 rigs, 305 PNG**.
+- **23 armas 3D del original** en partida y **37 fichas** en la Armería. Las
+  23 armas tienen calibración por bounds reales en
+  `assets/weapons/weapon_calibrations.json`; `barracks*` solo es escaparate.
+- **8 rejillas IPA 1:1** (`03/04/05/06/08/09/10/11`) con aristas sólidas,
+  cobertura direccional y spawning conectado; 19 tableros de configuración.
+- Verificación final: **68/68** tests, **TODO OK 13/13** y
+  `viewer:audit-all ok=True` con 4 modelos.
+- Leer `docs/ESTADO_SESION_2026-11-21.md` antes de seguir: contiene los
+  pendientes reales y el detalle de cada ronda.
 
 ## 4. Trampas conocidas (todas documentadas en el examen, §9 y §11)
 
@@ -76,19 +94,20 @@ web de *RAD Soldiers* (Splash Damage / WarChest, 2012). Todo el juego está en u
 
 ## 5. Tareas, en orden de valor
 
-1. **Carátulas 3D de las 6 armas sin arte** (lanzacohetes y lanzagranadas): ya
-   existe `renderWeaponThumb(weapon)` en `index.html` que pinta la malla; usarlo
-   o generar PNG equivalentes y enlazarlos desde la ficha de la Armería.
-2. **Proporciones**: revisar `ROLE_LOOK` con los cuerpos reales (puede estar
-   exagerando la silueta de alguna clase). Compara con capturas.
-3. **Catálogo de habilidades**: ampliar `docs/Catalogo_habilidades_original.md` y
-   la pestaña «Habilidades del original» de la Armería.
-4. **Tests nuevos** para armas y mallas (que cada rol tenga su OBJ y su textura,
-   que las 37 armas mapeen a una malla existente).
-5. **Documentación histórica**: marcar claramente los documentos obsoletos de
+1. **Revisión visual humana** de `?debugWeapons=1`, `?debugGrid=1` y visor:
+   pide capturas a Dani; no lo valides tú.
+2. **Meshy/GLB**: solo si Dani aporta originales `.glb/.gltf` sin soldar;
+   montar loader local y animación por pieza sin tocar `assets/soldier/`.
+3. **Anti-clipping**: decidir si la escala `0.86` se aplica al modelo completo
+   o solo a obstáculos; hoy no está aplicada a unidades.
+4. **Alpha PNG**: regenerar atlas desde `_original/pipeline.py` con Transform
+   real y alpha; hoy solo hay `alphaTest` en materiales.
+5. **Auditoría exhaustiva del visor**: ampliar `viewer:audit-all` a los 35
+   personajes y las 23 armas; hoy sondea 4 modelos representativos.
+6. **Carátulas 3D de las 6 armas sin arte**: usar `renderWeaponThumb(weapon)` o
+   generar PNG equivalentes y enlazarlos desde la ficha de la Armería.
+7. **Documentación histórica**: marcar claramente los documentos obsoletos de
    `docs/historico/` que contradigan el estado actual.
-6. **Interfaz**: comparar el HUD con capturas del original y proponer mejoras
-   (pide capturas a Dani; no lo valides tú).
 
 ## 6. Cómo entregar
 

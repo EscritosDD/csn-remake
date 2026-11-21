@@ -6,6 +6,7 @@ Qué hay aquí y para qué sirve. Si vienes nuevo, lee en este orden.
 
 | Documento | Para qué |
 |---|---|
+| **[ESTADO_SESION_2026-11-21.md](ESTADO_SESION_2026-11-21.md)** | **Estado final de la última sesión.** Cambios por ronda, gates ejecutados, archivos tocados, bloqueos externos y plan para mañana |
 | **[Examen_para_continuar.md](Examen_para_continuar.md)** | **El informe de traspaso.** Estado real verificado, cómo ejecutar y verificar, arquitectura por líneas, tareas pendientes, los problemas abiertos con todo lo probado, y las recetas que funcionan (mallas de clase, armas) |
 | [ARQUITECTURA.md](ARQUITECTURA.md) | Dónde está cada bloque del código (funciones y líneas reales) y las trampas al editar |
 | [Equilibrio_medido.md](Equilibrio_medido.md) | Cifras de balance por modo y mapa, con n y metodología |
@@ -27,9 +28,10 @@ Qué hay aquí y para qué sirve. Si vienes nuevo, lee en este orden.
 
 | Documento | Para qué |
 |---|---|
+| [auditoria_global_3d.md](auditoria_global_3d.md) | Auditoría generada de todos los OBJ/rigs/texturas: 338 OBJ, 0 sin caras, 0 NaN, 13 rigs |
 | [Auditoria_visual_profunda_2026-11-19.md](Auditoria_visual_profunda_2026-11-19.md) | Hallazgos visuales reproducibles, hipótesis separadas y prompt técnico para OpenCode |
 | [Auditoria_profunda_v2.md](Auditoria_profunda_v2.md) | Los fallos de la tanda de corrección y cómo se arreglaron |
-| [Capturas_3D.md](Capturas_3D.md) | Cómo regenerar capturas (no se guardan en el repo) |
+| [Capturas_3D.md](Capturas_3D.md) | Cómo regenerar capturas, rejilla de depuración, auditoría del visor y verificación móvil |
 
 ## Histórico (`historico/`)
 

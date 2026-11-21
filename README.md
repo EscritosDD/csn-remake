@@ -10,23 +10,30 @@ propios y 6 de campaña) y una campaña de 6 misiones.
 
 - En Windows: doble clic en `D:\Juegos\CSN\JUGAR.bat` (levanta el servidor y
   abre el navegador).
-- O servir la carpeta con un estático y abrir `http://127.0.0.1:8000`:
+- O levantar el servidor del repo y abrir `http://127.0.0.1:8000`:
 
 ```
-python -m http.server 8000 --bind 127.0.0.1
+node server.js
 ```
+
+El servidor del repo sirve también `.glb`/`.gltf` con MIME correcto.
 
 No vale abrirlo como archivo (`file://`): el juego carga assets por HTTP.
 
 ## Verificar que todo está sano
 
 ```
+npm run lint && npm test
 powershell -ExecutionPolicy Bypass -File bench/VERIFICAR.ps1
 ```
 
-Hace cinco comprobaciones y devuelve 0 si todo pasa: sintaxis del script,
-19 tableros (simetría y solapes), reglas del motor (`rules.test.js`),
-integridad de datos (`data.test.js`) y humo 3D en navegador con captura.
+`VERIFICAR.ps1` hace 13 comprobaciones: sintaxis, 19 tableros, reglas, datos,
+winding, suite npm, rejillas IPA, capturas `debugGrid`, clips, humo 3D,
+auditoría del visor, movimiento, combate y móvil/SwiftShader. Último cierre:
+**TODO OK 13/13**, **68/68 tests** y `viewer:audit-all ok=True`.
+
+Depuración en el navegador: `?debugGrid=1` muestra rejillas 2D/3D y
+`?debugWeapons=1` marca el socket real de cada arma.
 
 ## Qué hay dentro
 
@@ -51,7 +58,9 @@ integridad de datos (`data.test.js`) y humo 3D en navegador con captura.
 
 ## Documentos clave
 
+- [Estado final de sesión](docs/ESTADO_SESION_2026-11-21.md) — cambios, gates, pendientes y plan para mañana.
 - [Arquitectura](docs/ARQUITECTURA.md) — estructura, funciones con su línea y reglas de edición.
+- [Auditoría global 3D](docs/auditoria_global_3d.md) — 338 OBJ, 0 sin caras, 0 NaN, 13 rigs.
 - [Plan director](docs/historico/Plan_director_original_base.md) — fases, criterios y estado.
 - [Catálogo de habilidades del original](docs/Catalogo_habilidades_original.md) — las 52 con su estado.
 - [Capturas 3D](docs/Capturas_3D.md) — los 13 mapas y las 6 misiones.
@@ -80,7 +89,7 @@ assets/               mallas, texturas, audio, iconos y geometria de mapas
 bench/                verificacion y pruebas (VERIFICAR.ps1, rules, datos, tableros, harness)
 docs/                 documentacion (indice en docs/README.md)
 docs/historico/       planes y auditorias de sesiones anteriores
-tools/                utilidades de Z.ai y de modelos (scripts .ps1 y .py)
+tools/                reparacion y auditoria de assets (repair_zero_face_objs.py, auditar_assets_3d.py, generate_weapon_calibrations.py, extract_maps_grid.py)
 _capture_all.mjs      generador de capturas 3D
 ```
 

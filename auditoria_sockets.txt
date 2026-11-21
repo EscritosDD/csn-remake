@@ -1,0 +1,95 @@
+﻿=== UnitTesterComponent.cs ===
+// Decompiled with JetBrains decompiler
+// Type: UnitTesterComponent
+// Assembly: Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+// MVID: C4E058C3-52EE-49D9-9B60-4517452EDFF8
+// Assembly location: C:\Users\Flo\Desktop\Neuer Ordner (2)\TacticsGame.unity3d_unpacked\Assembly-CSharp.dll
+
+using System.Runtime.InteropServices;
+using UnityEngine;
+
+public class UnitTesterComponent : MonoBehaviour
+{
+  public UnitOutfit Outfit;
+  public UnitWeapon WeaponPrefab;
+  public UnitBodyType BodyTypePrefab;
+  public UnitVoicePack VoicePackPrefab;
+  public Material OverrideMaterial;
+  public string AnimName;
+
+  private void Start() => UnitTesterComponent.딟(((Component) this).transform, this.Outfit, this.WeaponPrefab, this.BodyTypePrefab, this.VoicePackPrefab, this.OverrideMaterial, this.AnimName, 0);
+
+  public static void 딟([In] Transform obj0, [In] string obj1, [In] bool obj2, [In] bool obj3)
+  {
+    if (string.IsNullOrEmpty(obj1))
+      return;
+    Animation componentInChildren = ((Component) obj0).GetComponentInChildren<Animation>();
+    if (!Object.op_Inequality((Object) componentInChildren, (Object) null))
+      return;
+    AnimationClip clip = componentInChildren.GetClip(obj1);
+    componentInChildren.wrapMode = !obj3 ? (WrapMode) 1 : (WrapMode) 2;
+    componentInChildren.Play(obj1);
+    float num = 0.0f;
+    if (obj2)
+      num = Random.Range(0.0f, clip.length);
+    foreach (AnimationState animationState in componentInChildren)
+    {
+      if (animationState.enabled)
+        animationState.time = num;
+    }
+  }
+
+  public static void 딟([In] ref GameObject[] obj0, [In] Transform obj1, [In] UnitWeapon obj2)
+  {
+    foreach (Object @object in obj0)
+      Object.Destroy(@object);
+    obj0 = UnitTesterComponent.딟(obj1, obj2);
+  }
+
+  public static GameObject[] 딟([In] Transform obj0, [In] UnitWeapon obj1)
+  {
+    GameObject[] gameObjectArray = new GameObject[obj1.Models.Length];
+    for (int index = 0; index < obj1.Models.Length; ++index)
+    {
+      Transform transform1 = Object.Instantiate((Object) obj1.Models[index].ModelPrefab) as Transform;
+      Transform transform2 = 땓.땦.딟(obj0, obj1.Models[index].AttachmentJoint);
+      if (Object.op_Equality((Object) transform2, (Object) null))
+        transform2 = obj0;
+      transform1.parent = transform2;
+      transform1.localPosition = Vector3.zero;
+      transform1.localRotation = Quaternion.identity;
+      gameObjectArray[index] = ((Component) transform1).gameObject;
+    }
+    return gameObjectArray;
+  }
+
+  public static Transform 딟(
+    [In] Transform obj0,
+    [In] UnitOutfit obj1,
+    [In] UnitWeapon obj2,
+    [In] UnitBodyType obj3,
+    [In] UnitVoicePack obj4,
+    [In] Material obj5,
+    [In] string obj6,
+    [In] int obj7)
+  {
+    Transform transform = Object.Instantiate((Object) GlobalAppData.딢(obj1.SkeletonId)) as Transform;
+    transform.parent = obj0;
+    transform.localPosition = Vector3.zero;
+    transform.localRotation = Quaternion.identity;
+    땓.딯.딟(((Component) transform).gameObject, obj1.Mesh);
+    땓.땦.딟(((Component) transform).gameObject, obj7, 땓.딵.딟);
+    if (Object.op_Inequality((Object) obj2, (Object) null))
+      UnitTesterComponent.딟(transform, obj2);
+    땓.딼 딼 = new 땓.딼(obj2, obj3, obj4, transform);
+    foreach (UnitAudioEvents componentsInChild in ((Component) transform).gameObject.GetComponentsInChildren<UnitAudioEvents>())
+      componentsInChild.set_Controller((딧.떒) 딼);
+    ((Component) transform).gameObject.AddComponent<AudioSource>();
+    UnitTesterComponent.딟(transform, obj6, true, true);
+    return transform;
+  }
+}
+
+
+=== PYTHONS CON UnityPy ===
+No se encontro UnityPy instalado automaticamente (se puede instalar con pip install UnityPy).

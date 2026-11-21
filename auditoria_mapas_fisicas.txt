@@ -1,0 +1,800 @@
+﻿
+=== _original\decompiled\GameGridComponent.cs ===
+// Decompiled with JetBrains decompiler
+// Type: GameGridComponent
+// Assembly: Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+// MVID: C4E058C3-52EE-49D9-9B60-4517452EDFF8
+// Assembly location: C:\Users\Flo\Desktop\Neuer Ordner (2)\TacticsGame.unity3d_unpacked\Assembly-CSharp.dll
+
+using System.Collections;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using UnityEngine;
+
+[AddComponentMenu("Game/Grid")]
+public class GameGridComponent : MonoBehaviour
+{
+  public int SizeX;
+  public int SizeY;
+  public Transform GameTilePrefab;
+  public PlayerAchievement WinAchievement;
+  public bool ShowCollision;
+  public bool ShowHeight;
+  public bool ShowSpawns;
+  public bool ShowVis;
+  public bool ShowControlPoints;
+  public bool ShowAIDeployPoints;
+  public bool ShowAttackableTiles;
+  public int ShowAttackableTilesDistance = 20;
+  public float CameraBorderSpringLength = 2f;
+  public int CameraXMinPadding = 2;
+  public int CameraXMaxPadding = 2;
+  public int CameraYMinPadding = 2;
+  public int CameraYMaxPadding = 2;
+  private BitArray 딟;
+
+  public Vector3 GetTileCentre(int x, int y) => this.GetTileCentre(x, y, this.get_Tiles()[x, y].Height);
+
+  public Bounds GetTileBounds(int x, int y) => this.GetTileBounds(x, y, this.get_Tiles()[x, y].Height);
+
+  public GameTileComponent GetTile(int x, int y) => x >= 0 && x < this.SizeX && y >= 0 && y < this.SizeY ? this.get_Tiles()[x, y] : (GameTileComponent) null;
+
+  public bool TestLineOfSight(
+    딶.땖 GameState,
+    딶.땙 Turn,
+    int StartX,
+    int StartY,
+    int EndX,
+    int EndY,
+    int Range)
+  {
+    if (Range > 0 && Mathf.Max(Mathf.Abs(EndX - StartX), Mathf.Abs(EndY - StartY)) > Range || this.get_Tiles()[EndX, EndY].VisBlocker)
+      return false;
+    Vector3 tileCentre1 = this.GetTileCentre(StartX, StartY);
+    Vector3 tileCentre2 = this.GetTileCentre(EndX, EndY);
+    Vector2 Start;
+    // ISSUE: explicit constructor call
+    ((Vector2) ref Start).\u002Ector((float) tileCentre1.x, (float) tileCentre1.z);
+    Vector2 End;
+    // ISSUE: explicit constructor call
+    ((Vector2) ref End).\u002Ector((float) tileCentre2.x, (float) tileCentre2.z);
+    Vector2 vector2 = Vector2.op_Subtraction(End, Start);
+    float magnitude = ((Vector2) ref vector2).magnitude;
+    ((Vector2) ref vector2).Normalize();
+    GameTileComponent gameTileComponent1 = (GameTileComponent) null;
+    List<int> intList = this.GatherBlockingTiles(GameState, Turn);
+    bool flag = false;
+    float num1 = 0.0f;
+    while (!flag)
+    {
+      if ((double) num1 > (double) magnitude)
+      {
+        num1 = magnitude;
+        flag = true;
+      }
+      GameTileComponent gameTileComponent2 = this.PickTile(Vector2.op_Addition(Start, Vector2.op_Multiply(vector2, num1)));
+      if (Object.op_Inequality((Object) gameTileComponent1, (Object) gameTileComponent2))
+      {
+        gameTileComponent1 = gameTileComponent2;
+        if (gameTileComponent2.VisBlocker || gameTileComponent2.BlocksLine(Start, End))
+          return false;
+        if (gameTileComponent2.TileIndexX == EndX && gameTileComponent2.TileIndexY == EndY)
+          return true;
+        if (intList != null)
+        {
+          int num2 = gameTileComponent2.TileIndexX + gameTileComponent2.TileIndexY * this.SizeX;
+          if (intList.Contains(num2))
+            return false;
+        }
+      }
+      num1 += 0.25f;
+    }
+    return true;
+  }
+
+  public List<int> GatherBlockingTiles(딶.땖 GameState, 딶.땙 Turn)
+  {
+    List<int> intList = (List<int>) null;
+    if (GameState != null && Turn != null)
+    {
+      int sizeX = GameState.땹().SizeX;
+      for (int index = 0; index < Turn.땺().Count; ++index)
+      {
+        땓.땊 땊 = Turn.땺()[index];
+        if (GameState.땻()[index].땄(땊))
+        {
+          if (intList == null)
+            intList = new List<int>();
+          intList.Add(땊.땃 + 땊.딶 * sizeX);
+        }
+      }
+    }
+    return intList;
+  }
+
+  public bool TestDynamicLineOfSight(
+    딶.땖 GameState,
+    딶.땙 Turn,
+    int StartX,
+    int StartY,
+    int EndX,
+    int EndY,
+    List<int> visBlockingTiles)
+  {
+    Vector3 tileCentre1 = this.GetTileCentre(StartX, StartY);
+    Vector3 tileCentre2 = this.GetTileCentre(EndX, EndY);
+    Vector2 vector2_1;
+    // ISSUE: explicit constructor call
+    ((Vector2) ref vector2_1).\u002Ector((float) tileCentre1.x, (float) tileCentre1.z);
+    Vector2 vector2_2;
+    // ISSUE: explicit constructor call
+    ((Vector2) ref vector2_2).\u002Ector((float) tileCentre2.x, (float) tileCentre2.z);
+    Vector2 vector2_3 = Vector2.op_Subtraction(vector2_2, vector2_1);
+    float magnitude = ((Vector2) ref vector2_3).magnitude;
+    ((Vector2) ref vector2_3).Normalize();
+    GameTileComponent gameTileComponent1 = (GameTileComponent) null;
+    bool flag = false;
+    float num1 = 0.0f;
+    while (!flag)
+    {
+      if ((double) num1 > (double) magnitude)
+      {
+        num1 = magnitude;
+        flag = true;
+      }
+      GameTileComponent gameTileComponent2 = this.PickTile(Vector2.op_Addition(vector2_1, Vector2.op_Multiply(vector2_3, num1)));
+      if (Object.op_Inequality((Object) gameTileComponent1, (Object) gameTileComponent2))
+      {
+        gameTileComponent1 = gameTileComponent2;
+        if (gameTileComponent2.TileIndexX == EndX && gameTileComponent2.TileIndexY == EndY)
+          return true;
+        if (visBlockingTiles != null)
+        {
+          int num2 = gameTileComponent2.TileIndexX + gameTileComponent2.TileIndexY * this.SizeX;
+          if (visBlockingTiles.Contains(num2))
+            return false;
+        }
+      }
+      num1 += 0.25f;
+    }
+    return true;
+  }
+
+  public GameTileComponent PickTile(Vector2 Position2D)
+  {
+    int index1 = Mathf.RoundToInt((float) (Position2D.x + (double) (this.SizeX - 1) * 0.5));
+    int index2 = Mathf.RoundToInt((float) (Position2D.y + (double) (this.SizeY - 1) * 0.5));
+    return index1 < 0 || index1 >= this.SizeX || index2 < 0 || index2 >= this.SizeY ? (GameTileComponent) null : this.get_Tiles()[index1, index2];
+  }
+
+  public Vector3 GetTileCentre(int x, int y, int z) => new Vector3((float) x - (float) (this.SizeX - 1) * 0.5f, (float) z * (1f / 32f), (float) y - (float) (this.SizeY - 1) * 0.5f);
+
+  private Bounds GetTileBounds(int x, int y, int z) => new Bounds(this.GetTileCentre(x, y, z), new Vector3(1f, 2048f, 1f));
+
+  public void Init() => this.InitCommon();
+
+  public void InitCommon()
+  {
+    // ISSUE: reference to a compiler-generated method
+    this.set_Tiles(new GameTileComponent[this.SizeX, this.SizeY]);
+    GameTileComponent[] componentsInChildren = ((Component) this).GetComponentsInChildren<GameTileComponent>();
+    for (int index = 0; index < componentsInChildren.Length; ++index)
+      this.get_Tiles()[componentsInChildren[index].TileIndexX, componentsInChildren[index].TileIndexY] = componentsInChildren[index];
+    // ISSUE: reference to a compiler-generated method
+    this.set_TileNetwork(new 딶.땠(this));
+  }
+
+  public void InitAI(GameObject BundleCoverMap, GameObject BundleVismap)
+  {
+    // ISSUE: reference to a compiler-generated method
+    this.set_CoverMap(BundleCoverMap.GetComponent<CoverMap>());
+    this.get_CoverMap().Setup(this);
+    // ISSUE: reference to a compiler-generated method
+    this.set_VisMap(BundleVismap.GetComponent<VisibilityMap>());
+    this.get_VisMap().Setup(this);
+  }
+
+  public void BuildVisMap(ref VisibilityMap BuiltVisMap)
+  {
+  }
+
+  public void BuildCoverMap(ref CoverMap BuiltCoverMap)
+  {
+  }
+
+  public 딶.딥 GetCoverType(int AttackerX, int AttackerY, int DefenderX, int DefenderY) => Object.op_Inequality((Object) this.get_CoverMap(), (Object) null) && this.get_CoverMap().IsValid() ? (딶.딥) this.get_CoverMap().GetCoverType(AttackerX, AttackerY, DefenderX, DefenderY) : this.get_Tiles()[DefenderX, DefenderY].GetCoverType(this.get_Tiles()[AttackerX, AttackerY]);
+
+  public bool TileCanBeAttacked(GameTileComponent tile) => this.딟 == null || this.딟.Get(tile.TileIndexX + tile.TileIndexY * this.SizeX);
+
+  public void SetUpNonAttackableTiles(GameTileComponent startTile, 딶.땖 gameState, 딶.땙 turn)
+  {
+    this.딟 = new BitArray(this.SizeX * this.SizeY);
+    this.딟.SetAll(false);
+    GameTileComponent[] gameTileComponentArray = this.get_TileNetwork().딟(gameState, turn, startTile.TileIndexX, startTile.TileIndexY, 100000, (땓.딲) null, -1, -1);
+    for (int index = 0; index < gameTileComponentArray.Length; ++index)
+      this.딟.Set(gameTileComponentArray[index].TileIndexX + gameTileComponentArray[index].TileIndexY * this.SizeX, true);
+  }
+
+  [CompilerGenerated]
+  [SpecialName]
+  public GameTileComponent[,] get_Tiles() => this.딟;
+
+  [CompilerGenerated]
+  [SpecialName]
+  public 딶.땠 get_TileNetwork() => this.딟;
+
+  [CompilerGenerated]
+  [SpecialName]
+  public VisibilityMap get_VisMap() => this.딟;
+
+  [CompilerGenerated]
+  [SpecialName]
+  public CoverMap get_CoverMap() => this.딟;
+}
+
+
+=== _original\decompiled\GameTileComponent.cs ===
+// Decompiled with JetBrains decompiler
+// Type: GameTileComponent
+// Assembly: Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+// MVID: C4E058C3-52EE-49D9-9B60-4517452EDFF8
+// Assembly location: C:\Users\Flo\Desktop\Neuer Ordner (2)\TacticsGame.unity3d_unpacked\Assembly-CSharp.dll
+
+using UnityEngine;
+
+[ExecuteInEditMode]
+[AddComponentMenu("Game/Tile")]
+public class GameTileComponent : MonoBehaviour
+{
+  public bool SolidWest;
+  public bool SolidEast;
+  public bool SolidNorth;
+  public bool SolidSouth;
+  public bool VisBlocker;
+  public 딶.딥 WestCover;
+  public 딶.딥 EastCover;
+  public 딶.딥 NorthCover;
+  public 딶.딥 SouthCover;
+  public bool DisableGizmos;
+  public int TileIndexX;
+  public int TileIndexY;
+  public int Height;
+  private float 딟 = -1f;
+
+  private void Start()
+  {
+    if (!Application.isPlaying)
+      return;
+    BoxCollider boxCollider = ((Component) this).gameObject.AddComponent<BoxCollider>();
+    boxCollider.center = new Vector3(0.0f, -0.005f, 0.0f);
+    boxCollider.size = new Vector3(1f, 0.01f, 1f);
+    ((Object) boxCollider).hideFlags = (HideFlags) 13;
+    ((Component) this).transform.position = ((Component) ((Component) this).transform.parent).GetComponent<GameGridComponent>().GetTileCentre(this.TileIndexX, this.TileIndexY, this.Height);
+  }
+
+  public void OnHoldStart()
+  {
+    땓.땦 unitOnTile = this.GetUnitOnTile(딢.딴.딟);
+    if (unitOnTile == null)
+      return;
+    딶.딡.땴().딟(unitOnTile);
+  }
+
+  public void OnHoldStop()
+  {
+    땓.땦 unitOnTile = this.GetUnitOnTile(딢.딴.딟);
+    if (unitOnTile == null)
+      return;
+    딶.딡.땴().땄(unitOnTile);
+  }
+
+  public 땓.땦 GetUnitOnTile(딢.딴 selectedAbility)
+  {
+    딶.땯 땯 = 딶.딡.땴().딷();
+    if (땯 != null)
+    {
+      int num = 딶.딡.땴().땼().딟(딶.딡.땴().땼().떂(), this.TileIndexX, this.TileIndexY, -1, selectedAbility);
+      if (num != -1)
+        return 땯.딟(num);
+    }
+    return (땓.땦) null;
+  }
+
+  private void OnClicked()
+  {
+    if ((double) this.딟 > 0.0 && (double) Time.time - (double) this.딟 < 0.400000005960464)
+    {
+      this.OnDoubleClicked();
+      this.딟 = -1f;
+    }
+    else
+    {
+      this.딟 = Time.time;
+      딶.딡.땴().딟(this);
+    }
+  }
+
+  private void OnDoubleClicked() => 딶.딡.땴().땄(this);
+
+  public 딶.딥 GetCoverType(GameTileComponent AttackerTile)
+  {
+    GameGridComponent component = ((Component) ((Component) this).transform.parent).GetComponent<GameGridComponent>();
+    GameTileComponent gameTileComponent1 = component.get_Tiles()[Mathf.Clamp(this.TileIndexX - 1, 0, component.SizeX - 1), this.TileIndexY];
+    GameTileComponent gameTileComponent2 = component.get_Tiles()[Mathf.Clamp(this.TileIndexX + 1, 0, component.SizeX - 1), this.TileIndexY];
+    GameTileComponent gameTileComponent3 = component.get_Tiles()[this.TileIndexX, Mathf.Clamp(this.TileIndexY + 1, 0, component.SizeY - 1)];
+    GameTileComponent gameTileComponent4 = component.get_Tiles()[this.TileIndexX, Mathf.Clamp(this.TileIndexY - 1, 0, component.SizeY - 1)];
+    if (this.WestCover == 딶.딥.딟 && this.NorthCover == 딶.딥.딟 && this.SouthCover == 딶.딥.딟 && this.EastCover == 딶.딥.딟 && gameTileComponent1.EastCover == 딶.딥.딟 && gameTileComponent2.WestCover == 딶.딥.딟 && gameTileComponent3.SouthCover == 딶.딥.딟 && gameTileComponent4.NorthCover == 딶.딥.딟)
+      return 딶.딥.딟;
+    Vector3 position1 = ((Component) this).transform.position;
+    Vector2 Line1End;
+    // ISSUE: explicit constructor call
+    ((Vector2) ref Line1End).\u002Ector((float) position1.x, (float) position1.z);
+    Vector3 position2 = ((Component) AttackerTile).transform.position;
+    Vector2 Line1Start;
+    // ISSUE: explicit constructor call
+    ((Vector2) ref Line1Start).\u002Ector((float) position2.x, (float) position2.z);
+    if (this.WestCover != 딶.딥.딟 || gameTileComponent1.EastCover != 딶.딥.딟)
+    {
+      Vector2 vector2_1;
+      // ISSUE: explicit constructor call
+      ((Vector2) ref vector2_1).\u002Ector(-0.5f, -0.5f);
+      Vector2 vector2_2;
+      // ISSUE: explicit constructor call
+      ((Vector2) ref vector2_2).\u002Ector(0.0f, 1f);
+      if (this.DoLinesIntersect(Line1Start, Line1End, Vector2.op_Addition(Line1End, vector2_1), Vector2.op_Addition(Vector2.op_Addition(Line1End, vector2_1), vector2_2)))
+        return this.WestCover != 딶.딥.딟 ? this.WestCover : gameTileComponent1.EastCover;
+    }
+    if (this.EastCover != 딶.딥.딟 || gameTileComponent2.WestCover != 딶.딥.딟)
+    {
+      Vector2 vector2_3;
+      // ISSUE: explicit constructor call
+      ((Vector2) ref vector2_3).\u002Ector(0.5f, -0.5f);
+      Vector2 vector2_4;
+      // ISSUE: explicit constructor call
+      ((Vector2) ref vector2_4).\u002Ector(0.0f, 1f);
+      if (this.DoLinesIntersect(Line1Start, Line1End, Vector2.op_Addition(Line1End, vector2_3), Vector2.op_Addition(Vector2.op_Addition(Line1End, vector2_3), vector2_4)))
+        return this.EastCover != 딶.딥.딟 ? this.EastCover : gameTileComponent2.WestCover;
+    }
+    if (this.NorthCover != 딶.딥.딟 || gameTileComponent3.SouthCover != 딶.딥.딟)
+    {
+      Vector2 vector2_5;
+      // ISSUE: explicit constructor call
+      ((Vector2) ref vector2_5).\u002Ector(-0.5f, 0.5f);
+      Vector2 vector2_6;
+      // ISSUE: explicit constructor call
+      ((Vector2) ref vector2_6).\u002Ector(1f, 0.0f);
+      if (this.DoLinesIntersect(Line1Start, Line1End, Vector2.op_Addition(Line1End, vector2_5), Vector2.op_Addition(Vector2.op_Addition(Line1End, vector2_5), vector2_6)))
+        return this.NorthCover != 딶.딥.딟 ? this.NorthCover : gameTileComponent3.SouthCover;
+    }
+    if (this.SouthCover != 딶.딥.딟 || gameTileComponent4.NorthCover != 딶.딥.딟)
+    {
+      Vector2 vector2_7;
+      // ISSUE: explicit constructor call
+      ((Vector2) ref vector2_7).\u002Ector(-0.5f, -0.5f);
+      Vector2 vector2_8;
+      // ISSUE: explicit constructor call
+      ((Vector2) ref vector2_8).\u002Ector(1f, 0.0f);
+      if (this.DoLinesIntersect(Line1Start, Line1End, Vector2.op_Addition(Line1End, vector2_7), Vector2.op_Addition(Vector2.op_Addition(Line1End, vector2_7), vector2_8)))
+        return this.SouthCover != 딶.딥.딟 ? this.SouthCover : gameTileComponent4.NorthCover;
+    }
+    return 딶.딥.딟;
+  }
+
+  public bool BlocksLine(Vector2 Start, Vector2 End)
+  {
+    GameGridComponent component = ((Component) ((Component) this).transform.parent).GetComponent<GameGridComponent>();
+    GameTileComponent gameTileComponent1 = component.get_Tiles()[Mathf.Clamp(this.TileIndexX - 1, 0, component.SizeX - 1), this.TileIndexY];
+    GameTileComponent gameTileComponent2 = component.get_Tiles()[Mathf.Clamp(this.TileIndexX + 1, 0, component.SizeX - 1), this.TileIndexY];
+    GameTileComponent gameTileComponent3 = component.get_Tiles()[this.TileIndexX, Mathf.Clamp(this.TileIndexY + 1, 0, component.SizeY - 1)];
+    GameTileComponent gameTileComponent4 = component.get_Tiles()[this.TileIndexX, Mathf.Clamp(this.TileIndexY - 1, 0, component.SizeY - 1)];
+    if (this.WestCover != 딶.딥.딢 && this.NorthCover != 딶.딥.딢 && this.SouthCover != 딶.딥.딢 && this.EastCover != 딶.딥.딢 && gameTileComponent1.EastCover != 딶.딥.딢 && gameTileComponent2.WestCover != 딶.딥.딢 && gameTileComponent3.SouthCover != 딶.딥.딢 && gameTileComponent4.NorthCover != 딶.딥.딢)
+      return false;
+    Vector3 position = ((Component) this).transform.position;
+    Vector2 vector2_1;
+    // ISSUE: explicit constructor call
+    ((Vector2) ref vector2_1).\u002Ector((float) position.x, (float) position.z);
+    if (this.WestCover == 딶.딥.딢 || gameTileComponent1.EastCover == 딶.딥.딢)
+    {
+      Vector2 vector2_2;
+      // ISSUE: explicit constructor call
+      ((Vector2) ref vector2_2).\u002Ector(-0.5f, -0.5f);
+      Vector2 vector2_3;
+      // ISSUE: explicit constructor call
+      ((Vector2) ref vector2_3).\u002Ector(0.0f, 1f);
+      if (this.DoLinesIntersect(Start, End, Vector2.op_Addition(vector2_1, vector2_2), Vector2.op_Addition(Vector2.op_Addition(vector2_1, vector2_2), vector2_3)))
+        return true;
+    }
+    if (this.EastCover == 딶.딥.딢 || gameTileComponent2.WestCover == 딶.딥.딢)
+    {
+      Vector2 vector2_4;
+      // ISSUE: explicit constructor call
+      ((Vector2) ref vector2_4).\u002Ector(0.5f, -0.5f);
+      Vector2 vector2_5;
+      // ISSUE: explicit constructor call
+      ((Vector2) ref vector2_5).\u002Ector(0.0f, 1f);
+      if (this.DoLinesIntersect(Start, End, Vector2.op_Addition(vector2_1, vector2_4), Vector2.op_Addition(Vector2.op_Addition(vector2_1, vector2_4), vector2_5)))
+        return true;
+    }
+    if (this.NorthCover == 딶.딥.딢 || gameTileComponent3.SouthCover == 딶.딥.딢)
+    {
+      Vector2 vector2_6;
+      // ISSUE: explicit constructor call
+      ((Vector2) ref vector2_6).\u002Ector(-0.5f, 0.5f);
+      Vector2 vector2_7;
+      // ISSUE: explicit constructor call
+      ((Vector2) ref vector2_7).\u002Ector(1f, 0.0f);
+      if (this.DoLinesIntersect(Start, End, Vector2.op_Addition(vector2_1, vector2_6), Vector2.op_Addition(Vector2.op_Addition(vector2_1, vector2_6), vector2_7)))
+        return true;
+    }
+    if (this.SouthCover == 딶.딥.딢 || gameTileComponent4.NorthCover == 딶.딥.딢)
+    {
+      Vector2 vector2_8;
+      // ISSUE: explicit constructor call
+      ((Vector2) ref vector2_8).\u002Ector(-0.5f, -0.5f);
+      Vector2 vector2_9;
+      // ISSUE: explicit constructor call
+      ((Vector2) ref vector2_9).\u002Ector(1f, 0.0f);
+      if (this.DoLinesIntersect(Start, End, Vector2.op_Addition(vector2_1, vector2_8), Vector2.op_Addition(Vector2.op_Addition(vector2_1, vector2_8), vector2_9)))
+        return true;
+    }
+    return false;
+  }
+
+  private bool DoLinesIntersect(
+    Vector2 Line1Start,
+    Vector2 Line1End,
+    Vector2 Line2Start,
+    Vector2 Line2End)
+  {
+    float num1 = (float) ((Line2End.y - Line2Start.y) * (Line1End.x - Line1Start.x) - (Line2End.x - Line2Start.x) * (Line1End.y - Line1Start.y));
+    if ((double) num1 == 0.0)
+      return false;
+    float num2 = (float) ((Line2End.x - Line2Start.x) * (Line1Start.y - Line2Start.y) - (Line2End.y - Line2Start.y) * (Line1Start.x - Line2Start.x));
+    float num3 = (float) ((Line1End.x - Line1Start.x) * (Line1Start.y - Line2Start.y) - (Line1End.y - Line1Start.y) * (Line1Start.x - Line2Start.x));
+    float num4 = num2 / num1;
+    float num5 = num3 / num1;
+    return (double) num4 >= 0.0 && (double) num4 <= 1.0 && (double) num5 >= 0.0 && (double) num5 <= 1.0;
+  }
+}
+
+
+=== _original\decompiled\CoverMap.cs ===
+// Decompiled with JetBrains decompiler
+// Type: CoverMap
+// Assembly: Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+// MVID: C4E058C3-52EE-49D9-9B60-4517452EDFF8
+// Assembly location: C:\Users\Flo\Desktop\Neuer Ordner (2)\TacticsGame.unity3d_unpacked\Assembly-CSharp.dll
+
+using System;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using UnityEngine;
+
+[Serializable]
+public class CoverMap : MonoBehaviour
+{
+  private int 딟 = 2;
+  private GameGridComponent 딟;
+  [SerializeField]
+  private List<CoverArray> CoverData;
+
+  public bool Build(GameGridComponent Grid)
+  {
+    this.Setup(Grid);
+    this.CoverData = new List<CoverArray>();
+    for (int StartY = 0; StartY < Grid.SizeY; ++StartY)
+    {
+      for (int StartX = 0; StartX < Grid.SizeX; ++StartX)
+      {
+        CoverArray coverArray = new CoverArray();
+        coverArray.Bits = new List<int>(Grid.SizeX * Grid.SizeY / (32 / this.딟) + 1);
+        this.FillCoverArray(coverArray.Bits, StartX, StartY);
+        this.CoverData.Add(coverArray);
+      }
+    }
+    return true;
+  }
+
+  public bool IsValid() => this.CoverData != null && this.CoverData.Count > 0;
+
+  private int GetArrayIndex(int X, int Y) => (Y * this.딟.SizeX + X) / (32 / this.딟);
+
+  private int GetStartOfCellOffset(int ArrayIndex) => ArrayIndex * 4 * 8 / this.딟;
+
+  private int GetAmountToShift(int x, int y, int ArrayIndex) => (y * this.딟.SizeX + x - this.GetStartOfCellOffset(ArrayIndex)) * this.딟;
+
+  private void FillCoverArray(List<int> CostArray, int StartX, int StartY)
+  {
+    for (int index1 = 0; index1 < this.딟.SizeY; ++index1)
+    {
+      for (int index2 = 0; index2 < this.딟.SizeX; ++index2)
+      {
+        int arrayIndex = this.GetArrayIndex(index2, index1);
+        int amountToShift = this.GetAmountToShift(index2, index1, arrayIndex);
+        int num = (int) this.딟.get_Tiles()[index2, index1].GetCoverType(this.딟.get_Tiles()[StartX, StartY]) << amountToShift;
+        if (arrayIndex >= CostArray.Count)
+        {
+          CostArray.Add(num);
+        }
+        else
+        {
+          List<int> intList;
+          int index3;
+          (intList = CostArray)[index3 = arrayIndex] = intList[index3] | num;
+        }
+      }
+    }
+  }
+
+  public void Setup(GameGridComponent Grid)
+  {
+    this.딟 = Grid;
+    // ISSUE: reference to a compiler-generated method
+    this.set_MaxValue((1 << this.딟) - 1);
+  }
+
+  public int GetCoverType(int AttackerX, int AttackerY, int DefenderX, int DefenderY)
+  {
+    int arrayIndex = this.GetArrayIndex(DefenderX, DefenderY);
+    int amountToShift = this.GetAmountToShift(DefenderX, DefenderY, arrayIndex);
+    uint num = (uint) (this.get_MaxValue() << amountToShift);
+    return (int) (((uint) this.CoverData[AttackerY * this.딟.SizeX + AttackerX].Bits[arrayIndex] & num) >> amountToShift);
+  }
+
+  [CompilerGenerated]
+  [SpecialName]
+  public int get_MaxValue() => this.땄;
+}
+
+
+=== _original\decompiled\CoverArray.cs ===
+// Decompiled with JetBrains decompiler
+// Type: CoverArray
+// Assembly: Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+// MVID: C4E058C3-52EE-49D9-9B60-4517452EDFF8
+// Assembly location: C:\Users\Flo\Desktop\Neuer Ordner (2)\TacticsGame.unity3d_unpacked\Assembly-CSharp.dll
+
+using System;
+using System.Collections.Generic;
+
+[Serializable]
+public class CoverArray
+{
+  public List<int> Bits;
+}
+
+
+=== _original\decompiled\SpawnPointComponent.cs ===
+// Decompiled with JetBrains decompiler
+// Type: SpawnPointComponent
+// Assembly: Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+// MVID: C4E058C3-52EE-49D9-9B60-4517452EDFF8
+// Assembly location: C:\Users\Flo\Desktop\Neuer Ordner (2)\TacticsGame.unity3d_unpacked\Assembly-CSharp.dll
+
+using System.Runtime.CompilerServices;
+
+public class SpawnPointComponent : GameRulesComponent
+{
+  public 딶.땂 Team;
+  public 딢.딯 Direction;
+
+  [CompilerGenerated]
+  [SpecialName]
+  public int get_DistanceToControlPoint() => this.딟;
+
+  [CompilerGenerated]
+  [SpecialName]
+  public void set_DistanceToControlPoint(int value) => this.딟 = value;
+}
+
+
+=== bench\boards.js ===
+// bench/boards.js â€” Banco ejecutable de los 13 tableros (sin cambiar ningÃºn nÃºmero del juego).
+//
+// QuÃ© hace: lee MAP_DEFS de index.html (los datos de mapa reales), replica
+// los algoritmos exactos del juego (pathDist = BFS ignorando unidades, L1426;
+// cheb, L1411) y mide, por tablero: casillas libres conectadas, pasos a la
+// baliza desde el despliegue mÃ¡s cercano (A y B), ruta del dron hasta la
+// casilla mÃ¡s cercana de la extracciÃ³n, simetrÃ­a 180Â° de las cinco familias
+// de piezas y solapes. Al final coteja contra las dos tablas publicadas
+// (la auditorÃ­a del 16/11 y la entrada de la pÃ¡gina) para seÃ±alar dÃ³nde
+// coinciden y dÃ³nde no.
+//
+// Uso:  node bench/boards.js
+'use strict';
+const fs = require('fs');
+const path = require('path');
+
+const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+
+// --- 1. Extraer MAP_DEFS del juego (datos reales, no una copia) ---
+const m = html.match(/const MAP_DEFS=(\{[\s\S]*?\n\});/);
+if (!m) { console.error('FALLO: no se pudo extraer MAP_DEFS de index.html'); process.exit(1); }
+const MAP_DEFS = eval('(' + m[1] + ')');
+
+// --- 2. Constantes del juego (citas de lÃ­nea en index.html) ---
+const W = 12, H = 12;                                                       // L1039
+const BEACON = [{x:5,y:5},{x:6,y:5},{x:5,y:6},{x:6,y:6}];                   // L1040
+const ESCORT_START = {x:1,y:5};                                             // L771
+const ESCORT_EXT = [{x:10,y:5},{x:11,y:5},{x:10,y:6},{x:11,y:6}];           // L772
+const SPAWNS_A = [{x:0,y:3},{x:0,y:5},{x:1,y:6},{x:0,y:7},{x:0,y:6}];       // L1492
+const SPAWNS_B = [{x:11,y:8},{x:11,y:6},{x:10,y:5},{x:11,y:4},{x:11,y:5}];  // L1493
+
+// --- 3. Algoritmos exactos del juego ---
+const key = (x, y) => x + ',' + y;
+const cheb = (a, b) => Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));  // L1411
+
+// obstÃ¡culos = walls + shelves + crates (buildMap los concatena en `obstacles`, L1372)
+function obstacles(def) {
+  const s = new Set();
+  for (const k of ['walls', 'shelves', 'crates']) for (const [x, y] of def[k]) s.add(key(x, y));
+  return s;
+}
+
+// BFS ignorando unidades (idÃ©ntico a pathDist, L1426-1434)
+function pathDist(obs, a, b) {
+  if (a.x === b.x && a.y === b.y) return 0;
+  const seen = new Set([key(a.x, a.y)]);
+  let q = [{x: a.x, y: a.y, d: 0}];
+  while (q.length) {
+    const c = q.shift();
+    for (const [dx, dy] of [[1,0],[-1,0],[0,1],[0,-1]]) {
+      const nx = c.x + dx, ny = c.y + dy, k = key(nx, ny);
+      if (nx < 0 || ny < 0 || nx >= W || ny >= H || seen.has(k) || obs.has(k)) continue;
+      if (nx === b.x && ny === b.y) return c.d + 1;
+      seen.add(k); q.push({x: nx, y: ny, d: c.d + 1});
+    }
+  }
+  return 99;
+}
+function minDist(obs, from, to) {
+  let best = 99;
+  for (const a of from) for (const b of to) best = Math.min(best, pathDist(obs, a, b));
+  return best;
+}
+// casillas libres conectadas: BFS desde una celda libre (sin wall/shelf/crate)
+function connectedFree(obs) {
+  let start = null;
+  for (let y = 0; y < H && !start; y++) for (let x = 0; x < W; x++) if (!obs.has(key(x, y))) { start = {x, y}; break; }
+  if (!start) return 0;
+  const seen = new Set([key(start.x, start.y)]);
+  let q = [start];
+  while (q.length) {
+    const c = q.shift();
+    for (const [dx, dy] of [[1,0],[-1,0],[0,1],[0,-1]]) {
+      const nx = c.x + dx, ny = c.y + dy, k = key(nx, ny);
+      if (nx < 0 || ny < 0 || nx >= W || ny >= H || seen.has(k) || obs.has(k)) continue;
+      seen.add(k); q.push({x: nx, y: ny, d: 0});
+    }
+  }
+  return seen.size;
+}
+function sym180(list) {
+  const s = new Set(list.map(([x, y]) => key(x, y)));
+  if (s.size !== list.length) return 'dup';            // piezas repetidas dentro de la familia
+  for (const [x, y] of list) if (!s.has(key(11 - x, 11 - y))) return 'no';
+  return 'ok';
+}
+
+// --- 4. Medir los 13 tableros ---
+const boards = Object.keys(MAP_DEFS).filter(k => MAP_DEFS[k] && Array.isArray(MAP_DEFS[k].walls));
+const rows = [];
+for (const id of boards) {
+  const def = MAP_DEFS[id];
+  const obs = obstacles(def);
+  const libres = connectedFree(obs);
+  const balA = minDist(obs, SPAWNS_A, BEACON);
+  const balB = minDist(obs, SPAWNS_B, BEACON);
+  const dron = minDist(obs, [ESCORT_START], ESCORT_EXT);
+  const sim = ['walls','shelves','crates','barrels','medkits'].every(k => sym180(def[k]) === 'ok');
+  const simDetail = ['walls','shelves','crates','barrels','medkits'].map(k => k[0] + ':' + sym180(def[k])).join(' ');
+  // solapes entre todas las familias
+  const cells = new Set();
+  let overlaps = 0;
+  for (const k of ['walls','shelves','crates','barrels','medkits']) for (const [x, y] of def[k]) { if (cells.has(key(x, y))) overlaps++; else cells.add(key(x, y)); }
+  rows.push({id, libres, balA, balB, bal: Math.min(balA, balB), dron, sim, simDetail, overlaps});
+}
+
+console.log('=== MEDICIÃ“N EJECUTABLE (pathDist BFS sobre MAP_DEFS reales) ===');
+console.log('Tablero        libres  balizaA  balizaB  dron  sim180  solapes  detalle');
+for (const r of rows) {
+  console.log(
+    r.id.padEnd(15), String(r.libres).padEnd(7), String(r.balA).padEnd(8), String(r.balB).padEnd(8),
+    String(r.dron).padEnd(5), (r.sim ? 'ok' : 'FALLA').padEnd(7), String(r.overlaps).padEnd(8), r.simDetail
+  );
+}
+
+// --- 5. Cotejo contra las dos tablas publicadas ---
+// Formato: [baliza, dron, libres]
+const auditTable = {
+  almacen: [11, 21, 114], patio: [8, 17, 118], skirmish01: [6, 11, 114], skirmish02: [6, 11, 114],
+  skirmish: [7, 19, 116], skirmish04: [7, 13, 116], skirmish05: [7, 12, 114], skirmish06: [6, 12, 112],
+  skirmish07: [6, 11, 114], skirmish08: [4, 11, 114], skirmish09: [6, 11, 114], skirmish10: [6, 11, 114], skirmish11: [6, 11, 114]
+};
+// Formato: [libres, baliza, dron]  (orden de la entrada de la pÃ¡gina, L464)
+const pageTable = {
+  almacen: [114, 11, 22], patio: [118, 8, 17], skirmish01: [114, 6, 11], skirmish02: [114, 6, 11],
+  skirmish: [116, 7, 15], skirmish04: [116, 6, 13], skirmish05: [114, 7, 12], skirmish06: [112, 6, 12],
+  skirmish07: [114, 6, 11], skirmish08: [114, 4, 11], skirmish09: [114, 6, 11], skirmish10: [114, 6, 11], skirmish11: [114, 6, 11]
+};
+console.log('\n=== COTEJO CONTRA LAS TABLAS PUBLICADAS (medido = baliza/dron/libres) ===');
+console.log('Tablero        medido            auditorÃ­a 16/11      pÃ¡gina L464        veredicto');
+for (const r of rows) {
+  const mine = `${r.bal}/${r.dron}/${r.libres}`;
+  const a = auditTable[r.id] ? `${auditTable[r.id][0]}/${auditTable[r.id][1]}/${auditTable[r.id][2]}` : 'â€”';
+  const p = pageTable[r.id] ? `${pageTable[r.id][1]}/${pageTable[r.id][2]}/${pageTable[r.id][0]}` : 'â€”';
+  const matchA = auditTable[r.id] && auditTable[r.id][0] === r.bal && auditTable[r.id][1] === r.dron && auditTable[r.id][2] === r.libres;
+  const matchP = pageTable[r.id] && pageTable[r.id][1] === r.bal && pageTable[r.id][2] === r.dron && pageTable[r.id][0] === r.libres;
+  const verdict = matchA ? (matchP ? 'ambas' : 'auditorÃ­a') : (matchP ? 'pÃ¡gina' : 'NINGUNA');
+  console.log(r.id.padEnd(15), mine.padEnd(17), a.padEnd(18), p.padEnd(18), verdict);
+}
+
+
+=== bench\movement.test.js ===
+'use strict';
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+
+const root = path.dirname(__dirname);
+const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+const capture = fs.readFileSync(path.join(root, '_capture_all.mjs'), 'utf8');
+
+test('el movimiento 3D sigue un camino de casillas', () => {
+  assert.match(html, /function drawMovePath\(unit,from,to\)\{/);
+  assert.match(html, /function startDrawMove\(un,path\)\{/);
+  assert.match(html, /function updateUnitDrawPosition\(un,now\)\{/);
+  assert.match(html, /G\.units\.forEach\(un=>updateUnitDrawPosition\(un,drawNow\)\)/);
+  assert.match(html, /un\._drawPath=\[\{x:un\.dx!=null\?un\.dx:un\.x/);
+  assert.match(html, /un\._moveYaw=\(Math\.abs\(sx\)\+Math\.abs\(sy\)>0\.01\)\?Math\.atan2\(sy,sx\):null/);
+  assert.match(html, /function facingYaw\(u\)\{if\(u\._moveYaw!=null\)return u\._moveYaw/);
+});
+
+test('el paso de la marcha sigue la distancia real', () => {
+  assert.match(html, /ud\._gaitPhase=\(ud\._gaitPhase\|\|0\)\+gstep\/0\.42/);
+  assert.match(html, /ct=\(\(ud\._gaitPhase\|\|0\)\+ud\.clipPhase\)%clips\[key\]\.dur/);
+  assert.match(html, /const walking=!REDUCED_MOTION&&\(gspeed>0\.15\|\|moving\|\|un\._turning\)/);
+  assert.match(html, /\|\|!!un\._drawPath/);
+});
+
+test('los giros usan los clips reales de 90 y 180 grados', () => {
+  assert.match(html, /un\._turning&&clips\['turn'\+stance\+'L'\]/);
+  assert.match(html, /Math\.abs\(arc\)>2\.3\?\('turn'\+stance\+'180'\)/);
+  assert.match(html, /'turn'\+stance\+\(arc>0\?'L':'R'\)/);
+  assert.match(html, /ct=\(un\._turnProg\|\|0\)\*clips\[key\]\.dur/);
+  assert.match(capture, /clip:\(ud&&ud\._clipKey\)\|\|null,ct:/);
+});
+
+test('las texturas de soldado evitan sangrado de atlas', () => {
+  assert.match(html, /t\.generateMipmaps=false/);
+  assert.match(html, /t\.minFilter=THREE\.LinearFilter/);
+  assert.match(html, /t\.wrapS=THREE\.ClampToEdgeWrapping/);
+  assert.match(html, /Math\.min\(0\.998,Math\.max\(0\.002,UV\[ti\]\[0\]\)\)/);
+});
+
+test('las capturas registran movimiento y estado de textura', () => {
+  assert.match(capture, /const moveMode = mapId\.startsWith\('move:'\)/);
+  assert.match(capture, /window\.__moveProbe/);
+  assert.match(capture, /result\.tex = JSON\.parse\(rawTex\)/);
+  assert.match(capture, /const moveOk = !moveMode/);
+});
+
+
+=== MEDICION REAL DE COLISIONES EN assets/maps/*.bin ===
+skirmish03.bin | verts=84939 | scale=0.3629 | floorOrig={"cx":0,"cz":0,"w":41.33,"d":33.33} | boundsOrig={"min":[-26.5,-2,-17.56],"max":[24.12,11.25,17]}
+   en 12x12 escalado: casillasConSolidos(>0.25)=138/144 | vertsSolidos=42587/65974 | Y=[-0.73, 3.58] | sueloP5..P95=[-0.023, 0.231]
+skirmish04.bin | verts=80571 | scale=0.3502 | floorOrig={"cx":0,"cz":0,"w":42.83,"d":39.33} | boundsOrig={"min":[-21.79,-1.66,-20.02],"max":[25.75,13.94,20]}
+   en 12x12 escalado: casillasConSolidos(>0.25)=111/144 | vertsSolidos=36006/57257 | Y=[-0.58, 4.88] | sueloP5..P95=[-0.022, 0.219]
+skirmish05.bin | verts=61665 | scale=0.4286 | floorOrig={"cx":0,"cz":0,"w":35,"d":37.1551} | boundsOrig={"min":[-17.5,-1.86,-18.81],"max":[17.5,9.6,18.63]}
+   en 12x12 escalado: casillasConSolidos(>0.25)=100/144 | vertsSolidos=27873/51958 | Y=[-0.80, 3.75] | sueloP5..P95=[-0.129, 0.234]
+skirmish06.bin | verts=69652 | scale=0.5167 | floorOrig={"cx":0,"cz":0,"w":29.0301,"d":40.5} | boundsOrig={"min":[-14.57,-3.5,-20.25],"max":[17.52,8.1,20.25]}
+   en 12x12 escalado: casillasConSolidos(>0.25)=115/144 | vertsSolidos=19346/39977 | Y=[-1.81, 2.32] | sueloP5..P95=[-0.032, 0.213]
+skirmish08.bin | verts=87338 | scale=0.4297 | floorOrig={"cx":0,"cz":0,"w":34.9112,"d":56.0602} | boundsOrig={"min":[-19.85,-5.52,-28.12],"max":[20.46,5.75,28.08]}
+   en 12x12 escalado: casillasConSolidos(>0.25)=91/144 | vertsSolidos=13214/39301 | Y=[-2.23, 1.66] | sueloP5..P95=[-0.215, 0.208]
+skirmish09.bin | verts=75576 | scale=0.2477 | floorOrig={"cx":0,"cz":0,"w":60.5457,"d":33.0602} | boundsOrig={"min":[-30.32,-0.5,-16.58],"max":[30.27,11.1,16.58]}
+   en 12x12 escalado: casillasConSolidos(>0.25)=63/144 | vertsSolidos=21169/64819 | Y=[-0.12, 2.75] | sueloP5..P95=[-0.008, 0.195]
+skirmish10.bin | verts=73683 | scale=0.5552 | floorOrig={"cx":0,"cz":0,"w":27.0175,"d":44.5} | boundsOrig={"min":[-16.51,-2,-22.48],"max":[13.51,8.25,22.48]}
+   en 12x12 escalado: casillasConSolidos(>0.25)=118/144 | vertsSolidos=13939/34379 | Y=[-0.83, 1.89] | sueloP5..P95=[-0.213, 0.213]
+skirmish11.bin | verts=74344 | scale=0.3608 | floorOrig={"cx":0,"cz":0,"w":41.5721,"d":34.625} | boundsOrig={"min":[-20.79,-0.77,-18.31],"max":[20.79,10.66,17.31]}
+   en 12x12 escalado: casillasConSolidos(>0.25)=133/144 | vertsSolidos=34379/69364 | Y=[-0.28, 3.85] | sueloP5..P95=[-0.018, 0.239]

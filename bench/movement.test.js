@@ -13,8 +13,8 @@ test('el movimiento 3D sigue un camino de casillas', () => {
   assert.match(html, /function startDrawMove\(un,path\)\{/);
   assert.match(html, /function updateUnitDrawPosition\(un,now\)\{/);
   assert.match(html, /G\.units\.forEach\(un=>updateUnitDrawPosition\(un,drawNow\)\)/);
-  assert.match(html, /un\._drawPath=\[\{x:un\.dx!=null\?un\.dx:un\.x/);
-  assert.match(html, /un\._moveYaw=\(Math\.abs\(sx\)\+Math\.abs\(sy\)>0\.01\)\?Math\.atan2\(sy,sx\):null/);
+  assert.match(html, /un\._drawPath=pts;un\._drawSegs=segs;un\._drawLen=total/);
+  assert.match(html, /un\._moveYaw=Math\.atan2\(s\.b\.y-s\.a\.y,s\.b\.x-s\.a\.x\)/);
   assert.match(html, /function facingYaw\(u\)\{if\(u\._moveYaw!=null\)return u\._moveYaw/);
 });
 

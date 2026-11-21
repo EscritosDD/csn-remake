@@ -75,6 +75,34 @@ test('cada personaje tiene su voz extraida', () => {
   }
 });
 
+test('el servidor sirve GLB/GLTF con MIME correcto', () => {
+  const server = fs.readFileSync(path.join(ROOT, 'server.js'), 'utf8');
+  assert.match(server, /'\.glb':\s*'model\/gltf-binary'/);
+  assert.match(server, /'\.gltf':\s*'model\/gltf\+json'/);
+});
+
+test('las 23 armas tienen calibracion por bounds reales', () => {
+  const cal = JSON.parse(fs.readFileSync(path.join(ROOT, 'assets', 'weapons', 'weapon_calibrations.json'), 'utf8'));
+  const files = fs.readdirSync(path.join(ROOT, 'assets', 'weapons')).filter(f => f.endsWith('.obj'));
+  assert.equal(Object.keys(cal).length, 23);
+  for (const file of files) {
+    const key = file.slice(0, -4);
+    const entry = cal[key];
+    assert.ok(entry, 'falta calibracion de ' + key);
+    assert.equal(entry.socket, 'Bip001 R Hand');
+    assert.ok(entry.scale > 0 && entry.scale < 20, 'escala rara de ' + key);
+    assert.equal(entry.gripOffset.length, 3);
+  }
+});
+
+test('la captura auditoriza el visor y la verificacion la ejecuta', () => {
+  const cap = fs.readFileSync(path.join(ROOT, '_capture_all.mjs'), 'utf8');
+  const verify = fs.readFileSync(path.join(ROOT, 'bench', 'VERIFICAR.ps1'), 'utf8');
+  assert.ok(cap.includes("mapId.startsWith('viewer:')"));
+  assert.ok(cap.includes("result.viewerAudit = result.viewer"));
+  assert.ok(verify.includes('viewer:audit-all'));
+});
+
 test('los siete modelos por clase estan en assets/soldier', () => {
   const files = ['Francotirador', 'Artillero', 'Espia', 'Medico', 'Ingeniero', 'Comando', 'Capitan'];
   for (const f of files) {

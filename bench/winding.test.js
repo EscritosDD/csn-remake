@@ -91,11 +91,30 @@ function metricas(geo) {
   return { volumen, ratio: alineadas / total };
 }
 
-const modelos = ['Artillero', 'Capitan', 'Comando', 'Espia', 'Francotirador', 'Ingeniero', 'Medico'];
+function archivosOBJ(dir) {
+  const encontrados = [];
+  for (const entrada of fs.readdirSync(dir, { withFileTypes: true })) {
+    const ruta = path.join(dir, entrada.name);
+    if (entrada.isDirectory()) encontrados.push(...archivosOBJ(ruta));
+    else if (entrada.name.toLowerCase().endsWith('.obj')) encontrados.push(ruta);
+  }
+  return encontrados;
+}
 
-for (const nombre of modelos) {
+const modelos = [
+  ['soldier', 'assets', 'soldier.obj'],
+  ['Artillero', 'assets', 'soldier', 'Artillero.obj'],
+  ['Capitan', 'assets', 'soldier', 'Capitan.obj'],
+  ['Comando', 'assets', 'soldier', 'Comando.obj'],
+  ['Espia', 'assets', 'soldier', 'Espia.obj'],
+  ['Francotirador', 'assets', 'soldier', 'Francotirador.obj'],
+  ['Ingeniero', 'assets', 'soldier', 'Ingeniero.obj'],
+  ['Medico', 'assets', 'soldier', 'Medico.obj']
+];
+
+for (const [nombre, ...ruta] of modelos) {
   test(nombre + ': winding hacia fuera tras reflejar X', () => {
-    const txt = fs.readFileSync(path.join(root, 'assets', 'soldier', nombre + '.obj'), 'utf8');
+    const txt = fs.readFileSync(path.join(root, ...ruta), 'utf8');
     const nv = txt.split('\n').reduce((n, l) => n + (/^v\s/.test(l.trim()) ? 1 : 0), 0);
     const skin = { skinIndex: new Array(nv * 4).fill(0), skinWeight: new Array(nv * 4).fill(0) };
     const geo = parseOBJ3(txt, skin);
@@ -104,3 +123,36 @@ for (const nombre of modelos) {
     assert.ok(m.ratio > 0.9, 'normales alineadas ' + (m.ratio * 100).toFixed(1) + '%');
   });
 }
+
+test('todos los OBJ: caras, coordenadas finitas y volumen calculable', () => {
+  const fallos = [];
+  for (const archivo of archivosOBJ(path.join(root, 'assets'))) {
+    const txt = fs.readFileSync(archivo, 'latin1');
+    const lineas = txt.split(/\r?\n/);
+    const nv = lineas.reduce((n, l) => n + (/^v\s/.test(l.trim()) ? 1 : 0), 0);
+    const nf = lineas.reduce((n, l) => n + (/^f\s/.test(l.trim()) ? 1 : 0), 0);
+    if (!nf) { fallos.push(path.relative(root, archivo) + ': sin caras'); continue; }
+    if (!nv) { fallos.push(path.relative(root, archivo) + ': sin vértices'); continue; }
+    const geo = parseOBJ3(txt, { skinIndex: new Array(nv * 4).fill(0), skinWeight: new Array(nv * 4).fill(0) });
+    if (!geo.position || !geo.index || geo.index.array.length < 3) {
+      fallos.push(path.relative(root, archivo) + ': geometría vacía');
+      continue;
+    }
+    if (Array.from(geo.position.array).some(v => !Number.isFinite(v))) {
+      fallos.push(path.relative(root, archivo) + ': coordenadas no finitas');
+      continue;
+    }
+    const m = metricas(geo);
+    if (!Number.isFinite(m.volumen)) fallos.push(path.relative(root, archivo) + ': volumen no finito');
+  }
+  assert.deepEqual(fallos, []);
+});
+
+test('Hipster Dave: arma acoplada a la mano en el visor', () => {
+  assert.match(html, /makeViewerRiggedModel\(source\.geo\.clone\(\),source\.data,texture,\{animatable:true,grip:true\}\)/);
+});
+
+test('updateHover3D: cobertura sin ReferenceError', () => {
+  assert.match(html, /cls=covLvl>0\?'cov':'';/);
+  assert.doesNotMatch(html, /cls=cov\?'cov':'';/);
+});

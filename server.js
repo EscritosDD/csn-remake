@@ -26,6 +26,8 @@ const MIME = {
   '.woff': 'font/woff',
   '.woff2': 'font/woff2',
   '.bin': 'application/octet-stream',
+  '.glb': 'model/gltf-binary',
+  '.gltf': 'model/gltf+json',
   '.obj': 'text/plain; charset=utf-8',
   '.md': 'text/markdown; charset=utf-8'
 };

@@ -1,0 +1,508 @@
+{
+  "Assault Rifle": {
+    "attachmentJoint": "gunBone_R",
+    "barracksOffset": [
+      -0.2,
+      0.0,
+      0.0
+    ],
+    "barracksRotation": [
+      0.0,
+      0.0,
+      180.0
+    ],
+    "barracksScale": [
+      1.4,
+      1.4,
+      1.4
+    ],
+    "muzzleJointName": "gunMuzzleBone",
+    "muzzleJointNameB": "gunMuzzleBone",
+    "sourceBundle": "BasicWeapons.assetbundle",
+    "weaponId": "com.warchestgames.radtactics.assaultrifle"
+  },
+  "Baseball Bat": {
+    "attachmentJoint": "gunBone_R",
+    "barracksOffset": [
+      -0.35,
+      0.0,
+      0.0
+    ],
+    "barracksRotation": [
+      180.0,
+      -90.0,
+      0.0
+    ],
+    "barracksScale": [
+      1.4,
+      1.4,
+      1.4
+    ],
+    "muzzleJointName": "",
+    "muzzleJointNameB": "",
+    "sourceBundle": "Weapons.assetbundle",
+    "weaponId": "com.warchestgames.radtactics.baseballbat"
+  },
+  "Chainsaw": {
+    "attachmentJoint": "gunBone_R",
+    "barracksOffset": [
+      -0.4,
+      0.0,
+      0.0
+    ],
+    "barracksRotation": [
+      180.0,
+      -90.0,
+      0.0
+    ],
+    "barracksScale": [
+      1.4,
+      1.4,
+      1.4
+    ],
+    "muzzleJointName": "",
+    "muzzleJointNameB": "",
+    "sourceBundle": "Weapons03.assetbundle",
+    "weaponId": "com.warchestgames.radtactics.chainsaw"
+  },
+  "Explosive Crossbow": {
+    "attachmentJoint": "gunBone_R",
+    "barracksOffset": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "barracksRotation": [
+      0.0,
+      0.0,
+      180.0
+    ],
+    "barracksScale": [
+      1.4,
+      1.4,
+      1.4
+    ],
+    "muzzleJointName": "gunMuzzleBone",
+    "muzzleJointNameB": "gunMuzzleBone",
+    "sourceBundle": "BasicWeapons.assetbundle",
+    "weaponId": "com.warchestgames.radtactics.explosivecrossbow"
+  },
+  "JackHammer": {
+    "attachmentJoint": "gunBone_R",
+    "barracksOffset": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "barracksRotation": [
+      0.0,
+      0.0,
+      180.0
+    ],
+    "barracksScale": [
+      1.4,
+      1.4,
+      1.4
+    ],
+    "muzzleJointName": "gunMuzzleBone",
+    "muzzleJointNameB": "gunMuzzleBone",
+    "sourceBundle": "Weapons.assetbundle",
+    "weaponId": "com.warchestgames.radtactics.jackhammer"
+  },
+  "Katana": {
+    "attachmentJoint": "gunBone_R",
+    "barracksOffset": [
+      -0.35,
+      0.0,
+      0.0
+    ],
+    "barracksRotation": [
+      180.0,
+      -90.0,
+      0.0
+    ],
+    "barracksScale": [
+      1.4,
+      1.4,
+      1.4
+    ],
+    "muzzleJointName": "",
+    "muzzleJointNameB": "",
+    "sourceBundle": "Weapons.assetbundle",
+    "weaponId": "com.warchestgames.radtactics.katana"
+  },
+  "Knife": {
+    "attachmentJoint": "gunBone_R",
+    "barracksOffset": [
+      -0.25,
+      0.0,
+      0.0
+    ],
+    "barracksRotation": [
+      180.0,
+      -90.0,
+      0.0
+    ],
+    "barracksScale": [
+      1.6,
+      1.6,
+      1.6
+    ],
+    "muzzleJointName": "",
+    "muzzleJointNameB": "",
+    "sourceBundle": "Weapons.assetbundle",
+    "weaponId": "com.warchestgames.radtactics.knife"
+  },
+  "LMG": {
+    "attachmentJoint": "gunBone_R",
+    "barracksOffset": [
+      -0.2,
+      0.0,
+      0.0
+    ],
+    "barracksRotation": [
+      0.0,
+      0.0,
+      180.0
+    ],
+    "barracksScale": [
+      1.4,
+      1.4,
+      1.4
+    ],
+    "muzzleJointName": "gunMuzzleBone",
+    "muzzleJointNameB": "gunMuzzleBone",
+    "sourceBundle": "Weapons.assetbundle",
+    "weaponId": "com.warchestgames.radtactics.lmg"
+  },
+  "M95": {
+    "attachmentJoint": "gunBone_R",
+    "barracksOffset": [
+      -0.25,
+      0.0,
+      0.0
+    ],
+    "barracksRotation": [
+      0.0,
+      0.0,
+      180.0
+    ],
+    "barracksScale": [
+      1.4,
+      1.4,
+      1.4
+    ],
+    "muzzleJointName": "gunMuzzleBone",
+    "muzzleJointNameB": "gunMuzzleBone",
+    "sourceBundle": "Weapons.assetbundle",
+    "weaponId": "com.warchestgames.radtactics.m95"
+  },
+  "MP5k": {
+    "attachmentJoint": "gunBone_R",
+    "barracksOffset": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "barracksRotation": [
+      0.0,
+      0.0,
+      180.0
+    ],
+    "barracksScale": [
+      1.5,
+      1.5,
+      1.5
+    ],
+    "muzzleJointName": "gunMuzzleBone",
+    "muzzleJointNameB": "gunMuzzleBone",
+    "sourceBundle": "Weapons02.assetbundle",
+    "weaponId": "com.warchestgames.radtactics.mp5k"
+  },
+  "MiniGun": {
+    "attachmentJoint": "gunBone_R",
+    "barracksOffset": [
+      -0.5,
+      0.0,
+      0.1
+    ],
+    "barracksRotation": [
+      0.0,
+      0.0,
+      180.0
+    ],
+    "barracksScale": [
+      1.4,
+      1.4,
+      1.4
+    ],
+    "muzzleJointName": "gunMuzzleBone",
+    "muzzleJointNameB": "gunMuzzleBone",
+    "sourceBundle": "Weapons.assetbundle",
+    "weaponId": "com.warchestgames.radtactics.minigun"
+  },
+  "Pistol": {
+    "attachmentJoint": "gunBone_R",
+    "barracksOffset": [
+      -0.25,
+      0.0,
+      0.0
+    ],
+    "barracksRotation": [
+      0.0,
+      0.0,
+      180.0
+    ],
+    "barracksScale": [
+      1.6,
+      1.6,
+      1.6
+    ],
+    "muzzleJointName": "gunMuzzleBone",
+    "muzzleJointNameB": "gunMuzzleBone",
+    "sourceBundle": "BasicWeapons.assetbundle",
+    "weaponId": "com.warchestgames.radtactics.pistol"
+  },
+  "Revolver": {
+    "attachmentJoint": "gunBone_R",
+    "barracksOffset": [
+      -0.25,
+      0.0,
+      0.0
+    ],
+    "barracksRotation": [
+      0.25,
+      0.0,
+      180.0
+    ],
+    "barracksScale": [
+      1.5,
+      1.5,
+      1.5
+    ],
+    "muzzleJointName": "gunMuzzleBone",
+    "muzzleJointNameB": "gunMuzzleBone",
+    "sourceBundle": "Weapons.assetbundle",
+    "weaponId": "com.warchestgames.radtactics.revolver"
+  },
+  "RiotShotgun": {
+    "attachmentJoint": "gunBone_R",
+    "barracksOffset": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "barracksRotation": [
+      0.0,
+      0.0,
+      180.0
+    ],
+    "barracksScale": [
+      1.4,
+      1.4,
+      1.4
+    ],
+    "muzzleJointName": "gunMuzzleBone",
+    "muzzleJointNameB": "gunMuzzleBone",
+    "sourceBundle": "Weapons02.assetbundle",
+    "weaponId": "com.warchestgames.radtactics.riotshotgun"
+  },
+  "Rocket Launcher": {
+    "attachmentJoint": "gunBone_R",
+    "barracksOffset": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "barracksRotation": [
+      0.0,
+      0.0,
+      180.0
+    ],
+    "barracksScale": [
+      1.4,
+      1.4,
+      1.4
+    ],
+    "muzzleJointName": "gunMuzzleBone",
+    "muzzleJointNameB": "gunMuzzleBone",
+    "sourceBundle": "BasicWeapons.assetbundle",
+    "weaponId": "com.warchestgames.radtactics.rocketlauncher"
+  },
+  "Semi Auto Rifle": {
+    "attachmentJoint": "gunBone_R",
+    "barracksOffset": [
+      -0.25,
+      0.0,
+      0.0
+    ],
+    "barracksRotation": [
+      0.0,
+      0.0,
+      180.0
+    ],
+    "barracksScale": [
+      1.4,
+      1.4,
+      1.4
+    ],
+    "muzzleJointName": "gunMuzzleBone",
+    "muzzleJointNameB": "gunMuzzleBone",
+    "sourceBundle": "BasicWeapons.assetbundle",
+    "weaponId": "com.warchestgames.radtactics.semiautorifle"
+  },
+  "Shotgun": {
+    "attachmentJoint": "gunBone_R",
+    "barracksOffset": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "barracksRotation": [
+      0.0,
+      0.0,
+      180.0
+    ],
+    "barracksScale": [
+      1.4,
+      1.4,
+      1.4
+    ],
+    "muzzleJointName": "gunMuzzleBone",
+    "muzzleJointNameB": "gunMuzzleBone",
+    "sourceBundle": "BasicWeapons.assetbundle",
+    "weaponId": "com.warchestgames.radtactics.shotgun"
+  },
+  "Sledge Hammer": {
+    "attachmentJoint": "gunBone_R",
+    "barracksOffset": [
+      -0.35,
+      0.0,
+      0.0
+    ],
+    "barracksRotation": [
+      180.0,
+      -90.0,
+      0.0
+    ],
+    "barracksScale": [
+      1.4,
+      1.4,
+      1.4
+    ],
+    "muzzleJointName": "gunMuzzleBone",
+    "muzzleJointNameB": "gunMuzzleBone",
+    "sourceBundle": "BasicWeapons.assetbundle",
+    "weaponId": "com.warchestgames.radtactics.sledgehammer"
+  },
+  "Sniper Rifle": {
+    "attachmentJoint": "gunBone_R",
+    "barracksOffset": [
+      -0.25,
+      0.0,
+      0.0
+    ],
+    "barracksRotation": [
+      0.0,
+      0.0,
+      180.0
+    ],
+    "barracksScale": [
+      1.4,
+      1.4,
+      1.4
+    ],
+    "muzzleJointName": "gunMuzzleBone",
+    "muzzleJointNameB": "gunMuzzleBone",
+    "sourceBundle": "BasicWeapons.assetbundle",
+    "weaponId": "com.warchestgames.radtactics.sniperrifle"
+  },
+  "SpikedClub": {
+    "attachmentJoint": "gunBone_R",
+    "barracksOffset": [
+      -0.35,
+      0.0,
+      0.0
+    ],
+    "barracksRotation": [
+      180.0,
+      -90.0,
+      0.0
+    ],
+    "barracksScale": [
+      1.4,
+      1.4,
+      1.4
+    ],
+    "muzzleJointName": "",
+    "muzzleJointNameB": "",
+    "sourceBundle": "Weapons02.assetbundle",
+    "weaponId": "com.warchestgames.radtactics.spikedclub"
+  },
+  "Uzi": {
+    "attachmentJoint": "gunBone_R",
+    "barracksOffset": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "barracksRotation": [
+      0.0,
+      0.0,
+      180.0
+    ],
+    "barracksScale": [
+      1.5,
+      1.5,
+      1.5
+    ],
+    "muzzleJointName": "gunMuzzleBone",
+    "muzzleJointNameB": "gunMuzzleBone",
+    "sourceBundle": "Weapons.assetbundle",
+    "weaponId": "com.warchestgames.radtactics.uzi"
+  },
+  "Water Cannon": {
+    "attachmentJoint": "gunBone_R",
+    "barracksOffset": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "barracksRotation": [
+      0.0,
+      0.0,
+      180.0
+    ],
+    "barracksScale": [
+      1.4,
+      1.4,
+      1.4
+    ],
+    "muzzleJointName": "gunMuzzleBone",
+    "muzzleJointNameB": "gunMuzzleBone",
+    "sourceBundle": "Weapons.assetbundle",
+    "weaponId": "com.warchestgames.radtactics.watercannon"
+  },
+  "Wood Axe": {
+    "attachmentJoint": "gunBone_R",
+    "barracksOffset": [
+      -0.35,
+      0.0,
+      0.0
+    ],
+    "barracksRotation": [
+      180.0,
+      -90.0,
+      0.0
+    ],
+    "barracksScale": [
+      1.4,
+      1.4,
+      1.4
+    ],
+    "muzzleJointName": "gunMuzzleBone",
+    "muzzleJointNameB": "gunMuzzleBone",
+    "sourceBundle": "Weapons.assetbundle",
+    "weaponId": "com.warchestgames.radtactics.woodaxe"
+  }
+}

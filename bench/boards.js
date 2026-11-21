@@ -33,10 +33,10 @@ const SPAWNS_B = [{x:11,y:8},{x:11,y:6},{x:10,y:5},{x:11,y:4},{x:11,y:5}];  // L
 const key = (x, y) => x + ',' + y;
 const cheb = (a, b) => Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));  // L1411
 
-// obstáculos = walls + shelves + crates (buildMap los concatena en `obstacles`, L1372)
+// obstáculos = walls + shelves + crates + barrels (el juego bloquea los barriles vivos)
 function obstacles(def) {
   const s = new Set();
-  for (const k of ['walls', 'shelves', 'crates']) for (const [x, y] of def[k]) s.add(key(x, y));
+  for (const k of ['walls', 'shelves', 'crates', 'barrels']) for (const [x, y] of def[k]) s.add(key(x, y));
   return s;
 }
 

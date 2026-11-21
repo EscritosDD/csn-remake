@@ -85,18 +85,36 @@ estaticos (`python -m http.server 8000`) y se abre en el navegador.
 - `build3DWorld` monta tablero, props del tema (`buildThemedProps3`),
   unidades (`makeRealSoldier3` con el modelo de su clase del IPA) y utileria
   (armas con `makeGunProp3`).
+- `buildThemedProps3` solo se llama cuando no hay geometria IPA visible
+  (`!geoShown`), para que los props procedurales no atraviesen el mapa real.
 - Los modelos de clase estan en `assets/soldier/<Clase>.obj` + `_rig.json` +
   `_tex.png`, con escala en `assets/soldier_scales.json`.
+- `mount()` pone la pose de reposo antes de medir bounds y usa
+  `SkinnedMesh.computeBoundingBox()` transformado por `matrixWorld`.
+- `makeRealGun3()` y `fitGunToHand3()` leen
+  `assets/weapons/weapon_calibrations.json`: socket anatomico `Bip001 R Hand`,
+  escala por longitud real y `gripOffset`. Los campos `barracks*` solo son de
+  escaparate.
 - La vista 3D es la principal; la 2D es alternativa.
+- Depuracion: `?debugGrid=1` dibuja la rejilla 2D y el grupo 3D
+  `debugGrid3D`; `?debugWeapons=1` marca el origen del arma y muestra su
+  calibracion por consola.
 
 ## Verificacion (usar siempre)
 
 ```
+npm run lint && npm test
+npm run verify
 powershell -ExecutionPolicy Bypass -File bench\VERIFICAR.ps1
+node _capture_all.mjs viewer:audit-all VIEWAUDIT_FINAL 8000
+python tools\auditar_assets_3d.py
 ```
 
-Sintaxis (0 errores), 13 tableros (simetria y solapes), `rules.test.js`
-(6/6), `data.test.js` (6/6) y humo 3D en navegador. El balance se mide con
+`VERIFICAR.ps1` comprueba sintaxis, 19 tableros, reglas, datos, winding,
+rejillas IPA, capturas `debugGrid`, humo 3D, **auditoria del visor**, clips,
+movimiento, combate y movil/SwiftShader. El ultimo cierre dio **TODO OK
+13/13**, `npm test` **68/68** y `viewer:audit-all` `ok=True` con 4 modelos.
+El balance se mide con
 `bench/harness.js <modo> <mapa> <partidas> <formato>` y las capturas con
 `_capture_all.mjs`.
 
@@ -110,3 +128,10 @@ Sintaxis (0 errores), 13 tableros (simetria y solapes), `rules.test.js`
 3. **`byName` en el rig** se define despues del `bind`; no usar antes.
 4. **Escala por clase**: los modelos del IPA vienen en unidades distintas.
 5. Tras cada cambio: `node bench/check-syntax.js` y la bateria completa.
+6. **Cero parches por nombre** en el motor (`if (entry.name === ...)`): las
+   excepciones van en datos de calibracion o en el pipeline de assets.
+7. **IPA y Meshy no se mezclan**: la fuente de verdad es `assets/soldier/`;
+   Meshy vive aislado en `assets/personajes_propios/`.
+8. **No cerrar en falso**: si falta el original `.glb` o la fuente Meshy sin
+   soldar, se documenta como pendiente; no se inventa un loader ni se copia
+   un modelo sobre el rig IPA.
