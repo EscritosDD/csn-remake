@@ -165,7 +165,7 @@ test('la captura auditoriza el visor y la verificacion la ejecuta', () => {
   assert.ok(cap.includes("mapId.startsWith('viewer:')"));
   assert.ok(cap.includes("result.viewerAudit = result.viewer"));
   assert.ok(verify.includes('viewer:audit-all'));
-  for (const mode of ['soap', 'sneaky', 'meshy09', 'mp5k', 'minigun', 'setup']) {
+  for (const mode of ['soap', 'sneaky', 'megan', 'sister', 'rpg', 'fire', 'meshy09', 'mp5k', 'minigun', 'setup']) {
     assert.ok(cap.includes(mode + ':'), 'falta modo de captura ' + mode);
   }
 });
@@ -233,7 +233,7 @@ test('el visor usa el cargador de armas compartido sin alias temporales', () => 
   assert.doesNotMatch(html, /WEAPON_MESH_FILE\[key\]=file/);
   assert.match(html, /const holder=GUN_MESH_CACHE\[file\];/);
   assert.match(html, /const meshFile=weaponFileForRef\(wanted\);/);
-  assert.match(html, /position\.set\(0\.18,0\.62,0\)/);
+  assert.doesNotMatch(html, /position\.set\(0\.18,0\.62,0\)/);
   assert.doesNotMatch(html, /if\(bS\)\{/);
   assert.match(html, /viewerWeaponLabelText/);
   assert.doesNotMatch(html, /weaponLabel\.textContent=/);
@@ -252,4 +252,34 @@ test('Configurar partida permite elegir personaje por ranura', () => {
   assert.match(html, /def\.charKey\?charForKey\(def\.role,def\.charKey\)/);
   assert.match(html, /MESHY_CAST\.map\(c=>\(\{\.\.\.c,key:c\.key/);
   assert.match(html, /geometry\.deleteAttribute\('skinWeight'\)[\s\S]{0,400}side:THREE\.FrontSide/);
+});
+
+test('los originales del visor traen arma por defecto y filtran por rol', () => {
+  const viewer = fs.readFileSync(path.join(ROOT, 'src', 'viewer', 'main.js'), 'utf8');
+  const cast = fs.readFileSync(path.join(ROOT, 'src', 'data', 'cast.js'), 'utf8');
+  const defaults = Object.fromEntries([...cast.matchAll(/name:'([^']+)'[^\n]*?defaultWeapon:'([^']+)'/g)].map(m => [m[1], m[2]]));
+  assert.equal(Object.keys(defaults).length, 17);
+  const esperado = {
+    'Hipster Dave': 'M40', 'Archie Fletcher': 'M40', 'Soap': 'M110 SASS', 'Spud': 'M24 SWS',
+    'Ivan Tkilya': 'M249 SAW', 'Mme La Hacque': 'MP7', 'Sneaky Pete': 'MP7',
+    'Sister Florence': 'M4A1', 'Riot Medic': 'M4A1', 'Textbook Kate': 'M4A1',
+    'Big Time Taschmann': 'Remington 870', 'Megan McNick': 'Benelli M4', 'Carlito Grosso': 'M203',
+    'Riot Agent': 'M4A1', 'Riot Engineer': 'M4A1', 'Commander (M)': 'M4A1', 'Commander (F)': 'Desert Eagle'
+  };
+  assert.deepEqual(defaults, esperado);
+  assert.match(viewer, /WEAPONS_ORIGINAL\[file\]\|\|\{\}\)\.roles/);
+  assert.match(viewer, /roleWeapons\.unshift\(entry\.defaultWeapon\)/);
+  assert.doesNotMatch(viewer, /viewer\.weapon=''; selectModel\('roles'/);
+});
+
+test('el visor funde clips y dispara desde eventos del clip', () => {
+  const viewer = fs.readFileSync(path.join(ROOT, 'src', 'viewer', 'main.js'), 'utf8');
+  assert.match(viewer, /function poseViewerClip\(model,clip,ct,key,signature,now,dtMs\)/);
+  assert.match(viewer, /typeof CLIP_BLEND_MS!=='undefined'\?CLIP_BLEND_MS:200/);
+  assert.match(viewer, /typeof _smooth01==='function'\?_smooth01\(0,1,p\)/);
+  assert.match(viewer, /function dispatchViewerFire\(actor,clip,key,ct,weapon\)/);
+  assert.match(viewer, /f==='PlayWeaponFire'\|\|f==='PlayFiring'/);
+  assert.match(viewer, /gun\.userData\._testFlash=1/);
+  assert.doesNotMatch(viewer, /fireBtn\.onclick[\s\S]{0,600}auWeapon/);
+  assert.doesNotMatch(viewer, /position\.set\(0\.18,0\.62,0\)/);
 });

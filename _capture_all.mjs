@@ -26,21 +26,48 @@ const viewerAuditProbeExpr = `(async function(){
  const statusEl=document.getElementById('viewerStatus');
  const state=()=>window.__csnViewer&&window.__csnViewer.state;
  const model=()=>{const v=state(),c=v&&v.spin&&v.spin.children&&v.spin.children[0];return (c&&c.children&&c.children[0])||null;};
- const probe=label=>{const v=state(),m=model();let size=[0,0,0];if(m){const box=new THREE.Box3().setFromObject(m),s=new THREE.Vector3();box.getSize(s);size=[s.x,s.y,s.z].map(n=>+n.toFixed(4));}const st=statusEl;return {label,name:(v&&v.name)||'',kind:(v&&v.kind)||'',status:(st.textContent||'').trim(),statusHidden:!!(st.hidden||st.style.display==='none'),size,meshy:!!(m&&m.userData&&m.userData.meshy),gun:!!(m&&m.userData&&m.userData.viewerGun),geometryOk:size.some(n=>Number.isFinite(n)&&n>0.001)};};
+  const probe=label=>{const v=state(),m=model();let size=[0,0,0];if(m){const box=new THREE.Box3().setFromObject(m),s=new THREE.Vector3();box.getSize(s);size=[s.x,s.y,s.z].map(n=>+n.toFixed(4));}
+  const gun=m&&m.userData&&m.userData.viewerGun;let grip=null;
+  if(gun&&typeof THREE!=='undefined'&&m.userData.byName&&m.userData.bones&&typeof WEAPON_SOCKETS!=='undefined'){
+    m.updateMatrixWorld(true);const parent=gun.parent||m,ud=m.userData,sr=WEAPON_SOCKETS.handRight.pos,sl=WEAPON_SOCKETS.handLeft.pos;
+    const palm=(joint,socket)=>{const b=ud.bones[ud.byName[joint]];if(!b)return null;return parent.worldToLocal(new THREE.Vector3(-Math.abs(socket[0]),socket[1],socket[2]).applyMatrix4(b.matrixWorld));};
+    const rp=palm('Bip001 R Hand',sr),lp=palm('Bip001 L Hand',sl),bFA=ud.bones[ud.byName['Bip001 R Forearm']];
+    if(rp&&lp&&bFA){const fa=parent.worldToLocal(new THREE.Vector3().setFromMatrixPosition(bFA.matrixWorld));
+      const two=lp.clone().sub(rp),dir=new THREE.Vector3(1,0,0).applyQuaternion(gun.quaternion),span=two.length(),ly=lp.y;
+      const sm=(a,b,x)=>{const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t);};
+      const w2h=sm(0.28,0.42,ly)*sm(0.20,0.28,span)*(1-sm(0.52,0.62,span));
+      const arr=p=>[p.x,p.y,p.z].map(n=>+n.toFixed(3));
+      grip={socketR:[-Math.abs(sr[0]),sr[1],sr[2]].map(n=>+n.toFixed(3)),rPalm:arr(rp),lPalm:arr(lp),gripDist:+rp.distanceTo(gun.position).toFixed(3),gripDot:+dir.dot(two.normalize()).toFixed(3),w2h:+w2h.toFixed(3),faDist:+rp.distanceTo(fa).toFixed(3)};
+    }
+  }
+  const st=statusEl,wEl=document.getElementById('viewerWeaponSelect');return {label,name:(v&&v.name)||'',kind:(v&&v.kind)||'',weapon:(v&&v.weapon)||'',weaponChar:(v&&v.weaponChar)||'',weaponTouched:!!(v&&v.weaponTouched),weaponOptions:wEl?[...wEl.options].map(o=>o.value).filter(Boolean):[],testFire:!!(v&&v.testFire),status:(st.textContent||'').trim(),statusHidden:!!(st.hidden||st.style.display==='none'),size,meshy:!!(m&&m.userData&&m.userData.meshy),gun:!!gun,grip,geometryOk:size.some(n=>Number.isFinite(n)&&n>0.001)};};
+
  const settle=async()=>{await sleep(400);for(let i=0;i<120;i++){const st=statusEl,t=(st.textContent||'').trim();if((st.hidden||st.style.display==='none')&&!t)return true;if(/No se pudo|todav/.test(t))return false;await sleep(250);}return false;};
  const out=[];
- const roles=async key=>{document.querySelector('#viewerKinds [data-kind="roles"]').click();await sleep(250);const c=document.getElementById('viewerCharacterSelect');c.value=key;c.dispatchEvent(new Event('change',{bubbles:true}));await settle();out.push(probe(key));};
- await roles('original:01');
- const w=document.getElementById('viewerWeaponSelect'),opts=[...w.options].map(o=>o.value).filter(Boolean);
- if(opts.length){w.value=opts[0];w.dispatchEvent(new Event('change',{bubbles:true}));await settle();out.push(probe('original:01+weapon'));}
- await roles('original:05');
- await roles('own:09');
- document.querySelector('#viewerKinds [data-kind="weapons"]').click();await sleep(250);
- const wb=document.querySelector('#viewerList button');if(wb){wb.click();await settle();out.push(probe('weapon:'+wb.textContent.trim()));}
- document.querySelector('#viewerKinds [data-kind="props"]').click();await sleep(250);
+  const roles=async key=>{document.querySelector('#viewerKinds [data-kind="roles"]').click();await sleep(250);const c=document.getElementById('viewerCharacterSelect');c.value=key;c.dispatchEvent(new Event('change',{bubbles:true}));await settle();out.push(probe(key));};
+  const pickWeapon=async(key,weapon,label)=>{await roles(key);const w=document.getElementById('viewerWeaponSelect');w.value=weapon;w.dispatchEvent(new Event('change',{bubbles:true}));await settle();out.push(probe(label||key+'+'+weapon));};
+  const fireWeapon=async(label)=>{const b=document.getElementById('viewerFireBtn');if(!b||b.disabled)return;b.click();await sleep(1300);out.push(probe(label+'@fire'));await sleep(3200);out.push(probe(label+'@idle'));};
+  await roles('original:01');
+  const w=document.getElementById('viewerWeaponSelect'),opts=[...w.options].map(o=>o.value).filter(Boolean);
+  if(opts.length){w.value=opts[0];w.dispatchEvent(new Event('change',{bubbles:true}));await settle();out.push(probe('original:01+weapon'));}
+  await pickWeapon('original:03','M110 SASS','Soap+M110 SASS');
+  await pickWeapon('original:08','M4A1','Sister Florence+M4A1');
+  await pickWeapon('original:12','Benelli M4','Megan McNick+Benelli M4');
+  await roles('original:01');
+  await fireWeapon('Hipster+M40');
+  await roles('original:05');
+  await roles('original:09');
+  await roles('own:09');
+  document.querySelector('#viewerKinds [data-kind="weapons"]').click();await sleep(250);
+  const wb=document.querySelector('#viewerList button');if(wb){wb.click();await settle();out.push(probe('weapon:'+wb.textContent.trim()));}
+  const rb=[...document.querySelectorAll('#viewerList button')].find(b=>/RPG/i.test(b.textContent));
+  if(rb){rb.click();await settle();out.push(probe('weapon:'+rb.textContent.trim()));}
+  document.querySelector('#viewerKinds [data-kind="props"]').click();await sleep(250);
+
  const pb=document.querySelector('#viewerList button');if(pb){pb.click();await settle();out.push(probe('prop:'+pb.textContent.trim()));}
- document.querySelector('#viewerKinds [data-kind="roles"]').click();
- window.__viewerAuditProbe=out;return JSON.stringify(out);
+  document.querySelector('#viewerKinds [data-kind="roles"]').click();await sleep(250);await roles('original:01');
+  window.__viewerAuditProbe=out;return JSON.stringify(out);
+
 })()`;
 
 const result = {
@@ -165,8 +192,12 @@ try {
       barracks: "document.getElementById('mnuBarracks').click()",
       viewer: "document.querySelector('#mainTabs [data-tab=\"viewer\"]').click()",
       hipster: "(async function(){document.querySelector('#mainTabs [data-tab=\"viewer\"]').click();await new Promise(r=>setTimeout(r,1500));const s=document.getElementById('viewerCharacterSelect');s.value='original:01';s.dispatchEvent(new Event('change',{bubbles:true}));return s.value;})()",
-      soap: "(async function(){document.querySelector('#mainTabs [data-tab=\"viewer\"]').click();await new Promise(r=>setTimeout(r,1500));const c=document.getElementById('viewerCharacterSelect');c.value='original:03';c.dispatchEvent(new Event('change',{bubbles:true}));await new Promise(r=>setTimeout(r,1800));const w=document.getElementById('viewerWeaponSelect');w.value='SVD Dragunov';w.dispatchEvent(new Event('change',{bubbles:true}));return c.value+'|SVD Dragunov';})()",
-      sneaky: "(async function(){document.querySelector('#mainTabs [data-tab=\"viewer\"]').click();await new Promise(r=>setTimeout(r,1500));const c=document.getElementById('viewerCharacterSelect');c.value='original:06';c.dispatchEvent(new Event('change',{bubbles:true}));await new Promise(r=>setTimeout(r,1800));const w=document.getElementById('viewerWeaponSelect');w.value='MP5';w.dispatchEvent(new Event('change',{bubbles:true}));return c.value+'|MP5';})()",
+      soap: "(async function(){document.querySelector('#mainTabs [data-tab=\"viewer\"]').click();await new Promise(r=>setTimeout(r,1500));const c=document.getElementById('viewerCharacterSelect');c.value='original:03';c.dispatchEvent(new Event('change',{bubbles:true}));await new Promise(r=>setTimeout(r,1800));const w=document.getElementById('viewerWeaponSelect');w.value='M110 SASS';w.dispatchEvent(new Event('change',{bubbles:true}));return c.value+'|M110 SASS';})()",
+      sneaky: "(async function(){document.querySelector('#mainTabs [data-tab=\"viewer\"]').click();await new Promise(r=>setTimeout(r,1500));const c=document.getElementById('viewerCharacterSelect');c.value='original:06';c.dispatchEvent(new Event('change',{bubbles:true}));await new Promise(r=>setTimeout(r,1800));const w=document.getElementById('viewerWeaponSelect');w.value='MP7';w.dispatchEvent(new Event('change',{bubbles:true}));return c.value+'|MP7';})()",
+      megan: "(async function(){document.querySelector('#mainTabs [data-tab=\"viewer\"]').click();await new Promise(r=>setTimeout(r,1500));const c=document.getElementById('viewerCharacterSelect');c.value='original:12';c.dispatchEvent(new Event('change',{bubbles:true}));await new Promise(r=>setTimeout(r,1800));return c.value+'|Benelli M4';})()",
+      sister: "(async function(){document.querySelector('#mainTabs [data-tab=\"viewer\"]').click();await new Promise(r=>setTimeout(r,1500));const c=document.getElementById('viewerCharacterSelect');c.value='original:08';c.dispatchEvent(new Event('change',{bubbles:true}));await new Promise(r=>setTimeout(r,1800));return c.value+'|M4A1';})()",
+      rpg: "(async function(){document.querySelector('#mainTabs [data-tab=\"viewer\"]').click();await new Promise(r=>setTimeout(r,1500));document.querySelector('#viewerKinds [data-kind=\"weapons\"]').click();await new Promise(r=>setTimeout(r,1500));const b=[...document.querySelectorAll('#viewerList button')].find(x=>x.textContent.includes('RPG'));if(!b)throw new Error('no RPG');b.click();return b.textContent;})()",
+      fire: "(async function(){document.querySelector('#mainTabs [data-tab=\"viewer\"]').click();await new Promise(r=>setTimeout(r,1500));const c=document.getElementById('viewerCharacterSelect');c.value='original:01';c.dispatchEvent(new Event('change',{bubbles:true}));await new Promise(r=>setTimeout(r,1800));document.getElementById('viewerFireBtn').click();await new Promise(r=>setTimeout(r,1300));return JSON.stringify(window.__csnViewer.state.testFire);})()",
       meshy09: "(async function(){document.querySelector('#mainTabs [data-tab=\"viewer\"]').click();await new Promise(r=>setTimeout(r,1500));const c=document.getElementById('viewerCharacterSelect');c.value='own:09';c.dispatchEvent(new Event('change',{bubbles:true}));return c.value;})()",
       mp5k: "(async function(){document.querySelector('#mainTabs [data-tab=\"viewer\"]').click();await new Promise(r=>setTimeout(r,1500));document.querySelector('#viewerKinds [data-kind=\"weapons\"]').click();await new Promise(r=>setTimeout(r,1500));const b=[...document.querySelectorAll('#viewerList button')].find(x=>x.textContent.includes('MP5K'));if(!b)throw new Error('no MP5K');b.click();return b.textContent;})()",
       minigun: "(async function(){document.querySelector('#mainTabs [data-tab=\"viewer\"]').click();await new Promise(r=>setTimeout(r,1500));document.querySelector('#viewerKinds [data-kind=\"weapons\"]').click();await new Promise(r=>setTimeout(r,1500));const b=[...document.querySelectorAll('#viewerList button')].find(x=>x.textContent.includes('Minigun'));if(!b)throw new Error('no Minigun');b.click();return b.textContent;})()",
@@ -181,7 +212,7 @@ try {
     await ev(screens[screenKey]);
     if (auditMode) {
       for (const kind of ['roles', 'weapons', 'props', 'pieces']) {
-        await ev("document.querySelector('#viewerKinds [data-kind=\"" + kind + "\"]').click()");
+        await ev("(function(){const b=document.querySelector('#viewerKinds [data-kind=\"" + kind + "\"]');if(b)b.click();})()");
         await sleep(350);
         await ev("(function(){const b=document.querySelector('#viewerList button');if(b){b.click();return b.textContent;}return '';})()");
         await sleep(750);
@@ -307,11 +338,11 @@ try {
   }));
   if (auditMode) {
     const probes = Array.isArray(result.viewerProbe) ? result.viewerProbe : [];
-    const mounted = probes.filter(p => ['original:01', 'original:01+weapon', 'original:05', 'own:09'].includes(p.label));
+    const required = ['original:01', 'original:01+weapon', 'original:05', 'own:09'];
     const gunOk = probes.some(p => p.label === 'original:01+weapon' && p.gun);
     const meshyOk = probes.some(p => p.label === 'own:09' && p.meshy);
     const individualOk = probes.some(p => p.label.startsWith('weapon:') && p.geometryOk) && probes.some(p => p.label.startsWith('prop:') && p.geometryOk);
-    const probeOk = probes.length >= 6 && mounted.length === 4 && mounted.every(p => p.statusHidden && !p.status && p.geometryOk) && gunOk && meshyOk && individualOk;
+    const probeOk = probes.length >= 6 && required.every(label => probes.some(p => p.label === label && p.statusHidden && !p.status && p.geometryOk)) && gunOk && meshyOk && individualOk;
     viewerOk = viewerOk && probeOk;
   }
   result.ok = sceneOk && pngOk && moveOk && combatOk && mobileOk && geoOk && softwareOk && viewerOk && errs.length === 0;

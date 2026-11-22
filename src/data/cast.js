@@ -156,23 +156,24 @@ export const OWN_CAST=[
 ];
 
 export const ORIG_CAST=[
- {name:'Hipster Dave',body:'Soldier_Light',outfit:'Soldier_Light_d / DeltaForce / Veteran',role:'Francotirador',bio:'Gafas verdes, pelo naranja y un fusil enorme. Cara de enfado permanente.',play:true},
-  {name:'Archie Fletcher',body:'Soldier_Light_Rambo',outfit:'Rambo / DeerHunter',role:'Francotirador',bio:'Rambo de mercadillo: cinta en la cabeza y más valor que puntería.',play:true},
-  {name:'Soap',body:'Soldier_SAS',outfit:'Soldier_SAS',role:'Francotirador',bio:'El nombre que todos recuerdan y nadie explica.',play:true},
-  {name:'Spud',body:'Soldier_Spud',outfit:'Soldier_ForestCamo',role:'Francotirador',bio:'Patata de nombre, roca de aguante.',play:true},
- {name:'Ivan Tkilya',body:'Soldier_Heavy',outfit:'Soldier_heavy / GermanSpecialForces',role:'Artillero',bio:'Pesado de manual: donde se planta, hay que rodearlo.',play:true},
-  {name:'Mme La Hacque',body:'Agent_Light',outfit:'Agent_light / JewelThief',role:'Espía',bio:'Elegancia francesa con un cuchillo en la bota.',play:true},
- {name:'Sneaky Pete',body:'Agent_Light',outfit:'Agent_light (base)',role:'Espía',bio:'Nadie le vio llegar; nadie le vio irse.',play:true},
- {name:'Sister Florence',body:'Medic',outfit:'Medic / Medic_Rescue',role:'Médico',bio:'Reza por ti y luego te cose la herida.',play:true,rigPose:true},
-  {name:'Riot Medic',body:'Medic_therapist',outfit:'Medic_therapist',role:'Médico',bio:'Casco antidisturbios y camilla blindada.',play:true},
-  {name:'Textbook Kate',body:'Medic',outfit:'Medic (variante)',role:'Médico',bio:'Se sabe el manual de memoria; por eso cura mejor.',play:true},
- {name:'Big Time Taschmann',body:'Engineer',outfit:'Engineer / Spetsnaz',role:'Ingeniero',bio:'Maza más alta que su torso y sonrisa de oreja a oreja.',play:true},
-  {name:'Megan McNick',body:'Engineer_Light',outfit:'Engineer_Light / Trinity',role:'Ingeniero',bio:'Ingeniera de Trinity: torretas antes que palabras.',play:true},
-  {name:'Carlito Grosso',body:'Engineer_Heavy',outfit:'Engineer_Heavy / EOD',role:'Ingeniero',bio:'Siempre vuelve con el blindaje puesto.',play:true},
- {name:'Riot Agent',body:'Agent_Heavy',outfit:'Agent_Heavy / Skin1',role:'Comando',bio:'Antidisturbios: escudo primero, preguntas después.',play:true},
-  {name:'Riot Engineer',body:'Engineer (RiotCop)',outfit:'Engineer_RiotCop',role:'Ingeniero',bio:'Convierte una calle en una fortaleza en tres turnos.',play:true},
- {name:'Commander (M)',body:'Commander',outfit:'Commander / Latino / Asian / African',role:'Capitán',bio:'Manda con la voz y con el ejemplo.',play:true},
-  {name:'Commander (F)',body:'Commander_F',outfit:'Commander_F / Latino / Asian / African',role:'Capitán',bio:'Misma autoridad, otro acento.',play:true}
+  {name:'Hipster Dave',body:'Soldier_Light',outfit:'Soldier_Light_d / DeltaForce / Veteran',role:'Francotirador',defaultWeapon:'M40',bio:'Gafas verdes, pelo naranja y un fusil enorme. Cara de enfado permanente.',play:true},
+   {name:'Archie Fletcher',body:'Soldier_Light_Rambo',outfit:'Rambo / DeerHunter',role:'Francotirador',defaultWeapon:'M40',bio:'Rambo de mercadillo: cinta en la cabeza y más valor que puntería.',play:true},
+   {name:'Soap',body:'Soldier_SAS',outfit:'Soldier_SAS',role:'Francotirador',defaultWeapon:'M110 SASS',bio:'El nombre que todos recuerdan y nadie explica.',play:true},
+   {name:'Spud',body:'Soldier_Spud',outfit:'Soldier_ForestCamo',role:'Francotirador',defaultWeapon:'M24 SWS',bio:'Patata de nombre, roca de aguante.',play:true},
+  {name:'Ivan Tkilya',body:'Soldier_Heavy',outfit:'Soldier_heavy / GermanSpecialForces',role:'Artillero',defaultWeapon:'M249 SAW',bio:'Pesado de manual: donde se planta, hay que rodearlo.',play:true},
+   {name:'Mme La Hacque',body:'Agent_Light',outfit:'Agent_light / JewelThief',role:'Espía',defaultWeapon:'MP7',bio:'Elegancia francesa con un cuchillo en la bota.',play:true},
+  {name:'Sneaky Pete',body:'Agent_Light',outfit:'Agent_light (base)',role:'Espía',defaultWeapon:'MP7',bio:'Nadie le vio llegar; nadie le vio irse.',play:true},
+  {name:'Sister Florence',body:'Medic',outfit:'Medic / Medic_Rescue',role:'Médico',defaultWeapon:'M4A1',bio:'Reza por ti y luego te cose la herida.',play:true,rigPose:true},
+   {name:'Riot Medic',body:'Medic_therapist',outfit:'Medic_therapist',role:'Médico',defaultWeapon:'M4A1',bio:'Casco antidisturbios y camilla blindada.',play:true},
+   {name:'Textbook Kate',body:'Medic',outfit:'Medic (variante)',role:'Médico',defaultWeapon:'M4A1',bio:'Se sabe el manual de memoria; por eso cura mejor.',play:true},
+  {name:'Big Time Taschmann',body:'Engineer',outfit:'Engineer / Spetsnaz',role:'Ingeniero',defaultWeapon:'Remington 870',bio:'Maza más alta que su torso y sonrisa de oreja a oreja.',play:true},
+   {name:'Megan McNick',body:'Engineer_Light',outfit:'Engineer_Light / Trinity',role:'Ingeniero',defaultWeapon:'Benelli M4',bio:'Ingeniera de Trinity: torretas antes que palabras.',play:true},
+   {name:'Carlito Grosso',body:'Engineer_Heavy',outfit:'Engineer_Heavy / EOD',role:'Ingeniero',defaultWeapon:'M203',bio:'Siempre vuelve con el blindaje puesto.',play:true},
+  {name:'Riot Agent',body:'Agent_Heavy',outfit:'Agent_Heavy / Skin1',role:'Comando',defaultWeapon:'M4A1',bio:'Antidisturbios: escudo primero, preguntas después.',play:true},
+   {name:'Riot Engineer',body:'Engineer (RiotCop)',outfit:'Engineer_RiotCop',role:'Ingeniero',defaultWeapon:'M4A1',bio:'Convierte una calle en una fortaleza en tres turnos.',play:true},
+  {name:'Commander (M)',body:'Commander',outfit:'Commander / Latino / Asian / African',role:'Capitán',defaultWeapon:'M4A1',bio:'Manda con la voz y con el ejemplo.',play:true},
+   {name:'Commander (F)',body:'Commander_F',outfit:'Commander_F / Latino / Asian / African',role:'Capitán',defaultWeapon:'Desert Eagle',bio:'Misma autoridad, otro acento.',play:true}
 ];
+
 
 export function sculptedWeaponUnit(un){return !!(un&&un.charMesh&&MESHY_CAST.some(entry=>entry.mesh===un.charMesh&&entry.sculptedWeapon));}

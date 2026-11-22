@@ -201,3 +201,51 @@ test('las 23 armas tienen volumen positivo con parseOBJStatic', () => {
     assert.ok(Array.from(geo.normal.array).every(Number.isFinite), file + ': normales no finitas');
   }
 });
+
+test('los sockets de mano se reflejan en X al acoplar el arma', () => {
+  const sockets = JSON.parse(fs.readFileSync(path.join(root, 'assets', 'weapons', 'weapon_sockets.json'), 'utf8'));
+  const pose = fs.readFileSync(path.join(root, 'src', 'render3d', 'gun-pose.js'), 'utf8');
+  assert.ok(sockets.handRight.pos[0] > 0);
+  assert.ok(sockets.handLeft.pos[0] > 0);
+  assert.match(pose, /_gpPalmR\.x=-Math\.abs\(_gpPalmR\.x\)/);
+  assert.match(pose, /_gpPalmL\.x=-Math\.abs\(_gpPalmL\.x\)/);
+  assert.match(pose, /_gpRPalm\.copy\(_gpPalmR\)\.applyMatrix4\(bR\.matrixWorld\)/);
+});
+
+test('el RPG se gira 90 grados en X y mantiene el cañón horizontal', () => {
+  const src = fs.readFileSync(path.join(root, 'src', 'render3d', 'assets-weapons.js'), 'utf8');
+  assert.match(src, /if\(file==='RPG'\)return \{x:Math\.PI\/2,y:0,z:0\}/);
+  assert.match(src, /mesh\.rotation\.set\(rot\.x,rot\.y,rot\.z\)/);
+  assert.match(src, /holder\.rotation\.x=-Math\.PI\/2/);
+  const txt = fs.readFileSync(path.join(root, 'assets', 'weapons', 'RPG.obj'), 'latin1');
+  const geo = parseOBJStatic(txt);
+  const puntos = geo.position.array;
+  const min = [Infinity, Infinity, Infinity], max = [-Infinity, -Infinity, -Infinity];
+  for (let i = 0; i < puntos.length; i += 3) {
+    for (let eje = 0; eje < 3; eje++) { min[eje] = Math.min(min[eje], puntos[i + eje]); max[eje] = Math.max(max[eje], puntos[i + eje]); }
+  }
+  const size = max.map((n, eje) => n - min[eje]);
+  assert.ok(size[1] > size[2], 'sección del RPG en el eje correcto: ' + size.map(n => n.toFixed(3)).join(' × '));
+});
+
+test('los 11 originales tienen rig de 20 huesos con pesos normalizados', () => {
+  const dir = path.join(root, 'assets', 'soldier', 'bodies');
+  const bodies = ['Soldier_SAS', 'Soldier_Spud', 'Soldier_Heavy', 'Soldier_Light_Rambo', 'Agent_Light',
+    'Medic_therapist_1248v', 'Engineer_Light', 'Engineer_Heavy', 'Engineer_RiotCop', 'CommanderM', 'CommanderF'];
+  for (const body of bodies) {
+    const obj = fs.readFileSync(path.join(dir, body + '.obj'), 'latin1');
+    const vertexCount = obj.split(/\r?\n/).filter(line => line.startsWith('v ')).length;
+    const rig = JSON.parse(fs.readFileSync(path.join(dir, body + '_rig.json'), 'utf8'));
+    assert.equal(rig.bones.length, 20, body + ': huesos');
+    assert.deepEqual(rig.skinBones, [...Array(20).keys()], body + ': skinBones');
+    assert.equal(rig.boneInverses.length, 20, body + ': inversas');
+    assert.ok(rig.boneInverses.every(matrix => matrix.length === 16), body + ': inversas 4x4');
+    assert.equal(rig.skinIndex.length, vertexCount * 4, body + ': skinIndex');
+    assert.equal(rig.skinWeight.length, vertexCount * 4, body + ': skinWeight');
+    for (let i = 0; i < rig.skinIndex.length; i++) assert.ok(rig.skinIndex[i] >= 0 && rig.skinIndex[i] < 20, body + ': hueso de piel fuera de rango');
+    for (let i = 0; i < rig.skinWeight.length; i += 4) {
+      const suma = rig.skinWeight.slice(i, i + 4).reduce((a, b) => a + b, 0);
+      assert.ok(Math.abs(suma - 1) < 1e-3, body + ': pesos ' + suma);
+    }
+  }
+});

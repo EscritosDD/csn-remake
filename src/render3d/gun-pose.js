@@ -54,9 +54,9 @@ export function fitGunToHand3(un,grp,isLive){
   if(grp.updateWorldMatrix)grp.updateWorldMatrix(true,true);else grp.updateMatrixWorld(true);
   const sr=WEAPON_SOCKETS.handRight&&WEAPON_SOCKETS.handRight.pos;
   const sl=WEAPON_SOCKETS.handLeft&&WEAPON_SOCKETS.handLeft.pos;
-  if(Array.isArray(sr)&&sr.length===3&&sr.every(Number.isFinite))_gpPalmR.fromArray(sr);
+  if(Array.isArray(sr)&&sr.length===3&&sr.every(Number.isFinite)){_gpPalmR.fromArray(sr);_gpPalmR.x=-Math.abs(_gpPalmR.x);}
   else _gpPalmR.set(-0.103,0.016,0);
-  if(Array.isArray(sl)&&sl.length===3&&sl.every(Number.isFinite))_gpPalmL.fromArray(sl);
+  if(Array.isArray(sl)&&sl.length===3&&sl.every(Number.isFinite)){_gpPalmL.fromArray(sl);_gpPalmL.x=-Math.abs(_gpPalmL.x);}
   else _gpPalmL.set(-0.102,0.016,0);
   const bR=ud.bones[ud.byName['Bip001 R Hand']];
   const bFA=ud.bones[ud.byName['Bip001 R Forearm']];

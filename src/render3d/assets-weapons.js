@@ -181,7 +181,7 @@ export function gunRotationFor(file,bb,cat){
   const ax=Math.abs(bb.min.x),mx=Math.abs(bb.max.x);
   const ay=Math.abs(bb.min.y),my=Math.abs(bb.max.y);
   const az=Math.abs(bb.min.z),mz=Math.abs(bb.max.z);
-  if(file==='RPG')return {x:0,y:0,z:0};
+  if(file==='RPG')return {x:Math.PI/2,y:0,z:0};
   if(cat==='Cuerpo a cuerpo'){
     if(Math.max(az,mz)>=Math.max(ax,mx)&&Math.max(az,mz)>=Math.max(ay,my))return {x:0,y:mz>=az?Math.PI/2:-Math.PI/2,z:0};
     if(Math.max(ax,mx)>=Math.max(ay,my))return {x:0,y:0,z:mx>=ax?0:Math.PI};
