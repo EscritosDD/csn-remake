@@ -79,34 +79,8 @@ fetch('assets/argon-soldiers.svg').then(r=>{if(!r.ok)throw new Error('svg');retu
   buildSpriteStrip();
   if(G)draw();
 }).catch(()=>{});
-loadRealSoldier();
-fetch('assets/weapons/weapon_metadata.json').then(r=>r.ok?r.json():{}).then(m=>{WEAPON_METADATA=m||{};}).catch(()=>{});
-fetch('assets/weapons/weapon_calibrations.json').then(r=>r.ok?r.json():{}).then(c=>{WEAPON_CALIBRATIONS=c||{};}).catch(()=>{});
-if(typeof window!=='undefined')window.__csnEvents=CLIP_EVENT_LOG;
-try{window.__csnCam={get cam(){return T3&&T3.cam;},get t3(){return T3;}};}catch(e){}
-document.querySelectorAll('#viewSeg button').forEach(b=>b.onclick=()=>setViewMode(b.dataset.view));
-window.__build3D=function(){ build3DFrame(); };
-window.__render3D=function(){ render3DFrame({G,keysHeld:_keysHeld,hoverTile,advanceUnitYaw,TURRET_POS}); };
-wireKeyboard({get G(){return G;},selectUnit,updateUI,draw,undoLastMove});
-window.__renderDemo=function(){ renderDemoFrame({get G(){return G;},set G(v){G=v;},myNation}); };
-window.quickStart=function(mapId){ quickStart(mapId,{myNation,setup,get G(){return G;}}); };
-const COMMANDER_CRATE_ABILITIES=[
- {icon:'PlayerAbility_06_Health_Crate_alpha',n:'Caja de salud',d:'Crea una caja de salud en el mapa.',obj:'crate'},
- {icon:'PlayerAbility_08_Improved_Ammo_alpha',n:'Caja de munición',d:'Crea una caja de munición de alta velocidad.',obj:'crate'},
- {icon:'PlayerAbility_10_Pain_Killers_alpha',n:'Caja de analgésicos',d:'Crea una caja de analgésicos.',obj:'crate'},
- {icon:'PlayerAbility_11_Team_Spirit_alpha',n:'Caja de espíritu de equipo',d:'Crea una caja de espíritu de equipo.',obj:'crate'}
-];
-const TUT_TEXTS={
-  undo:'Deshacer: vuelve atrás el último movimiento de tu soldado en este turno (botón ↶ del panel de acción).',
-  settings:'Ajustes: el botón de sonido (🔊) silencia o activa los efectos; la cámara se ajusta con Q/E, +/− y C.',
-  home:'Inicio: desde la partida, «Abandonar» te devuelve al menú sin borrar tu nación ni las monedas.',
-  confirm:'Confirmar: «Terminar turno» cierra tu turno y deja actuar al rival. La vista 2D/3D se cambia sin tocar la partida.'
-};
-function tutShow(){const b=document.getElementById('tutBubble');if(b)b.style.display='block';}
-function tutHide(){const b=document.getElementById('tutBubble');if(b)b.style.display='none';lsSet('radsoldiers_tut','1');}
-window.quickSmoke=function(){ quickSmoke({myNation,setup,get G(){return G;}}); };
-window.quickFlash=function(){ quickFlash({myNation,setup,get G(){return G;}}); };
-wireUI({get G(){return G;},TUT_TEXTS,tutShow,tutHide});
+let bridgeFull=null;
+if(typeof THREE!=='undefined'){
 installEarlyBridge({
 get $(){return $;},get G(){return G;},set G(v){G=v;},
 get W(){return W;},set W(v){W=v;},get H(){return H;},
@@ -120,32 +94,7 @@ set hoverTile(v){setHoverTile(v);},get arsFilter(){return arsFilter;},set arsFil
 get DEMO(){return DEMO;},set DEMO(v){setDEMO(v);},get CHAR_PREFS(){return CHAR_PREFS;},
 set CHAR_PREFS(v){setCHAR_PREFS(v);},
 });
-/* ================= INIT ================= */
-buildNationGrid();buildArsenal();
-loadSkirmishTop('skirmish03');loadSkirmishTop('skirmish04');
-(function(){
-  setCHAR_PREFS(loadChars());
-  const params=new URLSearchParams(window.location.search||'');
-  const auto=params.get('autostart');
-  const saved=lsGet(LS_NATION);const found=saved?nationById(saved):null;
-  if(auto){
-    myNation=found||NATIONS[0];setDemoNation(myNation);
-    try{enterApp();}
-    catch(e){try{renderNationChip();}catch(e2){} $('#mainTabs').style.display='flex'; showScreen('scr-play');}
-    if(auto==='smoke')window.quickSmoke();
-    else if(auto==='flash')window.quickFlash();
-    else if(auto==='skirmish')window.quickStart('skirmish');
-    else window.quickStart(MAP_DEFS[auto]?auto:'almacen');
-    return;
-  }
-  if(found){myNation=found;setDemoNation(myNation);
-    try{enterApp();}
-    catch(e){try{renderNationChip();}catch(e2){} $('#mainTabs').style.display='flex'; showScreen('scr-play');}
-  }
-  else{if(saved)lsRemove(LS_NATION); showScreen('scr-nation');}
-})();
-$('#guerraCountdown').textContent=fmtCountdown(msToNextSaturday());
-installFullBridge({
+bridgeFull={
 get $(){return $;},get ABILITY_CATALOG(){return ABILITY_CATALOG;},get ABILITY_IMPL(){return ABILITY_IMPL;},
 get ABILITY_OBJECTS(){return ABILITY_OBJECTS;},get AC(){return AC;},get AMBIENT_FILE(){return AMBIENT_FILE;},
 get ARGON_DEFS(){return ARGON_DEFS;},get AUX_HINTS(){return AUX_HINTS;},get AUX_LABELS(){return AUX_LABELS;},
@@ -299,4 +248,60 @@ get viewerTeam(){return viewerTeam;},get w2cx(){return w2cx;},get waterCannon(){
 get weaponCalibration(){return weaponCalibration;},get weaponCategoryForFile(){return weaponCategoryForFile;},get weaponCoverURL(){return weaponCoverURL;},
 get weaponFileForRef(){return weaponFileForRef;},get weaponMeta(){return weaponMeta;},get weaponTargetLength(){return weaponTargetLength;},
 get wireSkinSeg(){return wireSkinSeg;},get worldRotationsFromLocal(){return worldRotationsFromLocal;},
-});
+};
+installFullBridge(bridgeFull);
+loadRealSoldier({get G(){return G;},get T3(){return T3;},get VIEW_MODE(){return VIEW_MODE;},draw,updateUI,build3DWorld,rebuildDemo,PORTRAIT_CACHE,REAL_SPRITES});
+}
+fetch('assets/weapons/weapon_metadata.json').then(r=>r.ok?r.json():{}).then(m=>{WEAPON_METADATA=m||{};}).catch(()=>{});
+fetch('assets/weapons/weapon_calibrations.json').then(r=>r.ok?r.json():{}).then(c=>{WEAPON_CALIBRATIONS=c||{};}).catch(()=>{});
+if(typeof window!=='undefined')window.__csnEvents=CLIP_EVENT_LOG;
+try{window.__csnCam={get cam(){return T3&&T3.cam;},get t3(){return T3;}};}catch(e){}
+document.querySelectorAll('#viewSeg button').forEach(b=>b.onclick=()=>setViewMode(b.dataset.view));
+window.__build3D=function(){ build3DFrame(); };
+window.__render3D=function(){ render3DFrame({G,keysHeld:_keysHeld,hoverTile,advanceUnitYaw,TURRET_POS}); };
+wireKeyboard({get G(){return G;},selectUnit,updateUI,draw,undoLastMove});
+window.__renderDemo=function(){ renderDemoFrame({get G(){return G;},set G(v){G=v;},myNation}); };
+window.quickStart=function(mapId){ quickStart(mapId,{myNation,setup,get G(){return G;}}); };
+const COMMANDER_CRATE_ABILITIES=[
+ {icon:'PlayerAbility_06_Health_Crate_alpha',n:'Caja de salud',d:'Crea una caja de salud en el mapa.',obj:'crate'},
+ {icon:'PlayerAbility_08_Improved_Ammo_alpha',n:'Caja de munición',d:'Crea una caja de munición de alta velocidad.',obj:'crate'},
+ {icon:'PlayerAbility_10_Pain_Killers_alpha',n:'Caja de analgésicos',d:'Crea una caja de analgésicos.',obj:'crate'},
+ {icon:'PlayerAbility_11_Team_Spirit_alpha',n:'Caja de espíritu de equipo',d:'Crea una caja de espíritu de equipo.',obj:'crate'}
+];
+const TUT_TEXTS={
+  undo:'Deshacer: vuelve atrás el último movimiento de tu soldado en este turno (botón ↶ del panel de acción).',
+  settings:'Ajustes: el botón de sonido (🔊) silencia o activa los efectos; la cámara se ajusta con Q/E, +/− y C.',
+  home:'Inicio: desde la partida, «Abandonar» te devuelve al menú sin borrar tu nación ni las monedas.',
+  confirm:'Confirmar: «Terminar turno» cierra tu turno y deja actuar al rival. La vista 2D/3D se cambia sin tocar la partida.'
+};
+function tutShow(){const b=document.getElementById('tutBubble');if(b)b.style.display='block';}
+function tutHide(){const b=document.getElementById('tutBubble');if(b)b.style.display='none';lsSet('radsoldiers_tut','1');}
+window.quickSmoke=function(){ quickSmoke({myNation,setup,get G(){return G;}}); };
+window.quickFlash=function(){ quickFlash({myNation,setup,get G(){return G;}}); };
+wireUI({get G(){return G;},TUT_TEXTS,tutShow,tutHide});
+/* ================= INIT ================= */
+buildNationGrid();buildArsenal();
+loadSkirmishTop('skirmish03');loadSkirmishTop('skirmish04');
+(function(){
+  setCHAR_PREFS(loadChars());
+  const params=new URLSearchParams(window.location.search||'');
+  const auto=params.get('autostart');
+  const saved=lsGet(LS_NATION);const found=saved?nationById(saved):null;
+  if(auto){
+    myNation=found||NATIONS[0];setDemoNation(myNation);
+    try{enterApp();}
+    catch(e){try{renderNationChip();}catch(e2){} $('#mainTabs').style.display='flex'; showScreen('scr-play');}
+    if(auto==='smoke')window.quickSmoke();
+    else if(auto==='flash')window.quickFlash();
+    else if(auto==='skirmish')window.quickStart('skirmish');
+    else window.quickStart(MAP_DEFS[auto]?auto:'almacen');
+    return;
+  }
+  if(found){myNation=found;setDemoNation(myNation);
+    try{enterApp();}
+    catch(e){try{renderNationChip();}catch(e2){} $('#mainTabs').style.display='flex'; showScreen('scr-play');}
+  }
+  else{if(saved)lsRemove(LS_NATION); showScreen('scr-nation');}
+})();
+$('#guerraCountdown').textContent=fmtCountdown(msToNextSaturday());
+if(bridgeFull)installFullBridge(bridgeFull);

@@ -5,6 +5,7 @@ export * from './assets-weapons.js';
 export * from './camera3d.js';
 export * from './clips.js';
 export * from './env.js';
+export * from './fallback-soldier.js';
 export * from './fx3d.js';
 export * from './gun-pose.js';
 export * from './gun.js';

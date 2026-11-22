@@ -1,3 +1,8 @@
+import { CLIPLIB } from './clips.js';
+import { CAST_TEXTURE_FILE, MESHY_CAST } from '../data/cast.js';
+import { buildSpriteStrip } from '../render2d/sprites.js';
+import { loadMeshyModel } from './assets-meshy.js';
+
 export const REAL={ready:false,data:null,geo:null,tex:null,castTex:{}};
 
 export function parseOBJ3(txt,skin){
@@ -44,11 +49,12 @@ export const ROLE_MODEL_FILES={'Francotirador':'Francotirador','Artillero':'Arti
 
 export const ROLE_OUTFIT_FILES={'Francotirador':'veteran','Artillero':'deerhunter','Espía':'spetsnaz','Médico':'decon','Ingeniero':'rambo','Comando':'deltaforce','Capitán':'base'};
 
-export function loadRealSoldier(){
+export function loadRealSoldier(ctx={}){
   if(typeof THREE==='undefined')return;
+  const {draw=()=>{},updateUI=()=>{},build3DWorld=()=>{},rebuildDemo=()=>{},PORTRAIT_CACHE,REAL_SPRITES}=ctx;
   REAL.texByRole={};REAL.byRole={};REAL.castTex={};
-  fetch('assets/soldier_scales.json').then(r=>r.json()).then(sc=>{ROLE_SCALES=sc||{};}).catch(()=>{});
-  fetch('assets/soldier_clips.json').then(r=>{if(!r.ok)throw new Error('clips');return r.json();}).then(pack=>{CLIPLIB.pack=pack;CLIPLIB.ready=true;}).catch(()=>{});
+  fetch('assets/soldier_scales.json').then(r=>r.json()).then(sc=>{ROLE_SCALES=sc||{};}).catch(err=>console.error('[loadRealSoldier:escalas]',err));
+  fetch('assets/soldier_clips.json').then(r=>{if(!r.ok)throw new Error('clips');return r.json();}).then(pack=>{CLIPLIB.pack=pack;CLIPLIB.ready=true;}).catch(err=>console.error('[loadRealSoldier:clips]',err));
   const texLoad=(path)=>new Promise(res=>{new THREE.TextureLoader().load(path,t=>{
     t.colorSpace=THREE.SRGBColorSpace;t.generateMipmaps=false;
     t.minFilter=THREE.LinearFilter;t.magFilter=THREE.LinearFilter;
@@ -80,16 +86,16 @@ export function loadRealSoldier(){
     (pairs||[]).forEach(([role,t])=>{if(t)REAL.texByRole[role]=t;});
     return Promise.all([
       Promise.all(Object.values(CAST_TEXTURE_FILE).map(file=>texLoad('assets/soldier/cast/'+file).then(t=>[file,t]))),
-      Promise.all(MESHY_CAST.map(c=>loadMeshyModel(c.mesh)))
+      Promise.all(MESHY_CAST.map(c=>loadMeshyModel(c.mesh,REAL)))
     ]).then(([casts])=>{
       (casts||[]).forEach(([file,t])=>{if(t)REAL.castTex[file]=t;});
     });
   }).then(()=>{
-    Object.keys(PORTRAIT_CACHE).forEach(k=>delete PORTRAIT_CACHE[k]);
-    REAL_SPRITES.cache={};REAL_SPRITES.failed=false;
-    if(typeof buildSpriteStrip==='function')buildSpriteStrip();
-    if(typeof rebuildDemo==='function')rebuildDemo();
-    if(G&&T3&&VIEW_MODE==='3d')build3DWorld();
-    if(G){updateUI();draw();}
-  }).catch(()=>{});
+    if(PORTRAIT_CACHE)Object.keys(PORTRAIT_CACHE).forEach(k=>delete PORTRAIT_CACHE[k]);
+    if(REAL_SPRITES){REAL_SPRITES.cache={};REAL_SPRITES.failed=false;}
+    buildSpriteStrip();
+    rebuildDemo();
+    if(ctx.G&&ctx.T3&&ctx.VIEW_MODE==='3d')build3DWorld();
+    if(ctx.G){updateUI();draw();}
+  }).catch(err=>console.error('[loadRealSoldier]',err));
 }

@@ -1,0 +1,304 @@
+﻿
+=== src/main.js (/INIT/) ===
+L  98: ];
+L  99: const TUT_TEXTS={
+L 100:   undo:'Deshacer: vuelve atr├ís el ├║ltimo movimiento de tu soldado en este turno (bot├│n ÔåÂ del panel de acci├│n).',
+L 101:   settings:'Ajustes: el bot├│n de sonido (­ƒöè) silencia o activa los efectos; la c├ímara se ajusta con Q/E, +/ÔêÆ y C.',
+L 102:   home:'Inicio: desde la partida, ┬½Abandonar┬╗ te devuelve al men├║ sin borrar tu naci├│n ni las monedas.',
+L 103:   confirm:'Confirmar: ┬½Terminar turno┬╗ cierra tu turno y deja actuar al rival. La vista 2D/3D se cambia sin tocar la partida.'
+L 104: };
+L 105: function tutShow(){const b=document.getElementById('tutBubble');if(b)b.style.display='block';}
+L 106: function tutHide(){const b=document.getElementById('tutBubble');if(b)b.style.display='none';lsSet('radsoldiers_tut','1');}
+L 107: window.quickSmoke=function(){ quickSmoke({myNation,setup,get G(){return G;}}); };
+L 108: window.quickFlash=function(){ quickFlash({myNation,setup,get G(){return G;}}); };
+L 109: wireUI({get G(){return G;},TUT_TEXTS,tutShow,tutHide});
+L 110: installEarlyBridge({
+L 111: get $(){return $;},get G(){return G;},set G(v){G=v;},
+L 112: get W(){return W;},set W(v){W=v;},get H(){return H;},
+L 113: set H(v){H=v;},get BEACON(){return BEACON;},set BEACON(v){BEACON=v;},
+L 114: get TURRET_POS(){return TURRET_POS;},set TURRET_POS(v){TURRET_POS=v;},get NATIVE_GRID(){return NATIVE_GRID;},
+L 115: set NATIVE_GRID(v){NATIVE_GRID=v;},get flowStep(){return flowStep;},set flowStep(v){flowStep=v;},
+L 116: get myNation(){return myNation;},set myNation(v){myNation=v;setDemoNation(v);},get pickedNation(){return pickedNation;},
+L 117: set pickedNation(v){pickedNation=v;},get setup(){return setup;},set setup(v){setup=v;},
+L 118: get uid(){return uid;},set uid(v){uid=v;},get hoverTile(){return hoverTile;},
+L 119: set hoverTile(v){setHoverTile(v);},get arsFilter(){return arsFilter;},set arsFilter(v){setArsFilter(v);},
+L 120: get DEMO(){return DEMO;},set DEMO(v){setDEMO(v);},get CHAR_PREFS(){return CHAR_PREFS;},
+L 121: set CHAR_PREFS(v){setCHAR_PREFS(v);},
+L 122: });
+L 123: /* ================= INIT ================= */
+L 124: buildNationGrid();buildArsenal();
+L 125: loadSkirmishTop('skirmish03');loadSkirmishTop('skirmish04');
+L 126: (function(){
+L 127:   setCHAR_PREFS(loadChars());
+L 128:   const params=new URLSearchParams(window.location.search||'');
+L 129:   const auto=params.get('autostart');
+L 130:   const saved=lsGet(LS_NATION);const found=saved?nationById(saved):null;
+L 131:   if(auto){
+L 132:     myNation=found||NATIONS[0];setDemoNation(myNation);
+L 133:     try{enterApp();}
+L 134:     catch(e){try{renderNationChip();}catch(e2){} $('#mainTabs').style.display='flex'; showScreen('scr-play');}
+L 135:     if(auto==='smoke')window.quickSmoke();
+L 136:     else if(auto==='flash')window.quickFlash();
+L 137:     else if(auto==='skirmish')window.quickStart('skirmish');
+L 138:     else window.quickStart(MAP_DEFS[auto]?auto:'almacen');
+L 139:     return;
+L 140:   }
+L 141:   if(found){myNation=found;setDemoNation(myNation);
+L 142:     try{enterApp();}
+L 143:     catch(e){try{renderNationChip();}catch(e2){} $('#mainTabs').style.display='flex'; showScreen('scr-play');}
+L 144:   }
+L 145:   else{if(saved)lsRemove(LS_NATION); showScreen('scr-nation');}
+L 146: })();
+L 147: $('#guerraCountdown').textContent=fmtCountdown(msToNextSaturday());
+L 148: installFullBridge({
+L 149: get $(){return $;},get ABILITY_CATALOG(){return ABILITY_CATALOG;},get ABILITY_IMPL(){return ABILITY_IMPL;},
+L 150: get ABILITY_OBJECTS(){return ABILITY_OBJECTS;},get AC(){return AC;},get AMBIENT_FILE(){return AMBIENT_FILE;},
+L 151: get ARGON_DEFS(){return ARGON_DEFS;},get AUX_HINTS(){return AUX_HINTS;},get AUX_LABELS(){return AUX_LABELS;},
+L 152: get AU_AMBIENT(){return AU_AMBIENT;},get AU_BASE(){return AU_BASE;},get AU_MUSIC(){return AU_MUSIC;},
+L 153: get AXIS_X3(){return AXIS_X3;},get BEACON(){return BEACON;},set BEACON(v){BEACON=v;},
+L 154: get BODIES(){return BODIES;},get CAMO_TEX(){return CAMO_TEX;},get CAMPAIGN_MISSIONS(){return CAMPAIGN_MISSIONS;},
+L 155: get CAST_BODIES(){return CAST_BODIES;},get CAST_TEXTURE_FILE(){return CAST_TEXTURE_FILE;},get CATS(){return CATS;},
+L 156: get CHARACTERS(){return CHARACTERS;},get CHARACTER_ABILITIES(){return CHARACTER_ABILITIES;},get CHAR_ABILITY_ACTIONS(){return CHAR_ABILITY_ACTIONS;},
+L 157: get CHAR_PREFS(){return CHAR_PREFS;},set CHAR_PREFS(v){setCHAR_PREFS(v);},get CHAR_VOICE(){return CHAR_VOICE;},
+L 158: get CLASS_LABEL(){return CLASS_LABEL;},get CLASS_ORDER(){return CLASS_ORDER;},get CLIPLIB(){return CLIPLIB;},
+L 159: get CLIP_BLEND_MS(){return CLIP_BLEND_MS;},get CLIP_EVENT_LOG(){return CLIP_EVENT_LOG;},get COINS_KEY(){return COINS_KEY;},
+L 160: get COMMANDER_CRATE_ABILITIES(){return COMMANDER_CRATE_ABILITIES;},get COVER_COST(){return COVER_COST;},get DEBUG_GRID(){return DEBUG_GRID;},
+L 161: get DEBUG_WEAPONS(){return DEBUG_WEAPONS;},get DEFAULT_SQUADS(){return DEFAULT_SQUADS;},get DEMO(){return DEMO;},
+L 162: set DEMO(v){setDEMO(v);},get DMR_WEAPONS(){return DMR_WEAPONS;},get DOM_TARGET(){return DOM_TARGET;},
+L 163: get DOM_ZONES(){return DOM_ZONES;},get DRAW_MOVE_MS_PER_TILE(){return DRAW_MOVE_MS_PER_TILE;},get EMBLEM_TEX(){return EMBLEM_TEX;},
+L 164: get ESCORT_EXT(){return ESCORT_EXT;},get ESCORT_MAX_ROUNDS(){return ESCORT_MAX_ROUNDS;},get ESCORT_START(){return ESCORT_START;},
+L 165: get FLASH_COST(){return FLASH_COST;},get FX(){return FX;},get G(){return G;},
+L 166: set G(v){G=v;},get GRID_CACHE(){return GRID_CACHE;},get GUN_MESH_CACHE(){return GUN_MESH_CACHE;},
+L 167: get HAS_THREE(){return HAS_THREE;},get LEAF_SVG(){return LEAF_SVG;},get LS_CAMPAIGN(){return LS_CAMPAIGN;},
+L 168: get LS_CHARS(){return LS_CHARS;},get LS_NATION(){return LS_NATION;},get LS_SOUND(){return LS_SOUND;},
+L 169: get MAP_DEFS(){return MAP_DEFS;},get MAPS_ORIGINAL(){return MAPS_ORIGINAL;},get MAP_PIECES(){return MAP_PIECES;},
+L 170: get MEM_STORE(){return MEM_STORE;},get MESHY_CAST(){return MESHY_CAST;},get MESHY_MODELS(){return MESHY_MODELS;},
+L 171: get MINE_DMG(){return MINE_DMG;},get MOLOTOV_COST(){return MOLOTOV_COST;},get MUSIC_TRACKS(){return MUSIC_TRACKS;},
+L 172: get NATIONS(){return NATIONS;},get NATION_ART(){return NATION_ART;},get NATIVE_GRID(){return NATIVE_GRID;},
+L 173: set NATIVE_GRID(v){NATIVE_GRID=v;},get NATIVE_MAP_IDS(){return NATIVE_MAP_IDS;},get ORB_COST(){return ORB_COST;},
+L 174: get ORIG_CAST(){return ORIG_CAST;},get OWN_CAST(){return OWN_CAST;},get PISTOL(){return PISTOL;},
+L 175: get PORTRAIT_CACHE(){return PORTRAIT_CACHE;},get REAL(){return REAL;},get REAL_SPRITES(){return REAL_SPRITES;},
+L 176: get REAL_SPRITE_FEET(){return REAL_SPRITE_FEET;},get REDUCED_MOTION(){return REDUCED_MOTION;},get ROLES(){return ROLES;},
+L 177: get ROLE_BODY(){return ROLE_BODY;},get ROLE_LOOK(){return ROLE_LOOK;},get ROLE_MODEL_FILES(){return ROLE_MODEL_FILES;},
+L 178: get ROLE_NAMES(){return ROLE_NAMES;},get ROLE_OUTFIT_FILES(){return ROLE_OUTFIT_FILES;},get ROLE_PORTRAIT(){return ROLE_PORTRAIT;},
+L 179: get ROLE_SCALES(){return ROLE_SCALES;},get ROLE_SVG_ID(){return ROLE_SVG_ID;},get SHIELD_COST(){return SHIELD_COST;},
+L 180: get SKINS(){return SKINS;},get SKIN_TONES(){return SKIN_TONES;},get SKIRMISH_GEO(){return SKIRMISH_GEO;},
+L 181: get SMOKE_TURNS(){return SMOKE_TURNS;},get SPAWNS_A(){return SPAWNS_A;},get SPAWNS_B(){return SPAWNS_B;},
+L 182: get SPRITE_AIM_CT(){return SPRITE_AIM_CT;},get SPRITE_CACHE(){return SPRITE_CACHE;},get STEP_META(){return STEP_META;},
+L 183: get T3(){return T3;},get TEX3(){return TEX3;},get TRANQ_COST(){return TRANQ_COST;},
+L 184: get TURRET_POS(){return TURRET_POS;},set TURRET_POS(v){TURRET_POS=v;},get TUT_TEXTS(){return TUT_TEXTS;},
+L 185: get VIEW_MODE(){return VIEW_MODE;},get VOICE_FILES(){return VOICE_FILES;},get W(){return W;},
+L 186: set W(v){W=v;},get H(){return H;},set H(v){H=v;},
+L 187: get WEAPONS(){return WEAPONS;},get WEAPONS_ORIGINAL(){return WEAPONS_ORIGINAL;},get WEAPON_CALIBRATIONS(){return WEAPON_CALIBRATIONS;},
+L 188: get WEAPON_COVER_BY_FILE(){return WEAPON_COVER_BY_FILE;},get WEAPON_LEN(){return WEAPON_LEN;},get WEAPON_MESH_FILE(){return WEAPON_MESH_FILE;},
+L 189: get WEAPON_METADATA(){return WEAPON_METADATA;},get WEAPON_SFX(){return WEAPON_SFX;},get WEAPON_THUMB_CACHE(){return WEAPON_THUMB_CACHE;},
+L 190: get _cq(){return _cq;},get _gpDir(){return _gpDir;},get _gpOrigin(){return _gpOrigin;},
+L 191: get _gpPalmR(){return _gpPalmR;},get _gpRPalm(){return _gpRPalm;},get _gpUp(){return _gpUp;},
+L 192: get _hitWhite(){return _hitWhite;},get _keysHeld(){return _keysHeld;},get _retargetDelta(){return _retargetDelta;},
+L 193: get _rq(){return _rq;},get _smooth01(){return _smooth01;},get _toonGrad(){return _toonGrad;},
+L 194: get _undoBtn(){return _undoBtn;},get _wThumbR(){return _wThumbR;},get advanceUnitYaw(){return advanceUnitYaw;},
+L 195: get aiUnitAct(){return aiUnitAct;},get aimR(){return aimR;},get aliveCount(){return aliveCount;},
+L 196: get angleToFacing(){return angleToFacing;},get applyCharacterAbilities(){return applyCharacterAbilities;},get applyNativeGrid(){return applyNativeGrid;},
+L 197: get applyStun(){return applyStun;},get armTab(){return armTab;},get arsFilter(){return arsFilter;},
+L 198: set arsFilter(v){setArsFilter(v);},get attachRealGun(){return attachRealGun;},get auAmbient(){return auAmbient;},
+L 199: get auClick(){return auClick;},get auMusicStart(){return auMusicStart;},get auMusicStop(){return auMusicStop;},
+L 200: get auPlay(){return auPlay;},get auStopAmbient(){return auStopAmbient;},get auVoice(){return auVoice;},
+L 201: get auWeapon(){return auWeapon;},get audioCtx(){return audioCtx;},get backToMenu(){return backToMenu;},
+L 202: get barrelAt(){return barrelAt;},get block3D(){return block3D;},get blocked(){return blocked;},
+L 203: get boardCenter(){return boardCenter;},get boardTileClick(){return boardTileClick;},get boneTargetQ(){return boneTargetQ;},
+L 204: get box3(){return box3;},get build3DWorld(){return build3DWorld;},get buildArsenal(){return buildArsenal;},
+L 205: get buildDemo(){return buildDemo;},get buildMap(){return buildMap;},get buildNationGrid(){return buildNationGrid;},
+L 206: get buildSkirmishGeo3(){return buildSkirmishGeo3;},get buildSpriteSVG(){return buildSpriteSVG;},get buildSpriteStrip(){return buildSpriteStrip;},
+L 207: get buildSquads(){return buildSquads;},get buildThemedProps3(){return buildThemedProps3;},get camoTexture(){return camoTexture;},
+L 208: get canHealSpecial(){return canHealSpecial;},get canReviveSpecial(){return canReviveSpecial;},get canSnipeSpecial(){return canSnipeSpecial;},
+L 209: get canStep(){return canStep;},get canvas(){return canvas;},get ctx(){return ctx;},
+L 210: get captureTurret(){return captureTurret;},get charAbilitiesFor(){return charAbilitiesFor;},get charForKey(){return charForKey;},
+L 211: get charNameFor(){return charNameFor;},get characterForRole(){return characterForRole;},get characterKey(){return characterKey;},
+L 212: get charsForRole(){return charsForRole;},get cheb(){return cheb;},get checkBeaconAtTurnEnd(){return checkBeaconAtTurnEnd;},
+L 213: get checkMines(){return checkMines;},get checkOverwatch(){return checkOverwatch;},get checkWin(){return checkWin;},
+L 214: get classicBoardMetrics(){return classicBoardMetrics;},get classicTileFromPoint(){return classicTileFromPoint;},get clipEventFeedback(){return clipEventFeedback;},
+L 215: get clipPulse(){return clipPulse;},get clipTrackAt(){return clipTrackAt;},get closeModal(){return closeModal;},
+L 216: get coinsGet(){return coinsGet;},get coinsSet(){return coinsSet;},get coverBonus(){return coverBonus;},
+L 217: get coverLevel(){return coverLevel;},get damage(){return damage;},get demoStatus(){return demoStatus;},
+
+=== src/viewer/main.js (/todav[i├¡]a no est[a├í] disponible|REAL\.ready|selectModel/) ===
+L  45:     {key:'SpiderMine',label:'Mina',file:'SpiderMine.obj',tex:'SpiderMine_d.png',note:'Mina desplegable del original.'},
+L  46:     {key:'RemoteCharge',label:'Carga remota',file:'RemoteCharge.obj',tex:'RemoteCharge_d.png',note:'Carga remota del original.'},
+L  47:     {key:'DeployableCover',label:'Cobertura desplegable',file:'DeployableCover.obj',tex:'DeployableCover_d.png',note:'Cobertura desplegable del original.'},
+L  48:     {key:'ObjectiveRocket',label:'Cohete objetivo',file:'ObjectiveRocket.obj',tex:'Rocket_d.png',note:'Cohete objetivo del mapa.'},
+L  49:     {key:'RiotShieldBot',label:'Shield-O-Bot',file:'RiotShieldBot.obj',tex:'RiotShieldBot_d.png',note:'Robot escudo del original.'} ]; function abilityCardHTML(ability){
+L  50:     const obj=ability.obj?ABILITY_OBJECTS[ability.obj]:null; const objLine=obj ?'<br><span class="sub">Objeto: '+obj.name+'. '+(obj.model
+L  51:         ?'<button type="button" data-viewer-prop="'+obj.model+'" style="text-decoration:underline;cursor:pointer">Ver en 3D</button> ┬À '+obj.note :obj.note)+'</span>' :'';
+L  52:     return '<div class="ab-card on" style="display:flex;gap:8px;align-items:center;text-align:left"><img src="assets/ui/ability/'+ability.icon+'.png" alt="" style="width:34px;height:34px;flex:none"/><span><b>'+ability.n+'</b><br><small>'+ability.d+objLine+'</small></span></div>';
+L  53:   }; function renderViewerAbilities(entry){ const box=document.getElementById('viewerAbilities'); if(!box)return;
+L  54:     if(entry&&entry.mesh){box.innerHTML='<p class="sub" style="margin:0">Dise├▒o propio de Dani: sin habilidades del original.</p>';return;}
+L  55:     if(!entry||!entry.name){box.innerHTML='';return;}; const list=CHARACTER_ABILITIES[entry.name]; if(list===undefined){box.innerHTML='';return;}; if(!list.length){
+L  56:       box.innerHTML='<p class="sub" style="margin:0"><b>Habilidades:</b> el Capit├ín ten├¡a una selecci├│n aparte de habilidades de comandante; las concretas no est├ín en el material legible del original.</p>';
+L  57:       return; }; box.innerHTML='<p class="sub" style="margin:0 0 6px"><b>Habilidades del original:</b></p>'+list.map(abilityCardHTML).join('');
+L  58:     box.querySelectorAll('[data-viewer-prop]').forEach(button=>{ button.onclick=()=>{
+L  59:         document.querySelectorAll('#viewerKinds button').forEach(item=>item.classList.toggle('on',item.dataset.kind==='props')); viewer.kind='props';viewer.skinIndex=0;
+L  60:         selectModel('props',button.dataset.viewerProp); }; }); }; const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms)); function setStatus(message,visible){
+L  61:     status.textContent=message; status.style.display=visible?'grid':'none'; }; function ensureRenderer(){ if(viewer.renderer)return true; try{
+L  62:       viewer.renderer=new THREE.WebGLRenderer({antialias:true,alpha:true}); viewer.renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+L  63:       viewer.renderer.setClearColor(0x11150f,0); stage.insertBefore(viewer.renderer.domElement,status); viewer.scene=new THREE.Scene();
+L  64:       viewer.scene.add(new THREE.HemisphereLight(0xe7f0d9,0x30372b,2)); const key=new THREE.DirectionalLight(0xffedc2,2.4);key.position.set(3,5,4);viewer.scene.add(key);
+L  65:       const fill=new THREE.DirectionalLight(0x9bb8d1,1.1);fill.position.set(-4,2,-3);viewer.scene.add(fill);
+L  66:       viewer.meshyFill=new THREE.DirectionalLight(0xd7ebff,1.8);viewer.meshyFill.position.set(-3,2,5);viewer.meshyFill.intensity=0;viewer.scene.add(viewer.meshyFill);
+L  67:       viewer.meshyRim=new THREE.DirectionalLight(0xffd9a8,2.2);viewer.meshyRim.position.set(3,4,-4);viewer.meshyRim.intensity=0;viewer.scene.add(viewer.meshyRim);
+L  68:       viewer.camera=new THREE.PerspectiveCamera(36,1,0.01,80); viewer.spin=new THREE.Group();viewer.scene.add(viewer.spin); viewer.platform=new THREE.Mesh(
+L  69:         new THREE.CircleGeometry(1,48), new THREE.MeshStandardMaterial({color:0x30382a,roughness:0.9,metalness:0}) ); viewer.platform.rotation.x=-Math.PI/2;
+L  70:       viewer.scene.add(viewer.platform); return true; }catch(error){ setStatus('No se pudo iniciar el visor WebGL: '+error.message,true); return false; } }; function updateCamera(){
+L  71:     const zoom=+(zoomControl.value||1); viewer.camera.position.set(0,viewer.baseDistance*0.22,viewer.baseDistance/zoom); viewer.camera.lookAt(0,0,0); }; function resize(){
+L  72:     if(!viewer.renderer||!document.getElementById('scr-viewer').classList.contains('on'))return; const width=Math.max(1,stage.clientWidth),height=Math.max(1,stage.clientHeight);
+L  73:     viewer.renderer.setSize(width,height,false); viewer.camera.aspect=width/height; viewer.camera.updateProjectionMatrix(); }; function frame(now){
+L  74:     if(!document.getElementById('scr-viewer').classList.contains('on')){ viewer.frameRequested=false; return; }; if(viewer.renderer){
+L  75:       const idle=CLIPLIB.ready&&CLIPLIB.pack&&CLIPLIB.pack.clips[viewer.idleClipKey];
+L  76:       if(viewer.idleActor&&idle)poseSpriteClip(null,viewer.idleActor,idle,(now/1000)%idle.dur,viewer.idleClipKey); if(viewer.gripActor&&viewer.gripActor.userData.gun)
+L  77:         fitGunToHand3(viewer.gripActor.userData.gripUnit,viewer.gripActor,false); const dt=viewer.lastFrame?Math.min(0.05,(now-viewer.lastFrame)/1000):0.016;
+L  78:       if(!viewer.drag&&viewer.spin&&viewer.spin.children.length){ viewer.spin.rotation.y+=dt*0.22; if(Math.abs(viewer.dragVel)>1e-4){ viewer.spin.rotation.y+=viewer.dragVel*dt;
+L  79:           viewer.dragVel*=Math.exp(-dt/0.25); }else viewer.dragVel=0; }; viewer.renderer.render(viewer.scene,viewer.camera); refreshTexturePreview(); }; viewer.lastFrame=now;
+L  80:     requestAnimationFrame(frame); }; function refreshTexturePreview(){ let texture=null; if(viewer.spin)viewer.spin.traverse(object=>{ if(!texture&&object.material){
+L  81:         const mats=Array.isArray(object.material)?object.material:[object.material]; const mat=mats.find(item=>item.map&&item.map.image); if(mat)texture=mat.map; } });
+L  82:     const image=texture&&texture.image; const src=image&&(image.currentSrc||image.src); if(src&&texturePreview.src!==src){texturePreview.src=src;texturePreview.hidden=false;} }
+L  83:   function mount(model){ if(model.parent)model.parent.remove(model); model.position.set(0,0,0); while(viewer.spin.children.length)viewer.spin.remove(viewer.spin.children[0]);
+L  84:     if(model.userData&&model.userData.bones&&model.userData.bindLocal&&CLIPLIB.ready); poseViewerRest(model,model.userData.idleClipKey||'idle2h',0); model.updateMatrixWorld(true);
+L  85:     model.traverse(object=>{ if(object.isSkinnedMesh&&object.skeleton)object.skeleton.update(); }); model.updateMatrixWorld(true); const bounds=new THREE.Box3();
+L  86:     const meshBounds=new THREE.Box3(); model.traverse(object=>{ if(!object.isMesh||!object.geometry)return; let p=object.parent;
+L  87:       while(p&&p!==model){if(p.userData&&p.userData.isViewerGun)return;p=p.parent;}; if(object.isSkinnedMesh){ if(object.computeBoundingBox)object.computeBoundingBox();
+L  88:         if(object.boundingBox&&!object.boundingBox.isEmpty()){ meshBounds.copy(object.boundingBox).applyMatrix4(object.matrixWorld); }else meshBounds.setFromObject(object,true);
+L  89:       }else meshBounds.setFromObject(object,true); bounds.union(meshBounds); }); const size=new THREE.Vector3(),center=new THREE.Vector3();
+L  90:     bounds.getSize(size);bounds.getCenter(center); if(!Number.isFinite(size.x)||Math.max(size.x,size.y,size.z)<0.001)throw new Error('El modelo no contiene geometr├¡a visible.');
+L  91:     const centerOffset=viewerCenterOffset(center); const centered=new THREE.Group(); centered.position.set(centerOffset.x,centerOffset.y,centerOffset.z); centered.add(model);
+L  92:     viewer.spin.add(centered); centered.updateMatrixWorld(true); viewer.idleActor=viewer.kind==='roles'&&model.userData.animatable?model:null;
+L  93:     viewer.gripActor=viewer.kind==='roles'&&model.userData.grip?model:null; if(viewer.meshyFill)viewer.meshyFill.intensity=viewer.kind==='roles'&&model.userData.meshy?1.8:0;
+L  94:     if(viewer.meshyRim)viewer.meshyRim.intensity=viewer.kind==='roles'&&model.userData.meshy?2.2:0; viewer.idleClipKey=model.userData.idleClipKey||'idle2h';
+L  95:     if(viewer.gripActor&&viewer.gripActor.userData.gun); fitGunToHand3(viewer.gripActor.userData.gripUnit,viewer.gripActor,false);
+L  96:     viewer.spin.rotation.set(viewer.kind==='weapons'?0.25:0,-0.55,0); const platformRadius=Math.max(0.35,Math.max(size.x,size.z)*0.72);
+L  97:     viewer.platform.scale.set(platformRadius,platformRadius,1); viewer.platform.position.y=bounds.min.y-center.y-0.02; resize();
+L  98:     viewer.baseDistance=fitViewerDistance(size,viewer.camera.fov,viewer.camera.aspect); updateCamera(); viewer.renderer.render(viewer.scene,viewer.camera); refreshTexturePreview();
+L  99:     setStatus('',false); }; function refreshList(){ const list=document.getElementById('viewerList'); const controls=document.getElementById('viewerCharacterControls');
+L 100:     const pieceControls=document.getElementById('viewerPieceControls'); const characterSelect=document.getElementById('viewerCharacterSelect');
+L 101:     controls.style.display=viewer.kind==='roles'?'grid':'none'; pieceControls.style.display=viewer.kind==='pieces'?'grid':'none';
+L 102:     list.style.display=viewer.kind==='roles'?'none':'flex'; if(viewer.kind==='roles'){ characterSelect.replaceChildren(); viewerCharacters.forEach(entry=>{
+L 103:         const option=document.createElement('option'); option.value=entry.key;option.textContent=entry.label; characterSelect.appendChild(option); });
+L 104:       characterSelect.value=viewer.name; const entry=viewerCharacters.find(item=>item.key===viewer.name)||viewerCharacters[0];
+L 105:       const skin=entry.skins[Math.min(viewer.skinIndex,entry.skins.length-1)]; document.getElementById('viewerSkinName').textContent=skin.label;
+L 106:       document.getElementById('viewerSkinPrev').disabled=entry.skins.length<2; document.getElementById('viewerSkinNext').disabled=entry.skins.length<2;
+L 107:       const weaponSelect=document.getElementById('viewerWeaponSelect'); const weaponLabel=document.getElementById('viewerWeaponLabel');
+L 108:       const roleWeapons=(entry.role&&VIEWER_ROLE_WEAPONS[entry.role])||[]; const sculpted=!!entry.sculptedWeapon;
+L 109:       if(sculpted||(viewer.weapon&&!roleWeapons.includes(viewer.weapon)))viewer.weapon=''; weaponSelect.replaceChildren(); const noneOption=document.createElement('option');
+L 110:       noneOption.value='';noneOption.textContent=sculpted?'Sin acople (arma ya esculpida)':'Sin arma'; weaponSelect.appendChild(noneOption); roleWeapons.forEach(weapon=>{
+L 111:         const option=document.createElement('option'); option.value=weapon;option.textContent=weapon; weaponSelect.appendChild(option); }); weaponSelect.value='';
+L 112:       weaponSelect.disabled=sculpted; weaponLabel.style.display=roleWeapons.length||sculpted?'':'none';
+L 113:       document.getElementById('viewerWeaponLabelText').textContent=sculpted?'Arma del dise├▒o propio (No se acopla otra arma)':'Arma'; return; }; if(viewer.kind==='pieces'){
+L 114:       const mapSelect=document.getElementById('viewerPieceMapSelect'); if(!mapSelect.options.length){ MAPS_ORIGINAL.forEach(map=>{ const option=document.createElement('option');
+L 115:           option.value=map.name;option.textContent=map.name+' ('+map.pieces+' piezas)'; mapSelect.appendChild(option); }); }; mapSelect.value=viewer.pieceMap;
+L 116:       const pieces=MAP_PIECES.filter(piece=>piece.m===viewer.pieceMap); document.getElementById('viewerPieceCount').textContent=pieces.length+' piezas ┬À mapa '+viewer.pieceMap;
+L 117:       list.innerHTML=''; pieces.forEach((entry,index)=>{ const button=document.createElement('button'); const meshName=(entry.f||entry.k).split('/').pop();
+L 118:         button.type='button';button.textContent=entry.l+' ┬À '+String(index+1).padStart(2,'0'); button.title=entry.f||entry.k;
+L 119:         button.setAttribute('aria-label',entry.l+' ('+meshName+')'); button.classList.toggle('on',viewer.name===entry.k); button.onclick=()=>selectModel('pieces',entry.k);
+L 120:         list.appendChild(button); }); return; }; const entries=viewer.kind==='props' ?viewerPropFiles.map(prop=>({key:prop.key,label:prop.label,file:prop.file}))
+L 121:       :viewerWeaponFiles.map(file=>({key:file,label:(WEAPONS_ORIGINAL[file]||{}).name||file,file})); list.innerHTML=''; entries.forEach(entry=>{
+L 122:       const button=document.createElement('button'); button.type='button';button.textContent=entry.label; button.classList.toggle('on',viewer.name===entry.key);
+L 123:       button.onclick=()=>selectModel(viewer.kind,entry.key); list.appendChild(button); }); }; function showModelInfo(kind,key){ const entry=kind==='roles'
+L 124:       ?viewerCharacters.find(item=>item.key===key) :kind==='props' ?viewerPropFiles.find(item=>item.key===key) :kind==='pieces' ?MAP_PIECES.find(item=>item.k===key)
+L 125:           :viewerWeaponFiles.includes(key)?{label:(WEAPONS_ORIGINAL[key]||{}).name||key,name:(WEAPONS_ORIGINAL[key]||{}).name||key,file:key,orig:WEAPONS_ORIGINAL[key]||null}:null;
+L 126:     if(!entry)throw new Error('El modelo seleccionado no pertenece al cat├ílogo del visor.'); document.getElementById('viewerName').textContent=entry.name||entry.label||entry.l;
+L 127:     document.getElementById('viewerDescription').textContent=kind==='roles' ?(entry.mesh ?'Dise├▒o Meshy independiente ┬À '+entry.mesh+'.'
+L 128:         :'Rol: '+(entry.role||'ÔÇö')+'. '+(entry.bio||'')) :kind==='props' ?(entry.note||'Objeto del original extra├¡do de sus assetbundles.') :kind==='pieces'
+L 129:           ?'Pieza de '+entry.m+' ┬À '+entry.s[0]+' ├ù '+entry.s[1]+' ├ù '+entry.s[2]+' unidades (1 unidad = 1 casilla).' :entry.orig
+
+=== src/game/demo.js (/rebuildDemo|demoStatus/) ===
+L   5: 
+L   6: export let DEMO=null;
+L   7: let demoNation=null;
+L   8: export function setDEMO(v){DEMO=v;}
+L   9: export function setDemoNation(v){demoNation=v;}
+L  10: export function demoStatus(msg){const el=document.getElementById('demoStatus');if(el)el.textContent=msg;}
+L  11: export function demoUnit(id,team,role,weapon){
+L  12:   return {id:id,team:team,role:role,weapon:weapon,skin:'nacion',nation:demoNation||NATIONS[0],x:0,y:0,dx:0,dy:0,maxEnergy:8,energy:8,maxHp:250,hp:250,alive:true,invisible:false,body:ROLES[role]?ROLES[role].body:'medio'};
+L  13: }
+L  14: export function buildDemo(){
+L  15:   if(DEMO)return true;
+L  16:   const wrap=document.getElementById('demoWrap');if(!wrap)return false;
+L  17:   if(typeof THREE==='undefined'){demoStatus('La vista 3D no ha podido cargar en este dispositivo: dentro de la partida seguir├ís viendo el tablero cl├ísico, con las mismas reglas.');return false;}
+L  18:   let renderer;
+L  19:   try{renderer=new THREE.WebGLRenderer({antialias:true});}
+L  20:   catch(e){demoStatus('Tu dispositivo no ha podido abrir WebGL, as├¡ que el 3D no puede mostrarse aqu├¡: dentro de la partida seguir├ís viendo el tablero cl├ísico, con las mismas reglas.');return false;}
+L  21:   const isSw=isSoftwareGL3(renderer);
+L  22:   renderer.setPixelRatio(isSw?1:Math.min(isMobileGL3()?1.5:(window.devicePixelRatio||1),2));
+L  23:   renderer.outputColorSpace=THREE.SRGBColorSpace;
+L  24:   renderer.toneMapping=THREE.ACESFilmicToneMapping;
+L  25:   renderer.toneMappingExposure=1.08;
+L  26:   renderer.shadowMap.enabled=!isSw;
+L  27:   if(!isSw)renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+L  28:   wrap.appendChild(renderer.domElement);
+L  29:   const scene=new THREE.Scene();
+L  30:   const sky=skyTheme3('almacen');
+L  31:   scene.background=new THREE.Color(sky.bg);
+L  32:   scene.fog=new THREE.Fog(sky.fog,22,42);
+L  33:   const camera=new THREE.PerspectiveCamera(37.5,2,0.1,120);
+L  34:   scene.add(new THREE.HemisphereLight(0xd8ecff,0x3c462e,1.15));
+L  35:   const sun=new THREE.DirectionalLight(0xffe8b8,1.8);
+L  36:   sun.position.set(-6,12,5);
+L  37:   if(!isSw){sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.bias=-0.0005;sun.shadow.normalBias=0.02;}
+L  38:   scene.add(sun);
+L  39:   const fill=new THREE.DirectionalLight(0x8ec5ff,0.55);fill.position.set(7,5,-6);scene.add(fill);
+L  40:   const stage=new THREE.Group();scene.add(stage);
+L  41:   const apron=new THREE.Mesh(new THREE.PlaneGeometry(26,26),texMat3('apron',null,0.95));
+L  42:   apron.rotation.x=-Math.PI/2;apron.position.y=-0.12;apron.receiveShadow=true;stage.add(apron);
+L  43:   const curb=new THREE.Mesh(new THREE.BoxGeometry(7.46,0.14,7.46),mat3('#4f534c',0.9));
+L  44:   curb.position.y=-0.06;curb.receiveShadow=true;stage.add(curb);
+L  45:   [[-3.92,-3.92],[3.92,-3.92],[-3.92,3.92],[3.92,3.92]].forEach(cp=>{
+L  46:     const bollard=new THREE.Mesh(new THREE.CylinderGeometry(0.13,0.15,0.4,10),mat3('#3a3e42',0.7));
+L  47:     bollard.position.set(cp[0],0.1,cp[1]);bollard.castShadow=true;stage.add(bollard);
+L  48:     const cap=new THREE.Mesh(new THREE.CylinderGeometry(0.14,0.14,0.055,10),mat3('#f2b234',0.5));
+L  49:     cap.position.set(cp[0],0.32,cp[1]);stage.add(cap);
+L  50:   });
+L  51:   for(let y=0;y<7;y++)for(let x=0;x<7;x++){
+L  52:     const h=hash2(x,y);
+L  53:     const tile=box3(0.97,0.09,0.97,['#99968e','#918e85','#a09d94','#8b887f'][Math.floor(h*4)],x-3,0,y-3,0.95);
+L  54:     tile.castShadow=false;stage.add(tile);
+L  55:   }
+L  56:   const beacon=new THREE.Mesh(new THREE.PlaneGeometry(1.94,1.94),new THREE.MeshBasicMaterial({color:0xf2b234,transparent:true,opacity:0.16,depthWrite:false}));
+L  57:   beacon.rotation.x=-Math.PI/2;beacon.position.set(0,0.06,0);stage.add(beacon);
+L  58:   [[0,-1.0,2.04,0.06],[0,1.0,2.04,0.06],[-1.0,0,0.06,2.04],[1.0,0,0.06,2.04]].forEach(e=>{
+L  59:     const rim=new THREE.Mesh(new THREE.BoxGeometry(e[2],0.03,e[3]),new THREE.MeshBasicMaterial({color:0xf2b234}));
+L  60:     rim.position.set(e[0],0.04,e[1]);stage.add(rim);
+L  61:   });
+L  62:   const wallMat=texMat3('wall',null,0.85),crateMat=texMat3('crate',null,0.9),barrelMat=texMat3('barrel',null,0.55);
+L  63:   const wallGeo=new THREE.BoxGeometry(0.86,0.72,0.86),shelfGeo=new THREE.BoxGeometry(0.86,0.88,0.86),crateGeo=new THREE.BoxGeometry(0.76,0.5,0.76);
+L  64:   [[-2,-2,'wall'],[2,2,'wall'],[-2,2,'crate'],[2,-2,'crate'],[0,-3,'shelf','#d9b13a','#a9862a'],[0,3,'shelf','#3f8b93','#2e6a71']].forEach(p=>{
+L  65:     const grp=new THREE.Group();grp.position.set(p[0],0,p[1]);
+L  66:     const sh=makeContactShadow3(0.5,0.048);if(sh)grp.add(sh);
+L  67:     if(p[2]==='wall'){
+L  68:       const b=new THREE.Mesh(wallGeo,wallMat);b.position.y=0.41;b.castShadow=true;b.receiveShadow=true;grp.add(b);
+L  69:       grp.add(box3(0.92,0.09,0.92,'#585e64',0,0.08,0,0.85));
+L  70:       grp.add(box3(0.92,0.06,0.92,'#b4bac0',0,0.8,0,0.75));
+L  71:     } else if(p[2]==='shelf'){
+L  72:       const b=new THREE.Mesh(shelfGeo,texMat3('shelf',p[3],0.8));b.position.y=0.49;b.castShadow=true;b.receiveShadow=true;grp.add(b);
+L  73:       grp.add(box3(0.9,0.05,0.9,p[4],0,0.95,0,0.8));
+L  74:     } else {
+L  75:       const b=new THREE.Mesh(crateGeo,crateMat);b.position.y=0.3;b.castShadow=true;b.receiveShadow=true;grp.add(b);
+L  76:       grp.add(box3(0.8,0.05,0.8,'#b88b50',0,0.57,0,0.88));
+L  77:     }
+L  78:     stage.add(grp);
+L  79:   });
+L  80:   const mkBarrel=(bx,bz)=>{
+L  81:     const grp=new THREE.Group();grp.position.set(bx,0,bz);
+L  82:     const sh=makeContactShadow3(0.38,0.048);if(sh)grp.add(sh);
+L  83:     const cyl=new THREE.Mesh(new THREE.CylinderGeometry(0.28,0.28,0.68,18),barrelMat);
+L  84:     cyl.position.y=0.39;cyl.castShadow=true;cyl.receiveShadow=true;grp.add(cyl);
+L  85:     const ring1=new THREE.Mesh(new THREE.TorusGeometry(0.285,0.016,8,24),mat3('#7c1d18',0.5));
+L  86:     ring1.rotation.x=Math.PI/2;ring1.position.y=0.25;grp.add(ring1);
+L  87:     const ring2=ring1.clone();ring2.position.y=0.55;grp.add(ring2);
+L  88:     const lid=new THREE.Mesh(new THREE.CylinderGeometry(0.26,0.26,0.02,16),mat3('#e87266',0.45));
+L  89:     lid.position.y=0.74;grp.add(lid);
+L  90:     stage.add(grp);
+L  91:   };
+L  92:   mkBarrel(-3,0);mkBarrel(3,0);
+L  93:   const defs=[[901,'A','Comando','M4A1',-1.5,-1.2],[902,'A','M├®dico','M4A1',-1.5,1.1],[903,'B','Artillero','M249 SAW',1.5,-1.1],[904,'B','Esp├¡a','MP7',1.5,1.2]];
+L  94:   const units=[];
+
+=== _capture_all.mjs (/audit-all/) ===
+NO ENCONTRADO

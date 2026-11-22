@@ -21,6 +21,27 @@ const software = /^(1|true|yes)$/i.test(process.env.CSN_SOFTWARE || '') || !!(mo
 const mobileMode = mobileArg ? (mobileArg.startsWith('sw:') ? mobileArg.slice(3) : mobileArg) : null;
 const PORT = 9360 + Math.floor(Math.random() * 40);
 const sleep = ms => new Promise(r => setTimeout(r, ms));
+const viewerAuditProbeExpr = `(async function(){
+ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+ const statusEl=document.getElementById('viewerStatus');
+ const state=()=>window.__csnViewer&&window.__csnViewer.state;
+ const model=()=>{const v=state(),c=v&&v.spin&&v.spin.children&&v.spin.children[0];return (c&&c.children&&c.children[0])||null;};
+ const probe=label=>{const v=state(),m=model();let size=[0,0,0];if(m){const box=new THREE.Box3().setFromObject(m),s=new THREE.Vector3();box.getSize(s);size=[s.x,s.y,s.z].map(n=>+n.toFixed(4));}const st=statusEl;return {label,name:(v&&v.name)||'',kind:(v&&v.kind)||'',status:(st.textContent||'').trim(),statusHidden:!!(st.hidden||st.style.display==='none'),size,meshy:!!(m&&m.userData&&m.userData.meshy),gun:!!(m&&m.userData&&m.userData.viewerGun),geometryOk:size.some(n=>Number.isFinite(n)&&n>0.001)};};
+ const settle=async()=>{await sleep(400);for(let i=0;i<120;i++){const st=statusEl,t=(st.textContent||'').trim();if((st.hidden||st.style.display==='none')&&!t)return true;if(/No se pudo|todav/.test(t))return false;await sleep(250);}return false;};
+ const out=[];
+ const roles=async key=>{document.querySelector('#viewerKinds [data-kind="roles"]').click();await sleep(250);const c=document.getElementById('viewerCharacterSelect');c.value=key;c.dispatchEvent(new Event('change',{bubbles:true}));await settle();out.push(probe(key));};
+ await roles('original:01');
+ const w=document.getElementById('viewerWeaponSelect'),opts=[...w.options].map(o=>o.value).filter(Boolean);
+ if(opts.length){w.value=opts[0];w.dispatchEvent(new Event('change',{bubbles:true}));await settle();out.push(probe('original:01+weapon'));}
+ await roles('original:05');
+ await roles('own:09');
+ document.querySelector('#viewerKinds [data-kind="weapons"]').click();await sleep(250);
+ const wb=document.querySelector('#viewerList button');if(wb){wb.click();await settle();out.push(probe('weapon:'+wb.textContent.trim()));}
+ document.querySelector('#viewerKinds [data-kind="props"]').click();await sleep(250);
+ const pb=document.querySelector('#viewerList button');if(pb){pb.click();await settle();out.push(probe('prop:'+pb.textContent.trim()));}
+ document.querySelector('#viewerKinds [data-kind="roles"]').click();
+ window.__viewerAuditProbe=out;return JSON.stringify(out);
+})()`;
 
 const result = {
   map: mapId,
@@ -34,6 +55,7 @@ const result = {
   ui: null,
   viewer: null,
   viewerAudit: null,
+  viewerProbe: null,
   move: null,
   combat: null,
   mobile: null,
@@ -166,6 +188,8 @@ try {
       }
       await ev("document.querySelector('#viewerKinds [data-kind=\"roles\"]').click()");
       await sleep(350);
+      const rawProbe = await ev(viewerAuditProbeExpr, 90000);
+      try { result.viewerProbe = JSON.parse(rawProbe); } catch { result.viewerProbe = rawProbe; }
     }
     if (mobileMode === 'game') {
       for (let i = 0; i < 24; i++) {
@@ -275,11 +299,21 @@ try {
   const mobileOk = !mobileMode || !!(result.mobile && result.mobile.w <= 430 && result.mobile.scrollW <= result.mobile.clientW + 2 && (!result.mobile.board || !result.mobile.board.shown || result.mobile.board.w <= result.mobile.w + 2) && (!result.mobile.actions.count || result.mobile.actions.min >= 44));
   const geoOk = !mobileMode || mobileMode !== 'game' || !!(parsed && parsed.geo === true);
   const softwareOk = !software || !!(parsed && parsed.sw === true);
-  const viewerOk = !auditMode || !!(result.viewerAudit && Array.isArray(result.viewerAudit.models) && result.viewerAudit.models.length > 0 && result.viewerAudit.models.every(m => {
+  let viewerOk = !auditMode || !!(result.viewerAudit && Array.isArray(result.viewerAudit.models) && result.viewerAudit.models.length > 0 && result.viewerAudit.models.every(m => {
     if (!Number.isFinite(m.vol) || m.transparent !== false || m.opacity !== 1) return false;
-    if (m.kind === 'roles' || m.kind === 'weapons') return m.side === 0 && m.alphaTest === 0 && (m.kind !== 'roles' || m.vol > 0);
+    if (!m.size.every(n => Number.isFinite(n) && n > 0.001)) return false;
+    if (m.kind === 'roles' || m.kind === 'weapons') return m.side === 0 && m.alphaTest === 0 && (m.kind !== 'roles' || m.meshy || m.vol > 0);
     return m.size.every(Number.isFinite);
   }));
+  if (auditMode) {
+    const probes = Array.isArray(result.viewerProbe) ? result.viewerProbe : [];
+    const mounted = probes.filter(p => ['original:01', 'original:01+weapon', 'original:05', 'own:09'].includes(p.label));
+    const gunOk = probes.some(p => p.label === 'original:01+weapon' && p.gun);
+    const meshyOk = probes.some(p => p.label === 'own:09' && p.meshy);
+    const individualOk = probes.some(p => p.label.startsWith('weapon:') && p.geometryOk) && probes.some(p => p.label.startsWith('prop:') && p.geometryOk);
+    const probeOk = probes.length >= 6 && mounted.length === 4 && mounted.every(p => p.statusHidden && !p.status && p.geometryOk) && gunOk && meshyOk && individualOk;
+    viewerOk = viewerOk && probeOk;
+  }
   result.ok = sceneOk && pngOk && moveOk && combatOk && mobileOk && geoOk && softwareOk && viewerOk && errs.length === 0;
   if (moveMode && !moveOk) result.errores.push('movimiento sin muestras');
   if (combatMode && !combatOk) result.errores.push('combate sin eventos de clip');

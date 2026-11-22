@@ -1,8 +1,9 @@
 import { hash2 } from '../render2d/tiles.js';
 import { cheb, dist } from '../core-and-audio.js';
 import { WEAPONS, PISTOL } from '../data/weapons.js';
-import { T3, w2cx, mat3, box3, TEX3, procTex3, texMat3, makeContactShadow3, skyTheme3, nationTintColor, emblemTexture, makeSoldier3 } from './scene.js';
+import { T3, w2cx, mat3, box3, TEX3, procTex3, texMat3, makeContactShadow3, skyTheme3, nationTintColor, emblemTexture } from './scene.js';
 import { makeGunProp3 } from './gun.js';
+import { makeSoldier3 } from './fallback-soldier.js';
 import { REAL } from './assets-real.js';
 import { skState, loadSkirmishGeo, buildSkirmishGeo3, makeDrone3 } from './assets-geo.js';
 import { makeRealSoldier3 } from './soldiers.js';

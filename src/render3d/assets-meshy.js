@@ -1,6 +1,7 @@
-import { REAL } from './assets-real.js';
+import { worldRotationsFromLocal } from './clips.js';
 
 export const MESHY_MODELS={},MESHY_LOADING={};
+const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 
 export function validatedRigBoneInverses(data,bones,provided){
   const inverses=provided||data.boneInverses.map(a=>new THREE.Matrix4().set(
@@ -82,7 +83,7 @@ export function parseMeshyOBJ(text,rig){
   return geometry;
 }
 
-export function loadMeshyModel(mesh){
+export function loadMeshyModel(mesh,real){
   if(MESHY_MODELS[mesh])return Promise.resolve(MESHY_MODELS[mesh]);
   if(MESHY_LOADING[mesh])return MESHY_LOADING[mesh];
   if(typeof THREE==='undefined')return Promise.resolve(null);
@@ -98,8 +99,8 @@ export function loadMeshyModel(mesh){
     const size=new THREE.Vector3();geo.boundingBox.getSize(size);
     const maxDim=Math.max(size.x,size.y,size.z)||1;
     const started=Date.now();
-    while(!(REAL.ready&&REAL.data&&REAL.data.bones)&&Date.now()-started<5000)await wait(50);
-    const baseData=sameRigBoneOrder(REAL.data&&REAL.data.bones,data.bones)?REAL.data:null;
+    while(!(real&&real.ready&&real.data&&real.data.bones)&&Date.now()-started<5000)await wait(50);
+    const baseData=sameRigBoneOrder(real&&real.data&&real.data.bones,data.bones)?real:null;
     return {geo:geo,data:data,tex:tex,scale:0.95*1.14/maxDim,zUp:!!(data.bones[1]&&data.bones[1].pos[2]>data.bones[1].pos[1]+0.1),baseRestQ:baseData?baseData.bones.map(b=>new THREE.Quaternion(b.quat[0],b.quat[1],b.quat[2],b.quat[3])):null,baseRestParents:baseData?baseData.bones.map(b=>b.parent):null};
   }).then(model=>{if(model)MESHY_MODELS[mesh]=model;return model;}).catch(()=>null).finally(()=>{delete MESHY_LOADING[mesh];});
   return MESHY_LOADING[mesh];

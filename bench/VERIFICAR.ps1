@@ -53,7 +53,7 @@ if (-not $alive) {
 $prevUrl = $env:CSN_URL
 try {
   $env:CSN_URL = "http://127.0.0.1:8000/?debugGrid=1"
-  foreach ($spec in @(@('skirmish03', 'GRID03'), @('skirmish04', 'GRID04'), @('skirmish09', 'GRID09'), @('skirmish11', 'GRID11'))) {
+  foreach ($spec in @(@('skirmish', 'GRID03'), @('skirmish04', 'GRID04'), @('skirmish09', 'GRID09'), @('skirmish11', 'GRID11'))) {
     $gridMap = $spec[0]
     $gridPrefix = $spec[1]
     $gOut = & node _capture_all.mjs $gridMap $gridPrefix 12000 --2d 2>&1

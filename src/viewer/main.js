@@ -73,15 +73,20 @@ import { MAP_PIECES } from '../data/map-pieces.js'; (function(){ const stage=doc
     viewer.renderer.setSize(width,height,false); viewer.camera.aspect=width/height; viewer.camera.updateProjectionMatrix(); }; function frame(now){
     if(!document.getElementById('scr-viewer').classList.contains('on')){ viewer.frameRequested=false; return; }; if(viewer.renderer){
       const idle=CLIPLIB.ready&&CLIPLIB.pack&&CLIPLIB.pack.clips[viewer.idleClipKey];
-      if(viewer.idleActor&&idle)poseSpriteClip(null,viewer.idleActor,idle,(now/1000)%idle.dur,viewer.idleClipKey); if(viewer.gripActor&&viewer.gripActor.userData.gun)
-        fitGunToHand3(viewer.gripActor.userData.gripUnit,viewer.gripActor,false); const dt=viewer.lastFrame?Math.min(0.05,(now-viewer.lastFrame)/1000):0.016;
+      if(viewer.idleActor&&idle)
+        poseSpriteClip(null,viewer.idleActor,idle,(now/1000)%idle.dur,viewer.idleClipKey);
+      if(viewer.gripActor&&viewer.gripActor.userData.gun)
+        fitGunToHand3(viewer.gripActor.userData.gripUnit,viewer.gripActor,false);
+      const dt=viewer.lastFrame?Math.min(0.05,(now-viewer.lastFrame)/1000):0.016;
       if(!viewer.drag&&viewer.spin&&viewer.spin.children.length){ viewer.spin.rotation.y+=dt*0.22; if(Math.abs(viewer.dragVel)>1e-4){ viewer.spin.rotation.y+=viewer.dragVel*dt;
           viewer.dragVel*=Math.exp(-dt/0.25); }else viewer.dragVel=0; }; viewer.renderer.render(viewer.scene,viewer.camera); refreshTexturePreview(); }; viewer.lastFrame=now;
     requestAnimationFrame(frame); }; function refreshTexturePreview(){ let texture=null; if(viewer.spin)viewer.spin.traverse(object=>{ if(!texture&&object.material){
         const mats=Array.isArray(object.material)?object.material:[object.material]; const mat=mats.find(item=>item.map&&item.map.image); if(mat)texture=mat.map; } });
     const image=texture&&texture.image; const src=image&&(image.currentSrc||image.src); if(src&&texturePreview.src!==src){texturePreview.src=src;texturePreview.hidden=false;} }
   function mount(model){ if(model.parent)model.parent.remove(model); model.position.set(0,0,0); while(viewer.spin.children.length)viewer.spin.remove(viewer.spin.children[0]);
-    if(model.userData&&model.userData.bones&&model.userData.bindLocal&&CLIPLIB.ready); poseViewerRest(model,model.userData.idleClipKey||'idle2h',0); model.updateMatrixWorld(true);
+    if(model.userData&&model.userData.bones&&model.userData.bindLocal&&CLIPLIB.ready)
+      poseViewerRest(model,model.userData.idleClipKey||'idle2h',0);
+    model.updateMatrixWorld(true);
     model.traverse(object=>{ if(object.isSkinnedMesh&&object.skeleton)object.skeleton.update(); }); model.updateMatrixWorld(true); const bounds=new THREE.Box3();
     const meshBounds=new THREE.Box3(); model.traverse(object=>{ if(!object.isMesh||!object.geometry)return; let p=object.parent;
       while(p&&p!==model){if(p.userData&&p.userData.isViewerGun)return;p=p.parent;}; if(object.isSkinnedMesh){ if(object.computeBoundingBox)object.computeBoundingBox();
@@ -92,7 +97,8 @@ import { MAP_PIECES } from '../data/map-pieces.js'; (function(){ const stage=doc
     viewer.spin.add(centered); centered.updateMatrixWorld(true); viewer.idleActor=viewer.kind==='roles'&&model.userData.animatable?model:null;
     viewer.gripActor=viewer.kind==='roles'&&model.userData.grip?model:null; if(viewer.meshyFill)viewer.meshyFill.intensity=viewer.kind==='roles'&&model.userData.meshy?1.8:0;
     if(viewer.meshyRim)viewer.meshyRim.intensity=viewer.kind==='roles'&&model.userData.meshy?2.2:0; viewer.idleClipKey=model.userData.idleClipKey||'idle2h';
-    if(viewer.gripActor&&viewer.gripActor.userData.gun); fitGunToHand3(viewer.gripActor.userData.gripUnit,viewer.gripActor,false);
+    if(viewer.gripActor&&viewer.gripActor.userData.gun)
+      fitGunToHand3(viewer.gripActor.userData.gripUnit,viewer.gripActor,false);
     viewer.spin.rotation.set(viewer.kind==='weapons'?0.25:0,-0.55,0); const platformRadius=Math.max(0.35,Math.max(size.x,size.z)*0.72);
     viewer.platform.scale.set(platformRadius,platformRadius,1); viewer.platform.position.y=bounds.min.y-center.y-0.02; resize();
     viewer.baseDistance=fitViewerDistance(size,viewer.camera.fov,viewer.camera.aspect); updateCamera(); viewer.renderer.render(viewer.scene,viewer.camera); refreshTexturePreview();
@@ -205,7 +211,8 @@ import { MAP_PIECES } from '../data/map-pieces.js'; (function(){ const stage=doc
       const modelKey=kind==='roles'?name+'|'+skin.key:name; let model=viewer.models[kind][modelKey]; if(!model&&kind==='roles'){ if(entry.mesh){
           model=await loadViewerMeshy(entry); }else{ const started=Date.now();
           while((!REAL.ready||(entry.role&&!(REAL.byRole&&REAL.byRole[entry.role])))&&Date.now()-started<10000){ if(token!==viewer.selection)return; await wait(100); }
-          if(!REAL.ready||(entry.role&&!(REAL.byRole&&REAL.byRole[entry.role]))); throw new Error('El modelo original todavía no está disponible.');
+          if(!REAL.ready||(entry.role&&!(REAL.byRole&&REAL.byRole[entry.role])))
+            throw new Error('El modelo original todavía no está disponible.');
           model=await makeViewerOriginal(entry,skin); }; viewer.models.roles[modelKey]=model; }else if(!model&&kind==='props'){ const geo=await loadViewerProp(entry);
         const texturePath='assets/props/'+entry.tex; let texture=viewer.textures[texturePath]; if(!texture){ texture=await new Promise((resolve,reject)=>{
             new THREE.TextureLoader().load(texturePath,resolve,undefined,reject); }); texture.colorSpace=THREE.SRGBColorSpace; viewer.textures[texturePath]=texture; }
