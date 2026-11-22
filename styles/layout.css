@@ -354,7 +354,7 @@ body{background-image:radial-gradient(1100px 500px at 50% -80px, rgba(242,178,52
 
 #bootScreen .bootBox{width:min(420px,84vw);text-align:center;position:relative;z-index:2}
 
-#bootScreen .bootArt{position:absolute;inset:0;background:url('assets/ui/portada_arte.png') center/cover no-repeat;opacity:.28;filter:saturate(.9)}
+#bootScreen .bootArt{position:absolute;inset:0;background:url('../assets/ui/portada_arte.png') center/cover no-repeat;opacity:.28;filter:saturate(.9)}
 
 #bootScreen .bootBox img{width:min(260px,62vw)}
 

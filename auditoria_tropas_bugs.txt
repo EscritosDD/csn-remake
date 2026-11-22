@@ -1,0 +1,698 @@
+﻿=== 1. GIT STATUS Y ULTIMOS COMMITS ===
+ M _capture_all.mjs
+ M bench/data.test.js
+ M bench/harness.js
+ M bench/rules.test.js
+ M bench/ui.test.js
+ M bench/winding.test.js
+ M index.html
+ M package.json
+ M src/audio/sound.js
+ M src/bridge.js
+ M src/data/ui-copy.js
+ M src/main.js
+ M src/render3d/assets-meshy.js
+ M src/render3d/assets-weapons.js
+ M src/render3d/index.js
+ M src/render3d/runtime.js
+ M src/render3d/soldiers.js
+ M src/render3d/world.js
+ M src/ui/arsenal.js
+ M src/ui/barracks.js
+ M src/ui/index.js
+ M src/ui/wiring.js
+ M src/viewer/main.js
+ M styles/layout.css
+ M styles/viewer.css
+?? assets/competitive/
+?? auditoria_armeria_tropas.txt
+?? auditoria_carga_bugs.txt
+?? bench/cards.test.js
+?? bench/competitive.test.js
+?? bench/helpers/
+?? inspeccion_rigs_armas.txt
+?? src/data/catalog-competitive.js
+?? src/data/deployables.js
+?? src/data/skin-names.js
+?? src/render3d/actor-glb.js
+?? src/render3d/asset-cache.js
+?? src/render3d/gltf-loader.js
+?? src/ui/glb-lab.js
+?? src/viewer/card-stage.js
+?? src/viewer/inspector.js
+?? src/viewer/troop-cards.js
+?? styles/cards.css
+?? tools/validate_competitive_glb.mjs
+f475de4 correcciones 3D
+3654348 armas y dem├ís
+f8c6c4b coreeccion modular
+5340d39 desarrollo gpt code
+
+=== 2. FORENSE DE Agent_Light (Mme La Hacque y Sneaky Pete) ===
+Agent_Light.obj: v=1271 f=1534 nanV=0
+Agent_Light_rig.json: bones=20 skinBones=20 inv=20 flat=true skinV=1271 badSkin=0 zeroW=0 weirdBones=0
+Primeros 3 huesos: [{"name":"Bip001","parent":-1,"pos":[0,0,0],"quat":[0,0,0,1],"scale":[1,1,1]},{"name":"Bip001 Pelvis","parent":0,"pos":[-1.3489721488961852,0,0.5827070716240926],"quat":[0.9354143417128161,-0.0000018426126518867776,-1.3363062465410562,-0.0000018425704641620232],"scale":[1,1,1]},{"name":"Bip001 Spine","parent":1,"pos":[0.007995570946784658,-0.00006221792973293932,-0.5395888674314955],"quat":[-0.000002080183880097703,2.0581923527714853e-15,1.818987727339146e-11,0.9999999906853155],"scale":[1,1,1]}]
+skinBones: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]
+Texturas Agent en cast/: Agent_Heavy_d.png, Agent_Heavy_Decon_d.png, Agent_Heavy_Skin1_d.png, Agent_Heavy_Veteran_d.png, Agent_light_d.png, Agent_light_Decon_d.png, Agent_light_JewelThief_d.png, Agent_light_Veteran_d.png
+
+=== FILE: src/viewer/inspector.js ===
+(12329B, 233L)
+L  1: import { WEAPONS_ORIGINAL, WEAPON_MESH_FILE, weaponFileForRef, originalWeaponProfile } from '../render3d/assets-weapons.js';
+L  2: import { prettySkinName } from '../data/skin-names.js';
+L  3: import { CHARACTER_ABILITIES, ABILITY_OBJECTS } from '../data/cast.js';
+L  4: import { DEPLOYABLES } from '../data/deployables.js';
+L  5: import { auWeaponFile, auVoice } from '../core-and-audio.js';
+L  6: import { setCardStagePaused, setStageZoom, stageZoom, renderStage, scanCardBoxes } from './card-stage.js';
+L  7: 
+L  8: const insEsc=value=>String(value==null?'':value).replace(/[&<>"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[char]));
+L  9: let insRoot=null;
+L 10: let insStage=null;
+L 11: let insPanel=null;
+L 12: let insTitle=null;
+L 13: let insKicker=null;
+L 14: let insFire=null;
+L 15: let insPrev=null;
+L 16: let insNext=null;
+L 17: let insCurrent=null;
+L 18: let insBound=false;
+L 19: 
+L 20: export function isInspectorOpen(){return !!(insRoot&&!insRoot.hidden);}
+L 21: 
+L 22: function insElements(){
+L 23:   if(insRoot)return true;
+L 24:   insRoot=document.getElementById('inspectorRoot');
+L 25:   if(!insRoot)return false;
+L 26:   insStage=document.getElementById('inspectorStage');
+L 27:   insPanel=document.getElementById('inspectorPanel');
+L 28:   insTitle=document.getElementById('inspectorTitle');
+L 29:   insKicker=document.getElementById('inspectorKicker');
+L 30:   insFire=document.getElementById('inspectorFire');
+L 31:   insPrev=document.getElementById('inspectorPrev');
+L 32:   insNext=document.getElementById('inspectorNext');
+L 33:   return true;
+L 34: }
+L 35: 
+L 36: function insViewer(){return typeof window!=='undefined'?window.__csnViewer:null;}
+L 37: function insEngine(){return typeof window!=='undefined'?window.__csnCardEngine:null;}
+L 38: 
+L 39: function insWriteSpec(spec){
+L 40:   insCurrent=spec;
+L 41:   if(insStage)insStage.dataset.cardSpec=JSON.stringify(spec);
+L 42: }
+L 43: 
+L 44: function insSkinLabel(skin,index){
+L 45:   const file=skin&&skin.key&&skin.key.indexOf('cast:')===0?skin.key.slice(5):skin&&skin.label;
+L 46:   return prettySkinName(file,index);
+L 47: }
+L 48: 
+L 49: function insWeaponOptions(current){
+L 50:   const groups=new Map();
+L 51:   (insViewer()&&insViewer().getWeaponFiles()||[]).forEach(file=>{
+L 52:     const cat=(WEAPONS_ORIGINAL[file]||{}).cat||'Otros';
+L 53:     if(!groups.has(cat))groups.set(cat,[]);
+L 54:     groups.get(cat).push(file);
+L 55:   });
+L 56:   return '<option value="">Sin arma</option>'+[...groups.entries()].map(([cat,files])=>
+L 57:     '<optgroup label="'+insEsc(cat)+'">'+files.map(file=>'<option value="'+insEsc(file)+'"'+(file===current?' selected':'')+'>'+insEsc((WEAPONS_ORIGINAL[file]||{}).name||file)+'</option>').join('')+'</optgroup>').join('');
+L 58: }
+L 59: 
+L 60: function insAbilities(entry){
+L 61:   const list=CHARACTER_ABILITIES[entry.name]||[];
+L 62:   if(entry.mesh)return '<p class="note sub">Dise├▒o propio CSN: sin habilidades del original.</p>';
+L 63:   if(!list.length)return '<p class="note sub">Sin habilidades legibles del original.</p>';
+L 64:   return list.map(ability=>{
+L 65:     const obj=ability.obj?ABILITY_OBJECTS[ability.obj]:null;
+L 66:     const link=obj&&obj.model?'<button type="button" class="inspector-link" data-inspector-prop="'+insEsc(obj.model)+'">Inspeccionar desplegable: '+insEsc(obj.name||ability.n)+' ÔåÆ</button>':'';
+L 67:     return '<div class="inspector-ability"><img src="assets/ui/ability/'+insEsc(ability.icon)+'.png" alt=""/><div><b>'+insEsc(ability.n)+'</b><small>'+insEsc(ability.d)+'</small>'+link+'</div></div>';
+L 68:   }).join('');
+L 69: }
+L 70: 
+L 71: function insRolePanel(spec,entry){
+L 72:   const csn=!!entry.mesh;
+L 73:   const entries=entry.skins||[];
+L 74:   const labels=entries.map(insSkinLabel);
+L 75:   const skinIndex=Number(spec.skinIndex)||0;
+L 76:   const skinName=labels[skinIndex]||'Est├índar';
+L 77:   const skins='<button type="button" class="inspector-skin-step" data-inspector-skin-step="-1" aria-label="Skin anterior"'+(entries.length<2?' disabled':'')+'>ÔÇ╣</button>'+
+L 78:     '<span class="inspector-skin-name" data-inspector-skin-name="'+skinIndex+'">'+insEsc(skinName)+'</span>'+
+L 79:     '<button type="button" class="inspector-skin-step" data-inspector-skin-step="1" aria-label="Skin siguiente"'+(entries.length<2?' disabled':'')+'>ÔÇ║</button>';
+L 80:   const weaponBlock=csn?'<p class="note sub">Modelo Meshy propio: sin pose, clips ni retarget y sin acople de arma.</p>':
+L 81:     '<label class="inspector-select"><span>Arma del original ┬À '+((insViewer()&&insViewer().getWeaponFiles()||[]).length)+' disponibles</span><select data-inspector-weapon>'+insWeaponOptions(spec.weapon)+'</select></label>';
+L 82:   return '<div class="inspector-tags"><span class="tag'+(csn?'':' amber')+'">'+(csn?'CSN':'Juego original')+'</span><span class="tag">'+insEsc(entry.role||'Sin rol')+'</span></div>'+
+L 83:     '<p class="inspector-bio">'+insEsc(entry.bio||'')+'</p>'+
+L 84:     '<h3>Skin</h3><div class="inspector-skins">'+skins+'</div>'+weaponBlock+
+L 85:     '<h3>Habilidades del original</h3><div class="inspector-abilities">'+insAbilities(entry)+'</div>';
+L 86: }
+L 87: 
+L 88: function insWeaponPanel(spec){
+L 89:   const info=WEAPONS_ORIGINAL[spec.file]||{};
+L 90:   const csn=spec.csn||null;
+L 91:   const profile=originalWeaponProfile(spec.file)||{};
+L 92:   const stats=csn?'<div class="wstats"><div><b>'+insEsc(csn.dmg)+'</b><span>Da├▒o</span></div><div><b>'+insEsc(csn.rng)+'</b><span>Casillas</span></div><div><b>'+insEsc(csn.cost)+' ÔÜí</b><span>Coste</span></div></div>':'';
+L 93:   const data=csn?'<p class="note"><b>Ficha real:</b> '+insEsc(csn.real||'')+'</p>'+
+L 94:       '<p class="note sub"><b>Roles:</b> '+insEsc(csn.roles||'')+'</p>'+
+L 95:       '<p class="note sub">Modelo 3D CSN pendiente ┬À '+insEsc(csn.note||'')+'</p>'+stats:
+L 96:     '<p class="note sub">'+insEsc(info.cat||'Arma')+' ┬À '+insEsc(info.roles||'Sin asignaci├│n espec├¡fica')+'</p>'+
+L 97:     '<p class="note sub">'+insEsc((info.dims||[]).join(' ├ù '))+' m ┬À '+insEsc(info.verts||'?')+' v├®rtices ┬À '+insEsc(info.uses&&info.uses.join(', ')||'Sin equivalente CSN')+'</p>'+
+L 98:     '<p class="note sub">Presentaci├│n 3D del arma de referencia'+(profile.actionLabel?' ┬À '+insEsc(profile.actionLabel):'')+'.</p>';
+L 99:   return '<div class="inspector-tags"><span class="tag'+(csn?'':' amber')+'">'+(csn?'CSN':'Juego original')+'</span><span class="tag">'+insEsc(info.cat||(csn&&csn.cat)||'Arma')+'</span></div>'+
+L100:     '<p class="inspector-bio">'+insEsc(info.note||csn&&csn.real||info.name||spec.label||'')+'</p>'+data;
+L101: }
+L102: 
+L103: function insGlbPanel(spec){
+L104:   return '<div class="inspector-tags"><span class="tag amber">Competitivo</span><span class="tag">.glb</span></div>'+
+L105:     '<p class="inspector-bio">'+insEsc(spec.label||'Modelo competitivo')+'</p>'+
+L106:     '<p class="note sub">Modelo: '+insEsc(spec.glbUrl||'sin cargar')+'.</p>';
+L107: }
+L108: 
+L109: function insPropPanel(spec){
+L110:   const prop=DEPLOYABLES.find(item=>item.key===spec.key)||{};
+L111:   return '<div class="inspector-tags"><span class="tag amber">Juego original</span><span class="tag">Objeto desplegable</span></div>'+
+L112:     '<p class="inspector-bio">'+insEsc(prop.note||prop.label||spec.label||'')+'</p>'+
+L113:     '<p class="note sub">Malla '+insEsc(prop.file||'')+' ┬À Textura '+insEsc(prop.tex||'')+'.</p>';
+L114: }
+L115: 
+L116: function insRenderPanel(){
+L117:   if(!insPanel||!insCurrent)return;
+L118:   const viewer=insViewer();
+L119:   const entry=insCurrent.kind==='roles'&&viewer?viewer.getEntry(insCurrent.key):null;
+L120:   insKicker.textContent=insCurrent.kind==='roles'?'Personaje':insCurrent.kind==='props'?'Desplegable':insCurrent.kind==='glb'?'Laboratorio .glb':'Arma';
+L121:   insTitle.textContent=entry?entry.label:insCurrent.label||'Modelo 3D';
+L122:   insPanel.innerHTML=entry?insRolePanel(insCurrent,entry):insCurrent.kind==='glb'?insGlbPanel(insCurrent):insCurrent.kind==='props'?insPropPanel(insCurrent):insWeaponPanel(insCurrent);
+L123:   const oldLab=insPanel.querySelector('.glb-lab');if(oldLab)oldLab.remove();
+L124:   if(insCurrent.kind==='glb'&&window.__csnGlbLab&&window.__csnGlbLab.mount)window.__csnGlbLab.mount(insPanel,{kind:insCurrent.labKind||'chars',url:insCurrent.glbUrl,label:insCurrent.label});
+L125:   insPanel.querySelectorAll('[data-inspector-skin-step]').forEach(button=>{button.onclick=()=>{
+L126:     const entry=viewer&&insCurrent.kind==='roles'?viewer.getEntry(insCurrent.key):null;
+L127:     const count=entry&&entry.skins?entry.skins.length:0;
+L128:     if(count<2)return;
+L129:     const step=+button.dataset.inspectorSkinStep;
+L130:     const skinIndex=((Number(insCurrent.skinIndex)||0)+step+count)%count;
+L131:     const spec={...insCurrent,skinIndex};
+L132:     insWriteSpec(spec);
+L133:     if(insEngine()&&insStage)insEngine().activate(insStage,spec);
+L134:     insRenderPanel();
+L135:   };});
+L136:   const weaponSelect=insPanel.querySelector('[data-inspector-weapon]');
+L137:   if(weaponSelect)weaponSelect.onchange=()=>{
+L138:     const spec={...insCurrent,weapon:weaponSelect.value};
+L139:     insWriteSpec(spec);
+L140:     if(insEngine()&&insStage)insEngine().activate(insStage,spec);
+L141:     insUpdateFire();
+L142:   };
+L143:   insPanel.querySelectorAll('[data-inspector-prop]').forEach(button=>{button.onclick=()=>{closeInspector();if(window.openDeployable3D)window.openDeployable3D(button.dataset.inspectorProp);};});
+L144:   insUpdateFire();
+L145: }
+L146: 
+L147: function insUpdateFire(){
+L148:   if(!insFire||!insCurrent)return;
+L149:   const viewer=insViewer();
+L150:   if(insCurrent.kind==='glb'){
+L151:     insFire.hidden=false;
+L152:     insFire.textContent='ÔûÂ Probar animaci├│n de disparo';
+L153:     insFire.onclick=()=>{if(window.__csnGlbLab&&window.__csnGlbLab.play)window.__csnGlbLab.play('fire');};
+L154:     return;
+L155:   }
+L156:   if(insCurrent.kind==='roles'){
+L157:     const entry=viewer&&viewer.getEntry(insCurrent.key);
+L158:     if(entry&&entry.mesh){insFire.hidden=true;return;}
+L159:     const file=weaponFileForRef(insCurrent.weapon||'');
+L160:     const profile=file&&originalWeaponProfile(file);
+L161:     insFire.hidden=false;
+L162:     insFire.textContent='ÔûÂ '+(profile&&profile.actionLabel||'Probar disparo');
+L163:     insFire.onclick=()=>{if(viewer&&viewer.fire){const label=insFire.textContent;insFire.textContent='ÔûÂ ReproduciendoÔÇª';setTimeout(()=>{insFire.textContent=label;},900);viewer.fire(insCurrent);}};
+L164:     return;
+L165:   }
+L166:   if(insCurrent.kind==='weapons'){
+L167:     if(insCurrent.csn){insFire.hidden=true;return;}
+L168:     insFire.hidden=false;insFire.textContent='­ƒöè Escuchar sonido original';
+L169:     insFire.onclick=()=>auWeaponFile(weaponFileForRef(insCurrent.weapon||insCurrent.file)||insCurrent.file);
+L170:     return;
+L171:   }
+L172:   insFire.hidden=true;
+L173: }
+L174: 
+L175: function insNavigate(delta){
+L176:   const viewer=insViewer();
+L177:   if(!viewer||!insCurrent||insCurrent.kind!=='roles')return;
+L178:   const roster=viewer.getRoster()||[];
+L179:   if(!roster.length)return;
+L180:   const index=roster.findIndex(entry=>entry.key===insCurrent.key);
+L181:   const next=(index+delta+roster.length)%roster.length;
+L182:   const entry=roster[next];
+L183:   insOpen({kind:'roles',key:entry.key,skinIndex:0,weapon:weaponFileForRef(entry.defaultWeapon||'')||'',file:entry.file||entry.mesh||'',label:entry.label});
+L184: }
+L185: 
+L186: function insBind(){
+L187:   if(insBound)return;
+L188:   insBound=true;
+L189:   const close=document.getElementById('inspectorClose');
+L190:   if(close)close.onclick=closeInspector;
+L191:   const backdrop=insRoot.querySelector('[data-inspector-close]');
+L192:   if(backdrop)backdrop.onclick=closeInspector;
+L193:   document.addEventListener('keydown',event=>{if(event.key==='Escape'&&isInspectorOpen())closeInspector();});
+L194:   document.querySelectorAll('[data-inspector-zoom]').forEach(button=>{button.onclick=()=>{setStageZoom(stageZoom()+(+button.dataset.inspectorZoom||0),false);renderStage();};});
+L195:   const reset=document.getElementById('inspectorReset');
+L196:   if(reset)reset.onclick=()=>{setStageZoom(1,false);renderStage();};
+L197:   if(insPrev)insPrev.onclick=()=>insNavigate(-1);
+L198:   if(insNext)insNext.onclick=()=>insNavigate(1);
+L199: }
+L200: 
+L201: export async function openInspector(spec){
+L202:   if(!insElements()||!spec||typeof spec!=='object'||!['roles','weapons','props','glb'].includes(spec.kind))return false;
+L203:   insBind();
+L204:   setCardStagePaused(true);
+L205:   const viewer=insViewer();
+L206:   if(viewer&&viewer.state)viewer.state.inspectorOpen=true;
+L207:   insRoot.hidden=false;
+L208:   document.body.classList.add('inspector-open');
+L209:   insWriteSpec({...spec});
+L210:   scanCardBoxes(insRoot);
+L211:   const engine=insEngine();
+L212:   if(engine&&insStage)await engine.activate(insStage,insCurrent);
+L213:   insRenderPanel();
+L214:   const roster=viewer&&viewer.getRoster()||[];
+L215:   if(insPrev)insPrev.hidden=insCurrent.kind!=='roles'||roster.length<2;
+L216:   if(insNext)insNext.hidden=insPrev.hidden;
+L217:   renderStage();
+L218:   return true;
+L219: }
+L220: 
+L221: export function closeInspector(){
+L222:   if(!isInspectorOpen())return;
+L223:   insRoot.hidden=true;
+L224:   document.body.classList.remove('inspector-open');
+L225:   const viewer=insViewer();
+L226:   if(viewer&&viewer.state)viewer.state.inspectorOpen=false;
+L227:   if(viewer&&viewer.unmount)viewer.unmount();
+L228:   setCardStagePaused(false);
+L229:   scanCardBoxes();
+L230: }
+L231: 
+L232: if(typeof window!=='undefined')window.__csnInspector={open:openInspector,close:closeInspector,isOpen:isInspectorOpen,zoom:()=>stageZoom()};
+L233: 
+
+=== FILE: src/data/deployables.js ===
+(1371B, 13L)
+L  1: export const DEPLOYABLES=[
+L  2:   {key:'CommCrate_124tri',label:'Caja de bot├¡n',file:'CommCrate_124tri.obj',tex:'TreasureCrate_d.png',note:'Caja de comandante / bot├¡n del original.'},
+L  3:   {key:'CommCrate_180tri',label:'Caja de bot├¡n (variante)',file:'CommCrate_180tri.obj',tex:'TreasureCrate_d.png',note:'Variante de 180 tri├íngulos de la caja.'},
+L  4:   {key:'UAV',label:'UAV',file:'UAV.obj',tex:'UAV_d.png',note:'Dron explorador del original.'},
+L  5:   {key:'GatlingTurret',label:'Torreta Gatling',file:'GatlingTurret.obj',tex:'MGTurret_d.png',note:'Torreta Gatling del original.'},
+L  6:   {key:'RocketTurret',label:'Torreta de cohetes',file:'RocketTurret.obj',tex:'RocketTurret_d.png',note:'Torreta de cohetes del original.'},
+L  7:   {key:'SpiderMine',label:'Mina',file:'SpiderMine.obj',tex:'SpiderMine_d.png',note:'Mina desplegable del original.'},
+L  8:   {key:'RemoteCharge',label:'Carga remota',file:'RemoteCharge.obj',tex:'RemoteCharge_d.png',note:'Carga remota del original.'},
+L  9:   {key:'DeployableCover',label:'Cobertura desplegable',file:'DeployableCover.obj',tex:'DeployableCover_d.png',note:'Cobertura desplegable del original.'},
+L 10:   {key:'ObjectiveRocket',label:'Cohete objetivo',file:'ObjectiveRocket.obj',tex:'Rocket_d.png',note:'Cohete objetivo del mapa.'},
+L 11:   {key:'RiotShieldBot',label:'Shield-O-Bot',file:'RiotShieldBot.obj',tex:'RiotShieldBot_d.png',note:'Robot escudo del original.'}
+L 12: ];
+L 13: 
+
+=== FILE: src/render3d/assets-meshy.js ===
+(8592B, 169L)
+L  1: import { worldRotationsFromLocal } from './clips.js';
+L  2: 
+L  3: export const MESHY_MODELS={},MESHY_LOADING={};
+L  4: const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+L  5: 
+L  6: export function validatedRigBoneInverses(data,bones,provided){
+L  7:   const inverses=provided||data.boneInverses.map(a=>new THREE.Matrix4().set(
+L  8:     a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7],
+L  9:     a[8],a[9],a[10],a[11],a[12],a[13],a[14],a[15]
+L 10:   ));
+L 11:   if(inverses.length!==data.skinBones.length)
+L 12:     throw new Error('El rig no tiene una matriz bind por cada hueso de piel.');
+L 13:   data.bones.forEach((bone,i)=>{if(bone.parent<0)bones[i].updateMatrixWorld(true);});
+L 14:   const identity=new THREE.Matrix4();
+L 15:   let maxError=0;
+L 16:   data.skinBones.forEach((boneIndex,i)=>{
+L 17:     const bind=bones[boneIndex].matrixWorld.clone().multiply(inverses[i]);
+L 18:     bind.elements.forEach((value,j)=>{maxError=Math.max(maxError,Math.abs(value-identity.elements[j]));});
+L 19:   });
+L 20:   if(maxError<=0.001)return inverses;
+L 21:   return data.skinBones.map(boneIndex=>{
+L 22:     const bind=bones[boneIndex].matrixWorld;
+L 23:     const determinant=bind.determinant();
+L 24:     if(!Number.isFinite(determinant)||Math.abs(determinant)<1e-12)
+L 25:       throw new Error('El rig contiene una bind pose singular.');
+L 26:     return bind.clone().invert();
+L 27:   });
+L 28: }
+L 29: 
+L 30: export function sameRigBoneOrder(source,target){
+L 31:   return !!source&&!!target&&source.length===target.length&&source.every((bone,i)=>bone.name===target[i].name);
+L 32: }
+L 33: 
+L 34: export function normalizeMeshyRig(rig){
+L 35:   if(Array.isArray(rig.skinIndex[0]))return rig;
+L 36:   const skinIndex=[],skinWeight=[];
+L 37:   for(let i=0;i<rig.skinIndex.length;i+=4){
+L 38:     skinIndex.push(rig.skinIndex.slice(i,i+4));
+L 39:     skinWeight.push(rig.skinWeight.slice(i,i+4));
+L 40:   }
+L 41:   return Object.assign({},rig,{skinIndex,skinWeight});
+L 42: }
+L 43: 
+L 44: export const normalizeMeshyRigGlobal=normalizeMeshyRig;
+L 45: 
+L 46: export function parseMeshyOBJ(text,rig){
+L 47:   const vertices=[],uvs=[],normals=[],positions=[],outUvs=[],outNormals=[],skinIndices=[],skinWeights=[];
+L 48:   const resolveIndex=(index,length)=>index<0?length+index:index-1;
+L 49:   for(const line of text.split(/\r?\n/)){
+L 50:     const parts=line.trim().split(/\s+/);
+L 51:     if(parts[0]==='v')vertices.push([+parts[1],+parts[2],+parts[3]]);
+L 52:     else if(parts[0]==='vt')uvs.push([+parts[1],+parts[2]]);
+L 53:     else if(parts[0]==='vn')normals.push([+parts[1],+parts[2],+parts[3]]);
+L 54:     else if(parts[0]==='f'){
+L 55:       const face=parts.slice(1).map(token=>{
+L 56:         const indices=token.split('/');
+L 57:         return {v:resolveIndex(+indices[0],vertices.length),uv:indices[1]?resolveIndex(+indices[1],uvs.length):-1,n:indices[2]?resolveIndex(+indices[2],normals.length):-1};
+L 58:       });
+L 59:       for(let i=1;i<face.length-1;i++){
+L 60:         for(const corner of [face[0],face[i],face[i+1]]){
+L 61:           const vertex=vertices[corner.v],uv=uvs[corner.uv],normal=normals[corner.n];
+L 62:           if(!vertex)throw new Error('El OBJ Meshy contiene una cara inv├ílida.');
+L 63:           const boneIndices=rig.skinIndex[corner.v],boneWeights=rig.skinWeight[corner.v];
+L 64:           if(!boneIndices||!boneWeights||boneIndices.length!==4||boneWeights.length!==4)throw new Error('El rig Meshy no contiene pesos para todos los v├®rtices.');
+L 65:           positions.push(vertex[0],vertex[1],vertex[2]);
+L 66:           outUvs.push(uv?uv[0]:0,uv?uv[1]:0);
+L 67:           if(normal)outNormals.push(normal[0],normal[1],normal[2]);
+L 68:           skinIndices.push(...boneIndices);
+L 69:           skinWeights.push(...boneWeights);
+L 70:         }
+L 71:       }
+L 72:     }
+L 73:   }
+L 74:   if(!positions.length)throw new Error('El OBJ Meshy no contiene caras.');
+L 75:   let vol=0;
+L 76:   for(let i=0;i<positions.length;i+=9){
+L 77:     const ax=positions[i],ay=positions[i+1],az=positions[i+2];
+L 78:     const bx=positions[i+3],by=positions[i+4],bz=positions[i+5];
+L 79:     const cx=positions[i+6],cy=positions[i+7],cz=positions[i+8];
+L 80:     vol+=(ax*(by*cz-bz*cy)-ay*(bx*cz-bz*cx)+az*(bx*cy-by*cx))/6;
+L 81:   }
+L 82:   if(vol<0){
+L 83:     const swap=(arr,stride,face)=>{
+L 84:       const base=face*stride*3,a=base+stride,b=a+stride;
+L 85:       for(let k=0;k<stride;k++){const tmp=arr[a+k];arr[a+k]=arr[b+k];arr[b+k]=tmp;}
+L 86:     };
+L 87:     for(let face=0;face*9<positions.length;face++){
+L 88:       swap(positions,3,face);swap(outUvs,2,face);swap(outNormals,3,face);swap(skinIndices,4,face);swap(skinWeights,4,face);
+L 89:     }
+L 90:   }
+L 91:   const geometry=new THREE.BufferGeometry();
+L 92:   geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));
+L 93:   geometry.setAttribute('uv',new THREE.Float32BufferAttribute(outUvs,2));
+L 94:   geometry.setAttribute('skinIndex',new THREE.Float32BufferAttribute(skinIndices,4));
+L 95:   geometry.setAttribute('skinWeight',new THREE.Float32BufferAttribute(skinWeights,4));
+L 96:   geometry.computeVertexNormals();
+L 97:   geometry.computeBoundingBox();
+L 98:   return geometry;
+L 99: }
+L100: 
+L101: export function loadMeshyModel(mesh,real){
+L102:   if(MESHY_MODELS[mesh])return Promise.resolve(MESHY_MODELS[mesh]);
+L103:   if(MESHY_LOADING[mesh])return MESHY_LOADING[mesh];
+L104:   if(typeof THREE==='undefined')return Promise.resolve(null);
+L105:   MESHY_LOADING[mesh]=Promise.all([
+L106:     fetch('assets/personajes_propios/'+mesh+'.obj'),
+L107:     fetch('assets/personajes_propios/'+mesh+'_rig.json'),
+L108:     new Promise(res=>{new THREE.TextureLoader().load('assets/personajes_propios/'+mesh+'_tex.png',t=>{t.colorSpace=THREE.SRGBColorSpace;res(t);},undefined,()=>res(null));})
+L109:   ]).then(async ([objRes,rigRes,tex])=>{
+L110:     if(!objRes.ok||!rigRes.ok)return null;
+L111:     const [objText,rawRig]=await Promise.all([objRes.text(),rigRes.json()]);
+L112:     const data=normalizeMeshyRig(rawRig);
+L113:     const geo=parseMeshyOBJ(objText,data);
+L114:     const size=new THREE.Vector3();geo.boundingBox.getSize(size);
+L115:     const maxDim=Math.max(size.x,size.y,size.z)||1;
+L116:     const started=Date.now();
+L117:     while(!(real&&real.ready&&real.data&&real.data.bones)&&Date.now()-started<5000)await wait(50);
+L118:     const baseData=sameRigBoneOrder(real&&real.data&&real.data.bones,data.bones)?real:null;
+L119:     return {geo:geo,data:data,tex:tex,scale:0.95*1.14/maxDim,zUp:!!(data.bones[1]&&data.bones[1].pos[2]>data.bones[1].pos[1]+0.1),baseRestQ:baseData?baseData.bones.map(b=>new THREE.Quaternion(b.quat[0],b.quat[1],b.quat[2],b.quat[3])):null,baseRestParents:baseData?baseData.bones.map(b=>b.parent):null};
+L120:   }).then(model=>{if(model)MESHY_MODELS[mesh]=model;return model;}).catch(()=>null).finally(()=>{delete MESHY_LOADING[mesh];});
+L121:   return MESHY_LOADING[mesh];
+L122: }
+L123: 
+L124: export function makeSkinnedModel(geometry,data,texture,options={}){
+L125:   const model=new THREE.Group();
+L126:   const bones=data.bones.map(b=>{
+L127:     const bone=new THREE.Bone();
+L128:     bone.name=b.name;
+L129:     bone.position.fromArray(b.pos);
+L130:     bone.quaternion.fromArray(b.quat);
+L131:     if(b.scale)bone.scale.fromArray(b.scale);
+L132:     return bone;
+L133:   });
+L134:   data.bones.forEach((b,i)=>{if(b.parent>=0)bones[b.parent].add(bones[i]);});
+L135:   const inverses=validatedRigBoneInverses(data,bones);
+L136:   const skeleton=new THREE.Skeleton(data.skinBones.map(i=>bones[i]),inverses);
+L137:   if(texture)texture.colorSpace=THREE.SRGBColorSpace;
+L138:   const mesh=new THREE.SkinnedMesh(geometry,new THREE.MeshStandardMaterial({
+L139:     map:texture,roughness:0.85,metalness:0.02,transparent:false,opacity:1,depthWrite:true,alphaTest:0,
+L140:     side:THREE.FrontSide
+L141:   }));
+L142:   mesh.add(bones[0]);
+L143:   mesh.bind(skeleton,new THREE.Matrix4());
+L144:   mesh.frustumCulled=false;
+L145:   mesh.castShadow=true;
+L146:   model.add(mesh);
+L147:   const parents=data.bones.map(b=>b.parent);
+L148:   const bindLocal=data.bones.map(b=>new THREE.Quaternion(b.quat[0],b.quat[1],b.quat[2],b.quat[3]));
+L149:   const bindWorldQ=worldRotationsFromLocal(bindLocal,parents);
+L150:   const baseRestQ=options.baseRestQ||null;
+L151:   const sourceParents=baseRestQ?(options.baseParents||parents):parents;
+L152:   model.userData={
+L153:     bones,bindLocal,
+L154:     curQ:data.bones.map(b=>new THREE.Quaternion(b.quat[0],b.quat[1],b.quat[2],b.quat[3])),
+L155:     bindPos:data.bones.map(b=>new THREE.Vector3(b.pos[0],b.pos[1],b.pos[2])),
+L156:     curDelta:new THREE.Vector3(),mesh3:mesh,meshy:!!options.meshy,
+L157:     animatable:!!options.animatable,idleClipKey:options.idleClipKey||'idle2h',idleRole:options.idleRole,
+L158:     baseRestQ,baseRestWorldQ:baseRestQ?worldRotationsFromLocal(baseRestQ,sourceParents):null,
+L159:     bindWorldQ,parents,sourceParents,
+L160:     sourcePoseQ:data.bones.map(()=>new THREE.Quaternion()),
+L161:     sourceWorldQ:data.bones.map(()=>new THREE.Quaternion()),
+L162:     targetWorldQ:data.bones.map(()=>new THREE.Quaternion()),
+L163:     targetLocalQ:data.bones.map(()=>new THREE.Quaternion()),
+L164:     isClassRig:!!baseRestQ,grip:!!options.grip,role:options.role||'',gun:null,
+L165:     byName:Object.fromEntries(bones.map((bone,index)=>[bone.name,index]))
+L166:   };
+L167:   return model;
+L168: }
+L169: 
+
+=== 3. EXTRACTOS DE src/viewer/main.js (activateSpec, syncViewerGun, loadViewerBody) ===
+
+--- loadViewerBody / makeViewerOriginal @ L215 ---
+L215:   async function loadViewerBody(file){ const path='assets/soldier/bodies/'+file; if(viewer.bodyGeo[path])return viewer.bodyGeo[path];
+L216:     const rigPath=path.replace(/\.obj$/, '_rig.json'); const [response,rigResponse]=await Promise.all([fetch(path),fetch(rigPath)]);
+L217:     if(!response.ok)throw new Error('No se pudo cargar el cuerpo '+file); const text=await response.text(); let count=0;
+L218:     for(const line of text.split('\n')){if(line.startsWith('v '))count++;}; const rig=rigResponse.ok?await rigResponse.json():null;
+L219:     const hasRig=!!(rig&&rig.bones&&rig.skinIndex&&rig.skinIndex.length===count*4&&rig.skinWeight&&rig.skinWeight.length===count*4);
+L220:     const skin=hasRig?{skinIndex:rig.skinIndex,skinWeight:rig.skinWeight}:{skinIndex:new Array(count*4).fill(0),skinWeight:new Array(count*4).fill(0)};
+L221:     const geo=parseOBJ3(text,skin); const pos=geo.attributes.position.array; const zs=[]; for(let i=2;i<pos.length;i+=3)zs.push(pos[i]); zs.sort((a,b)=>a-b);
+L222:     const p95=zs[Math.floor(zs.length*0.95)]||1; const scale=1.14/p95; if(scale!==1)geo.scale(scale,scale,scale);
+L223:     viewer.bodyGeo[path]=geo; if(hasRig)viewer.bodyRig[path]=rig; return geo; }
+L224:   async function makeRiggedViewerActor(geometry,data,texture,entry){ const started=Date.now();
+L225:     while(!CLIPLIB.ready&&Date.now()-started<5000)await wait(50);
+L226:     const baseData=sameRigBoneOrder(REAL.data&&REAL.data.bones,data.bones)?REAL.data:null;
+L227:     const baseRestQ=baseData?baseData.bones.map(b=>new THREE.Quaternion(b.quat[0],b.quat[1],b.quat[2],b.quat[3])):null;
+L228:     const baseParents=baseData?baseData.bones.map(b=>b.parent):null;
+L229:     const model=makeViewerRiggedModel(geometry,data,texture,{animatable:true,baseRestQ,baseParents,grip:true,role:entry.role});
+L230:     model.scale.setScalar(1.15); const mesh=model.userData.mesh3; model.remove(mesh); const spin=new THREE.Group();
+L231:     spin.rotation.y=Math.PI/2; model.add(spin); const tilt=new THREE.Group(); tilt.rotation.x=-Math.PI/2; spin.add(tilt);
+L232:     mesh.scale.setScalar(0.95); tilt.add(mesh); poseViewerRest(model,idleForWeapon(entry.defaultWeapon||''),0);
+L233:     model.userData.gripUnit={role:entry.role,weapon:entry.defaultWeapon||''}; return model; }
+L234:   async function makeViewerOriginal(entry,skin){ let source=null,bodyGeo=null; if(entry.bodyFile){ bodyGeo=await loadViewerBody(entry.bodyFile); }else if(entry.bodyRole){
+L235: 
+L236:       source=REAL.byRole[entry.bodyRole]; if(!source)throw new Error('El modelo de clase '+entry.bodyRole+' todav├¡a no est├í disponible.'); }else{ source=REAL; }; let texture=null;
+L237:     if(skin.key&&skin.key.indexOf('cast:')===0){ const texturePath='assets/soldier/cast/'+skin.key.slice(5); if(viewer.textures[texturePath])texture=viewer.textures[texturePath];
+L238:       else{ texture=await new Promise((resolve,reject)=>{ new THREE.TextureLoader().load(texturePath,resolve,undefined,reject); }); texture.colorSpace=THREE.SRGBColorSpace;
+L239:         viewer.textures[texturePath]=texture; } }else if(skin.key==='native'&&source){ texture=source.tex; }; if(!texture)throw new Error('El modelo no tiene una textura disponible.');
+L240:     if(!entry.bodyFile&&!entry.bodyRole){ const model=makeViewerRiggedModel(source.geo.clone(),source.data,texture,{animatable:true,grip:true}); model.scale.setScalar(1.15);
+L241:       const mesh=model.userData.mesh3; model.remove(mesh); const spin=new THREE.Group(); spin.rotation.y=Math.PI/2; model.add(spin); const tilt=new THREE.Group();
+L242:       tilt.rotation.x=-Math.PI/2; spin.add(tilt); mesh.scale.setScalar(0.95); tilt.add(mesh); return model; }; if(entry.rigPose&&source)return await makeRiggedViewerActor(source.geo.clone(),source.data,texture,entry);
+L243:     if(entry.bodyFile){ const rig=viewer.bodyRig['assets/soldier/bodies/'+entry.bodyFile]; if(rig&&bodyGeo)return await makeRiggedViewerActor(bodyGeo.clone(),rig,texture,entry); };
+L244:     const geometry=bodyGeo?bodyGeo.clone():(source?source.geo.clone():null); if(!geometry)throw new Error('El modelo no tiene una geometr├¡a disponible.');
+L245:     geometry.deleteAttribute('skinIndex'); geometry.deleteAttribute('skinWeight'); geometry.computeVertexNormals(); const mesh=new THREE.Mesh(geometry,new THREE.MeshStandardMaterial({
+L246:       map:texture,roughness:0.85,metalness:0.02,transparent:false,opacity:1,depthWrite:true, side:THREE.FrontSide })); mesh.castShadow=true; const model=new THREE.Group();
+L247:     model.scale.setScalar(1.15); const spin=new THREE.Group();spin.rotation.y=Math.PI/2;model.add(spin); const tilt=new THREE.Group();tilt.rotation.x=-Math.PI/2;spin.add(tilt);
+L248:     mesh.scale.setScalar(0.95);tilt.add(mesh); model.userData.staticRole=true; return model; };   async function syncViewerGun(model,entry,token){
+L249:     const wanted=(entry&&entry.sculptedWeapon)?'':(viewer.weapon||''); const current=(model.userData&&model.userData.viewerGunWeapon)||'';
+L250:     if(model&&model.userData)model.userData.idleClipKey=wanted?idleForWeapon(wanted):'idle2h'; if(current===wanted)return;
+L251: 
+L252:     if(model.userData&&model.userData.viewerGun){ model.remove(model.userData.viewerGun); if(model.userData.gun===model.userData.viewerGun)model.userData.gun=null;
+L253:       model.userData.viewerGun=null; model.userData.viewerGunWeapon=''; }; if(!wanted)return; const meshFile=weaponFileForRef(wanted); if(!meshFile)return;
+L254:     if(!GUN_MESH_CACHE[meshFile])makeRealGun3(meshFile); if(!GUN_MESH_CACHE[meshFile]){ const started=Date.now(); while(GUN_MESH_CACHE[meshFile]===null&&Date.now()-started<10000){
+L255:         if(token!==viewer.selection)return; await wait(100); }; if(!GUN_MESH_CACHE[meshFile])throw new Error('No se pudo cargar la malla de esta arma.'); }
+L256:     const sourceGun=GUN_MESH_CACHE[meshFile];
+L257:     if(sourceGun.userData&&sourceGun.userData.texReady)await sourceGun.userData.texReady;
+L258:     if(token!==viewer.selection)return;
+L259:     if(model.userData&&model.userData._viewerClip)model.userData._viewerBlend={clip:model.userData._viewerClip,ct:model.userData._viewerCt||0,t0:performance.now()};
+L260:     if(!model.userData||!model.userData.grip)return; const holder=sourceGun.clone(true); holder.userData.texReady=sourceGun.userData.texReady; const gunMeta=holder.userData.meta||weaponMeta(meshFile);
+L261:     const gunGroup=makeGunAnchor({role:entry.role,weapon:wanted}); gunGroup.userData.isViewerGun=true; gunGroup.add(holder);
+L262:     gunGroup.userData.file=meshFile; gunGroup.userData.meta=gunMeta; if(DEBUG_WEAPONS){
+L263:       const marker=new THREE.Mesh(new THREE.SphereGeometry(0.045,12,8),new THREE.MeshBasicMaterial({color:0xff3300,depthTest:false})); marker.userData.isViewerGun=true;
+L264:       gunGroup.add(marker); console.info('[debugWeapons]',meshFile,gunMeta&&gunMeta.attachmentJoint,holder.userData.calibration); }; model.add(gunGroup);
+L265:     model.userData.viewerGun=gunGroup; model.userData.viewerGunWeapon=wanted; if(model.userData.grip){ model.userData.gun=gunGroup;
+L266:       model.userData.gripUnit={role:entry.role,weapon:wanted}; fitGunToHand3(model.userData.gripUnit,model,false); } };   async function selectModel(kind,name){
+L267:     viewer.kind=kind;viewer.name=name;viewer.testFire=null; const token=++viewer.selection; refreshList(); let selection;
+L268:     try{selection=showModelInfo(kind,name);}catch(error){setStatus(error.message,true);return;}
+L269:     if(!ensureRenderer())return; setStatus('Cargando modelo y texturaÔÇª',true);
+
+--- syncViewerGun @ L248 ---
+L248:     mesh.scale.setScalar(0.95);tilt.add(mesh); model.userData.staticRole=true; return model; };   async function syncViewerGun(model,entry,token){
+L249:     const wanted=(entry&&entry.sculptedWeapon)?'':(viewer.weapon||''); const current=(model.userData&&model.userData.viewerGunWeapon)||'';
+L250:     if(model&&model.userData)model.userData.idleClipKey=wanted?idleForWeapon(wanted):'idle2h'; if(current===wanted)return;
+L251: 
+L252:     if(model.userData&&model.userData.viewerGun){ model.remove(model.userData.viewerGun); if(model.userData.gun===model.userData.viewerGun)model.userData.gun=null;
+L253:       model.userData.viewerGun=null; model.userData.viewerGunWeapon=''; }; if(!wanted)return; const meshFile=weaponFileForRef(wanted); if(!meshFile)return;
+L254:     if(!GUN_MESH_CACHE[meshFile])makeRealGun3(meshFile); if(!GUN_MESH_CACHE[meshFile]){ const started=Date.now(); while(GUN_MESH_CACHE[meshFile]===null&&Date.now()-started<10000){
+L255:         if(token!==viewer.selection)return; await wait(100); }; if(!GUN_MESH_CACHE[meshFile])throw new Error('No se pudo cargar la malla de esta arma.'); }
+L256:     const sourceGun=GUN_MESH_CACHE[meshFile];
+L257:     if(sourceGun.userData&&sourceGun.userData.texReady)await sourceGun.userData.texReady;
+L258:     if(token!==viewer.selection)return;
+L259:     if(model.userData&&model.userData._viewerClip)model.userData._viewerBlend={clip:model.userData._viewerClip,ct:model.userData._viewerCt||0,t0:performance.now()};
+L260:     if(!model.userData||!model.userData.grip)return; const holder=sourceGun.clone(true); holder.userData.texReady=sourceGun.userData.texReady; const gunMeta=holder.userData.meta||weaponMeta(meshFile);
+L261:     const gunGroup=makeGunAnchor({role:entry.role,weapon:wanted}); gunGroup.userData.isViewerGun=true; gunGroup.add(holder);
+L262:     gunGroup.userData.file=meshFile; gunGroup.userData.meta=gunMeta; if(DEBUG_WEAPONS){
+L263:       const marker=new THREE.Mesh(new THREE.SphereGeometry(0.045,12,8),new THREE.MeshBasicMaterial({color:0xff3300,depthTest:false})); marker.userData.isViewerGun=true;
+L264:       gunGroup.add(marker); console.info('[debugWeapons]',meshFile,gunMeta&&gunMeta.attachmentJoint,holder.userData.calibration); }; model.add(gunGroup);
+L265:     model.userData.viewerGun=gunGroup; model.userData.viewerGunWeapon=wanted; if(model.userData.grip){ model.userData.gun=gunGroup;
+L266:       model.userData.gripUnit={role:entry.role,weapon:wanted}; fitGunToHand3(model.userData.gripUnit,model,false); } };   async function selectModel(kind,name){
+L267:     viewer.kind=kind;viewer.name=name;viewer.testFire=null; const token=++viewer.selection; refreshList(); let selection;
+L268:     try{selection=showModelInfo(kind,name);}catch(error){setStatus(error.message,true);return;}
+L269:     if(!ensureRenderer())return; setStatus('Cargando modelo y texturaÔÇª',true);
+L270:     try{
+L271:       const {entry,skin}=selection; const modelKey=kind==='roles'?name+'|'+skin.key:name; let model=viewer.models[kind][modelKey];
+L272:       if(!model&&kind==='roles'){
+L273:         if(entry.mesh){model=await loadViewerMeshy(entry);}
+L274:         else{const started=Date.now();
+L275:           while((!REAL.ready||(entry.role&&!(REAL.byRole&&REAL.byRole[entry.role])))&&Date.now()-started<10000){if(token!==viewer.selection)return;await wait(100);}
+L276:           if(!REAL.ready||(entry.role&&!(REAL.byRole&&REAL.byRole[entry.role])))throw new Error('El modelo original todav├¡a no est├í disponible.');
+L277:           model=await makeViewerOriginal(entry,skin);}
+L278:         viewer.models.roles[modelKey]=model;
+L279:       }else if(!model&&kind==='props'){
+
+--- activateSpec / buildCardModel @ L343 ---
+L343:   async function buildCardModel(spec){
+L344:     if(!cardStage||!spec||!spec.kind)return null;
+L345:     if(cardBuild)await cardBuild.catch(()=>{});
+L346:     cardBuild=(async()=>{
+L347:       viewer.cardMode=true;
+L348:       if(spec.kind==='glb'){
+L349:         if(!spec.glbUrl)throw new Error('Falta la ruta .glb.');
+L350:         const actor=await loadGlbActor(spec.glbUrl,{height:1.08,rotationY:spec.rotationY||0});
+L351:         actor.root.userData.glbActor=actor;
+L352:         actor.root.userData.animatable=true;
+L353:         actor.root.userData.grip=true;
+L354:         actor.root.userData.idleClipKey='idle';
+L355:         actor.root.userData.glbOwned=true;
+L356:         viewer.cardModel=actor.root;
+L357:         return actor.root;
+L358:       }
+L359:       if(spec.kind==='roles'){
+L360:         const entry=viewerCharacters.find(item=>item.key===spec.key);
+L361:         if(entry&&!entry.mesh){
+L362:           const started=Date.now();
+L363:           while((!REAL.ready||!CLIPLIB.ready||(entry.role&&!(REAL.byRole&&REAL.byRole[entry.role])))&&Date.now()-started<15000){await wait(50);}
+L364:           if(!REAL.ready||!CLIPLIB.ready)throw new Error('Modelo original o clips todav├¡a no disponibles.');
+L365:         }
+L366:         viewer.skinIndex=spec.skinIndex||0;viewer.weapon=spec.weapon||'';viewer.weaponTouched=true;viewer.weaponChar='';await selectModel('roles',spec.key);
+L367:       }
+L368:       else await selectModel(spec.kind,spec.key);
+L369:       if(!viewer.cardModel||!await waitTextures(viewer.cardModel))return null;
+L370:       return viewer.cardModel;
+L371:     })();
+L372:     try{return await cardBuild;}catch(error){if(typeof console!=='undefined'&&console.warn)console.warn('[cardStage:build]',error.message||error);return null;}finally{cardBuild=null;}
+L373:   }
+L374:   async function activateSpec(box,spec){
+L375:     if(!box||!spec||!spec.kind||!cardStage)return;
+L376:     if(spec.csn){unmountStage();showCsnPlaceholder(box,spec);if(viewer.inspectorOpen&&!viewer.frameRequested){viewer.frameRequested=true;requestAnimationFrame(frame);}return;}
+L377:     clearStagePlaceholder(box);
+L378:     const model=await buildCardModel(spec);
+L379:     if(!model)return;
+L380:     mountStageInto(box,spec);
+L381:     setStageZoom(stageZoom(),false);
+L382:     if(viewer.inspectorOpen&&!viewer.frameRequested){viewer.frameRequested=true;requestAnimationFrame(frame);}
+L383:   }
+L384:   function entryFor(spec){return viewerCharacters.find(item=>item.key===spec.key)||null;}
+L385:   async function fireSpec(spec){
+L386:     if(!spec)return;
+L387:     if(spec.kind==='glb'){if(viewer.glbActor)playOnce(viewer.glbActor,'fire');return;}
+L388:     if(spec.kind!=='roles')return;
+L389:     const entry=entryFor(spec); if(!entry||entry.mesh)return;
+L390:     const weapon=spec.weapon||entry.defaultWeapon||viewer.weapon; if(!weapon)return;
+L391:     auVoice({name:entry.name,role:entry.role},'firing',0.55);
+L392:     await activateSpec(activeCard().box||document.querySelector('.card-3d-box[data-card-spec]'),spec);
+L393:     viewer.weapon=weapon;
+L394:     const file=weaponFileForRef(weapon)||weapon; const profile=originalWeaponProfile(file)||{};
+L395:     let key=profile.fireClip;
+L396:     if(!key||!CLIPLIB.ready||!CLIPLIB.pack||!CLIPLIB.pack.clips||!CLIPLIB.pack.clips[key])key=typeof fireClipFor==='function'?fireClipFor(weapon):(idleForWeapon(weapon)==='idle1h'?'fire1h':'fire2h');
+L397:     if(CLIPLIB.ready&&CLIPLIB.pack&&CLIPLIB.pack.clips&&CLIPLIB.pack.clips[key])viewer.testFire={key:key,start:performance.now()};
+
+=== 4. TODOS LOS AUDIOS SFX EN assets/audio/sfx/ (PARA DESPLEGABLES) ===
+Total SFX en disco (40):
+abilities/ability_beep.mp3
+abilities/drop_cover.mp3
+abilities/landmine_place.mp3
+ui/ui_click.mp3
+weapons/2h_swing_01.mp3
+weapons/assaultrifle_fire.mp3
+weapons/axe_swing_01.mp3
+weapons/baseballbat_hit_01.mp3
+weapons/beretta_fire.mp3
+weapons/bullet_hit_01.mp3
+weapons/bullet_hit_02.mp3
+weapons/bulletby_01.mp3
+weapons/chainsaw_swing_01.mp3
+weapons/cluster_explode.mp3
+weapons/crossbow_fire.mp3
+weapons/grenade_throw_01.mp3
+weapons/grenade_throw_02.mp3
+weapons/grenade_throw_03.mp3
+weapons/jackhammer_fire.mp3
+weapons/jackhammer_rack.mp3
+weapons/knife_slash_01.mp3
+weapons/knife_stab_01.mp3
+weapons/landmine_explode.mp3
+weapons/launcher_explode.mp3
+weapons/lmg_fire.mp3
+weapons/m95_fire.mp3
+weapons/minigun_fire.mp3
+weapons/mp5k_fire.mp3
+weapons/revolver_fire.mp3
+weapons/riotshotgun_cock.mp3
+weapons/riotshotgun_fire.wav
+weapons/rocketlauncher_fire.mp3
+weapons/semiautorifle_fire.mp3
+weapons/shotgun_fire.mp3
+weapons/shotgun_rack.mp3
+weapons/sniperrifle_fire.mp3
+weapons/spikedclub_hit_01.mp3
+weapons/strike_artillery_a.mp3
+weapons/strike_laser_a.mp3
+weapons/submachinegun_fire.mp3
+
+=== 5. ROLES ACTUALES EN ORIG_CAST (src/data/cast.js) ===
+export const ORIG_CAST=[
+  {name:'Hipster Dave',body:'Soldier_Light',outfit:'Soldier_Light_d / DeltaForce / Veteran',role:'Francotirador',defaultWeapon:'M40',bio:'Gafas verdes, pelo naranja y un fusil enorme. Cara de enfado permanente.',play:true},
+   {name:'Archie Fletcher',body:'Soldier_Light_Rambo',outfit:'Rambo / DeerHunter',role:'Francotirador',defaultWeapon:'M40',bio:'Rambo de mercadillo: cinta en la cabeza y m├ís valor que punter├¡a.',play:true},
+   {name:'Soap',body:'Soldier_SAS',outfit:'Soldier_SAS',role:'Francotirador',defaultWeapon:'M110 SASS',bio:'El nombre que todos recuerdan y nadie explica.',play:true},
+   {name:'Spud',body:'Soldier_Spud',outfit:'Soldier_ForestCamo',role:'Francotirador',defaultWeapon:'M24 SWS',bio:'Patata de nombre, roca de aguante.',play:true},
+  {name:'Ivan Tkilya',body:'Soldier_Heavy',outfit:'Soldier_heavy / GermanSpecialForces',role:'Artillero',defaultWeapon:'M249 SAW',bio:'Pesado de manual: donde se planta, hay que rodearlo.',play:true},
+   {name:'Mme La Hacque',body:'Agent_Light',outfit:'Agent_light / JewelThief',role:'Esp├¡a',defaultWeapon:'MP7',bio:'Elegancia francesa con un cuchillo en la bota.',play:true},
+  {name:'Sneaky Pete',body:'Agent_Light',outfit:'Agent_light (base)',role:'Esp├¡a',defaultWeapon:'MP7',bio:'Nadie le vio llegar; nadie le vio irse.',play:true},
+  {name:'Sister Florence',body:'Medic',outfit:'Medic / Medic_Rescue',role:'M├®dico',defaultWeapon:'M4A1',bio:'Reza por ti y luego te cose la herida.',play:true,rigPose:true},
+   {name:'Riot Medic',body:'Medic_therapist',outfit:'Medic_therapist',role:'M├®dico',defaultWeapon:'M4A1',bio:'Casco antidisturbios y camilla blindada.',play:true},
+   {name:'Textbook Kate',body:'Medic',outfit:'Medic (variante)',role:'M├®dico',defaultWeapon:'M4A1',bio:'Se sabe el manual de memoria; por eso cura mejor.',play:true},
+  {name:'Big Time Taschmann',body:'Engineer',outfit:'Engineer / Spetsnaz',role:'Ingeniero',defaultWeapon:'Remington 870',bio:'Maza m├ís alta que su torso y sonrisa de oreja a oreja.',play:true},
+   {name:'Megan McNick',body:'Engineer_Light',outfit:'Engineer_Light / Trinity',role:'Ingeniero',defaultWeapon:'Benelli M4',bio:'Ingeniera de Trinity: torretas antes que palabras.',play:true},
+   {name:'Carlito Grosso',body:'Engineer_Heavy',outfit:'Engineer_Heavy / EOD',role:'Ingeniero',defaultWeapon:'M203',bio:'Siempre vuelve con el blindaje puesto.',play:true},
+  {name:'Riot Agent',body:'Agent_Heavy',outfit:'Agent_Heavy / Skin1',role:'Comando',defaultWeapon:'M4A1',bio:'Antidisturbios: escudo primero, preguntas despu├®s.',play:true},
+   {name:'Riot Engineer',body:'Engineer (RiotCop)',outfit:'Engineer_RiotCop',role:'Ingeniero',defaultWeapon:'M4A1',bio:'Convierte una calle en una fortaleza en tres turnos.',play:true},
+  {name:'Commander (M)',body:'Commander',outfit:'Commander / Latino / Asian / African',role:'Capit├ín',defaultWeapon:'M4A1',bio:'Manda con la voz y con el ejemplo.',play:true},
+   {name:'Commander (F)',body:'Commander_F',outfit:'Commander_F / Latino / Asian / African',role:'Capit├ín',defaultWeapon:'Desert Eagle',bio:'Misma autoridad, otro acento.',play:true}
+];
+
+
+export function sculptedWeaponUnit(un){return !!(un&&un.charMesh&&MESHY_CAST.some(entry=>entry.mesh===un.charMesh&&entry.sculptedWeapon));}
+

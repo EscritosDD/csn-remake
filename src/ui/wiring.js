@@ -42,7 +42,6 @@ document.addEventListener('mouseover',e=>{
   const bk=document.getElementById('mnuBarracks');if(bk)bk.onclick=openBarracks;
   document.addEventListener('change',(e)=>{const t=e.target;if(t&&t.dataset&&t.dataset.charrole){const role=t.dataset.charrole;setCHAR_PREFS(loadChars());CHAR_PREFS[role]=t.value;saveChars(CHAR_PREFS);const opts=charsForRole(role),cur=opts.find(o=>o.name===t.value)||opts[0],card=t.closest('.barrack-card'),img=card&&card.querySelector('.barrack-portrait');if(img)img.src=rolePortraitURL(role,cur)||'assets/ui/retrato_capitan.png';if(ctx.G)updateUI();else if(typeof buildSquads==='function')buildSquads();toast('Personaje de '+role+': '+t.value+'.');}});
   const ar=document.getElementById('mnuArmory');if(ar)ar.onclick=()=>{showScreen('scr-arsenal');armTab('armas');};
-  document.querySelectorAll('#armTabSeg button').forEach(b=>b.onclick=()=>armTab(b.dataset.armtab));
   const bb=document.getElementById('barrBack');if(bb)bb.onclick=()=>showScreen('scr-play');
   coinsSet(coinsGet());
   renderAbilityCatalog();

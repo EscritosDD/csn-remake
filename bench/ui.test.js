@@ -6,8 +6,9 @@ const path = require('node:path');
 
 const root = path.dirname(__dirname);
 const html = require('./source');
+const indexHtml = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const capture = fs.readFileSync(path.join(root, '_capture_all.mjs'), 'utf8');
-const cssFiles = ['layout.css', 'game.css', 'viewer.css', 'theme.css'];
+const cssFiles = ['layout.css', 'game.css', 'viewer.css', 'theme.css', 'cards.css'];
 const css = cssFiles.map(name => fs.readFileSync(path.join(root, 'styles', name), 'utf8')).join('\n');
 let uiDataPromise;
 function loadUiData() {
@@ -69,4 +70,35 @@ test('los controles tienen foco visible y tamaño cómodo', () => {
 test('las capturas permiten monitoreo móvil y de reglas', () => {
   assert.match(capture, /CSN_WINDOW/);
   assert.match(capture, /how: /);
+});
+
+test('la navegación principal usa los cuatro nombres del usuario', async () => {
+  const tabs = indexHtml.split('id="mainTabs"')[1]?.split('</nav>')[0] || '';
+  const esperados = [['play','Jugar'],['arsenal','Armería'],['viewer','Tropas'],['how','Cómo se juega']];
+  assert.equal((tabs.match(/data-tab="/g)||[]).length,4);
+  for (const [tab,label] of esperados) assert.match(tabs,new RegExp('data-tab="'+tab+'"[^>]*>'+label+'</button>'));
+  assert.match(indexHtml,/id="mnuArmory"[^>]*>[\s\S]*?Catálogo de armas y desplegables/);
+  assert.match(indexHtml,/id="mnuViewer"[^>]*>[\s\S]*?Personajes con visor 3D integrado/);
+  assert.match(html,/#mainTabs button'\)\.forEach\(b=>b\.onclick=\(\)=>\{showScreen\('scr-'\+b\.dataset\.tab\);if\(b\.dataset\.tab==='arsenal'\)armTab\('armas'\);\}\)/);
+  assert.match(html,/getElementById\('mnuArmory'\);if\(ar\)ar\.onclick=\(\)=>\{showScreen\('scr-arsenal'\);armTab\('armas'\);\}/);
+  const { AUX_LABELS, AUX_HINTS } = await loadUiData();
+  assert.equal(AUX_LABELS['scr-arsenal'],'Armería');
+  assert.equal(AUX_LABELS['scr-viewer'],'Tropas');
+  assert.equal(AUX_HINTS['scr-arsenal'],'Armas originales, CSN y desplegables · opcional');
+  assert.equal(AUX_HINTS['scr-viewer'],'Personajes con visor 3D integrado · opcional');
+});
+
+test('Armería y Tropas tienen los contenedores de la nueva navegación', () => {
+  for (const id of ['arsSectionSeg','deployableGrid','troopFilters','troopGrid']) assert.match(indexHtml,new RegExp('id="'+id+'"'),id);
+  assert.match(indexHtml,/<link rel="stylesheet" href="styles\/cards\.css">/);
+  assert.match(indexHtml,/<h1>Armería<\/h1>/);
+  assert.match(indexHtml,/<h1>Tropas<\/h1>/);
+  assert.ok(indexHtml.indexOf('id="arsSectionSeg"')<indexHtml.indexOf('id="arsFilters"'));
+  assert.ok(indexHtml.indexOf('id="arsenalGrid"')<indexHtml.indexOf('id="deployableGrid"'));
+  assert.ok(indexHtml.indexOf('id="troopGrid"')<indexHtml.indexOf('id="viewerLegacy"'));
+  assert.match(indexHtml,/id="viewerLegacy" class="viewer-legacy" hidden/);
+  assert.doesNotMatch(indexHtml,/data-kind="pieces"/);
+  assert.doesNotMatch(indexHtml,/id="viewerPieceControls"/);
+  for (const id of ['viewerKinds','viewerCharacterControls','viewerCanvas','viewerStatus','viewerList','viewerWeaponSelect','viewerFireBtn']) assert.match(indexHtml,new RegExp('id="'+id+'"'),id);
+  for (const selector of ['\\.troop-filters','\\.troop-grid','\\.deployable-grid','\\.viewer-legacy\\[hidden\\]\\{display:none!important\\}']) assert.match(css,new RegExp(selector));
 });

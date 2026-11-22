@@ -44,7 +44,7 @@ export function normalizeMeshyRig(rig){
 export const normalizeMeshyRigGlobal=normalizeMeshyRig;
 
 export function parseMeshyOBJ(text,rig){
-  const vertices=[],uvs=[],normals=[],positions=[],outUvs=[],outNormals=[],skinIndices=[],skinWeights=[];
+  const vertices=[],uvs=[],normals=[],positions=[],outUvs=[],vertexIds=[],skinIndices=[],skinWeights=[];
   const resolveIndex=(index,length)=>index<0?length+index:index-1;
   for(const line of text.split(/\r?\n/)){
     const parts=line.trim().split(/\s+/);
@@ -58,13 +58,13 @@ export function parseMeshyOBJ(text,rig){
       });
       for(let i=1;i<face.length-1;i++){
         for(const corner of [face[0],face[i],face[i+1]]){
-          const vertex=vertices[corner.v],uv=uvs[corner.uv],normal=normals[corner.n];
+          const vertex=vertices[corner.v],uv=uvs[corner.uv];
           if(!vertex)throw new Error('El OBJ Meshy contiene una cara inválida.');
           const boneIndices=rig.skinIndex[corner.v],boneWeights=rig.skinWeight[corner.v];
           if(!boneIndices||!boneWeights||boneIndices.length!==4||boneWeights.length!==4)throw new Error('El rig Meshy no contiene pesos para todos los vértices.');
           positions.push(vertex[0],vertex[1],vertex[2]);
           outUvs.push(uv?uv[0]:0,uv?uv[1]:0);
-          if(normal)outNormals.push(normal[0],normal[1],normal[2]);
+          vertexIds.push(corner.v);
           skinIndices.push(...boneIndices);
           skinWeights.push(...boneWeights);
         }
@@ -72,11 +72,45 @@ export function parseMeshyOBJ(text,rig){
     }
   }
   if(!positions.length)throw new Error('El OBJ Meshy no contiene caras.');
+  let vol=0;
+  for(let i=0;i<positions.length;i+=9){
+    const ax=positions[i],ay=positions[i+1],az=positions[i+2];
+    const bx=positions[i+3],by=positions[i+4],bz=positions[i+5];
+    const cx=positions[i+6],cy=positions[i+7],cz=positions[i+8];
+    vol+=(ax*(by*cz-bz*cy)-ay*(bx*cz-bz*cx)+az*(bx*cy-by*cx))/6;
+  }
+  if(vol<0){
+    const swap=(arr,stride,face)=>{
+      const base=face*stride*3,a=base+stride,b=a+stride;
+      for(let k=0;k<stride;k++){const tmp=arr[a+k];arr[a+k]=arr[b+k];arr[b+k]=tmp;}
+    };
+    for(let face=0;face*9<positions.length;face++){
+      swap(positions,3,face);swap(outUvs,2,face);swap(vertexIds,1,face);swap(skinIndices,4,face);swap(skinWeights,4,face);
+    }
+  }
+  const accumulated=vertices.map(()=>[0,0,0]);
+  for(let i=0;i<positions.length;i+=9){
+    const ax=positions[i],ay=positions[i+1],az=positions[i+2];
+    const bx=positions[i+3],by=positions[i+4],bz=positions[i+5];
+    const cx=positions[i+6],cy=positions[i+7],cz=positions[i+8];
+    const ux=bx-ax,uy=by-ay,uz=bz-az,vx=cx-ax,vy=cy-ay,vz=cz-az;
+    const nx=uy*vz-uz*vy,ny=uz*vx-ux*vz,nz=ux*vy-uy*vx;
+    for(let k=0;k<3;k++){
+      const id=vertexIds[i/3+k];
+      accumulated[id][0]+=nx;accumulated[id][1]+=ny;accumulated[id][2]+=nz;
+    }
+  }
+  const smoothNormals=[];
+  for(let i=0;i<vertexIds.length;i++){
+    const id=vertexIds[i],value=accumulated[id],length=Math.hypot(value[0],value[1],value[2]);
+    const source=length>1e-8?value:(normals[id]||[0,1,0]);
+    const scale=1/(Math.hypot(source[0],source[1],source[2])||1);
+    smoothNormals.push(source[0]*scale,source[1]*scale,source[2]*scale);
+  }
   const geometry=new THREE.BufferGeometry();
   geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));
   geometry.setAttribute('uv',new THREE.Float32BufferAttribute(outUvs,2));
-  if(outNormals.length===positions.length)geometry.setAttribute('normal',new THREE.Float32BufferAttribute(outNormals,3));
-  else geometry.computeVertexNormals();
+  geometry.setAttribute('normal',new THREE.Float32BufferAttribute(smoothNormals,3));
   geometry.setAttribute('skinIndex',new THREE.Float32BufferAttribute(skinIndices,4));
   geometry.setAttribute('skinWeight',new THREE.Float32BufferAttribute(skinWeights,4));
   geometry.computeBoundingBox();
@@ -90,7 +124,7 @@ export function loadMeshyModel(mesh,real){
   MESHY_LOADING[mesh]=Promise.all([
     fetch('assets/personajes_propios/'+mesh+'.obj'),
     fetch('assets/personajes_propios/'+mesh+'_rig.json'),
-    new Promise(res=>{new THREE.TextureLoader().load('assets/personajes_propios/'+mesh+'_tex.png',t=>{t.colorSpace=THREE.SRGBColorSpace;res(t);},undefined,()=>res(null));})
+    new Promise(res=>{new THREE.TextureLoader().load('assets/personajes_propios/'+mesh+'_tex.png',t=>{t.colorSpace=THREE.SRGBColorSpace;t.generateMipmaps=false;t.minFilter=THREE.LinearFilter;t.magFilter=THREE.LinearFilter;t.wrapS=THREE.ClampToEdgeWrapping;t.wrapT=THREE.ClampToEdgeWrapping;t.needsUpdate=true;res(t);},undefined,()=>res(null));})
   ]).then(async ([objRes,rigRes,tex])=>{
     if(!objRes.ok||!rigRes.ok)return null;
     const [objText,rawRig]=await Promise.all([objRes.text(),rigRes.json()]);
@@ -108,21 +142,23 @@ export function loadMeshyModel(mesh,real){
 
 export function makeSkinnedModel(geometry,data,texture,options={}){
   const model=new THREE.Group();
-  const bones=data.bones.map(b=>{
+  const restQ=data.bones.map(b=>new THREE.Quaternion(b.quat[0],b.quat[1],b.quat[2],b.quat[3]).normalize());
+  const bones=data.bones.map((b,i)=>{
     const bone=new THREE.Bone();
     bone.name=b.name;
     bone.position.fromArray(b.pos);
-    bone.quaternion.fromArray(b.quat);
+    bone.quaternion.copy(restQ[i]);
     if(b.scale)bone.scale.fromArray(b.scale);
     return bone;
   });
   data.bones.forEach((b,i)=>{if(b.parent>=0)bones[b.parent].add(bones[i]);});
   const inverses=validatedRigBoneInverses(data,bones);
   const skeleton=new THREE.Skeleton(data.skinBones.map(i=>bones[i]),inverses);
-  if(texture)texture.colorSpace=THREE.SRGBColorSpace;
+  if(texture){texture.colorSpace=THREE.SRGBColorSpace;texture.generateMipmaps=false;texture.minFilter=THREE.LinearFilter;texture.magFilter=THREE.LinearFilter;texture.wrapS=THREE.ClampToEdgeWrapping;texture.wrapT=THREE.ClampToEdgeWrapping;texture.needsUpdate=true;}
+  const meshy=!!options.meshy;
   const mesh=new THREE.SkinnedMesh(geometry,new THREE.MeshStandardMaterial({
-    map:texture,roughness:0.85,metalness:0.02,transparent:false,opacity:1,depthWrite:true,alphaTest:0,
-    side:THREE.FrontSide
+    map:texture,roughness:meshy?0.90:0.85,metalness:meshy?0:0.02,transparent:false,opacity:1,depthWrite:true,alphaTest:0,
+    side:meshy?THREE.DoubleSide:THREE.FrontSide
   }));
   mesh.add(bones[0]);
   mesh.bind(skeleton,new THREE.Matrix4());
@@ -130,13 +166,13 @@ export function makeSkinnedModel(geometry,data,texture,options={}){
   mesh.castShadow=true;
   model.add(mesh);
   const parents=data.bones.map(b=>b.parent);
-  const bindLocal=data.bones.map(b=>new THREE.Quaternion(b.quat[0],b.quat[1],b.quat[2],b.quat[3]));
+  const bindLocal=restQ.map(q=>q.clone());
   const bindWorldQ=worldRotationsFromLocal(bindLocal,parents);
   const baseRestQ=options.baseRestQ||null;
   const sourceParents=baseRestQ?(options.baseParents||parents):parents;
   model.userData={
     bones,bindLocal,
-    curQ:data.bones.map(b=>new THREE.Quaternion(b.quat[0],b.quat[1],b.quat[2],b.quat[3])),
+    curQ:restQ.map(q=>q.clone()),
     bindPos:data.bones.map(b=>new THREE.Vector3(b.pos[0],b.pos[1],b.pos[2])),
     curDelta:new THREE.Vector3(),mesh3:mesh,meshy:!!options.meshy,
     animatable:!!options.animatable,idleClipKey:options.idleClipKey||'idle2h',idleRole:options.idleRole,

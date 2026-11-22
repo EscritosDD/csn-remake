@@ -1,0 +1,932 @@
+﻿=== 1. GIT STATUS, COMMITS Y DIFF ===
+ M _capture_all.mjs
+ M bench/data.test.js
+ M bench/harness.js
+ M bench/rules.test.js
+ M bench/ui.test.js
+ M bench/winding.test.js
+ M index.html
+ M package.json
+ M src/audio/sound.js
+ M src/bridge.js
+ M src/data/ui-copy.js
+ M src/main.js
+ M src/render3d/assets-meshy.js
+ M src/render3d/assets-weapons.js
+ M src/ui/arsenal.js
+ M src/ui/barracks.js
+ M src/viewer/main.js
+ M styles/layout.css
+ M styles/viewer.css
+?? bench/cards.test.js
+?? inspeccion_rigs_armas.txt
+?? src/data/deployables.js
+?? src/viewer/card-stage.js
+?? src/viewer/troop-cards.js
+?? styles/cards.css
+--- Ultimos commits ---
+f475de4 correcciones 3D
+3654348 armas y dem├ís
+f8c6c4b coreeccion modular
+5340d39 desarrollo gpt code
+--- Diff stat ---
+warning: in the working copy of '_capture_all.mjs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'bench/ui.test.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'bench/winding.test.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'index.html', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'package.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/audio/sound.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/bridge.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/data/ui-copy.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/main.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/render3d/assets-meshy.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/render3d/assets-weapons.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/ui/arsenal.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/ui/barracks.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/viewer/main.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'styles/layout.css', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'styles/viewer.css', LF will be replaced by CRLF the next time Git touches it
+ _capture_all.mjs               |  31 +++--
+ bench/data.test.js             |  63 ++++++++-
+ bench/harness.js               |   4 +-
+ bench/rules.test.js            |   4 +-
+ bench/ui.test.js               |  34 ++++-
+ bench/winding.test.js          |  61 +++++++--
+ index.html                     |  26 ++--
+ package.json                   |   4 +-
+ src/audio/sound.js             |  16 ++-
+ src/bridge.js                  |   6 +-
+ src/data/ui-copy.js            |   4 +-
+ src/main.js                    |  13 +-
+ src/render3d/assets-meshy.js   |  19 ++-
+ src/render3d/assets-weapons.js |  26 +++-
+ src/ui/arsenal.js              | 147 +++++++++++++++++---
+ src/ui/barracks.js             |   5 +-
+ src/viewer/main.js             | 300 ++++++++++++++++++++++-------------------
+ styles/layout.css              |   2 +-
+ styles/viewer.css              |  14 ++
+ 19 files changed, 564 insertions(+), 215 deletions(-)
+
+=== 2. GRAFO ESM, CICLOS, ";" FANTASMA Y REGISTRO EN BENCH ===
+Modulos src/: 64 | Imports rotos: 0 | Ciclos ESM: 0
+Total ';' fantasma en src/: 0
+Modulos potencialmente no referenciados en harness.js: 62 src/audio/sound.js, src/bridge.js, src/core-and-audio.js, src/core/geometry.js, src/core/rng.js, src/core/storage.js, src/core/time.js, src/data/cast.js, src/data/deployables.js, src/data/index.js, src/data/map-pieces.js, src/data/maps.js, src/data/nations.js, src/data/roles.js, src/data/ui-copy.js, src/data/weapons.js, src/game/ai-escort.js, src/game/ai.js, src/game/board.js, src/game/chars.js, src/game/combat.js, src/game/demo.js, src/game/gadgets.js, src/game/index.js, src/game/input.js, src/game/keyboard.js, src/game/missions.js, src/game/quick.js, src/game/turn.js, src/render2d/board.js, src/render2d/fx.js, src/render2d/index.js, src/render2d/sprites.js, src/render2d/tiles.js, src/render3d/assets-geo.js, src/render3d/assets-meshy.js, src/render3d/assets-real.js, src/render3d/assets-weapons.js, src/render3d/camera3d.js, src/render3d/clips.js, src/render3d/env.js, src/render3d/fallback-soldier.js, src/render3d/fx3d.js, src/render3d/gun-pose.js, src/render3d/gun.js, src/render3d/index.js, src/render3d/real-sprites.js, src/render3d/retarget.js, src/render3d/runtime.js, src/render3d/scene.js, src/render3d/soldiers.js, src/render3d/world-props.js, src/render3d/world.js, src/ui/abilities.js, src/ui/arsenal.js, src/ui/barracks.js, src/ui/index.js, src/ui/ui-shell.js, src/ui/unit-card.js, src/ui/wiring.js, src/viewer/card-stage.js, src/viewer/troop-cards.js
+
+=== 3. AUDITORIA DE CONTEXTOS WEBGL (WebGLRenderer) ===
+  src/game/demo.js:L19 -> try{renderer=new THREE.WebGLRenderer({antialias:true});}
+  src/render3d/assets-weapons.js:L121 -> _wThumbR=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});
+  src/render3d/camera3d.js:L29 -> const renderer=new THREE.WebGLRenderer({antialias:true});
+  src/render3d/real-sprites.js:L26 -> const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});
+  src/viewer/card-stage.js:L53 -> const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});
+Total instanciaciones WebGLRenderer en src/: 5
+
+=== 4. INTEGRIDAD DE DATOS: 23 ARMAS ORIGINALES, CLIPS, SFX Y PIEZAS ===
+Clips disponibles: 40 | Archivos SFX weapons en disco: 36
+Contiene originalWeaponProfile: true
+Nombre AssaultRifle en WEAPONS_ORIGINAL: Assault Rifle
+Nombre Rifle en WEAPONS_ORIGINAL: Semi Auto Rifle
+Referencias SFX en assets-weapons.js: 21 | Faltantes en disco: 0 
+Datos Piezas intactos -> src/data/map-pieces.js=true | OBJ en assets/maps/pieces/=281
+
+=== 5. INSPECCION DE HTML: PESTA├æAS, ARMERIA, TROPAS Y AUSENCIA DE PIEZAS EN UI ===
+
+--- index.html [#mainTabs] ---
+<nav class="tabs" id="mainTabs" style="display:none">
+    <button data-tab="play" class="on">Jugar</button>
+    <button data-tab="arsenal">Armer├¡a</button>
+    <button data-tab="viewer">Tropas</button>
+    <button data-tab="how">C├│mo se juega</button>
+  </nav>
+
+--- index.html [#scr-arsenal] ---
+<section class="screen" id="scr-arsenal">
+    <div class="back-row"><button class="btn ghost" data-back>ÔåÉ Volver al men├║</button></div>
+    <div class="hero">
+      <h1>Armer├¡a</h1>
+      <details class="info"><summary>Ôôÿ ┬┐Qu├® hay aqu├¡?</summary><div class="info-body"><p>37 armas jugables con datos verificados de manuales militares y fichas del fabricante, m├ís el equipo de granadas, torretas y botiquines de la secci├│n siguiente. Aqu├¡ ves las armas de la v1 con sus datos reales y su traducci├│n al juego: da├▒o, alcance en casillas y coste de energ├¡a sobre cuerpos de 200, 250 o 300 PV seg├║n el tipo (ligero, medio o pesado).</p></div></details>
+    </div>
+    <div class="seg" id="arsSectionSeg"><button type="button" data-arssec="weapons" class="on">Armas</button><button type="button" data-arssec="deployables">Desplegables y objetos</button></div>
+    <div class="filters" id="arsFilters"></div>
+    <div class="arsenal-grid" id="arsenalGrid"></div>
+    <div id="deployablePanel" style="display:none"><div id="deployableGrid" class="deployable-grid"></div></div>
+    <div class="seg" id="armTabSeg" style="margin:10px 0 0">
+      <button data-armtab="armas" class="on">Armas</button>
+      <button data-armtab="habilidades">Habilidades del original</button>
+    </div>
+    <div class="panel" id="abilityPanel" style="margin-top:14px;display:none">
+      <h2>Cat├ílogo del original ┬À 52 habilidades</h2>
+      <details class="info"><summary>Ôôÿ ┬┐Qu├® es este cat├ílogo?</summary><div class="info-body"><p class="sub" style="margin:0 0 8px">Iconos reales del IPA. Las marcadas ┬½en juego
+
+--- index.html [#scr-viewer] ---
+<section class="screen" id="scr-viewer">
+    <div class="back-row"><button class="btn ghost" data-back>ÔåÉ Volver al men├║</button></div>
+    <div class="hero">
+      <h1>Tropas</h1>
+      <details class="info"><summary>Ôôÿ ┬┐C├│mo se usa?</summary><div class="info-body"><p>Explora los modelos y texturas del juego sin iniciar una partida. Arrastra para girar, usa la rueda o el control para acercar y alejar.</p></div></details>
+    </div>
+    <div class="panel">
+      <div class="troop-filters" id="troopFilters"></div>
+      <div class="troop-grid" id="troopGrid"></div>
+      <div id="viewerLegacy" class="viewer-legacy" hidden>
+      <div class="seg" id="viewerKinds" aria-label="Tipo de modelo">
+        <button type="button" class="on" data-kind="roles">Personajes</button>
+        <button type="button" data-kind="weapons">Armas</button>
+        <button type="button" data-kind="props">Objetos</button>
+      </div>
+      <div class="viewer-layout">
+        <div class="viewer-character-controls" id="viewerCharacterControls">
+          <label>Modelo
+            <select id="viewerCharacterSelect" aria-label="Seleccionar modelo de personaje"></select>
+          </label>
+          <div class="viewer-skin-nav" aria-label="Navegar por las skins">
+            <button type="button" id="viewerSkinPrev" aria-label="Skin anterior">ÔÇ╣</button>
+            <span class="viewer-skin-name" id="viewerSkinName"></span>
+            <button type="button" id="viewerSkinNext" aria-label="Skin siguiente">ÔÇ║</button>
+          </div>
+          <label id="viewerWeaponLabel" style="grid-
+Apariciones de viewerPieceControls en index.html: 0
+Apariciones de data-kind="pieces" en index.html: 0
+
+=== 6. EXTRACTOS CLAVE DE CODIGO MODIFICADO/NUEVO ===
+
+--- src/render3d/assets-meshy.js ---
+(8592B, 169L)
+import { worldRotationsFromLocal } from './clips.js';
+
+export const MESHY_MODELS={},MESHY_LOADING={};
+const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+
+export function validatedRigBoneInverses(data,bones,provided){
+  const inverses=provided||data.boneInverses.map(a=>new THREE.Matrix4().set(
+    a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7],
+    a[8],a[9],a[10],a[11],a[12],a[13],a[14],a[15]
+  ));
+  if(inverses.length!==data.skinBones.length)
+    throw new Error('El rig no tiene una matriz bind por cada hueso de piel.');
+  data.bones.forEach((bone,i)=>{if(bone.parent<0)bones[i].updateMatrixWorld(true);});
+  const identity=new THREE.Matrix4();
+  let maxError=0;
+  data.skinBones.forEach((boneIndex,i)=>{
+    const bind=bones[boneIndex].matrixWorld.clone().multiply(inverses[i]);
+    bind.elements.forEach((value,j)=>{maxError=Math.max(maxError,Math.abs(value-identity.elements[j]));});
+  });
+  if(maxError<=0.001)return inverses;
+  return data.skinBones.map(boneIndex=>{
+    const bind=bones[boneIndex].matrixWorld;
+    const determinant=bind.determinant();
+    if(!Number.isFinite(determinant)||Math.abs(determinant)<1e-12)
+      throw new Error('El rig contiene una bind pose singular.');
+    return bind.clone().invert();
+  });
+}
+
+export function sameRigBoneOrder(source,target){
+  return !!source&&!!target&&source.length===target.length&&source.every((bone,i)=>bone.name===target[i].name);
+}
+
+export function normalizeMeshyRig(rig){
+  if(Array.isArray(rig.skinIndex[0]))return rig;
+  const skinIndex=[],skinWeight=[];
+  for(let i=0;i<rig.skinIndex.length;i+=4){
+    skinIndex.push(rig.skinIndex.slice(i,i+4));
+    skinWeight.push(rig.skinWeight.slice(i,i+4));
+  }
+  return Object.assign({},rig,{skinIndex,skinWeight});
+}
+
+export const normalizeMeshyRigGlobal=normalizeMeshyRig;
+
+export function parseMeshyOBJ(text,rig){
+  const vertices=[],uvs=[],normals=[],positions=[],outUvs=[],outNormals=[],skinIndices=[],skinWeights=[];
+  const resolveIndex=(index,length)=>index<0?length+index:index-1;
+  for(const line of text.split(/\r?\n/)){
+    const parts=line.trim().split(/\s+/);
+    if(parts[0]==='v')vertices.push([+parts[1],+parts[2],+parts[3]]);
+    else if(parts[0]==='vt')uvs.push([+parts[1],+parts[2]]);
+    else if(parts[0]==='vn')normals.push([+parts[1],+parts[2],+parts[3]]);
+    else if(parts[0]==='f'){
+      const face=parts.slice(1).map(token=>{
+        const indices=token.split('/');
+        return {v:resolveIndex(+indices[0],vertices.length),uv:indices[1]?resolveIndex(+indices[1],uvs.length):-1,n:indices[2]?resolveIndex(+indices[2],normals.length):-1};
+      });
+      for(let i=1;i<face.length-1;i++){
+        for(const corner of [face[0],face[i],face[i+1]]){
+          const vertex=vertices[corner.v],uv=uvs[corner.uv],normal=normals[corner.n];
+          if(!vertex)throw new Error('El OBJ Meshy contiene una cara inv├ílida.');
+          const boneIndices=rig.skinIndex[corner.v],boneWeights=rig.skinWeight[corner.v];
+          if(!boneIndices||!boneWeights||boneIndices.length!==4||boneWeights.length!==4)throw new Error('El rig Meshy no contiene pesos para todos los v├®rtices.');
+          positions.push(vertex[0],vertex[1],vertex[2]);
+          outUvs.push(uv?uv[0]:0,uv?uv[1]:0);
+          if(normal)outNo
+/* ... [RECORTADO] ... */
+texture,options={}){
+  const model=new THREE.Group();
+  const bones=data.bones.map(b=>{
+    const bone=new THREE.Bone();
+    bone.name=b.name;
+    bone.position.fromArray(b.pos);
+    bone.quaternion.fromArray(b.quat);
+    if(b.scale)bone.scale.fromArray(b.scale);
+    return bone;
+  });
+  data.bones.forEach((b,i)=>{if(b.parent>=0)bones[b.parent].add(bones[i]);});
+  const inverses=validatedRigBoneInverses(data,bones);
+  const skeleton=new THREE.Skeleton(data.skinBones.map(i=>bones[i]),inverses);
+  if(texture)texture.colorSpace=THREE.SRGBColorSpace;
+  const mesh=new THREE.SkinnedMesh(geometry,new THREE.MeshStandardMaterial({
+    map:texture,roughness:0.85,metalness:0.02,transparent:false,opacity:1,depthWrite:true,alphaTest:0,
+    side:THREE.FrontSide
+  }));
+  mesh.add(bones[0]);
+  mesh.bind(skeleton,new THREE.Matrix4());
+  mesh.frustumCulled=false;
+  mesh.castShadow=true;
+  model.add(mesh);
+  const parents=data.bones.map(b=>b.parent);
+  const bindLocal=data.bones.map(b=>new THREE.Quaternion(b.quat[0],b.quat[1],b.quat[2],b.quat[3]));
+  const bindWorldQ=worldRotationsFromLocal(bindLocal,parents);
+  const baseRestQ=options.baseRestQ||null;
+  const sourceParents=baseRestQ?(options.baseParents||parents):parents;
+  model.userData={
+    bones,bindLocal,
+    curQ:data.bones.map(b=>new THREE.Quaternion(b.quat[0],b.quat[1],b.quat[2],b.quat[3])),
+    bindPos:data.bones.map(b=>new THREE.Vector3(b.pos[0],b.pos[1],b.pos[2])),
+    curDelta:new THREE.Vector3(),mesh3:mesh,meshy:!!options.meshy,
+    animatable:!!options.animatable,idleClipKey:options.idleClipKey||'idle2h',idleRole:options.idleRole,
+    baseRestQ,baseRestWorldQ:baseRestQ?worldRotationsFromLocal(baseRestQ,sourceParents):null,
+    bindWorldQ,parents,sourceParents,
+    sourcePoseQ:data.bones.map(()=>new THREE.Quaternion()),
+    sourceWorldQ:data.bones.map(()=>new THREE.Quaternion()),
+    targetWorldQ:data.bones.map(()=>new THREE.Quaternion()),
+    targetLocalQ:data.bones.map(()=>new THREE.Quaternion()),
+    isClassRig:!!baseRestQ,grip:!!options.grip,role:options.role||'',gun:null,
+    byName:Object.fromEntries(bones.map((bone,index)=>[bone.name,index]))
+  };
+  return model;
+}
+
+
+--- src/audio/sound.js ---
+(6011B, 106L)
+import { lsGet } from '../core/storage.js';
+import { DMR_WEAPONS, WEAPON_SFX, weaponSfxFile } from '../data/weapons.js';
+
+import { CHAR_VOICE } from '../data/cast.js';
+import { VOICE_FILES } from '../data/roles.js';
+import { originalWeaponProfile } from '../render3d/assets-weapons.js';
+
+
+export const LS_SOUND='radsoldiers_sound';
+
+export let AC=null, soundOn=(lsGet(LS_SOUND)!=='0');
+
+export function audioCtx(){if(!soundOn)return null;try{if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();return AC;}catch(e){return null;}}
+
+export function tone(freq,dur,type,vol,slideTo){const ac=audioCtx();if(!ac)return;const o=ac.createOscillator(),g=ac.createGain();o.type=type||'square';o.frequency.setValueAtTime(freq,ac.currentTime);if(slideTo)o.frequency.exponentialRampToValueAtTime(Math.max(30,slideTo),ac.currentTime+dur);g.gain.setValueAtTime(vol||0.05,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.0001,ac.currentTime+dur);o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+dur+0.02);}
+
+export function noiseBurst(dur,vol,freqEnd){const ac=audioCtx();if(!ac)return;const len=Math.max(1,(ac.sampleRate*dur)|0);const buf=ac.createBuffer(1,len,ac.sampleRate);const d=buf.getChannelData(0);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*(1-i/len);const src=ac.createBufferSource();src.buffer=buf;const f=ac.createBiquadFilter();f.type='lowpass';f.frequency.setValueAtTime(3200,ac.currentTime);f.frequency.exponentialRampToValueAtTime(Math.max(60,freqEnd||300),ac.currentTime+dur);const g=ac.createGain();g.gain.setValueAtTime(vol||0.12,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.0001,ac.currentTime+dur);src.connect(f);f.connect(g);g.connect(ac.destination);src.start();}
+
+export function sfx(kind){if(!soundOn)return;try{
+  if(kind==='shoot'){noiseBurst(0.12,0.10,900);tone(160,0.08,'square',0.03,70);}
+  else if(kind==='boom'){noiseBurst(0.5,0.22,120);tone(70,0.4,'sine',0.16,34);}
+  else if(kind==='place'){tone(190,0.07,'square',0.05,120);setTimeout(()=>tone(1250,0.05,'square',0.03),70);}
+  else if(kind==='flash'){noiseBurst(0.16,0.15,2600);tone(2600,0.24,'sine',0.10,880);setTimeout(()=>tone(1750,0.13,'sine',0.05,660),45);}
+  else if(kind==='turn'){tone(520,0.09,'triangle',0.05);setTimeout(()=>tone(660,0.1,'triangle',0.05),95);}
+  else if(kind==='win'){[523,659,784,1046].forEach((f,i)=>setTimeout(()=>tone(f,0.16,'triangle',0.06),i*120));}
+  else if(kind==='lose'){[392,330,262,196].forEach((f,i)=>setTimeout(()=>tone(f,0.16,'triangle',0.06),i*120));}
+ }catch(e){}}
+
+export const AU_BASE='assets/audio/';
+
+export let AU_AMBIENT=null;
+
+const AUDIO_BUFFERS=new Map(),AUDIO_PENDING=new Map()
+/* ... [RECORTADO] ... */
+);
+  if(!profile||!profile.sfx)return null;
+  return auPlay('sfx/weapons/'+profile.sfx,profile.sfx.endsWith('.wav')?0.35:0.45);
+}
+
+
+export function auClick(){auPlay('sfx/ui/ui_click.mp3',0.35);}
+
+export function auVoice(un,ev,vol){
+  if(!un||typeof un.role!=='string'||!un.role)return;
+  let folder=null;
+  try{
+    const named=typeof un.name==='string'&&un.name.trim()?un.name:'';
+    const nm=named||(globalThis.charNameFor?globalThis.charNameFor(un.role):'');
+    if(typeof nm==='string'&&CHAR_VOICE[nm])folder=CHAR_VOICE[nm];
+  }catch(e){}
+  if(!folder)folder=VOICE_FILES[un.role];
+  if(!folder)return;
+  auPlay('voice/'+folder+'/'+ev+'.mp3',vol==null?0.5:vol);
+}
+
+export const AMBIENT_FILE={astillero:'ambient/skirmish04/amb0.mp3',platform:'ambient/skirmish04/amb0.mp3',cruce:'ambient/rotonda/amb0.mp3',depot:'ambient/skirmish03/amb0.mp3',terminal:'ambient/skirmish03/amb0.mp3'};
+
+export function auAmbient(theme){if(AU_AMBIENT){try{AU_AMBIENT.pause();}catch(e){}AU_AMBIENT=null;}const f=auPlay(AMBIENT_FILE[theme]||('ambient/'+theme+'/amb0.mp3'),0.20,true);AU_AMBIENT=f;}
+
+export const MUSIC_TRACKS=['game_subtle_01','game_subtle_02','game_subtle_03','game_subtle_04','game_subtle_05','game_subtle_06','game_subtle_07'];
+
+export let AU_MUSIC=null;
+
+export function auMusicStart(){
+  if(!soundOn)return;
+  auMusicStop();
+  const t=MUSIC_TRACKS[Math.floor(Math.random()*MUSIC_TRACKS.length)];
+  AU_MUSIC=auPlay('music/'+t+'.mp3',0.15,true);
+}
+
+export function auMusicStop(){if(AU_MUSIC){try{AU_MUSIC.pause();}catch(e){}AU_MUSIC=null;}}
+
+export function auStopAmbient(){if(AU_AMBIENT){try{AU_AMBIENT.pause();}catch(e){}AU_AMBIENT=null;}}
+
+export function renderSoundBtn(){const b=document.getElementById('soundBtn');if(b)b.textContent=soundOn?'­ƒöè Sonido: s├¡':'­ƒöç Sonido: no';}
+
+
+--- src/ui/arsenal.js ---
+(9565B, 139L)
+import { BODIES, ROLES, ROLE_NAMES, roleLook } from '../data/roles.js';
+import { WEAPONS } from '../data/weapons.js';
+import { WEAPONS_ORIGINAL, originalWeaponProfile } from '../render3d/assets-weapons.js';
+import { auWeaponFile } from '../audio/sound.js';
+import { DEPLOYABLES } from '../data/deployables.js';
+import { scanCardBoxes } from '../viewer/card-stage.js';
+import { $, rolePortraitURL, showScreen } from './ui-shell.js';
+
+export const CATS=['Todas','Fusiles de asalto','Subfusiles','Ametralladoras','Francotirador','Escopetas','Lanzacohetes','Lanzagranadas','Pistolas','Cuerpo a cuerpo','Consumible'];
+export const ORIGINS=['Todas','Juego original','CSN'];
+export let arsFilter='Todas';
+export let arsOrigin='Todas';
+export let arsSection='weapons';
+const arEsc=value=>String(value==null?'':value).replace(/[&<>"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[char]));
+
+export function setArsFilter(v){arsFilter=v;}
+export function setArsOrigin(v){arsOrigin=v;}
+export function setArsSection(v){arsSection=v==='deployables'?'deployables':'weapons';}
+
+const arScan=()=>{if(typeof scanCardBoxes==='function')scanCardBoxes();};
+const arSpecAttr=spec=>'data-card-spec=\''+JSON.stringify(spec).replace(/'/g,'&#39;')+'\'';
+const arCategoryHit=(cat,filter)=>filter==='Todas'||cat===filter||(filter==='Consumible'&&cat==='Consumibles')||(filter==='Consumibles'&&cat==='Consumible');
+
+function arFilterButtons(container,items,current,onPick){
+  container.innerHTML=items.map(item=>'<button type="button" class="'+(item===current?'on':'')+'" data-filter-value="'+arEsc(item)+'">'+arEsc(item)+'</button>').join('');
+  container.querySelectorAll('button[data-filter-value]').forEach(button=>{button.onclick=()=>onPick(button.dataset.filterValue);});
+}
+
+function arCard3dBox(spec,label){
+  return '<div class="card-3d-box" '+arSpecAttr(spec)+' aria-label="Modelo 3D de '+arEsc(label)+'"><img class="card-3d-thumb is-loading" alt="" hidden/><span class="card-3d-badge">3D</span><span class="card-3d-tools"><button type="button" data-card-zoom="-0.2" aria-label="Alejar">ÔêÆ</button><button type="button" data-card-zoom="0.2" aria-label="Acercar">+</button><button type="button" class="wide" data-card-expand aria-label="Ampliar">Ôñó</button></span></div>';
+}
+
+function arOriginalCardHTML(file){
+  const info=WEAPONS_ORIGINAL[file]||{};
+  const profile=originalWeaponProfile(file)||{};
+  const spec={kind:'weapons',key:file,file,label:info.name||file};
+  return '<article class="catalog-card weapon-original"><header><span class="tag amber">Juego original</span><span class="catalog-count">'+arEsc(profile.actionLabel||'Ver modelo')+'</span></header>'+
+    arCard3dBox(spec,info.name||file)+
+    '<div class="card-body"><div class="card-meta"><span class="tag">'+arEsc(info.cat||'Arma')+'</span><span class="tag">'+arEsc(info.verts||'?')+' v├®rtices</span></div>'+
+    '<h3>'+arEsc(info.name||file)+'</h3><p class="note sub">'+arEsc(info.roles||'Sin asignaci├│n espec├¡fica en el original.')+'</p>'+
+    '<div class="card-actions"><button type="button" class="btn ghost" data-au-file="'+arEsc(file)+'">­ƒöè Escuchar sonido original</button></div></div></article>';
+}
+
+function arCsnCardHTML(name,weapon){
+  const icons={'Fusiles de asalto':'Ôû░','Subfusiles':'Ôîü','Ametralladoras':'Ôëï','Francotirador':'Ô£ø','Escopetas':'ÔûÑ','Lanzacohetes':'Ô×ñ','Lanzagranadas':'Ô£║','Pistolas':'Ôû¬','Cuerpo a cuerpo':'Ô£ò','Consumibles':'Ôùê'};
+  const roles=ROLE_NAMES.filter(role=>ROLES[role].weapons.includes(name)).join(', ')||(weapon.cat==='Pistolas'?'Todos (secundaria)':'Sin asignar');
+  return '<article class="catalog-card weapon-csn"><header><span class="tag">CSN</span><span class="catalog-count">Dise├▒o jugable</span></header>'+
+    '<div class="card-3d-box" aria-label="Vista t├íctica de '+arEsc(name)+'"><div class="card-3d-empty"><span class="csn-ico">'+(icons[weapon.cat]||'Ôùå')+'</span><b>'+arEsc(weapon.cat.toUpperCase())+'</b><span>? ┬À Modelo 3D CSN pendiente</span></div></div>'+
+    '<div class="card-body"><h3>'+arEsc(name)+'</h3><p class="real">'+arEsc(weapon.real)+'</p><p class="note">'+arEsc(weapon.note)+(weapon.once?' <b>Un solo uso por partida.</b>':'')+(weapon.aoe?' Da├▒o en ├írea.':'')+'</p>'+
+    '<div class="wstats"><div><b>'+weapon.dmg+'</b><span>Da├▒o</span></div><div><b>'+weapon.rng+'</b><span>Casillas</span></div><div><b>'+weapon.cost+' ÔÜí</b><span>Coste</span></div></div>'+
+    '<p class="note sub">Roles: '+arEsc(roles)+'</p></div></article>';
+}
+
+function arDeployableCardHTML(prop){
+  const sp
+/* ... [RECORTADO] ... */
+oyables=$('#deployablePanel'),filters=$('#arsFilters');
+  if(weapons)weapons.style.display=arsSection==='weapons'?'':'none';
+  if(deployables)deployables.style.display=arsSection==='deployables'?'':'none';
+  if(filters)filters.style.display=arsSection==='weapons'?'':'none';
+  const oldSeg=$('#armTabSeg');if(oldSeg)oldSeg.style.display=arsSection==='weapons'?'':'none';
+  const abilityPanel=$('#abilityPanel');if(abilityPanel&&arsSection==='deployables')abilityPanel.style.display='none';
+}
+
+export function buildArsenal(){
+  const sectionSeg=$('#arsSectionSeg');
+  if(sectionSeg&&!sectionSeg._bound){
+    sectionSeg._bound=true;
+    sectionSeg.querySelectorAll('button[data-arssec]').forEach(button=>{button.onclick=()=>{arSetSection(button.dataset.arssec);arScan();};});
+  }
+  const originalFiles=Object.keys(WEAPONS_ORIGINAL);
+  const csnEntries=Object.entries(WEAPONS);
+  arBuildFilters(originalFiles.length,csnEntries.length);
+  const grid=$('#arsenalGrid');if(grid){
+    const originals=originalFiles.filter(file=>{
+      const cat=(WEAPONS_ORIGINAL[file]||{}).cat||'Otros';
+      return (arsOrigin==='Todas'||arsOrigin==='Juego original')&&arCategoryHit(cat,arsFilter);
+    });
+    const csn=csnEntries.filter(([name,w])=>(arsOrigin==='Todas'||arsOrigin==='CSN')&&arCategoryHit(w.cat,arsFilter));
+    grid.innerHTML=originals.map(arOriginalCardHTML).join('')+csn.map(([name,w])=>arCsnCardHTML(name,w)).join('');
+    arBindCards(grid);
+  }
+  buildDeployables();arSetSection(arsSection);arScan();
+  const rt=$('#rolesTable');
+  if(rt)rt.innerHTML=ROLE_NAMES.map(role=>{
+    const body=BODIES[ROLES[role].body];
+    return '<div style="display:flex;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line);flex-wrap:wrap;align-items:center"><span class="role-dot" style="background:'+ROLES[role].color+';margin-top:5px"></span>'+(rolePortraitURL(role)?'<img class="role-thumb" src="'+rolePortraitURL(role)+'" alt="Retrato del '+role+'"/>':'')+'<b style="min-width:120px">'+role+'</b><span class="mono" style="font-size:13.5px">'+body.name+' ┬À '+roleLook(role).silueta+' ┬À '+body.hp+' PV ┬À '+body.energy+' ÔÜí ┬À mover '+body.moveCost+' ÔÜí/casilla</span><span style="flex:1;min-width:220px" class="sub">'+ROLES[role].desc+' Armas: '+ROLES[role].weapons.join(', ')+'.</span></div>';
+  }).join('');
+}
+
+export function openDeployable3D(key){
+  const prop=DEPLOYABLES.find(item=>item.key===key);
+  if(!prop)return false;
+  arsSection='deployables';
+  buildArsenal();
+  showScreen('scr-arsenal');
+  const card=[...document.querySelectorAll('#deployableGrid [data-card-spec]')].find(box=>{
+    try{return JSON.parse(box.dataset.cardSpec).key===key;}catch(error){return false;}
+  });
+  if(card){
+    if(card.scrollIntoView)card.scrollIntoView({block:'center',behavior:'smooth'});
+    if(window.__csnCardEngine)window.__csnCardEngine.activate(card,JSON.parse(card.dataset.cardSpec));
+  }
+  return true;
+}
+
+if(typeof window!=='undefined'&&!window.openDeployable3D)window.openDeployable3D=openDeployable3D;
+
+
+--- src/viewer/card-stage.js ---
+(9547B, 283L)
+let stage=null;
+let builder=null;
+let onActivate=null;
+let onZoom=null;
+let activeBox=null;
+let activeSpec=null;
+let zoom=1;
+const cards=new Map();
+const bound=new Set();
+const thumbs=new Map();
+const queue=[];
+let pumping=false;
+let observer=null;
+
+function clampZoom(value){return Math.max(1,Math.min(2.5,+value||1));}
+
+function updateCamera(){
+  if(!stage)return;
+  stage.camera.position.set(0,stage.baseDistance*0.22,stage.baseDistance/zoom);
+  stage.camera.lookAt(0,0,0);
+}
+
+export function getCardStage(){return stage;}
+export function stageZoom(){return zoom;}
+export function activeCard(){return {box:activeBox,spec:activeSpec};}
+
+export function setStageBaseDistance(value){
+  if(!stage)return;
+  stage.baseDistance=Math.max(0.4,+value||3);
+  updateCamera();
+}
+
+export function setStageZoom(value,notify){
+  zoom=clampZoom(value);
+  updateCamera();
+  if(notify!==false&&typeof onZoom==='function')onZoom(zoom);
+}
+
+export function setCardStageCallbacks(callbacks){
+  if(callbacks&&typeof callbacks.onActivate==='function')onActivate=callbacks.onActivate;
+  if(callbacks&&typeof callbacks.onZoom==='function')onZoom=callbacks.onZoom;
+}
+
+export function setCardModelBuilder(fn){
+  builder=typeof fn==='function'?fn:null;
+  if(builder)pump();
+}
+
+export function ensureCardStage(stageEl){
+  if(stage)return stage;
+  if(typeof THREE==='undefined')return null;
+  try{
+    const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+    renderer.setClearColor(0x11150f,0);
+    renderer.domElement.classList.add('card-stage-canvas');
+    const scene=new THREE.Scene();
+    scene.add(new THREE.HemisphereLight(0xe7f0d9,0x30372b,2));
+    const key=new THREE.DirectionalLight(0xffedc2,2.4);key.position.set(3,5,4);scene.add(key);
+    const fill=new THREE.DirectionalLight(0x9bb8d1,1.1);fill.position.set(-4,2,-3);scene.add(fill);
+    const meshyFill=new THREE.DirectionalLight(0xd7ebff,1.8);meshyFill.position.set(-3,2,5);meshyFill.intensity=0;scene.add(meshyFill);
+    const meshyRim=new THREE.DirectionalLight(0xffd9a8,2.2);meshyRim.position.set(3,4,-4);meshyRim.intensity=0;scene.add(meshyRim);
+    const spin=new THREE.Group();scene.add(spin);
+    const platform=new THREE.Mesh(new THREE.CircleGeometry(1,48),new THREE.MeshStandardMaterial({color:0x30382a,roughness:0.9,metalness:0}));
+    platform.rotation.x=-Math.PI/2;scene.add(platform);
+    stage={renderer,scene,camera:new THREE.PerspectiveCamera(36,1,0.01,80),spin,platform,meshyFill,meshyRim,baseDistance:3,stageEl:stageEl||null};
+    updateCamera();
+    return stage;
+  }catch(error){
+    return null;
+  }
+}
+
+export function resizeStage(box){
+  if(!stage)return;
+  const target=box||activeBox||stage.stageEl;
+  const width=Math.max(1,Math.round(target&&target.clientWidth||320));
+  const height=Math.max(1,Math.round(target&&target.clientHeight||200));
+  stage.renderer.setSize(width,height,false);
+  stage.camera.aspect=width/height;
+  stage.camera.updateProjectionMatrix();
+}
+
+export function renderStage(){
+  if(!stage)return;
+  stage.renderer.render(stage.scene,stage.camera);
+}
+
+export function snapshotStage(){
+  if(!stage||!activeBox)return null;
+  renderStage();
+  let url=null;
+  try{url=stage.renderer.domElement.toDataURL('image/png');}catch(error){return null;}
+  const img=activeBox.querySelector('.card-3d-thumb');
+  if(img&&url){img.src=url;img.hidden=false;img.classList.remove('is-loading');}
+  return url;
+}
+
+function applyThumb(box,url){
+  const img=box&&box.querySelector('.card-3d-thumb');
+  if(!img||!url)return;
+  img.src=url;img.hidden=false;img.classList.remove('is-loading');
+}
+
+function thumbKey(spec){
+  return [spec.kind,spec.key,spec.skinIndex||0,spec.weapon||'',spec.file||''].join('|');
+}
+
+export function renderThumbnail(spec,model){
+  if(!stage||!model)return null;
+  const saved=stage.spin.children.slice();
+  for(const child of saved)stage.spin.remove(child);
+  const platformVisible=stage.platform.visible;
+  stage.platform.visible=false;
+  stage.spin.rotation.set(spec.kind==='weapons'?0.25:0,-0.55,0);
+  let restoreCamera=null;
+  try{
+    const centered=new THREE.Group();
+    model.updateMatrixWorld(true);
+    const bounds=new THREE.Box3().setFromObject(model);
+    const center=new THREE.Vector3(),size=new THREE.Vector3();
+    bounds.getSize(size);bounds.getCenter(center);
+    centered.position.set(-center.x,-center.y,-center.z);
+    centered.add(model);
+    stage.spin.add(centered);
+    ce
+/* ... [RECORTADO] ... */
+tic)return;
+    if(typeof onActivate==='function')onActivate(box,spec);
+    if(!stage)return;
+    let lastX=event.clientX,lastY=event.clientY;
+    try{box.setPointerCapture(event.pointerId);}catch(error){}
+    const move=e=>{
+      const dx=e.clientX-lastX,dy=e.clientY-lastY;
+      lastX=e.clientX;lastY=e.clientY;
+      stage.spin.rotation.y+=dx*0.008;
+      stage.spin.rotation.x=Math.max(-0.65,Math.min(0.65,stage.spin.rotation.x+dy*0.006));
+      renderStage();
+    };
+    const end=()=>{
+      box.removeEventListener('pointermove',move);
+      box.removeEventListener('pointerup',end);
+      box.removeEventListener('pointercancel',end);
+      snapshotStage();
+    };
+    box.addEventListener('pointermove',move);
+    box.addEventListener('pointerup',end);
+    box.addEventListener('pointercancel',end);
+  });
+  box.addEventListener('wheel',event=>{
+    const spec=cards.get(box);
+    if(!spec||spec.static)return;
+    event.preventDefault();
+    setStageZoom(zoom+(event.deltaY<0?0.12:-0.12));
+    renderStage();
+  },{passive:false});
+  box.addEventListener('click',event=>{
+    const button=event.target.closest('[data-card-zoom]');
+    if(!button)return;
+    event.stopPropagation();
+    setStageZoom(zoom+(+button.dataset.cardZoom||0));
+    renderStage();
+  });
+}
+
+export function registerCardBox(box,spec){
+  if(!box||!spec)return;
+  const previous=cards.get(box);
+  cards.set(box,spec);
+  bindBox(box);
+  const img=box.querySelector('.card-3d-thumb');
+  if(img&&!img.classList.contains('is-loading'))img.classList.add('is-loading');
+  if(previous&&thumbKey(previous)!==thumbKey(spec))thumbs.delete(thumbKey(previous));
+  queueThumb(box,spec);
+  if(observer)observer.observe(box);
+}
+
+export function mountStageInto(box,spec){
+  if(!stage)return;
+  if(activeBox&&activeBox!==box)snapshotStage();
+  activeBox=box||null;
+  activeSpec=spec||null;
+  if(!box)return;
+  box.appendChild(stage.renderer.domElement);
+  const img=box.querySelector('.card-3d-thumb');
+  if(img)img.classList.add('is-hidden');
+  resizeStage(box);
+  renderStage();
+}
+
+export function pruneCardBoxes(){
+  for(const box of Array.from(cards.keys())){
+    if(box.isConnected)continue;
+    cards.delete(box);
+    bound.delete(box);
+    if(observer)observer.unobserve(box);
+  }
+}
+
+export function scanCardBoxes(root){
+  const scope=root||document;
+  pruneCardBoxes();
+  if(!observer&&typeof IntersectionObserver!=='undefined'){
+    observer=new IntersectionObserver(entries=>{
+      for(const entry of entries){
+        if(!entry.isIntersecting)continue;
+        const spec=cards.get(entry.target);
+        if(spec)queueThumb(entry.target,spec);
+      }
+    },{rootMargin:'160px'});
+  }
+  scope.querySelectorAll('.card-3d-box[data-card-spec]').forEach(box=>{
+    let spec=null;
+    try{spec=JSON.parse(box.dataset.cardSpec);}catch(error){return;}
+    registerCardBox(box,spec);
+  });
+}
+
+export function resetCardStage(){
+  if(activeBox)snapshotStage();
+  activeBox=null;activeSpec=null;
+  queue.length=0;
+  thumbs.clear();
+}
+
+
+--- src/viewer/main.js ---
+(41906B, 349L)
+import { ensureCardStage, activeCard, resizeStage, renderStage, snapshotStage, setCardModelBuilder, setCardStageCallbacks, mountStageInto, scanCardBoxes, setStageBaseDistance, setStageZoom, stageZoom } from './card-stage.js';
+import { renderTroopCards } from './troop-cards.js';
+import { originalWeaponProfile } from '../render3d/assets-weapons.js';
+import { DEPLOYABLES } from '../data/deployables.js';
+import { auWeaponFile, auVoice } from '../core-and-audio.js';
+(function(){ const stage=document.getElementById('viewerCanvas'); if(!stage||typeof THREE==='undefined')return;
+  const status=document.getElementById('viewerStatus'); const zoomControl=document.getElementById('viewerZoom'); const texturePreview=document.getElementById('viewerTexture');
+  const viewer={ renderer:null,scene:null,camera:null,spin:null,platform:null,meshyFill:null,meshyRim:null, baseDistance:3,drag:null,dragVel:0,lastFrame:0,selection:0,
+    kind:'roles',name:'',skinIndex:0,weapon:'',weaponChar:'',weaponTouched:false,idleActor:null,gripActor:null,idleClipKey:'idle2h',testFire:null,
+    frameRequested:false,models:{roles:{},weapons:{},props:{}},textures:{},bodyGeo:{},bodyRig:{},cardModel:null,cardMode:false }; try{window.__csnViewer={get state(){return viewer;}};}catch(e){}
+  const cardStage=ensureCardStage(stage);
+  if(cardStage){viewer.renderer=cardStage.renderer;viewer.scene=cardStage.scene;viewer.camera=cardStage.camera;viewer.spin=cardStage.spin;viewer.platform=cardStage.platform;viewer.meshyFill=cardStage.meshyFill;viewer.meshyRim=cardStage.meshyRim;}
+  const VIEWER_BODY_SKINS={ 'Soldier_SAS':['Soldier_SAS_d.png','Soldier_SAS_Decon_d.png','Soldier_SAS_Veteran_d.png'],
+    'Soldier_Spud':['Soldier_d.png','Soldier_Decon_d.png','Soldier_ForestCamo_d.png','Soldier_Veteran_d.png'],
+    'Soldier_Light':['Soldier_Light_d.png','Soldier_Light_Decon_d.png','Soldier_Light_DeltaForce_d.png','Soldier_Light_Halloween_d.png','Soldier_Light_Spetsnaz_d.png','Soldier_Light_Veteran_d.png'],
+    'Soldier_Light_Rambo':['Soldier_Light_Rambo_d.png','Soldier_Light_Rambo_Decon_d.png','Soldier_Light_Rambo_DeerHunter_d.png','Soldier_Light_Rambo_Veteran_d.png'],
+    'Soldier_Heavy':['Soldier_heavy_d.png','Soldier_heavy_GermanSpecialForces_d.png','Soldier_Heavy_Decon_d.png','Soldier_Heavy_Veteran_d.png'],
+    'Agent_Light':['Agent_light_d.png','Agent_light_Decon_d.png','Agent_light_JewelThief_d.png','Agent_light_Veteran_d.png'],
+    'Agent_Heavy':['Agent_Heavy_d.png','Agent_Heavy_Decon_d.png','Agent_Heavy_Skin1_d.png','Agent_Heavy_Veteran_d.png'],
+    'Medic':['Medic_d.png','Medic_Decon_d.png','Medic_Halloween_d.png','Medic_Rescue_d.png','Medic_Spetsnaz_d.png','Medic_Veteran_d.png'],
+    'Medic_therapist':['Medic_Therapist_d.png','Medic_Therapist_Decon_d.png','Medic_Therapist_Surgeon_d.png','Medic_Therapist_Veteran_d.png'],
+    'Engineer':['Engineer_d.png','Engineer_Decon_d.png','Engineer_Halloween_d.png','Engineer_Spetsnaz_d.png','Engineer_Veteran_d.png'],
+    'Engineer_Light':['Engineer_Light_d.png','Engineer_Light_Decon_d.png','Engineer_Light_Trinity_d.png','Engineer_Light_Veteran_d.png'],
+    'Engineer_Heavy':['Engineer_Heavy2_d.png','Engineer_Heavy_Decon_d.png','Engineer_Heavy_EOD_d.png','Engineer_Heavy_Veteran_d.png'],
+    'Engineer (RiotCop)':['Engineer_RiotCop_d.png','Engineer_RiotCop_Decon_d.png','Engineer_RiotCop_Skin1_d.png','Engineer_RiotCop_Veteran_d.png'],
+    'Commander':['Commander_d.png','Commander_African_d.png','Commander_Asian_d.png','Commander_Latino_d.png'],
+    'CommanderM':['Commander_d.png','Commander_African_d.png','Commander_Asian_d.png','Commander_Latino_d.png'],
+    'Commander_F':['Commander_F_d.png','Commander_F_African_d.png','Commander_F_Asian_d.png','Commander_F_Latino_d.png'] }; const VIEWER_ROLE_FALLBACK={
+    'Riot Medic':'M├®dico','Megan McNick':'Ingeniero','Carlito Grosso':'Ingeniero', 'Riot Engineer':'Ingeniero','Commander (F)':'Capit├ín' }; const VIEWER_CAST_TEXTURE=CAST_TEXTURE_FILE;
+  const VIEWER_BODY_FILE={ 'Soldier_SAS':'Soldier_SAS.obj', 'Soldier_Spud':'Soldier_Spud.obj', 'Soldier_Heavy':'Soldier_Heavy.obj', 'Soldier_Light_Rambo':'Soldier_Light_Rambo.obj',
+    'Agent_Light':'Agent_Light.obj', 'Medic_therapist':'Medic_therapist_1248v.obj', 'Engineer_Light':'Engineer_Light.obj', 'Engineer_Heavy':'Engineer_Heavy.obj',
+    'Engineer (RiotCop)':'Engineer_RiotCop.obj', 'CommanderM':'CommanderM.obj', 'Commander_F':'CommanderF.obj' };
+  const VIEWER_BODY_OVERRIDE={'Archie Fletcher':'Soldier_Light_Rambo','Commander (M)':'CommanderM'};
+  const VIEWER_BODY_ROLE={'Medic':'M├®dico','Engineer':'Ingeniero','Agent_Heavy':'Comando','Commander':'Capit├ín'};
+  const VIEWER_MESHY_FRONT={Francotirador:1,Espia:1,Artillero:-1,Medico:1,Ingeniero:1};
+  const viewerCharacters=[ ...ORIG_CAST.map((character,index)=>{ const role=character.role||VIEWER_ROLE_FALLBACK[character.name]||'';
+      const body=VIEWER_BODY_OVERRIDE[character.name]||character.body; const bodyFile=VIEWER_BODY_FILE[body]||''; const bodyRole=VIEWER_BODY_ROLE[body]||''; return {
+        key:'original:'+String(index+1).padStart(2,'0'), label:character.name,name:character.name,
+/* ... [RECORTADO] ... */
+ntById('viewerCharacterSelect');if(characterSelect)characterSelect.onchange=event=>{viewer.skinIndex=0;viewer.weaponTouched=false;selectModel('roles',event.target.value);};
+  const weaponSelect=document.getElementById('viewerWeaponSelect');if(weaponSelect)weaponSelect.onchange=event=>{viewer.weapon=event.target.value||'';viewer.weaponTouched=true;selectModel('roles',viewer.name);};
+  const fireTestBtn=document.getElementById('viewerFireBtn');if(fireTestBtn)fireTestBtn.onclick=()=>{
+    const weapon=viewer.weapon;if(!weapon||viewer.kind!=='roles'||!viewer.idleActor)return;
+    const file=weaponFileForRef(weapon)||weapon;const profile=originalWeaponProfile(file)||{};
+    let key=profile.fireClip;if(!key||!CLIPLIB.ready||!CLIPLIB.pack||!CLIPLIB.pack.clips||!CLIPLIB.pack.clips[key])key=typeof fireClipFor==='function'?fireClipFor(weapon):(idleForWeapon(weapon)==='idle1h'?'fire1h':'fire2h');
+    if(CLIPLIB.ready&&CLIPLIB.pack&&CLIPLIB.pack.clips&&CLIPLIB.pack.clips[key])viewer.testFire={key:key,start:performance.now()};
+  };
+  const stepSkin=delta=>{const entry=viewerCharacters.find(item=>item.key===viewer.name);if(!entry||entry.skins.length<2)return;
+    viewer.skinIndex=(viewer.skinIndex+delta+entry.skins.length)%entry.skins.length;selectModel('roles',entry.key);};
+  const skinPrev=document.getElementById('viewerSkinPrev'),skinNext=document.getElementById('viewerSkinNext');if(skinPrev)skinPrev.onclick=()=>stepSkin(-1);if(skinNext)skinNext.onclick=()=>stepSkin(1);
+  document.querySelectorAll('#viewerKinds button').forEach(button=>{button.onclick=()=>{
+    document.querySelectorAll('#viewerKinds button').forEach(item=>item.classList.toggle('on',item===button));viewer.kind=button.dataset.kind;viewer.skinIndex=0;
+    const names=viewer.kind==='roles'?viewerCharacters.map(entry=>entry.key):viewer.kind==='props'?viewerPropFiles.map(entry=>entry.key):viewerWeaponFiles;
+    selectModel(viewer.kind,names[0]);};});
+  if(zoomControl)zoomControl.oninput=()=>{setStageZoom(+zoomControl.value,false);updateCamera();};
+  stage.addEventListener('wheel',event=>{event.preventDefault();setStageZoom(stageZoom()+(event.deltaY<0?0.1:-0.1));},{passive:false});
+  stage.addEventListener('pointerdown',event=>{viewer.drag={x:event.clientX,y:event.clientY,t:event.timeStamp};viewer.dragVel=0;try{stage.setPointerCapture(event.pointerId);}catch(error){}});
+  stage.addEventListener('pointermove',event=>{if(!viewer.drag)return;const dx=event.clientX-viewer.drag.x,dy=event.clientY-viewer.drag.y;
+    const dt=Math.max(0.008,Math.min(0.05,(event.timeStamp-viewer.drag.t)/1000));viewer.drag={x:event.clientX,y:event.clientY,t:event.timeStamp};viewer.spin.rotation.y+=dx*0.008;
+    viewer.spin.rotation.x=Math.max(-0.65,Math.min(0.65,viewer.spin.rotation.x+dy*0.006));viewer.dragVel=Math.max(-3,Math.min(3,dx*0.008/dt));});
+  const stopDrag=()=>{viewer.drag=null;snapshotStage();};stage.addEventListener('pointerup',stopDrag);stage.addEventListener('pointercancel',stopDrag);
+  const menuButton=document.getElementById('mnuViewer');const tabButton=document.querySelector('#mainTabs [data-tab="viewer"]');[menuButton,tabButton].forEach(button=>{
+    if(button)button.onclick=()=>{showScreen('scr-viewer');activate();};});
+  window.addEventListener('resize',resize);
+  renderTroopCards(viewerCharacters,viewerWeaponFiles);
+  cardEngine.scan();
+  setTimeout(()=>cardEngine.activateFirst(),400);
+})();
+
+
+=== 7. GATE COMPLETO (LINT + NPM TEST + VERIFICAR 13/13) ===
+
+> csn-remake@1.0.0 lint
+> node --check server.js && node --check _capture_all.mjs && node --check bench/winding.test.js && node --check bench/xss.test.js && node --check bench/ui.test.js && node --check bench/cards.test.js && node --check bench/movement.test.js && node --check bench/map-collision.test.js && node --check bench/clips.test.js && node --check bench/combat.test.js && node --check bench/mobile.test.js && node bench/check-syntax.js
+
+bloques inline: 0 ┬À scripts modulo: 2 ┬À modulos src: 64 ┬À errores de sintaxis: 0
+
+> csn-remake@1.0.0 test
+> node --test bench/data.test.js bench/rules.test.js bench/winding.test.js bench/xss.test.js bench/ui.test.js bench/cards.test.js bench/movement.test.js bench/map-collision.test.js bench/clips.test.js bench/combat.test.js bench/mobile.test.js
+
+Ô£ö las tarjetas 3D comparten un ├║nico renderer con buffer de captura (2.6551ms)
+Ô£ö el visor usa el motor de tarjetas sin controles de piezas (0.4928ms)
+Ô£ö Armer├¡a separa origen, CSN sin malla y desplegables (1.8623ms)
+Ô£ö Tropas expone las 23 armas originales y acciones por personaje (4.4012ms)
+Ô£ö the original 40 aligned clips are all packed and mapped once (1.6363ms)
+Ô£ö reference clip is the exact base bind pose (7.2149ms)
+Ô£ö every baked clip event uses the runtime shape (0.9903ms)
+Ô£ö los eventos reales del clip alimentan el feedback de combate (4.4817ms)
+Ô£ö el retroceso del arma sigue el pulso del evento, no un temporizador fijo (2.2318ms)
+Ô£ö el impacto visual espera al disparo y el audio va limitado por unidad (1.8406ms)
+Ô£ö la captura de combate registra clip, eventos y pulsos (0.2186ms)
+Ô£ö 12 naciones con personalidad propia (28.263ms)
+Ô£ö reparto: 17 personajes del original y 18 propios (0.7729ms)
+Ô£ö tres skins y todas sin pasivas (3.1614ms)
+Ô£ö 6 misiones de campana con mapa, objetivo y formato validos (0.6147ms)
+Ô£ö cada personaje tiene su voz extraida (18.1356ms)
+Ô£ö el servidor sirve GLB/GLTF con MIME correcto (0.6415ms)
+Ô£ö el servidor sirve styles/ y src/ sin abrir _original/ ni bench/ (0.5899ms)
+Ô£ö las 23 armas tienen calibracion por bounds reales (2.2971ms)
+Ô£ö los sockets de mano y las bocas del IPA estan extraidos (1.7937ms)
+Ô£ö el audio de armas procede de los AudioClip del original (2.6329ms)
+Ô£ö los 23 perfiles originales enlazan clips, audio y acciones (45.0218ms)
+Ô£ö el material de las armas usa la textura del IPA sin alias ni mipmaps (1.3336ms)
+Ô£ö la captura auditoriza el visor y la verificacion la ejecuta (39.8736ms)
+Ô£ö los siete modelos por clase estan en assets/soldier (1.7252ms)
+Ô£ö assets/soldier solo contiene los siete cuerpos IPA originales (19.1616ms)
+Ô£ö los cinco dise├▒os Meshy siguen intactos en assets/personajes_propios (34.4698ms)
+Ô£ö sin alphaTest especular y sin parches por nombre de personaje (2.1558ms)
+Ô£ö el visor no aplica pose, clips ni retarget a los modelos Meshy (1.3547ms)
+Ô£ö el visor usa el cargador de armas compartido sin alias temporales (4.2097ms)
+Ô£ö mount() reengancha el modelo sin saltos y alinea la plataforma (1.5475ms)
+Ô£ö Configurar partida permite elegir personaje por ranura (1.2779ms)
+Ô£ö los originales del visor traen arma por defecto y pueden equipar las 23 armas originales (1.0943ms)
+Ô£ö el visor funde clips y dispara desde eventos del clip (0.4692ms)
+Ô£ö las ocho rejillas IPA conservan su tama├▒o nativo (8.3862ms)
+Ô£ö las rejillas IPA tienen despliegues conectados y sin cruce de aristas s├│lidas (36.0176ms)
+Ô£ö el motor usa rejilla nativa, aristas, barriles y cobertura direccional (4.4649ms)
+Ô£ö el viewport movil mantiene controles tocables y tablero contenido (2.121ms)
+Ô£ö el render reduce resolucion en movil y en software (2.0733ms)
+Ô£ö la captura emula movil y fuerza SwiftShader cuando se pide (0.4695ms)
+Ô£ö el movimiento 3D sigue un camino de casillas (4.4939ms)
+Ô£ö el paso de la marcha sigue la distancia real (2.653ms)
+Ô£ö los giros usan los clips reales de 90 y 180 grados (2.5365ms)
+Ô£ö las texturas de soldado evitan sangrado de atlas (2.6157ms)
+Ô£ö las capturas registran movimiento y estado de textura (0.414ms)
+Ô£ö authored gameplay models use viewer-compatible proportions, surfaces, textures, and gear (80.0945ms)
+Ô£ö generic gameplay fallback retains role-specific proportions and gear (38.1801ms)
+Ô£ö invalid rig bind matrices are recalculated while valid ones are preserved (27.5618ms)
+Ô£ö clip root keeps a rig root offset while following pelvis motion (26.2226ms)
+Ô£ö clip quaternion sampling interpolates even when output aliases scratch (24.7968ms)
+Ô£ö screen state preserves a live game when returning to Play (20.214ms)
+Ô£ö new matches reset tactical camera state (22.3952ms)
+Ô£ö 2D board margins preserve tile hit testing across canvas aspect ratios (18.0207ms)
+Ô£ö 3D viewer framing is based on model bounds rather than model category (21.8922ms)
+Ô£ö coverLevel directional levels (0/1/2/3) and isFlanked (28.2481ms)
+Ô£ö M18 smoke blocks cross-tile LOS but allows adjacent cheb<=1 fire (26.165ms)
+Ô£ö M84 flashbang applies stun without damage and clears after stunned unit turn ends (31.4223ms)
+Ô£ö M18A1 Claymore ignores allies and Escort drone, detonates only on enemy step (24.5595ms)
+Ô£ö Dominacion settles only at full round completion (_domRoundDone) (30.7077ms)
+Ô£ö Escolta guarded drone reduces damage to 47% and wins on extraction (30.1454ms)
+Ô£ö crates give cover without blocking LOS; walls and shelves do (20.3597ms)
+Ô£ö damage accounting credits the source team and kills from area sources (19.5264ms)
+Ô£ö turn-start damage resolves victory before the next side moves (25.5492ms)
+Ô£ö dead shooters cannot fire (18.3749ms)
+Ô£ö weapon families select their authored firing clip (15.1079ms)
+Ô£ö clip events fire once per crossing and reset when the clip rewinds (19.4004ms)
+Ô£ö el indicador de pasos tiene progreso real (6.3365ms)
+Ô£ö los cuatro pasos est├ín cableados al flujo real (3.1909ms)
+Ô£ö hay notas gu├¡a y el tutorial aparece en batalla (3.2078ms)
+Ô£ö las vueltas contextuales siguen al jugador (4.0777ms)
+Ô£ö los controles tienen foco visible y tama├▒o c├│modo (0.5506ms)
+Ô£ö las capturas permiten monitoreo m├│vil y de reglas (0.2601ms)
+Ô£ö la navegaci├│n principal usa los cuatro nombres del usuario (2.2775ms)
+Ô£ö Armer├¡a y Tropas tienen los contenedores de la nueva navegaci├│n (0.8709ms)
+Ô£ö soldier: winding hacia fuera tras reflejar X (52.4494ms)
+Ô£ö Artillero: winding hacia fuera tras reflejar X (13.565ms)
+Ô£ö Capitan: winding hacia fuera tras reflejar X (12.0728ms)
+Ô£ö Comando: winding hacia fuera tras reflejar X (11.4679ms)
+Ô£ö Espia: winding hacia fuera tras reflejar X (13.8599ms)
+Ô£ö Francotirador: winding hacia fuera tras reflejar X (8.9814ms)
+Ô£ö Ingeniero: winding hacia fuera tras reflejar X (9.2343ms)
+Ô£ö Medico: winding hacia fuera tras reflejar X (9.0875ms)
+Ô£ö todos los OBJ: caras, coordenadas finitas y volumen calculable (5384.9361ms)
+Ô£ö Hipster Dave: arma acoplada a la mano en el visor (0.5552ms)
+Ô£ö updateHover3D: cobertura sin ReferenceError (0.4793ms)
+Ô£ö parseOBJStatic corrige winding negativo y recalcula normales (0.603ms)
+Ô£ö las 23 armas tienen volumen positivo con parseOBJStatic (43.387ms)
+Ô£ö los sockets de mano se reflejan en X al acoplar el arma (0.538ms)
+Ô£ö el RPG se gira 90 grados en X y mantiene el ca├▒├│n horizontal (1.6519ms)
+Ô£ö los 11 originales tienen rig de 20 huesos con pesos normalizados (24.4568ms)
+Ô£ö parseMeshyOBJ corrige winding negativo y sincroniza UV, normales y skin (0.9384ms)
+Ô£ö loadChars descarta nombres inyectados en localStorage (3.4706ms)
+Ô£ö loadChars conserva solo nombres y claves del catalogo (2.8005ms)
+Ô£ö loadChars ignora JSON que no sea un objeto (3.882ms)
+Ô£ö log escapa HTML y conserva solo negrita (2.1156ms)
+Ôä╣ tests 95
+Ôä╣ suites 0
+Ôä╣ pass 95
+Ôä╣ fail 0
+Ôä╣ cancelled 0
+Ôä╣ skipped 0
+Ôä╣ todo 0
+Ôä╣ duration_ms 6054.3446
+== CSN Â· verificacion completa ==
+
+[1/13] Sintaxis del script inline
+bloques inline: 0 ┬À scripts modulo: 2 ┬À modulos src: 64 ┬À errores de sintaxis: 0
+
+[2/13] Tableros (19, simetria 180 y solapes)
+campana04       5/10/132          ÔÇö                  ÔÇö                  NINGUNA
+campana05       4/9/128           ÔÇö                  ÔÇö                  NINGUNA
+campana06       7/13/128          ÔÇö                  ÔÇö                  NINGUNA
+
+[3/13] Reglas (motor)
+
+Ôä╣ pass 21
+Ôä╣ fail 0
+Ôä╣ pass 4
+Ôä╣ fail 0
+Ôä╣ pass 3
+Ôä╣ fail 0
+
+[4/13] Datos (personajes, naciones, skins, misiones, voces)
+Ôä╣ pass 23
+Ôä╣ fail 0
+
+[5/13] Winding y grip de mallas (node:test)
+Ôä╣ pass 17
+Ôä╣ fail 0
+
+[6/13] Suite completa de tests (npm test)
+Ôä╣ tests 95
+Ôä╣ pass 95
+Ôä╣ fail 0
+
+[7/13] Rejillas IPA 1:1 y fisicas (node:test)
+Ôä╣ tests 3
+Ôä╣ pass 3
+Ôä╣ fail 0
+
+[8/13] Capturas debugGrid de mapas IPA (headless)
+  skirmish: ok=True Â· {"theme":"skirmish03","geo":true,"units":8,"tris":66693,"calls":836,"sw":false,"frame":535,"ev":0,"evLast":null}
+  skirmish04: ok=True Â· {"theme":"skirmish04","geo":true,"units":8,"tris":61829,"calls":654,"sw":false,"frame":645,"ev":0,"evLast":null}
+  skirmish09: ok=True Â· {"theme":"rotonda","geo":true,"units":8,"tris":60809,"calls":861,"sw":false,"frame":562,"ev":0,"evLast":null}
+  skirmish11: ok=True Â· {"theme":"astillero","geo":true,"units":8,"tris":62105,"calls":867,"sw":false,"frame":618,"ev":0,"evLast":null}
+
+[9/13] Humo 3D en navegador (headless)
+  csn3d: {"theme":"depot","geo":true,"units":8,"tris":45518,"calls":91,"sw":false,"frame":677,"ev":0,"evLast":null}
+  visor: ok=True Â· modelos=55
+
+[10/13] Clips originales (40 contra el IPA historico)
+OK 40 clips originales, 20 huesos, eventos, tiempos, root motion y bind de referencia
+
+[11/13] Movimiento 3D y texturas (headless)
+  muestras: 186 Â· texturas: 8
+
+[12/13] Combate 3D y eventos del clip (headless)
+  eventos: 6 Â· muestras: 152
+
+[13/13] Movil y SwiftShader (headless)
+  viewport: 390x844 Â· fps: 24.6 Â· sw: True
+
+== RESULTADO ==
+TODO OK: sintaxis, 19 tableros, reglas, datos, winding, suite npm, rejillas IPA, capturas debugGrid, clips, humo 3D, auditoria del visor, movimiento, combate y movil/SwiftShader.

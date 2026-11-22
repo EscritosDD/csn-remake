@@ -7,7 +7,35 @@ import { REAL } from './assets-real.js';
 import { MESHY_MODELS, validatedRigBoneInverses, sameRigBoneOrder } from './assets-meshy.js';
 import { worldRotationsFromLocal } from './clips.js';
 
+export function makeGlbSoldier3(un){
+  const actor=un.glbActor;
+  if(!actor||!actor.root)return null;
+  const c=soldierColors3(un),g=new THREE.Group();
+  g.scale.setScalar(1.15);
+  const hpArc=new THREE.Mesh(new THREE.RingGeometry(0.44,0.54,64,1,0,Math.PI*2),new THREE.MeshBasicMaterial({color:un.team==='A'?0x4fdc6e:0x4f8fe0,transparent:true,opacity:0.92,side:THREE.DoubleSide,depthWrite:false}));
+  hpArc.rotation.x=-Math.PI/2;hpArc.position.y=0.05;g.add(hpArc);
+  const roleRing=new THREE.Mesh(new THREE.RingGeometry(0.36,0.405,48,1,0,Math.PI*2),new THREE.MeshBasicMaterial({color:new THREE.Color(c.role),transparent:true,opacity:0.85,side:THREE.DoubleSide,depthWrite:false}));
+  roleRing.rotation.x=-Math.PI/2;roleRing.position.y=0.055;g.add(roleRing);
+  const shadow=makeContactShadow3(0.42,0.008);if(shadow)g.add(shadow);
+  g.add(new THREE.Mesh(new THREE.CylinderGeometry(0.31,0.34,0.035,24),mat3(c.team,0.6)));
+  const chev=new THREE.Mesh(new THREE.ConeGeometry(0.085,0.14,3),new THREE.MeshBasicMaterial({color:un.team==='A'?0x7ae7ff:0xffa07a}));
+  chev.rotation.z=-Math.PI/2;chev.scale.set(0.28,1,1);chev.position.set(0.37,0.036,0);g.add(chev);
+  const segs=[];
+  for(let i=0;i<un.maxEnergy;i++){
+    const a=-Math.PI/2+i*(Math.PI*2/un.maxEnergy);
+    const s=box3(0.075,0.028,0.045,'#69d66f',Math.cos(a)*0.42,0.035,Math.sin(a)*0.42,0.5);
+    s.rotation.y=-a;g.add(s);segs.push(s);
+  }
+  const selRing=new THREE.Mesh(new THREE.TorusGeometry(0.5,0.016,8,40),new THREE.MeshBasicMaterial({color:0xffffff}));
+  selRing.rotation.x=Math.PI/2;selRing.position.y=0.03;selRing.visible=false;g.add(selRing);
+  const spin=new THREE.Group();spin.rotation.y=Math.PI/2;g.add(spin);spin.add(actor.root);
+  g.userData.hpArc=hpArc;g.userData.segs=segs;g.userData.selRing=selRing;g.userData.baseChev=chev;
+  g.userData.real=true;g.userData.glbActor=actor;g.userData.glbState='idle';
+  return g;
+}
+
 export function makeRealSoldier3(un){
+  if(un.glbActor&&un.glbActor.root)return makeGlbSoldier3(un);
   const c=soldierColors3(un);
   const g=new THREE.Group();
   g.scale.setScalar(1.15); /* soldados un poco mas grandes que una casilla, como el original */

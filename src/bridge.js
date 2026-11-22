@@ -41,12 +41,12 @@ d('_gpUp',()=>r._gpUp);d('_hitWhite',()=>r._hitWhite);d('_keysHeld',()=>r._keysH
 d('_rq',()=>r._rq);d('_smooth01',()=>r._smooth01);d('_toonGrad',()=>r._toonGrad);d('_undoBtn',()=>r._undoBtn);
 d('_wThumbR',()=>r._wThumbR);d('advanceUnitYaw',()=>r.advanceUnitYaw);d('aiUnitAct',()=>r.aiUnitAct);d('aimR',()=>r.aimR);
 d('aliveCount',()=>r.aliveCount);d('angleToFacing',()=>r.angleToFacing);d('applyCharacterAbilities',()=>r.applyCharacterAbilities);d('applyNativeGrid',()=>r.applyNativeGrid);
-d('applyStun',()=>r.applyStun);d('armTab',()=>r.armTab);d('arsFilter',()=>r.arsFilter,v=>{r.arsFilter=v;});d('attachRealGun',()=>r.attachRealGun);
+d('applyStun',()=>r.applyStun);d('armTab',()=>r.armTab);d('arsFilter',()=>r.arsFilter,v=>{r.arsFilter=v;});d('arsOrigin',()=>r.arsOrigin);d('setArsOrigin',()=>r.setArsOrigin);d('openDeployable3D',()=>r.openDeployable3D);d('originalWeaponProfile',()=>r.originalWeaponProfile);d('attachRealGun',()=>r.attachRealGun);
 d('auAmbient',()=>r.auAmbient);d('auClick',()=>r.auClick);d('auMusicStart',()=>r.auMusicStart);d('auMusicStop',()=>r.auMusicStop);
-d('auPlay',()=>r.auPlay);d('auStopAmbient',()=>r.auStopAmbient);d('auVoice',()=>r.auVoice);d('auWeapon',()=>r.auWeapon);
+d('auPlay',()=>r.auPlay);d('auWeaponFile',()=>r.auWeaponFile);d('auStopAmbient',()=>r.auStopAmbient);d('auVoice',()=>r.auVoice);d('auWeapon',()=>r.auWeapon);
 d('audioCtx',()=>r.audioCtx);d('backToMenu',()=>r.backToMenu);d('barrelAt',()=>r.barrelAt);d('block3D',()=>r.block3D);
 d('blocked',()=>r.blocked);d('boardCenter',()=>r.boardCenter);d('boardTileClick',()=>r.boardTileClick);d('boneTargetQ',()=>r.boneTargetQ);
-d('box3',()=>r.box3);d('build3DWorld',()=>r.build3DWorld);d('buildArsenal',()=>r.buildArsenal);d('buildDemo',()=>r.buildDemo);
+d('box3',()=>r.box3);d('build3DWorld',()=>r.build3DWorld);d('buildArsenal',()=>r.buildArsenal);d('buildDeployables',()=>r.buildDeployables);d('buildDemo',()=>r.buildDemo);
 d('buildMap',()=>r.buildMap);d('buildNationGrid',()=>r.buildNationGrid);d('buildSkirmishGeo3',()=>r.buildSkirmishGeo3);d('buildSpriteSVG',()=>r.buildSpriteSVG);
 d('buildSpriteStrip',()=>r.buildSpriteStrip);d('buildSquads',()=>r.buildSquads);d('buildThemedProps3',()=>r.buildThemedProps3);d('camoTexture',()=>r.camoTexture);
 d('canHealSpecial',()=>r.canHealSpecial);d('canReviveSpecial',()=>r.canReviveSpecial);d('canSnipeSpecial',()=>r.canSnipeSpecial);d('canStep',()=>r.canStep);

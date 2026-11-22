@@ -15,6 +15,7 @@
 <link rel="stylesheet" href="styles/game.css">
 <link rel="stylesheet" href="styles/viewer.css">
 <link rel="stylesheet" href="styles/theme.css">
+<link rel="stylesheet" href="styles/cards.css">
 </head>
 <body>
 <div class="topbar"><div class="topbar-in">
@@ -23,8 +24,8 @@
   <div class="nation-chip" id="nationChip" style="display:none"></div>
   <nav class="tabs" id="mainTabs" style="display:none">
     <button data-tab="play" class="on">Jugar</button>
-    <button data-tab="arsenal">Arsenal real</button>
-    <button data-tab="viewer">Visor 3D</button>
+    <button data-tab="arsenal">Armería</button>
+    <button data-tab="viewer">Tropas</button>
     <button data-tab="how">Cómo se juega</button>
   </nav>
 </div></div>
@@ -81,8 +82,8 @@
           <button class="btn" id="mnuChallenges">🏆 Desafíos<small class="sub">Operación Londres · 6 misiones</small></button>
           <button class="btn" id="mnuExpansions">📦 Expansiones<small class="sub">Contenido futuro</small></button>
           <button class="btn" id="mnuBarracks">🏰 Cuartel<small class="sub">Tropas, skins, arsenal y monedas</small></button>
-          <button class="btn" id="mnuViewer">🧊 Visor 3D<small class="sub">Personajes y armas sin entrar a una partida</small></button>
-          <button class="btn" id="mnuArmory">🛠 Armería<small class="sub">Armas y catálogo de habilidades del original</small></button>
+          <button class="btn" id="mnuViewer">🧊 Tropas<small class="sub">Personajes con visor 3D integrado</small></button>
+          <button class="btn" id="mnuArmory">🛠 Armería<small class="sub">Catálogo de armas y desplegables</small></button>
         </div>
         <p class="sub" style="margin:10px 0 0"><span class="tag amber" id="coinsTag">🪙 0</span> +25 monedas por victoria contra la IA.</p>
       </div>
@@ -343,15 +344,13 @@
   <section class="screen" id="scr-arsenal">
     <div class="back-row"><button class="btn ghost" data-back>← Volver al menú</button></div>
     <div class="hero">
-      <h1>Arsenal <em>real</em></h1>
+      <h1>Armería</h1>
       <details class="info"><summary>ⓘ ¿Qué hay aquí?</summary><div class="info-body"><p>37 armas jugables con datos verificados de manuales militares y fichas del fabricante, más el equipo de granadas, torretas y botiquines de la sección siguiente. Aquí ves las armas de la v1 con sus datos reales y su traducción al juego: daño, alcance en casillas y coste de energía sobre cuerpos de 200, 250 o 300 PV según el tipo (ligero, medio o pesado).</p></div></details>
     </div>
+    <div class="seg" id="arsSectionSeg"><button type="button" data-arssec="weapons" class="on">Armas</button><button type="button" data-arssec="deployables">Desplegables y objetos (10)</button><button type="button" data-arssec="abilities">Habilidades del original (52)</button></div>
     <div class="filters" id="arsFilters"></div>
     <div class="arsenal-grid" id="arsenalGrid"></div>
-    <div class="seg" id="armTabSeg" style="margin:10px 0 0">
-      <button data-armtab="armas" class="on">Armas</button>
-      <button data-armtab="habilidades">Habilidades del original</button>
-    </div>
+    <div id="deployablePanel" style="display:none"><div id="deployableGrid" class="deployable-grid"></div></div>
     <div class="panel" id="abilityPanel" style="margin-top:14px;display:none">
       <h2>Catálogo del original · 52 habilidades</h2>
       <details class="info"><summary>ⓘ ¿Qué es este catálogo?</summary><div class="info-body"><p class="sub" style="margin:0 0 8px">Iconos reales del IPA. Las marcadas «en juego» tienen equivalente en CSN; las demás son huecos a cubrir.</p></div></details>
@@ -410,15 +409,17 @@
   <section class="screen" id="scr-viewer">
     <div class="back-row"><button class="btn ghost" data-back>← Volver al menú</button></div>
     <div class="hero">
-      <h1>Visor <em>3D</em></h1>
+      <h1>Tropas</h1>
       <details class="info"><summary>ⓘ ¿Cómo se usa?</summary><div class="info-body"><p>Explora los modelos y texturas del juego sin iniciar una partida. Arrastra para girar, usa la rueda o el control para acercar y alejar.</p></div></details>
     </div>
     <div class="panel">
+      <div class="troop-filters" id="troopFilters"></div>
+      <div class="troop-grid" id="troopGrid"></div>
+      <div id="viewerLegacy" class="viewer-legacy" hidden>
       <div class="seg" id="viewerKinds" aria-label="Tipo de modelo">
         <button type="button" class="on" data-kind="roles">Personajes</button>
         <button type="button" data-kind="weapons">Armas</button>
         <button type="button" data-kind="props">Objetos</button>
-        <button type="button" data-kind="pieces">Piezas</button>
       </div>
       <div class="viewer-layout">
         <div class="viewer-character-controls" id="viewerCharacterControls">
@@ -435,12 +436,6 @@
           </label>
           <button type="button" class="btn ghost" id="viewerFireBtn" style="grid-column:1/-1" disabled>Probar disparo</button>
         </div>
-        <div class="viewer-character-controls" id="viewerPieceControls" style="display:none">
-          <label>Mapa
-            <select id="viewerPieceMapSelect" aria-label="Seleccionar mapa de piezas"></select>
-          </label>
-          <span class="sub" id="viewerPieceCount"></span>
-        </div>
         <div class="viewer-list" id="viewerList" aria-label="Modelos disponibles"></div>
         <div class="viewer-stage">
           <div class="viewer-canvas" id="viewerCanvas" aria-label="Visor interactivo 3D">
@@ -453,12 +448,29 @@
           <label class="viewer-zoom">Zoom <input id="viewerZoom" type="range" min="1" max="2.5" step="0.05" value="1" aria-label="Zoom del modelo"/></label>
         </div>
       </div>
+      </div>
     </div>
   </section>
 
   <footer>
     CSN — Chess Soldier Nation es un juego original hecho desde cero como homenaje a RAD Soldiers (Splash Damage / WarChest, 2012), retirado de las tiendas en 2021. Sin servidor: las partidas contra la IA y a dos jugadores funcionan en este dispositivo, y tu nación y tu marcador de Guerra de Naciones se guardan solo aquí. Datos del arsenal verificados en manuales FM del Ejército de EE. UU. y fichas de fabricante; las cifras «en el juego» son valores de diseño para equilibrar en pruebas.
   </footer>
+</div>
+
+<div id="inspectorRoot" class="inspector-root" hidden>
+  <div class="inspector-backdrop" data-inspector-close></div>
+  <section class="inspector-modal" role="dialog" aria-modal="true" aria-labelledby="inspectorTitle">
+    <header class="inspector-head"><div><span class="inspector-kicker" id="inspectorKicker">Modelo 3D</span><h2 id="inspectorTitle">Inspector</h2></div><button type="button" class="inspector-close" id="inspectorClose" aria-label="Cerrar inspector">✕</button></header>
+    <div class="inspector-main">
+      <div class="inspector-view">
+        <div id="inspectorStage" class="card-3d-box inspector-stage" data-card-spec="{}" aria-label="Modelo 3D ampliado"><img class="card-3d-thumb is-loading" alt="" hidden/></div>
+        <p class="inspector-hint">Arrastra para girar · rueda para acercar</p>
+        <div class="inspector-bar"><button type="button" data-inspector-zoom="-0.2" aria-label="Alejar">−</button><button type="button" id="inspectorReset">Resetear vista</button><button type="button" data-inspector-zoom="0.2" aria-label="Acercar">+</button></div>
+      </div>
+      <aside class="inspector-panel" id="inspectorPanel"></aside>
+    </div>
+    <footer class="inspector-foot"><button type="button" id="inspectorPrev" hidden>‹ Anterior</button><button type="button" class="btn" id="inspectorFire">▶ Probar disparo</button><button type="button" id="inspectorNext" hidden>Siguiente ›</button></footer>
+  </section>
 </div>
 
 <!-- pass & play / victory modal -->

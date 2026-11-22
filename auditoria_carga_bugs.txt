@@ -1,0 +1,864 @@
+﻿=== 1. GIT STATUS Y ULTIMOS COMMITS ===
+ M _capture_all.mjs
+ M bench/data.test.js
+ M bench/harness.js
+ M bench/rules.test.js
+ M bench/ui.test.js
+ M bench/winding.test.js
+ M index.html
+ M package.json
+ M src/audio/sound.js
+ M src/bridge.js
+ M src/data/ui-copy.js
+ M src/main.js
+ M src/render3d/assets-meshy.js
+ M src/render3d/assets-weapons.js
+ M src/ui/arsenal.js
+ M src/ui/barracks.js
+ M src/ui/wiring.js
+ M src/viewer/main.js
+ M styles/layout.css
+ M styles/viewer.css
+?? auditoria_armeria_tropas.txt
+?? bench/cards.test.js
+?? inspeccion_rigs_armas.txt
+?? src/data/deployables.js
+?? src/data/skin-names.js
+?? src/viewer/card-stage.js
+?? src/viewer/inspector.js
+?? src/viewer/troop-cards.js
+?? styles/cards.css
+f475de4 correcciones 3D
+3654348 armas y dem├ís
+f8c6c4b coreeccion modular
+5340d39 desarrollo gpt code
+
+=== FILE: src/audio/sound.js ===
+(6011B, 106L)
+L  1: import { lsGet } from '../core/storage.js';
+L  2: import { DMR_WEAPONS, WEAPON_SFX, weaponSfxFile } from '../data/weapons.js';
+L  3: 
+L  4: import { CHAR_VOICE } from '../data/cast.js';
+L  5: import { VOICE_FILES } from '../data/roles.js';
+L  6: import { originalWeaponProfile } from '../render3d/assets-weapons.js';
+L  7: 
+L  8: 
+L  9: export const LS_SOUND='radsoldiers_sound';
+L 10: 
+L 11: export let AC=null, soundOn=(lsGet(LS_SOUND)!=='0');
+L 12: 
+L 13: export function audioCtx(){if(!soundOn)return null;try{if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();return AC;}catch(e){return null;}}
+L 14: 
+L 15: export function tone(freq,dur,type,vol,slideTo){const ac=audioCtx();if(!ac)return;const o=ac.createOscillator(),g=ac.createGain();o.type=type||'square';o.frequency.setValueAtTime(freq,ac.currentTime);if(slideTo)o.frequency.exponentialRampToValueAtTime(Math.max(30,slideTo),ac.currentTime+dur);g.gain.setValueAtTime(vol||0.05,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.0001,ac.currentTime+dur);o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+dur+0.02);}
+L 16: 
+L 17: export function noiseBurst(dur,vol,freqEnd){const ac=audioCtx();if(!ac)return;const len=Math.max(1,(ac.sampleRate*dur)|0);const buf=ac.createBuffer(1,len,ac.sampleRate);const d=buf.getChannelData(0);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*(1-i/len);const src=ac.createBufferSource();src.buffer=buf;const f=ac.createBiquadFilter();f.type='lowpass';f.frequency.setValueAtTime(3200,ac.currentTime);f.frequency.exponentialRampToValueAtTime(Math.max(60,freqEnd||300),ac.currentTime+dur);const g=ac.createGain();g.gain.setValueAtTime(vol||0.12,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.0001,ac.currentTime+dur);src.connect(f);f.connect(g);g.connect(ac.destination);src.start();}
+L 18: 
+L 19: export function sfx(kind){if(!soundOn)return;try{
+L 20:   if(kind==='shoot'){noiseBurst(0.12,0.10,900);tone(160,0.08,'square',0.03,70);}
+L 21:   else if(kind==='boom'){noiseBurst(0.5,0.22,120);tone(70,0.4,'sine',0.16,34);}
+L 22:   else if(kind==='place'){tone(190,0.07,'square',0.05,120);setTimeout(()=>tone(1250,0.05,'square',0.03),70);}
+L 23:   else if(kind==='flash'){noiseBurst(0.16,0.15,2600);tone(2600,0.24,'sine',0.10,880);setTimeout(()=>tone(1750,0.13,'sine',0.05,660),45);}
+L 24:   else if(kind==='turn'){tone(520,0.09,'triangle',0.05);setTimeout(()=>tone(660,0.1,'triangle',0.05),95);}
+L 25:   else if(kind==='win'){[523,659,784,1046].forEach((f,i)=>setTimeout(()=>tone(f,0.16,'triangle',0.06),i*120));}
+L 26:   else if(kind==='lose'){[392,330,262,196].forEach((f,i)=>setTimeout(()=>tone(f,0.16,'triangle',0.06),i*120));}
+L 27:  }catch(e){}}
+L 28: 
+L 29: export const AU_BASE='assets/audio/';
+L 30: 
+L 31: export let AU_AMBIENT=null;
+L 32: 
+L 33: const AUDIO_BUFFERS=new Map(),AUDIO_PENDING=new Map(),AUDIO_TEMPLATES=new Map();
+L 34: 
+L 35: function auBuffer(path){
+L 36:   const ac=audioCtx();if(!ac)return null;
+L 37:   if(AUDIO_BUFFERS.has(path))return AUDIO_BUFFERS.get(path);
+L 38:   if(AUDIO_PENDING.has(path))return null;
+L 39:   const pending=fetch(AU_BASE+path).then(r=>{if(!r.ok)throw new Error(path);return r.arrayBuffer();}).then(data=>new Promise((resolve,reject)=>{const req=ac.decodeAudioData(data,resolve,reject);if(req&&req.then)req.then(resolve,reject);}))
+L 40:     .then(buffer=>{AUDIO_BUFFERS.set(path,buffer);AUDIO_PENDING.delete(path);return buffer;}).catch(()=>{AUDIO_PENDING.delete(path);return null;});
+L 41:   AUDIO_PENDING.set(path,pending);return null;
+L 42: }
+L 43: 
+L 44: export function auPlay(path,vol,loop){
+L 45:   if(!soundOn)return null;
+L 46:   const level=vol==null?0.6:vol;
+L 47:   try{
+L 48:     const ac=audioCtx(),buffer=ac&&auBuffer(path);
+L 49:     if(buffer){
+L 50:       const src=ac.createBufferSource(),gain=ac.createGain();
+L 51:       src.buffer=buffer;src.loop=!!loop;gain.gain.value=level;src.connect(gain);gain.connect(ac.destination);src.start();return src;
+L 52:     }
+L 53:     let a=AUDIO_TEMPLATES.get(path);
+L 54:     if(!a){a=new Audio(AU_BASE+path);AUDIO_TEMPLATES.set(path,a);}
+L 55:     try{a.pause();a.currentTime=0;}catch(e){}
+L 56:     a.volume=level;a.loop=!!loop;a.play().catch(()=>{});return a;
+L 57:   }catch(e){return null;}
+L 58: }
+L 59: 
+L 60: export function auWeapon(cat,weaponName){
+L 61:   const f=weaponSfxFile(cat,weaponName);if(f)auPlay('sfx/weapons/'+f,f.endsWith('.wav')?0.35:0.45);
+L 62: }
+L 63: 
+L 64: export function auWeaponFile(file){
+L 65:   const profile=originalWeaponProfile(file);
+L 66:   if(!profile||!profile.sfx)return null;
+L 67:   return auPlay('sfx/weapons/'+profile.sfx,profile.sfx.endsWith('.wav')?0.35:0.45);
+L 68: }
+L 69: 
+L 70: 
+L 71: export function auClick(){auPlay('sfx/ui/ui_click.mp3',0.35);}
+L 72: 
+L 73: export function auVoice(un,ev,vol){
+L 74:   if(!un||typeof un.role!=='string'||!un.role)return;
+L 75:   let folder=null;
+L 76:   try{
+L 77:     const named=typeof un.name==='string'&&un.name.trim()?un.name:'';
+L 78:     const nm=named||(globalThis.charNameFor?globalThis.charNameFor(un.role):'');
+L 79:     if(typeof nm==='string'&&CHAR_VOICE[nm])folder=CHAR_VOICE[nm];
+L 80:   }catch(e){}
+L 81:   if(!folder)folder=VOICE_FILES[un.role];
+L 82:   if(!folder)return;
+L 83:   auPlay('voice/'+folder+'/'+ev+'.mp3',vol==null?0.5:vol);
+L 84: }
+L 85: 
+L 86: export const AMBIENT_FILE={astillero:'ambient/skirmish04/amb0.mp3',platform:'ambient/skirmish04/amb0.mp3',cruce:'ambient/rotonda/amb0.mp3',depot:'ambient/skirmish03/amb0.mp3',terminal:'ambient/skirmish03/amb0.mp3'};
+L 87: 
+L 88: export function auAmbient(theme){if(AU_AMBIENT){try{AU_AMBIENT.pause();}catch(e){}AU_AMBIENT=null;}const f=auPlay(AMBIENT_FILE[theme]||('ambient/'+theme+'/amb0.mp3'),0.20,true);AU_AMBIENT=f;}
+L 89: 
+L 90: export const MUSIC_TRACKS=['game_subtle_01','game_subtle_02','game_subtle_03','game_subtle_04','game_subtle_05','game_subtle_06','game_subtle_07'];
+L 91: 
+L 92: export let AU_MUSIC=null;
+L 93: 
+L 94: export function auMusicStart(){
+L 95:   if(!soundOn)return;
+L 96:   auMusicStop();
+L 97:   const t=MUSIC_TRACKS[Math.floor(Math.random()*MUSIC_TRACKS.length)];
+L 98:   AU_MUSIC=auPlay('music/'+t+'.mp3',0.15,true);
+L 99: }
+L100: 
+L101: export function auMusicStop(){if(AU_MUSIC){try{AU_MUSIC.pause();}catch(e){}AU_MUSIC=null;}}
+L102: 
+L103: export function auStopAmbient(){if(AU_AMBIENT){try{AU_AMBIENT.pause();}catch(e){}AU_AMBIENT=null;}}
+L104: 
+L105: export function renderSoundBtn(){const b=document.getElementById('soundBtn');if(b)b.textContent=soundOn?'­ƒöè Sonido: s├¡':'­ƒöç Sonido: no';}
+L106: 
+
+=== FILE: src/viewer/card-stage.js ===
+(11426B, 324L)
+L  1: let stage=null;
+L  2: let builder=null;
+L  3: let onActivate=null;
+L  4: let onInspect=null;
+L  5: let onZoom=null;
+L  6: let activeBox=null;
+L  7: let activeSpec=null;
+L  8: let zoom=1;
+L  9: let paused=false;
+L 10: let rendering=false;
+L 11: let restPose=null;
+L 12: const cards=new Map();
+L 13: const bound=new Set();
+L 14: const thumbs=new Map();
+L 15: const queue=[];
+L 16: let pumping=false;
+L 17: let observer=null;
+L 18: 
+L 19: function clampZoom(value){return Math.max(1,Math.min(2.5,+value||1));}
+L 20: 
+L 21: function updateCamera(){
+L 22:   if(!stage)return;
+L 23:   stage.camera.position.set(0,stage.baseDistance*0.22,stage.baseDistance/zoom);
+L 24:   stage.camera.lookAt(0,0,0);
+L 25: }
+L 26: 
+L 27: export function getCardStage(){return stage;}
+L 28: export function stageZoom(){return zoom;}
+L 29: export function activeCard(){return {box:activeBox,spec:activeSpec};}
+L 30: 
+L 31: export function setStageBaseDistance(value){
+L 32:   if(!stage)return;
+L 33:   stage.baseDistance=Math.max(0.4,+value||3);
+L 34:   updateCamera();
+L 35: }
+L 36: 
+L 37: export function setStageZoom(value,notify){
+L 38:   zoom=clampZoom(value);
+L 39:   updateCamera();
+L 40:   if(notify!==false&&typeof onZoom==='function')onZoom(zoom);
+L 41: }
+L 42: 
+L 43: export function setCardStageCallbacks(callbacks){
+L 44:   if(callbacks&&typeof callbacks.onActivate==='function')onActivate=callbacks.onActivate;
+L 45:   if(callbacks&&typeof callbacks.onInspect==='function')onInspect=callbacks.onInspect;
+L 46:   if(callbacks&&typeof callbacks.onZoom==='function')onZoom=callbacks.onZoom;
+L 47: }
+L 48: 
+L 49: export function setCardRestPose(fn){restPose=typeof fn==='function'?fn:null;}
+L 50: export function isCardStagePaused(){return paused;}
+L 51: export function setCardStagePaused(value){
+L 52:   paused=!!value;
+L 53:   if(!paused)pump();
+L 54: }
+L 55: 
+L 56: export function unmountStage(){
+L 57:   if(activeBox&&stage&&stage.renderer.domElement.parentNode===activeBox)activeBox.removeChild(stage.renderer.domElement);
+L 58:   activeBox=null;
+L 59:   activeSpec=null;
+L 60: }
+L 61: 
+L 62: export function setCardModelBuilder(fn){
+L 63:   builder=typeof fn==='function'?fn:null;
+L 64:   if(builder)pump();
+L 65: }
+L 66: 
+L 67: export function ensureCardStage(stageEl){
+L 68:   if(stage)return stage;
+L 69:   if(typeof THREE==='undefined')return null;
+L 70:   try{
+L 71:     const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});
+L 72:     renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+L 73:     renderer.setClearColor(0x11150f,0);
+L 74:     renderer.domElement.classList.add('card-stage-canvas');
+L 75:     const scene=new THREE.Scene();
+L 76:     scene.add(new THREE.HemisphereLight(0xe7f0d9,0x30372b,2));
+L 77:     const key=new THREE.DirectionalLight(0xffedc2,2.4);key.position.set(3,5,4);scene.add(key);
+L 78:     const fill=new THREE.DirectionalLight(0x9bb8d1,1.1);fill.position.set(-4,2,-3);scene.add(fill);
+L 79:     const meshyFill=new THREE.DirectionalLight(0xd7ebff,1.8);meshyFill.position.set(-3,2,5);meshyFill.intensity=0;scene.add(meshyFill);
+L 80:     const meshyRim=new THREE.DirectionalLight(0xffd9a8,2.2);meshyRim.position.set(3,4,-4);meshyRim.intensity=0;scene.add(meshyRim);
+L 81:     const spin=new THREE.Group();scene.add(spin);
+L 82:     const platform=new THREE.Mesh(new THREE.CircleGeometry(1,48),new THREE.MeshStandardMaterial({color:0x30382a,roughness:0.9,metalness:0}));
+L 83:     platform.rotation.x=-Math.PI/2;scene.add(platform);
+L 84:     stage={renderer,scene,camera:new THREE.PerspectiveCamera(36,1,0.01,80),spin,platform,meshyFill,meshyRim,baseDistance:3,stageEl:stageEl||null};
+L 85:     updateCamera();
+L 86:     return stage;
+L 87:   }catch(error){
+L 88:     return null;
+L 89:   }
+L 90: }
+L 91: 
+L 92: export function resizeStage(box){
+L 93:   if(!stage)return;
+L 94:   const target=box||activeBox||stage.stageEl;
+L 95:   const width=Math.max(1,Math.round(target&&target.clientWidth||320));
+L 96:   const height=Math.max(1,Math.round(target&&target.clientHeight||200));
+L 97:   stage.renderer.setSize(width,height,false);
+L 98:   stage.camera.aspect=width/height;
+L 99:   stage.camera.updateProjectionMatrix();
+L100: }
+L101: 
+L102: export function renderStage(){
+L103:   if(!stage)return;
+L104:   stage.renderer.render(stage.scene,stage.camera);
+L105: }
+L106: 
+L107: export function snapshotStage(){
+L108:   if(!stage||!activeBox)return null;
+L109:   renderStage();
+L110:   let url=null;
+L111:   try{url=stage.renderer.domElement.toDataURL('image/png');}catch(error){return null;}
+L112:   const img=activeBox.querySelector('.card-3d-thumb');
+L113:   if(img&&url){img.src=url;img.hidden=false;img.classList.remove('is-loading');}
+L114:   return url;
+L115: }
+L116: 
+L117: function applyThumb(box,url){
+L118:   const img=box&&box.querySelector('.card-3d-thumb');
+L119:   if(!img||!url)return;
+L120:   img.src=url;img.hidden=false;img.classList.remove('is-loading');
+L121: }
+L122: 
+L123: function thumbKey(spec){
+L124:   return [spec.kind,spec.key,spec.skinIndex||0,spec.weapon||'',spec.file||''].join('|');
+L125: }
+L126: 
+L127: export function renderThumbnail(spec,model){
+L128:   if(!stage||!model||paused||rendering)return null;
+L129:   rendering=true;
+L130:   const saved=stage.spin.children.slice();
+L131:   const savedRotation=stage.spin.rotation.clone();
+L132:   const platformVisible=stage.platform.visible;
+L133:   const savedFill=stage.meshyFill.intensity;
+L134:   const savedRim=stage.meshyRim.intensity;
+L135:   const savedCamera={fov:stage.camera.fov,aspect:stage.camera.aspect,baseDistance:stage.baseDistance,position:stage.camera.position.clone()};
+L136:   try{
+L137:     for(const child of saved)stage.spin.remove(child);
+L138:     stage.platform.visible=false;
+L139:     stage.meshyFill.intensity=model.userData&&model.userData.meshy?1.8:0;
+L140:     stage.meshyRim.intensity=model.userData&&model.userData.meshy?2.2:0;
+L141:     stage.spin.rotation.set(spec.kind==='weapons'?0.25:0,-0.55,0);
+L142:     stage.renderer.clear(true,true,true);
+L143:     if(typeof restPose==='function')restPose(model);
+L144:     model.updateMatrixWorld(true);
+L145:     model.traverse(object=>{if(object.isSkinnedMesh&&object.skeleton)object.skeleton.update();});
+L146:     const bounds=new THREE.Box3().setFromObject(model);
+L147:     const center=new THREE.Vector3(),size=new THREE.Vector3();
+L148:     bounds.getSize(size);bounds.getCenter(center);
+L149:     if(!Number.isFinite(size.x)||Math.max(size.x,size.y,size.z)<0.001)return null;
+L150:     const centered=new THREE.Group();
+L151:     centered.position.set(-center.x,-center.y,-center.z);
+L152:     centered.add(model);
+L153:     stage.spin.add(centered);
+L154:     centered.updateMatrixWorld(true);
+L155:     const maxDim=Math.max(size.x,size.y,size.z,0.01);
+L156:     const width=Math.max(160,Math.round((activeBox&&activeBox.clientWidth)||320));
+L157:     const height=Math.max(120,Math.round((activeBox&&activeBox.clientHeight)||200));
+L158:     stage.renderer.setSize(width,height,false);
+L159:     stage.camera.aspect=width/height;
+L160:     stage.camera.fov=36;
+L161:     stage.camera.updateProjectionMatrix();
+L162:     const radius=maxDim*0.5;
+L163:     const dist=Math.max(1.1,radius/Math.sin(18*Math.PI/180)*1.1);
+L164:     stage.camera.position.set(0,dist*0.18,dist);
+L165:     stage.camera.lookAt(0,0,0);
+L166:     stage.renderer.render(stage.scene,stage.camera);
+L167:     const url=stage.renderer.domElement.toDataURL('image/png');
+L168:     return url&&url.length>2048?url:null;
+L169:   }catch(error){
+L170:     return null;
+L171:   }finally{
+L172:     while(stage.spin.children.length)stage.spin.remove(stage.spin.children[0]);
+L173:     for(const child of saved)stage.spin.add(child);
+L174:     stage.spin.rotation.copy(savedRotation);
+L175:     stage.platform.visible=platformVisible;
+L176:     stage.meshyFill.intensity=savedFill;
+L177:     stage.meshyRim.intensity=savedRim;
+L178:     stage.camera.fov=savedCamera.fov;
+L179:     stage.camera.aspect=savedCamera.aspect;
+L180:     stage.camera.position.copy(savedCamera.position);
+L181:     stage.camera.updateProjectionMatrix();
+L182:     stage.baseDistance=savedCamera.baseDistance;
+L183:     updateCamera();
+L184:     resizeStage(activeBox||stage.stageEl);
+L185:     renderStage();
+L186:     rendering=false;
+L187:   }
+L188: }
+L189: 
+L190: function pump(){
+L191:   if(pumping||paused||!builder)return;
+L192:   pumping=true;
+L193:   (async()=>{
+L194:     while(queue.length){
+L195:       if(paused)break;
+L196:       const task=queue.shift();
+L197:       if(!task.box||!task.box.isConnected)continue;
+L198:       const img=task.box.querySelector('.card-3d-thumb');
+L199:       if(img&&img.src&&img.src.indexOf('data:')===0)continue;
+L200:       try{
+L201:         const model=await builder(task.spec);
+L202:         if(paused||!task.box.isConnected)continue;
+L203:         const url=model?renderThumbnail(task.spec,model):null;
+L204:         if(url){thumbs.set(task.key,url);applyThumb(task.box,url);}
+L205:       }catch(error){}
+L206:     }
+L207:     pumping=false;
+L208:     if(!paused&&queue.length)pump();
+L209:   })();
+L210: }
+L211: 
+L212: function queueThumb(box,spec){
+L213:   const key=thumbKey(spec);
+L214:   if(thumbs.has(key)){applyThumb(box,thumbs.get(key));return;}
+L215:   if(queue.some(task=>task.key===key))return;
+L216:   queue.push({box,spec,key});
+L217:   if(!paused)pump();
+L218: }
+L219: 
+L220: function bindBox(box){
+L221:   if(bound.has(box))return;
+L222:   bound.add(box);
+L223:   box.addEventListener('pointerdown',event=>{
+L224:     if(event.button!==undefined&&event.button!==0)return;
+L225:     const spec=cards.get(box);
+L226:     if(!spec||spec.static)return;
+L227:     if(spec.inspect){if(typeof onInspect==='function')onInspect(box,spec);return;}
+L228:     if(typeof onActivate==='function')onActivate(box,spec);
+L229:     if(!stage)return;
+L230:     let lastX=event.clientX,lastY=event.clientY;
+L231:     try{box.setPointerCapture(event.pointerId);}catch(error){}
+L232:     const move=e=>{
+L233:       const dx=e.clientX-lastX,dy=e.clientY-lastY;
+L234:       lastX=e.clientX;lastY=e.clientY;
+L235:       stage.spin.rotation.y+=dx*0.008;
+L236:       stage.spin.rotation.x=Math.max(-0.65,Math.min(0.65,stage.spin.rotation.x+dy*0.006));
+L237:       renderStage();
+L238:     };
+L239:     const end=()=>{
+L240:       box.removeEventListener('pointermove',move);
+L241:       box.removeEventListener('pointerup',end);
+L242:       box.removeEventListener('pointercancel',end);
+L243:       snapshotStage();
+L244:     };
+L245:     box.addEventListener('pointermove',move);
+L246:     box.addEventListener('pointerup',end);
+L247:     box.addEventListener('pointercancel',end);
+L248:   });
+L249:   box.addEventListener('wheel',event=>{
+L250:     const spec=cards.get(box);
+L251:     if(!spec||spec.static)return;
+L252:     event.preventDefault();
+L253:     setStageZoom(zoom+(event.deltaY<0?0.12:-0.12));
+L254:     renderStage();
+L255:   },{passive:false});
+L256:   box.addEventListener('click',event=>{
+L257:     const button=event.target.closest('[data-card-zoom]');
+L258:     if(!button)return;
+L259:     event.stopPropagation();
+L260:     setStageZoom(zoom+(+button.dataset.cardZoom||0));
+L261:     renderStage();
+L262:   });
+L263: }
+L264: 
+L265: export function registerCardBox(box,spec){
+L266:   if(!box||!spec)return;
+L267:   const previous=cards.get(box);
+L268:   cards.set(box,spec);
+L269:   bindBox(box);
+L270:   const img=box.querySelector('.card-3d-thumb');
+L271:   if(img&&!img.classList.contains('is-loading'))img.classList.add('is-loading');
+L272:   if(previous&&thumbKey(previous)!==thumbKey(spec))thumbs.delete(thumbKey(previous));
+L273:   queueThumb(box,spec);
+L274:   if(observer)observer.observe(box);
+L275: }
+L276: 
+L277: export function mountStageInto(box,spec){
+L278:   if(!stage)return;
+L279:   if(activeBox&&activeBox!==box)snapshotStage();
+L280:   activeBox=box||null;
+L281:   activeSpec=spec||null;
+L282:   if(!box)return;
+L283:   box.appendChild(stage.renderer.domElement);
+L284:   const img=box.querySelector('.card-3d-thumb');
+L285:   if(img)img.classList.add('is-hidden');
+L286:   resizeStage(box);
+L287:   renderStage();
+L288: }
+L289: 
+L290: export function pruneCardBoxes(){
+L291:   for(const box of Array.from(cards.keys())){
+L292:     if(box.isConnected)continue;
+L293:     cards.delete(box);
+L294:     bound.delete(box);
+L295:     if(observer)observer.unobserve(box);
+L296:   }
+L297: }
+L298: 
+L299: export function scanCardBoxes(root){
+L300:   const scope=root||document;
+L301:   pruneCardBoxes();
+L302:   if(!observer&&typeof IntersectionObserver!=='undefined'){
+L303:     observer=new IntersectionObserver(entries=>{
+L304:       for(const entry of entries){
+L305:         if(!entry.isIntersecting)continue;
+L306:         const spec=cards.get(entry.target);
+L307:         if(spec)queueThumb(entry.target,spec);
+L308:       }
+L309:     },{rootMargin:'160px'});
+L310:   }
+L311:   scope.querySelectorAll('.card-3d-box[data-card-spec]').forEach(box=>{
+L312:     let spec=null;
+L313:     try{spec=JSON.parse(box.dataset.cardSpec);}catch(error){return;}
+L314:     registerCardBox(box,spec);
+L315:   });
+L316: }
+L317: 
+L318: export function resetCardStage(){
+L319:   if(activeBox)snapshotStage();
+L320:   activeBox=null;activeSpec=null;
+L321:   queue.length=0;
+L322:   thumbs.clear();
+L323: }
+L324: 
+
+=== FILE: src/viewer/troop-cards.js ===
+(6333B, 92L)
+L  1: import { WEAPONS_ORIGINAL, WEAPON_MESH_FILE, originalWeaponProfile } from '../render3d/assets-weapons.js';
+L  2: import { prettySkinName } from '../data/skin-names.js';
+L  3: import { CHARACTER_ABILITIES, ABILITY_OBJECTS } from '../data/cast.js';
+L  4: import { scanCardBoxes } from './card-stage.js';
+L  5: 
+L  6: let tcRoster=[];
+L  7: let tcWeaponFiles=[];
+L  8: const tcState={origin:'Todas',role:'Todas',cards:{}};
+L  9: const tcEsc=value=>String(value==null?'':value).replace(/[&<>"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[char]));
+L 10: const tcScan=()=>{if(typeof scanCardBoxes==='function')scanCardBoxes();};
+L 11: const tcSpecAttr=spec=>'data-card-spec=\''+JSON.stringify(spec).replace(/'/g,'&#39;')+'\'';
+L 12: const tcFileForWeapon=ref=>WEAPON_MESH_FILE[ref]||ref||'';
+L 13: const tcCardState=entry=>tcState.cards[entry.key]||(tcState.cards[entry.key]={skinIndex:0,weapon:tcFileForWeapon(entry.defaultWeapon||'')});
+L 14: 
+L 15: function tcCard3dBox(spec,label){
+L 16:   return '<div class="card-3d-box" '+tcSpecAttr(spec)+' aria-label="Modelo 3D de '+tcEsc(label)+'"><img class="card-3d-thumb is-loading" alt="" hidden/><span class="card-3d-badge">3D</span></div>';
+L 17: }
+L 18: 
+L 19: function tcAbilitiesHTML(entry){
+L 20:   const list=CHARACTER_ABILITIES[entry.name]||[];
+L 21:   if(!list.length)return '';
+L 22:   return '<div class="ability-mini">'+list.slice(0,4).map(ability=>{
+L 23:     const obj=ability.obj?ABILITY_OBJECTS[ability.obj]:null;
+L 24:     return '<img src="assets/ui/ability/'+tcEsc(ability.icon)+'.png" alt="" title="'+tcEsc(ability.n)+(obj?' ┬À '+tcEsc(obj.name):'')+'"/>';
+L 25:   }).join('')+'</div>';
+L 26: }
+L 27: 
+L 28: function tcTroopCardHTML(entry,index){
+L 29:   const csn=!!entry.mesh;
+L 30:   const saved=tcCardState(entry);
+L 31:   const origin=csn?'CSN':'Juego original';
+L 32:   const weapon=csn?'':(saved.weapon||tcFileForWeapon(entry.defaultWeapon||''));
+L 33:   const profile=csn?null:originalWeaponProfile(weapon);
+L 34:   const skinIndex=Math.min(saved.skinIndex||0,Math.max(0,(entry.skins||[]).length-1));
+L 35:   const skin=entry.skins&&entry.skins[skinIndex];
+L 36:   const spec={kind:'roles',key:entry.key,skinIndex,weapon,file:entry.file||entry.mesh||'',label:entry.label,inspect:true};
+L 37:   return '<article class="catalog-card troop-card" data-origin="'+origin+'" data-role="'+tcEsc(entry.role||'')+'" data-troop-key="'+tcEsc(entry.key)+'">'+
+L 38:     '<header><span class="tag'+(csn?'':' amber')+'">'+origin+'</span><span class="catalog-count">'+String(index+1).padStart(2,'0')+'</span></header>'+
+L 39:     tcCard3dBox(spec,entry.label)+
+L 40:     '<div class="card-body"><h3>'+tcEsc(entry.label)+'</h3>'+
+L 41:     '<div class="card-meta"><span class="tag">'+tcEsc(entry.role||'Sin rol')+'</span><span class="tag">'+(csn?'Prototipo 3D':tcEsc(prettySkinName(skin&&skin.key&&skin.key.indexOf('cast:')===0?skin.key.slice(5):skin&&skin.label,skinIndex)))+'</span></div>'+
+L 42:     '<p class="note sub">'+tcEsc(entry.bio||'')+'</p>'+
+L 43:     (csn?'<p class="note">Dise├▒o propio CSN ┬À malla '+tcEsc(entry.mesh)+'. Sin pose, clips ni retarget.</p>'
+L 44:       :'<p class="note sub">Arma: '+tcEsc((WEAPONS_ORIGINAL[weapon]||{}).name||'sin arma')+' ┬À '+(profile&&profile.actionLabel||'Sin acci├│n')+'.</p>')+
+L 45:     tcAbilitiesHTML(entry)+
+L 46:     '<button type="button" class="inspector-open" data-inspector-open>Ver ficha y 3D ampliado ÔåÆ</button></div></article>';
+L 47: }
+L 48: 
+L 49: function tcOpenCard(card){
+L 50:   const box=card.querySelector('.card-3d-box[data-card-spec]');
+L 51:   if(!box)return;
+L 52:   try{
+L 53:     const spec=JSON.parse(box.dataset.cardSpec);
+L 54:     if(window.__csnInspector&&window.__csnInspector.open)window.__csnInspector.open(spec);
+L 55:   }catch(error){}
+L 56: }
+L 57: 
+L 58: function tcBuildFilters(){
+L 59:   const container=document.getElementById('troopFilters');if(!container)return;
+L 60:   const origins=['Todas','Juego original','CSN'];
+L 61:   const roles=['Todas','Francotirador','Artillero','Esp├¡a','M├®dico','Ingeniero','Comando','Capit├ín'];
+L 62:   container.innerHTML='<div class="weapon-filter-row" data-group="origin">'+origins.map(value=>{
+L 63:     const count=value==='Todas'?tcRoster.length:tcRoster.filter(entry=>value==='CSN'?!!entry.mesh:!entry.mesh).length;
+L 64:     return '<button type="button" data-value="'+tcEsc(value)+'"'+(value===tcState.origin?' class="on"':'')+'>'+tcEsc(value)+' ('+count+')</button>';
+L 65:   }).join('')+'</div><div class="weapon-filter-row" data-group="role">'+roles.map(value=>'<button type="button" data-value="'+tcEsc(value)+'"'+(value===tcState.role?' class="on"':'')+'>'+tcEsc(value)+'</button>').join('')+'</div>';
+L 66:   container.querySelectorAll('[data-group="origin"] button').forEach(button=>{button.onclick=()=>{tcState.origin=button.dataset.value;renderTroopCards();};});
+L 67:   container.querySelectorAll('[data-group="role"] button').forEach(button=>{button.onclick=()=>{tcState.role=button.dataset.value;renderTroopCards();};});
+L 68: }
+L 69: 
+L 70: export function renderTroopCards(characters,files){
+L 71:   if(Array.isArray(characters))tcRoster=characters;
+L 72:   if(Array.isArray(files))tcWeaponFiles=files;
+L 73:   tcBuildFilters();
+L 74:   const grid=document.getElementById('troopGrid');if(!grid)return;
+L 75:   const originCount=tcRoster.filter(entry=>!!entry.mesh).length;
+L 76:   const visible=tcRoster.map((entry,index)=>({entry,index})).filter(({entry})=>
+L 77:     (tcState.origin==='Todas'||(tcState.origin==='CSN'?!!entry.mesh:!entry.mesh))&&
+L 78:     (tcState.role==='Todas'||(entry.role||'Sin rol')===tcState.role));
+L 79:   grid.innerHTML='<div class="catalog-head" style="grid-column:1/-1"><h2>Personajes</h2><span class="catalog-count">'+tcRoster.length+' tropas ┬À '+(tcRoster.length-originCount)+' originales ┬À '+originCount+' CSN ┬À '+tcWeaponFiles.length+' armas</span></div>'+
+L 80:     (visible.length?visible.map(({entry,index})=>tcTroopCardHTML(entry,index)).join(''):'<p class="sub" style="grid-column:1/-1">No hay tropas para este filtro.</p>');
+L 81:   visible.forEach(({entry})=>{const card=grid.querySelector('[data-troop-key="'+tcEsc(entry.key)+'"]');if(card){
+L 82:     const open=card.querySelector('[data-inspector-open]');if(open)open.onclick=event=>{event.stopPropagation();tcOpenCard(card);};
+L 83:     card.onclick=()=>tcOpenCard(card);
+L 84:   }});
+L 85:   tcScan();
+L 86: }
+L 87: 
+L 88: export function setTroopOrigin(value){tcState.origin=value==='CSN'||value==='Juego original'?value:'Todas';renderTroopCards();}
+L 89: export function setTroopRole(value){tcState.role=value||'Todas';renderTroopCards();}
+L 90: 
+L 91: if(typeof window!=='undefined'&&!window.__csnTroopCards)window.__csnTroopCards={render:renderTroopCards,setOrigin:setTroopOrigin,setRole:setTroopRole,getRoster:()=>tcRoster,getWeaponFiles:()=>tcWeaponFiles};
+L 92: 
+
+=== FILE: src/ui/arsenal.js ===
+(9585B, 130L)
+L  1: import { BODIES, ROLES, ROLE_NAMES, roleLook } from '../data/roles.js';
+L  2: import { WEAPONS } from '../data/weapons.js';
+L  3: import { WEAPONS_ORIGINAL, WEAPON_MESH_FILE } from '../render3d/assets-weapons.js';
+L  4: import { auWeaponFile } from '../audio/sound.js';
+L  5: import { DEPLOYABLES } from '../data/deployables.js';
+L  6: import { scanCardBoxes } from '../viewer/card-stage.js';
+L  7: import { $, rolePortraitURL } from './ui-shell.js';
+L  8: 
+L  9: export const CATS=['Todas','Fusiles de asalto','Subfusiles','Ametralladoras','Francotirador','Escopetas','Lanzacohetes','Lanzagranadas','Pistolas','Cuerpo a cuerpo','Consumible'];
+L 10: export const ORIGINS=['Todas','Juego original','CSN'];
+L 11: export let arsFilter='Todas';
+L 12: export let arsOrigin='Todas';
+L 13: export let arsSection='weapons';
+L 14: const arEsc=value=>String(value==null?'':value).replace(/[&<>"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[char]));
+L 15: 
+L 16: export function setArsFilter(v){arsFilter=v;}
+L 17: export function setArsOrigin(v){arsOrigin=v;}
+L 18: export function setArsSection(v){arsSection=v==='deployables'?'deployables':v==='abilities'?'abilities':'weapons';}
+L 19: 
+L 20: const arScan=()=>{if(typeof scanCardBoxes==='function')scanCardBoxes();};
+L 21: const arSpecAttr=spec=>'data-card-spec=\''+JSON.stringify(spec).replace(/'/g,'&#39;')+'\'';
+L 22: const arCategoryHit=(cat,filter)=>filter==='Todas'||cat===filter||(filter==='Consumible'&&cat==='Consumibles')||(filter==='Consumibles'&&cat==='Consumible');
+L 23: const arOpen=spec=>{if(window.__csnInspector&&window.__csnInspector.open)window.__csnInspector.open(spec);};
+L 24: 
+L 25: function arCard3dBox(spec,label){
+L 26:   return '<div class="card-3d-box" '+arSpecAttr(spec)+' aria-label="Modelo 3D de '+arEsc(label)+'"><img class="card-3d-thumb is-loading" alt="" hidden/><span class="card-3d-badge">3D</span></div>';
+L 27: }
+L 28: 
+L 29: function arOriginalCardHTML(file){
+L 30:   const info=WEAPONS_ORIGINAL[file]||{};
+L 31:   const spec={kind:'weapons',key:file,file,label:info.name||file,inspect:true};
+L 32:   return '<article class="catalog-card weapon-original"><header><span class="tag amber">Juego original</span><span class="catalog-count">'+arEsc(info.cat||'Arma')+'</span></header>'+
+L 33:     arCard3dBox(spec,info.name||file)+
+L 34:     '<div class="card-body"><h3>'+arEsc(info.name||file)+'</h3><p class="real">'+arEsc((info.uses||[]).join(' ┬À ')||'Sin equivalente CSN')+'</p>'+
+L 35:     '<div class="wstats"><div><b>'+arEsc(info.verts||'?')+'</b><span>V├®rtices</span></div><div><b>'+arEsc((info.texSize||[]).join('├ù'))+'</b><span>Textura</span></div><div><b>'+arEsc((info.dims||[]).join(' ├ù '))+'</b><span>Medidas</span></div></div>'+
+L 36:     '<p class="note sub">'+arEsc(info.roles||'Sin asignaci├│n espec├¡fica en el original.')+'</p>'+
+L 37:     '<div class="card-actions"><button type="button" class="btn ghost" data-au-file="'+arEsc(file)+'">­ƒöè Escuchar sonido original</button><button type="button" class="btn ghost" data-inspector-open>Ampliar</button></div></div></article>';
+L 38: }
+L 39: 
+L 40: function arCsnCardHTML(name,weapon){
+L 41:   const file=WEAPON_MESH_FILE[name]||'AssaultRifle';
+L 42:   const spec={kind:'weapons',key:file,file,label:name,csn:{name,cat:weapon.cat,dmg:weapon.dmg,rng:weapon.rng,cost:weapon.cost,note:weapon.note,real:weapon.real},inspect:true};
+L 43:   const roles=ROLE_NAMES.filter(role=>ROLES[role].weapons.includes(name)).join(', ')||(weapon.cat==='Pistolas'?'Todos (secundaria)':'Sin asignar');
+L 44:   return '<article class="catalog-card weapon-csn" '+arSpecAttr(spec)+'><header><span class="tag">CSN</span><span class="catalog-count">'+arEsc(weapon.cat)+'</span></header>'+
+L 45:     '<div class="card-3d-box" aria-label="Vista t├íctica de '+arEsc(name)+'"><div class="card-3d-empty"><span class="csn-ico">'+(weapon.cat==='Cuerpo a cuerpo'?'Ô£ò':'Ôùå')+'</span><b>'+arEsc(weapon.cat.toUpperCase())+'</b><span>Modelo 3D CSN pendiente</span></div></div>'+
+L 46:     '<div class="card-body"><h3>'+arEsc(name)+'</h3><p class="real">'+arEsc(weapon.real)+'</p><p class="note">'+arEsc(weapon.note)+(weapon.once?' <b>Un solo uso por partida.</b>':'')+(weapon.aoe?' Da├▒o en ├írea.':'')+'</p>'+
+L 47:     '<div class="wstats"><div><b>'+weapon.dmg+'</b><span>Da├▒o</span></div><div><b>'+weapon.rng+'</b><span>Casillas</span></div><div><b>'+weapon.cost+' ÔÜí</b><span>Coste</span></div></div>'+
+L 48:     '<p class="note sub">Roles: '+arEsc(roles)+'</p><button type="button" class="inspector-open" data-inspector-open>Ver ficha y 3D ampliado ÔåÆ</button></div></article>';
+L 49: }
+L 50: 
+L 51: function arDeployableCardHTML(prop){
+L 52:   const spec={kind:'props',key:prop.key,file:prop.file,label:prop.label,inspect:true};
+L 53:   return '<article class="catalog-card"><header><span class="tag amber">Juego original</span><span class="catalog-count">'+arEsc(prop.key)+'</span></header>'+
+L 54:     arCard3dBox(spec,prop.label)+
+L 55:     '<div class="card-body"><h3>'+arEsc(prop.label)+'</h3><p class="note">'+arEsc(prop.note)+'</p><p class="note sub">Malla '+arEsc(prop.file)+' ┬À Textura '+arEsc(prop.tex)+'</p><button type="button" class="inspector-open" data-inspector-open>Ver en 3D ampliado ÔåÆ</button></div></article>';
+L 56: }
+L 57: 
+L 58: function arBindCards(grid){
+L 59:   grid.querySelectorAll('[data-au-file]').forEach(button=>{button.onclick=event=>{event.stopPropagation();auWeaponFile(button.dataset.auFile);};});
+L 60:   grid.querySelectorAll('.catalog-card').forEach(card=>{
+L 61:     card.onclick=()=>{
+L 62:       const box=card.querySelector('[data-card-spec]');
+L 63:       if(box){try{arOpen(JSON.parse(box.dataset.cardSpec));}catch(error){}}
+L 64:     };
+L 65:   });
+L 66: }
+L 67: 
+L 68: function arBuildFilters(originalCount,csnCount,cats){
+L 69:   const f=$('#arsFilters');if(!f)return;
+L 70:   const origin=document.createElement('div');origin.className='seg origin-seg';
+L 71:   origin.innerHTML=ORIGINS.map(item=>'<button type="button" data-origin-value="'+arEsc(item)+'"'+(item===arsOrigin?' class="on"':'')+'>'+arEsc(item)+(item==='Juego original'?' ('+originalCount+')':item==='CSN'?' ('+csnCount+')':' ('+(originalCount+csnCount)+')')+'</button>').join('');
+L 72:   origin.querySelectorAll('button').forEach(button=>{button.onclick=()=>{arsOrigin=button.dataset.originValue;buildArsenal();};});
+L 73:   const row=document.createElement('div');row.className='weapon-filter-row';
+L 74:   row.innerHTML=cats.map(([cat,count])=>'<button type="button" data-filter-value="'+arEsc(cat)+'"'+(cat===arsFilter?' class="on"':'')+'>'+arEsc(cat)+' ('+count+')</button>').join('');
+L 75:   row.querySelectorAll('button').forEach(button=>{button.onclick=()=>{arsFilter=button.dataset.filterValue;buildArsenal();};});
+L 76:   f.replaceChildren(origin,row);
+L 77: }
+L 78: 
+L 79: export function buildDeployables(){
+L 80:   const grid=$('#deployableGrid');if(!grid)return;
+L 81:   grid.innerHTML=DEPLOYABLES.map(arDeployableCardHTML).join('');
+L 82:   arBindCards(grid);arScan();
+L 83: }
+L 84: 
+L 85: function arSetSection(section){
+L 86:   arsSection=section==='deployables'?'deployables':section==='abilities'?'abilities':'weapons';
+L 87:   const sectionSeg=$('#arsSectionSeg');if(sectionSeg)sectionSeg.querySelectorAll('button').forEach(button=>button.classList.toggle('on',button.dataset.arssec===arsSection));
+L 88:   const weapons=$('#arsenalGrid'),deployables=$('#deployablePanel'),filters=$('#arsFilters'),abilityPanel=$('#abilityPanel');
+L 89:   if(weapons)weapons.style.display=arsSection==='weapons'?'':'none';
+L 90:   if(deployables)deployables.style.display=arsSection==='deployables'?'':'none';
+L 91:   if(filters)filters.style.display=arsSection==='weapons'?'':'none';
+L 92:   if(abilityPanel)abilityPanel.style.display=arsSection==='abilities'?'':'none';
+L 93: }
+L 94: 
+L 95: export function buildArsenal(){
+L 96:   const sectionSeg=$('#arsSectionSeg');
+L 97:   if(sectionSeg&&!sectionSeg._bound){
+L 98:     sectionSeg._bound=true;
+L 99:     sectionSeg.querySelectorAll('button[data-arssec]').forEach(button=>{button.onclick=()=>arSetSection(button.dataset.arssec);});
+L100:   }
+L101:   const originalFiles=Object.keys(WEAPONS_ORIGINAL);
+L102:   const csnEntries=Object.entries(WEAPONS);
+L103:   const catCounts=CATS.map(cat=>[cat,originalFiles.filter(file=>arCategoryHit((WEAPONS_ORIGINAL[file]||{}).cat||'Otros',cat)).length+csnEntries.filter(([,w])=>arCategoryHit(w.cat,cat)).length]);
+L104:   arBuildFilters(originalFiles.length,csnEntries.length,catCounts);
+L105:   const grid=$('#arsenalGrid');if(grid){
+L106:     const originals=originalFiles.filter(file=>{
+L107:       const cat=(WEAPONS_ORIGINAL[file]||{}).cat||'Otros';
+L108:       return (arsOrigin==='Todas'||arsOrigin==='Juego original')&&arCategoryHit(cat,arsFilter);
+L109:     });
+L110:     const csn=csnEntries.filter(([name,w])=>(arsOrigin==='Todas'||arsOrigin==='CSN')&&arCategoryHit(w.cat,arsFilter));
+L111:     grid.innerHTML=originals.map(arOriginalCardHTML).join('')+csn.map(([name,w])=>arCsnCardHTML(name,w)).join('');
+L112:     arBindCards(grid);
+L113:   }
+L114:   buildDeployables();arSetSection(arsSection);arScan();
+L115:   const rt=$('#rolesTable');
+L116:   if(rt)rt.innerHTML=ROLE_NAMES.map(role=>{
+L117:     const body=BODIES[ROLES[role].body];
+L118:     return '<div style="display:flex;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line);flex-wrap:wrap;align-items:center"><span class="role-dot" style="background:'+ROLES[role].color+';margin-top:5px"></span>'+(rolePortraitURL(role)?'<img class="role-thumb" src="'+rolePortraitURL(role)+'" alt="Retrato del '+role+'"/>':'')+'<b style="min-width:120px">'+role+'</b><span class="mono" style="font-size:13.5px">'+body.name+' ┬À '+roleLook(role).silueta+' ┬À '+body.hp+' PV ┬À '+body.energy+' ÔÜí ┬À mover '+body.moveCost+' ÔÜí/casilla</span><span style="flex:1;min-width:220px" class="sub">'+ROLES[role].desc+' Armas: '+ROLES[role].weapons.join(', ')+'.</span></div>';
+L119:   }).join('');
+L120: }
+L121: 
+L122: export function openDeployable3D(key){
+L123:   const prop=DEPLOYABLES.find(item=>item.key===key);
+L124:   if(!prop)return false;
+L125:   arOpen({kind:'props',key:prop.key,file:prop.file,label:prop.label,inspect:true});
+L126:   return true;
+L127: }
+L128: 
+L129: if(typeof window!=='undefined'&&!window.openDeployable3D)window.openDeployable3D=openDeployable3D;
+L130: 
+
+=== EXTRACTOS CLAVE DE src/viewer/main.js (INSPECTOR, BUILDER, FRAME, MOUNT) ===
+(Total src/viewer/main.js: 362L)
+
+--- [card-stage / inspector] ---
+L  1: import { ensureCardStage, activeCard, resizeStage, renderStage, snapshotStage, setCardModelBuilder, setCardStageCallbacks, setCardRestPose, setStageBaseDistance, setStageZoom, stageZoom, mountStageInto, unmountStage, scanCardBoxes } from './card-stage.js';
+L  2: import { renderTroopCards } from './troop-cards.js';
+L  3: import { openInspector } from './inspector.js';
+L  4: import { originalWeaponProfile } from '../render3d/assets-weapons.js';
+L  5: import { DEPLOYABLES } from '../data/deployables.js';
+L  6: import { auWeaponFile, auVoice } from '../core-and-audio.js';
+L  7: (function(){ const stage=document.getElementById('viewerCanvas'); if(!stage||typeof THREE==='undefined')return;
+L  8:   const status=document.getElementById('viewerStatus'); const zoomControl=document.getElementById('viewerZoom'); const texturePreview=document.getElementById('viewerTexture');
+L  9:   const viewer={ renderer:null,scene:null,camera:null,spin:null,platform:null,meshyFill:null,meshyRim:null, baseDistance:3,drag:null,dragVel:0,lastFrame:0,selection:0,
+L 10:     kind:'roles',name:'',skinIndex:0,weapon:'',weaponChar:'',weaponTouched:false,idleActor:null,gripActor:null,idleClipKey:'idle2h',testFire:null,
+L 11:     frameRequested:false,models:{roles:{},weapons:{},props:{}},textures:{},bodyGeo:{},bodyRig:{},cardModel:null,cardMode:false,inspectorOpen:false }; try{window.__csnViewer={get state(){return viewer;},getRoster:()=>viewerCharacters,getWeaponFiles:()=>viewerWeaponFiles,getEntry:key=>viewerCharacters.find(item=>item.key===key)||null,activate:spec=>activateSpec(activeCard().box||document.querySelector('#inspectorStage'),spec),fire:null,unmount:()=>unmountStage(),getCardBox:()=>activeCard().box};}catch(e){}
+L 12:   const cardStage=ensureCardStage(stage);
+L 13:   if(cardStage){viewer.renderer=cardStage.renderer;viewer.scene=cardStage.scene;viewer.camera=cardStage.camera;viewer.spin=cardStage.spin;viewer.platform=cardStage.platform;viewer.meshyFill=cardStage.meshyFill;viewer.meshyRim=cardStage.meshyRim;}
+L 14:   const VIEWER_BODY_SKINS={ 'Soldier_SAS':['Soldier_SAS_d.png','Soldier_SAS_Decon_d.png','Soldier_SAS_Veteran_d.png'],
+L 15:     'Soldier_Spud':['Soldier_d.png','Soldier_Decon_d.png','Soldier_ForestCamo_d.png','Soldier_Veteran_d.png'],
+L 16:     'Soldier_Light':['Soldier_Light_d.png','Soldier_Light_Decon_d.png','Soldier_Light_DeltaForce_d.png','Soldier_Light_Halloween_d.png','Soldier_Light_Spetsnaz_d.png','Soldier_Light_Veteran_d.png'],
+L 17:     'Soldier_Light_Rambo':['Soldier_Light_Rambo_d.png','Soldier_Light_Rambo_Decon_d.png','Soldier_Light_Rambo_DeerHunter_d.png','Soldier_Light_Rambo_Veteran_d.png'],
+L 18:     'Soldier_Heavy':['Soldier_heavy_d.png','Soldier_heavy_GermanSpecialForces_d.png','Soldier_Heavy_Decon_d.png','Soldier_Heavy_Veteran_d.png'],
+L 19:     'Agent_Light':['Agent_light_d.png','Agent_light_Decon_d.png','Agent_light_JewelThief_d.png','Agent_light_Veteran_d.png'],
+L 20:     'Agent_Heavy':['Agent_Heavy_d.png','Agent_Heavy_Decon_d.png','Agent_Heavy_Skin1_d.png','Agent_Heavy_Veteran_d.png'],
+L 21:     'Medic':['Medic_d.png','Medic_Decon_d.png','Medic_Halloween_d.png','Medic_Rescue_d.png','Medic_Spetsnaz_d.png','Medic_Veteran_d.png'],
+L 22:     'Medic_therapist':['Medic_Therapist_d.png','Medic_Therapist_Decon_d.png','Medic_Therapist_Surgeon_d.png','Medic_Therapist_Veteran_d.png'],
+L 23:     'Engineer':['Engineer_d.png','Engineer_Decon_d.png','Engineer_Halloween_d.png','Engineer_Spetsnaz_d.png','Engineer_Veteran_d.png'],
+L 24:     'Engineer_Light':['Engineer_Light_d.png','Engineer_Light_Decon_d.png','Engineer_Light_Trinity_d.png','Engineer_Light_Veteran_d.png'],
+L 25:     'Engineer_Heavy':['Engineer_Heavy2_d.png','Engineer_Heavy_Decon_d.png','Engineer_Heavy_EOD_d.png','Engineer_Heavy_Veteran_d.png'],
+L 26:     'Engineer (RiotCop)':['Engineer_RiotCop_d.png','Engineer_RiotCop_Decon_d.png','Engineer_RiotCop_Skin1_d.png','Engineer_RiotCop_Veteran_d.png'],
+L 27:     'Commander':['Commander_d.png','Commander_African_d.png','Commander_Asian_d.png','Commander_Latino_d.png'],
+L 28:     'CommanderM':['Commander_d.png','Commander_African_d.png','Commander_Asian_d.png','Commander_Latino_d.png'],
+---
+L 61:     if(!viewer.renderer)return; const target=activeCard().box||stage; resizeStage(target); viewer.camera.aspect=viewer.renderer.domElement.width/Math.max(1,viewer.renderer.domElement.height);
+L 62:     viewer.camera.updateProjectionMatrix(); };   function frame(now){
+L 63:     const visible=document.getElementById('scr-viewer').classList.contains('on')||viewer.inspectorOpen;
+L 64:     if(!visible){ viewer.frameRequested=false; return; }; if(viewer.renderer){
+L 65:       const dt=viewer.lastFrame?Math.min(0.05,(now-viewer.lastFrame)/1000):0.016;
+L 66:       const clips=CLIPLIB.ready&&CLIPLIB.pack&&CLIPLIB.pack.clips;
+L 67:       let clipKey=viewer.idleClipKey,clip=clips&&clips[clipKey],ct=(now/1000)%(clip&&clip.dur||1),signature=clipKey+'|'+(viewer.weapon||'');
+L 68:       if(viewer.testFire&&clips&&clips[viewer.testFire.key]){
+L 69:         const elapsed=(now-viewer.testFire.start)/1000,fire=clips[viewer.testFire.key];
+L 70:         if(elapsed<fire.dur){clip=fire;clipKey=viewer.testFire.key;ct=elapsed;signature=clipKey+'|fire|'+(viewer.weapon||'');}else viewer.testFire=null;
+L 71:       }
+L 72:       if(viewer.idleActor&&clip){ if(!poseViewerClip(viewer.idleActor,clip,ct,clipKey,signature,now,dt*1000))poseSpriteClip(null,viewer.idleActor,clip,ct,clipKey); }
+L 73:       if(viewer.testFire&&viewer.idleActor)dispatchViewerFire(viewer.idleActor,clip,clipKey,ct,viewer.weapon);
+L 74:       if(viewer.gripActor&&viewer.gripActor.userData.gun)
+L 75:         fitGunToHand3(viewer.gripActor.userData.gripUnit,viewer.gripActor,false);
+L 76:       const testGun=viewer.gripActor&&viewer.gripActor.userData.gun,testFlash=testGun&&testGun.userData.flash;
+L 77: 
+L 78:       if(testFlash&&testGun.userData._testFlash>0){
+L 79:         testGun.userData._testFlash=Math.max(0,testGun.userData._testFlash-dt*6);
+L 80:         testFlash.material.opacity=testGun.userData._testFlash;
+L 81:       }
+L 82:       if(!viewer.drag&&viewer.spin&&viewer.spin.children.length){ viewer.spin.rotation.y+=dt*0.22; if(Math.abs(viewer.dragVel)>1e-4){ viewer.spin.rotation.y+=viewer.dragVel*dt;
+L 83:           viewer.dragVel*=Math.exp(-dt/0.25); }else viewer.dragVel=0; }; renderStage(); refreshTexturePreview(); }; viewer.lastFrame=now;
+L 84:     requestAnimationFrame(frame); }; function refreshTexturePreview(){ let texture=null; if(viewer.spin)viewer.spin.traverse(object=>{ if(!texture&&object.material){
+L 85:         const mats=Array.isArray(object.material)?object.material:[object.material]; const mat=mats.find(item=>item.map&&item.map.image); if(mat)texture=mat.map; } });
+L 86:     const image=texture&&texture.image; const src=image&&(image.currentSrc||image.src); if(src&&texturePreview.src!==src){texturePreview.src=src;texturePreview.hidden=false;} }
+L 87:   function mount(model){ if(model.parent)model.parent.remove(model); model.position.set(0,0,0); while(viewer.spin.children.length)viewer.spin.remove(viewer.spin.children[0]);
+L 88:     if(model.userData&&model.userData.bones&&model.userData.bindLocal&&CLIPLIB.ready&&!model.userData._viewerClip)
+L 89:       poseViewerRest(model,model.userData.idleClipKey||'idle2h',0);
+L 90:     model.updateMatrixWorld(true);
+---
+L310:     if(CLIPLIB.ready&&CLIPLIB.pack&&CLIPLIB.pack.clips&&CLIPLIB.pack.clips[key])viewer.testFire={key:key,start:performance.now()};
+L311:   }
+L312:   const cardEngine={scan:()=>scanCardBoxes(),activate:activateSpec,fire:fireSpec,activateFirst:()=>{
+L313:     const box=document.querySelector('#troopGrid .card-3d-box[data-card-spec]');
+L314:     if(box){try{return activateSpec(box,JSON.parse(box.dataset.cardSpec));}catch(error){return null;}}
+L315:     return null;
+L316:   }};
+L317:   try{window.__csnCardEngine=cardEngine;window.__csnViewer.fire=fireSpec;}catch(error){}
+L318:   setCardModelBuilder(buildCardModel);
+L319:   setCardRestPose(model=>{
+L320:     if(!model||model.userData&&model.userData.meshy)return;
+L321:     poseViewerRest(model,model.userData&&model.userData.idleClipKey||'idle2h',0);
+L322:     model.traverse(object=>{if(object.isSkinnedMesh&&object.skeleton)object.skeleton.update();});
+L323:   });
+L324:   setCardStageCallbacks({onActivate:activateSpec,onInspect:spec=>openInspector(spec),onZoom:value=>{if(zoomControl)zoomControl.value=String(value);}});
+L325:   function activate(){
+L326:     refreshList();resize();const kindButton=document.querySelector('#viewerKinds button.on');viewer.kind=kindButton?kindButton.dataset.kind:'roles';
+L327:     const names=viewer.kind==='roles'?viewerCharacters.map(entry=>entry.key):viewer.kind==='props'?viewerPropFiles.map(entry=>entry.key):viewerWeaponFiles;
+L328:     if(!names.includes(viewer.name)||viewer.cardMode)viewer.name=names[0];
+L329:     selectModel(viewer.kind,viewer.name);
+L330:     if(!viewer.frameRequested){viewer.frameRequested=true;requestAnimationFrame(frame);}
+L331:     cardEngine.scan();
+L332:   }
+L333:   const characterSelect=document.getElementById('viewerCharacterSelect');if(characterSelect)characterSelect.onchange=event=>{viewer.skinIndex=0;viewer.weaponTouched=false;selectModel('roles',event.target.value);};
+L334:   const weaponSelect=document.getElementById('viewerWeaponSelect');if(weaponSelect)weaponSelect.onchange=event=>{viewer.weapon=event.target.value||'';viewer.weaponTouched=true;selectModel('roles',viewer.name);};
+L335:   const fireTestBtn=document.getElementById('viewerFireBtn');if(fireTestBtn)fireTestBtn.onclick=()=>{
+L336:     const weapon=viewer.weapon;if(!weapon||viewer.kind!=='roles'||!viewer.idleActor)return;
+L337:     const file=weaponFileForRef(weapon)||weapon;const profile=originalWeaponProfile(file)||{};
+L338:     let key=profile.fireClip;if(!key||!CLIPLIB.ready||!CLIPLIB.pack||!CLIPLIB.pack.clips||!CLIPLIB.pack.clips[key])key=typeof fireClipFor==='function'?fireClipFor(weapon):(idleForWeapon(weapon)==='idle1h'?'fire1h':'fire2h');
+L339:     if(CLIPLIB.ready&&CLIPLIB.pack&&CLIPLIB.pack.clips&&CLIPLIB.pack.clips[key])viewer.testFire={key:key,start:performance.now()};
+---
+L357:   window.addEventListener('resize',resize);
+L358:   renderTroopCards(viewerCharacters,viewerWeaponFiles);
+L359:   cardEngine.scan();
+L360:   setTimeout(()=>cardEngine.activateFirst(),400);
+L361: })();
+L362: 
+---
+
+--- [frame() y mount()] ---
+
+--- [syncViewerGun / selectModel] ---
+L229:       map:texture,roughness:0.85,metalness:0.02,transparent:false,opacity:1,depthWrite:true, side:THREE.FrontSide })); mesh.castShadow=true; const model=new THREE.Group();
+L230:     model.scale.setScalar(1.15); const spin=new THREE.Group();spin.rotation.y=Math.PI/2;model.add(spin); const tilt=new THREE.Group();tilt.rotation.x=-Math.PI/2;spin.add(tilt);
+L231:     mesh.scale.setScalar(0.95);tilt.add(mesh); model.userData.staticRole=true; return model; };   async function syncViewerGun(model,entry,token){
+L232:     const wanted=(entry&&entry.sculptedWeapon)?'':(viewer.weapon||''); const current=(model.userData&&model.userData.viewerGunWeapon)||'';
+L233:     if(model&&model.userData)model.userData.idleClipKey=wanted?idleForWeapon(wanted):'idle2h'; if(current===wanted)return;
+L234: 
+L235:     if(model.userData&&model.userData.viewerGun){ model.remove(model.userData.viewerGun); if(model.userData.gun===model.userData.viewerGun)model.userData.gun=null;
+L236:       model.userData.viewerGun=null; model.userData.viewerGunWeapon=''; }; if(!wanted)return; const meshFile=weaponFileForRef(wanted); if(!meshFile)return;
+L237:     if(!GUN_MESH_CACHE[meshFile])makeRealGun3(meshFile); if(!GUN_MESH_CACHE[meshFile]){ const started=Date.now(); while(GUN_MESH_CACHE[meshFile]===null&&Date.now()-started<10000){
+L238:         if(token!==viewer.selection)return; await wait(100); }; if(!GUN_MESH_CACHE[meshFile])throw new Error('No se pudo cargar la malla de esta arma.'); }
+L239:     const sourceGun=GUN_MESH_CACHE[meshFile];
+L240:     if(sourceGun.userData&&sourceGun.userData.texReady)await sourceGun.userData.texReady;
+L241:     if(token!==viewer.selection)return;
+L242:     if(model.userData&&model.userData._viewerClip)model.userData._viewerBlend={clip:model.userData._viewerClip,ct:model.userData._viewerCt||0,t0:performance.now()};
+L243:     if(!model.userData||!model.userData.grip)return; const holder=sourceGun.clone(true); holder.userData.texReady=sourceGun.userData.texReady; const gunMeta=holder.userData.meta||weaponMeta(meshFile);
+L244:     const gunGroup=makeGunAnchor({role:entry.role,weapon:wanted}); gunGroup.userData.isViewerGun=true; gunGroup.add(holder);
+L245:     gunGroup.userData.file=meshFile; gunGroup.userData.meta=gunMeta; if(DEBUG_WEAPONS){
+L246:       const marker=new THREE.Mesh(new THREE.SphereGeometry(0.045,12,8),new THREE.MeshBasicMaterial({color:0xff3300,depthTest:false})); marker.userData.isViewerGun=true;
+L247:       gunGroup.add(marker); console.info('[debugWeapons]',meshFile,gunMeta&&gunMeta.attachmentJoint,holder.userData.calibration); }; model.add(gunGroup);
+L248:     model.userData.viewerGun=gunGroup; model.userData.viewerGunWeapon=wanted; if(model.userData.grip){ model.userData.gun=gunGroup;
+L249:       model.userData.gripUnit={role:entry.role,weapon:wanted}; fitGunToHand3(model.userData.gripUnit,model,false); } };   async function selectModel(kind,name){
+L250:     viewer.kind=kind;viewer.name=name;viewer.testFire=null; const token=++viewer.selection; refreshList(); let selection;
+L251:     try{selection=showModelInfo(kind,name);}catch(error){setStatus(error.message,true);return;}
+L252:     if(!ensureRenderer())return; setStatus('Cargando modelo y texturaÔÇª',true);
+L253:     try{
+L254:       const {entry,skin}=selection; const modelKey=kind==='roles'?name+'|'+skin.key:name; let model=viewer.models[kind][modelKey];
+L255:       if(!model&&kind==='roles'){
+L256:         if(entry.mesh){model=await loadViewerMeshy(entry);}
+L257:         else{const started=Date.now();
+L258:           while((!REAL.ready||(entry.role&&!(REAL.byRole&&REAL.byRole[entry.role])))&&Date.now()-started<10000){if(token!==viewer.selection)return;await wait(100);}
+---
+
+=== CHECK: MODAL DEL INSPECTOR EN index.html ===
+<div id="inspectorRoot" class="inspector-root" hidden>
+  <div class="inspector-backdrop" data-inspector-close></div>
+  <section class="inspector-modal" role="dialog" aria-modal="true" aria-labelledby="inspectorTitle">
+    <header class="inspector-head"><div><span class="inspector-kicker" id="inspectorKicker">Modelo 3D</span><h2 id="inspectorTitle">Inspector</h2></div><button type="button" class="inspector-close" id="inspectorClose" aria-label="Cerrar inspector">Ô£ò</button></header>
+    <div class="inspector-main">
+      <div class="inspector-view">
+        <div id="inspectorStage" class="card-3d-box inspector-stage" data-card-spec="{}" aria-label="Modelo 3D ampliado"><img class="card-3d-thumb is-loading" alt="" hidden/></div>
+        <p class="inspector-hint">Arrastra para girar ┬À rueda para acercar</p>
+        <div class="inspector-bar"><button type="button" data-inspector-zoom="-0.2" aria-label="Alejar">ÔêÆ</button><button type="button" id="inspectorReset">Resetear vista</button><button type="button" data-inspector-zoom="0.2" aria-label="Acercar">+</button></div>
+      </div>
+      <aside class="inspector-panel" id="inspectorPanel"></aside>
+    </div>
+    <footer class="inspector-foot"><button type="button" id="inspectorPrev" hidden>ÔÇ╣ Anterior</button><button type="button" class="btn" id="inspectorFire">ÔûÂ Probar disparo</button><button type="button" id="inspectorNext" hidden>Siguiente ÔÇ║</button></footer>
+  </section>
+</div>
+
+<!-- pass & play / victory modal -->
+<div class="modal" id="modal"><div class="modal-box" id="modalBox"></div></div>
+<div class="toast" id="toast"></div>
+
+<script type="module" src="./src/main.js"></script>
+<script type="module" src="./src/viewer/main.js"></script>
+<div id="bootScreen"><div class="bootArt"></div><div class="bootBox"><img src="assets/ui/logo_csn.png" alt="CSN"/><div class="bootBar"><i id="bootFill"></i></div><p class="sub" id="bootMsg" style="color:#cfd6c8">Cargando el tablero, los soldados y los mapasÔÇª</p></div></div>
+</body>
+</html>
+

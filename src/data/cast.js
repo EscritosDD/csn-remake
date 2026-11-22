@@ -1,17 +1,13 @@
 export const CHARACTERS=[
- /* Los 7 jugables del original (ORIG_CAST, play:true): un personaje por rol.
-    La lista antigua tenía los roles equivocados (Hipster Dave como Artillero,
-    Big Time Taschmann como Capitán, no jugables como Archie Fletcher, Mme La
-    Hacque, Soap, Riot Medic y Megan McNick con rol) y dejaba fuera a Riot
-    Agent (Comando) y a Commander (M) (Capitán), así que en partida los
-    soldados llevaban el nombre equivocado. */
- {name:'Hipster Dave',role:'Francotirador',bio:'Gafas verdes, pelo naranja y un fusil enorme. Cara de enfado permanente.'},
- {name:'Ivan Tkilya',role:'Artillero',bio:'Pesado de manual: donde se planta, hay que rodearlo.'},
- {name:'Sneaky Pete',role:'Espía',bio:'Nadie le vio llegar; nadie le vio irse.'},
- {name:'Sister Florence',role:'Médico',bio:'Reza por ti y luego te cose la herida.'},
- {name:'Big Time Taschmann',role:'Ingeniero',bio:'Maza más alta que su torso y sonrisa de oreja a oreja.'},
- {name:'Riot Agent',role:'Comando',bio:'Antidisturbios: escudo primero, preguntas después.'},
- {name:'Commander (M)',role:'Capitán',bio:'Manda con la voz y con el ejemplo.'}
+ /* Los 7 jugables del original (ORIG_CAST, play:true): un personaje por rol,
+     con el rol que les corresponde en el IPA. */
+  {name:'Hipster Dave',role:'Comando',bio:'Gafas verdes, pelo naranja y un fusil enorme. Cara de enfado permanente.'},
+  {name:'Ivan Tkilya',role:'Artillero',bio:'Pesado de manual: donde se planta, hay que rodearlo.'},
+  {name:'Sneaky Pete',role:'Francotirador',bio:'Nadie le vio llegar; nadie le vio irse.'},
+  {name:'Sister Florence',role:'Médico',bio:'Reza por ti y luego te cose la herida.'},
+  {name:'Big Time Taschmann',role:'Ingeniero',bio:'Maza más alta que su torso y sonrisa de oreja a oreja.'},
+  {name:'Riot Agent',role:'Espía',bio:'Antidisturbios: escudo primero, preguntas después.'},
+  {name:'Commander (M)',role:'Capitán',bio:'Manda con la voz y con el ejemplo.'}
 ];
 
 export const CHARACTER_ABILITIES={
@@ -156,20 +152,20 @@ export const OWN_CAST=[
 ];
 
 export const ORIG_CAST=[
-  {name:'Hipster Dave',body:'Soldier_Light',outfit:'Soldier_Light_d / DeltaForce / Veteran',role:'Francotirador',defaultWeapon:'M40',bio:'Gafas verdes, pelo naranja y un fusil enorme. Cara de enfado permanente.',play:true},
-   {name:'Archie Fletcher',body:'Soldier_Light_Rambo',outfit:'Rambo / DeerHunter',role:'Francotirador',defaultWeapon:'M40',bio:'Rambo de mercadillo: cinta en la cabeza y más valor que puntería.',play:true},
-   {name:'Soap',body:'Soldier_SAS',outfit:'Soldier_SAS',role:'Francotirador',defaultWeapon:'M110 SASS',bio:'El nombre que todos recuerdan y nadie explica.',play:true},
-   {name:'Spud',body:'Soldier_Spud',outfit:'Soldier_ForestCamo',role:'Francotirador',defaultWeapon:'M24 SWS',bio:'Patata de nombre, roca de aguante.',play:true},
+  {name:'Hipster Dave',body:'Soldier_Light',outfit:'Soldier_Light_d / DeltaForce / Veteran',role:'Comando',defaultWeapon:'M4A1',bio:'Gafas verdes, pelo naranja y un fusil enorme. Cara de enfado permanente.',play:true},
+   {name:'Archie Fletcher',body:'Soldier_Light_Rambo',outfit:'Rambo / DeerHunter',role:'Artillero',defaultWeapon:'M249 SAW',bio:'Rambo de mercadillo: cinta en la cabeza y más valor que puntería.',play:true},
+   {name:'Soap',body:'Soldier_SAS',outfit:'Soldier_SAS',role:'Artillero',defaultWeapon:'M240B',bio:'El nombre que todos recuerdan y nadie explica.',play:true},
+   {name:'Spud',body:'Soldier_Spud',outfit:'Soldier_ForestCamo',role:'Artillero',defaultWeapon:'RPG-7',bio:'Patata de nombre, roca de aguante.',play:true},
   {name:'Ivan Tkilya',body:'Soldier_Heavy',outfit:'Soldier_heavy / GermanSpecialForces',role:'Artillero',defaultWeapon:'M249 SAW',bio:'Pesado de manual: donde se planta, hay que rodearlo.',play:true},
    {name:'Mme La Hacque',body:'Agent_Light',outfit:'Agent_light / JewelThief',role:'Espía',defaultWeapon:'MP7',bio:'Elegancia francesa con un cuchillo en la bota.',play:true},
-  {name:'Sneaky Pete',body:'Agent_Light',outfit:'Agent_light (base)',role:'Espía',defaultWeapon:'MP7',bio:'Nadie le vio llegar; nadie le vio irse.',play:true},
+  {name:'Sneaky Pete',body:'Agent_Light',outfit:'Agent_light (base)',role:'Francotirador',defaultWeapon:'M40',bio:'Nadie le vio llegar; nadie le vio irse.',play:true},
   {name:'Sister Florence',body:'Medic',outfit:'Medic / Medic_Rescue',role:'Médico',defaultWeapon:'M4A1',bio:'Reza por ti y luego te cose la herida.',play:true,rigPose:true},
    {name:'Riot Medic',body:'Medic_therapist',outfit:'Medic_therapist',role:'Médico',defaultWeapon:'M4A1',bio:'Casco antidisturbios y camilla blindada.',play:true},
    {name:'Textbook Kate',body:'Medic',outfit:'Medic (variante)',role:'Médico',defaultWeapon:'M4A1',bio:'Se sabe el manual de memoria; por eso cura mejor.',play:true},
   {name:'Big Time Taschmann',body:'Engineer',outfit:'Engineer / Spetsnaz',role:'Ingeniero',defaultWeapon:'Remington 870',bio:'Maza más alta que su torso y sonrisa de oreja a oreja.',play:true},
    {name:'Megan McNick',body:'Engineer_Light',outfit:'Engineer_Light / Trinity',role:'Ingeniero',defaultWeapon:'Benelli M4',bio:'Ingeniera de Trinity: torretas antes que palabras.',play:true},
    {name:'Carlito Grosso',body:'Engineer_Heavy',outfit:'Engineer_Heavy / EOD',role:'Ingeniero',defaultWeapon:'M203',bio:'Siempre vuelve con el blindaje puesto.',play:true},
-  {name:'Riot Agent',body:'Agent_Heavy',outfit:'Agent_Heavy / Skin1',role:'Comando',defaultWeapon:'M4A1',bio:'Antidisturbios: escudo primero, preguntas después.',play:true},
+  {name:'Riot Agent',body:'Agent_Heavy',outfit:'Agent_Heavy / Skin1',role:'Espía',defaultWeapon:'MP5',bio:'Antidisturbios: escudo primero, preguntas después.',play:true},
    {name:'Riot Engineer',body:'Engineer (RiotCop)',outfit:'Engineer_RiotCop',role:'Ingeniero',defaultWeapon:'M4A1',bio:'Convierte una calle en una fortaleza en tres turnos.',play:true},
   {name:'Commander (M)',body:'Commander',outfit:'Commander / Latino / Asian / African',role:'Capitán',defaultWeapon:'M4A1',bio:'Manda con la voz y con el ejemplo.',play:true},
    {name:'Commander (F)',body:'Commander_F',outfit:'Commander_F / Latino / Asian / African',role:'Capitán',defaultWeapon:'Desert Eagle',bio:'Misma autoridad, otro acento.',play:true}

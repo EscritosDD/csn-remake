@@ -149,6 +149,55 @@ test('el audio de armas procede de los AudioClip del original', () => {
   assert.match(weapons, /WEAPON_SFX_BY_WEAPON/);
 });
 
+test('los 23 perfiles originales enlazan clips, audio y acciones', async () => {
+  const { WEAPONS_ORIGINAL, originalWeaponProfile } = await import('../src/render3d/assets-weapons.js');
+  const { auWeaponFile } = await import('../src/audio/sound.js');
+  const soundSrc = fs.readFileSync(path.join(ROOT, 'src', 'audio', 'sound.js'), 'utf8');
+  const clips = JSON.parse(fs.readFileSync(path.join(ROOT, 'assets', 'soldier_clips.json'), 'utf8')).clips;
+  const dir = path.join(ROOT, 'assets', 'audio', 'sfx', 'weapons');
+  const esperado = {
+    AssaultRifle: ['idle2h', 'fireBurst', 'assaultrifle_fire.mp3', true, 'Probar disparo'],
+    Rifle: ['idle2h', 'fire2h', 'semiautorifle_fire.mp3', true, 'Probar disparo'],
+    Pistol: ['idle1h', 'fire1h', 'beretta_fire.mp3', true, 'Probar disparo'],
+    Revolver: ['idle1h', 'fire1hHeavy', 'revolver_fire.mp3', true, 'Probar disparo'],
+    Uzi: ['idle1h', 'fire1hBurst', 'submachinegun_fire.mp3', true, 'Probar disparo'],
+    MP5K: ['idle2h', 'fireBurst', 'mp5k_fire.mp3', true, 'Probar disparo'],
+    LightMachineGun: ['idle2h', 'fireBurst', 'lmg_fire.mp3', true, 'Probar disparo'],
+    Minigun: ['idle2h', 'fireMini', 'minigun_fire.mp3', true, 'Probar disparo'],
+    SniperRifle_weapon: ['idle2h', 'fireHeavy', 'sniperrifle_fire.mp3', true, 'Probar disparo'],
+    M95: ['idle2h', 'fireHeavy', 'm95_fire.mp3', true, 'Probar disparo'],
+    Shotgun: ['idle2h', 'fireHeavy', 'shotgun_fire.mp3', true, 'Probar disparo'],
+    RiotShotgun: ['idle2h', 'fireHeavy', 'riotshotgun_fire.wav', true, 'Probar disparo'],
+    RPG: ['idle2h', 'fireShoulder', 'rocketlauncher_fire.mp3', true, 'Probar disparo'],
+    Crossbow: ['idle2h', 'fire2h', 'crossbow_fire.mp3', false, 'Probar disparo'],
+    Knife: ['idleMelee', 'fireMelee', 'knife_slash_01.mp3', false, 'Probar ataque'],
+    Katana: ['idleMelee', 'fireMelee', 'knife_slash_01.mp3', false, 'Probar ataque'],
+    WoodAxe: ['idleMelee', 'fireMelee', 'axe_swing_01.mp3', false, 'Probar ataque'],
+    SledgeHammer: ['idleMelee', 'fireMelee', '2h_swing_01.mp3', false, 'Probar ataque'],
+    BaseballBat_SOURCE: ['idleMelee', 'fireMelee', 'baseballbat_hit_01.mp3', false, 'Probar ataque'],
+    SpikedClub_weapon: ['idleMelee', 'fireMelee', 'spikedclub_hit_01.mp3', false, 'Probar ataque'],
+    Chainsaw: ['idleMelee', 'fireMelee', 'chainsaw_swing_01.mp3', false, 'Probar ataque'],
+    FragGrenade: ['idle1h', 'throw', 'grenade_throw_01.mp3', false, 'Probar lanzamiento'],
+    Molotov: ['idle1h', 'throw', 'grenade_throw_01.mp3', false, 'Probar lanzamiento']
+  };
+  assert.equal(Object.keys(esperado).length, 23);
+  assert.deepEqual(Object.keys(WEAPONS_ORIGINAL).sort(), Object.keys(esperado).sort());
+  for (const [file, values] of Object.entries(esperado)) {
+    const [idleClip, fireClip, sfx, hasMuzzleFlash, actionLabel] = values;
+    assert.deepEqual(originalWeaponProfile(file), { idleClip, fireClip, sfx, hasMuzzleFlash, actionLabel }, 'perfil de ' + file);
+    assert.ok(fs.existsSync(path.join(dir, sfx)), 'falta audio ' + sfx + ' (' + file + ')');
+    assert.ok(clips[idleClip], 'falta clip ' + idleClip + ' (' + file + ')');
+    assert.ok(clips[fireClip], 'falta clip ' + fireClip + ' (' + file + ')');
+    assert.doesNotThrow(() => auWeaponFile(file), 'auWeaponFile ' + file);
+  }
+  assert.equal(WEAPONS_ORIGINAL.AssaultRifle.name, 'Assault Rifle');
+  assert.equal(WEAPONS_ORIGINAL.Rifle.name, 'Semi Auto Rifle');
+  assert.match(soundSrc, /import\s*\{[^}]*originalWeaponProfile[^}]*\}\s*from\s*'\.\.\/render3d\/assets-weapons\.js'/);
+  assert.match(soundSrc, /export function auWeaponFile\(file\)/);
+  assert.match(soundSrc, /originalWeaponProfile\(file\)/);
+  assert.match(soundSrc, /auPlay\('sfx\/weapons\/'\+profile\.sfx,profile\.sfx\.endsWith\('\.wav'\)\?0\.35:0\.45\)/);
+});
+
 test('el material de las armas usa la textura del IPA sin alias ni mipmaps', () => {
   const src = fs.readFileSync(path.join(ROOT, 'src', 'render3d', 'assets-weapons.js'), 'utf8');
   assert.match(src, /color:0xb8b8b8,roughness:0\.80,metalness:0\.03/);
@@ -165,9 +214,10 @@ test('la captura auditoriza el visor y la verificacion la ejecuta', () => {
   assert.ok(cap.includes("mapId.startsWith('viewer:')"));
   assert.ok(cap.includes("result.viewerAudit = result.viewer"));
   assert.ok(verify.includes('viewer:audit-all'));
-  for (const mode of ['soap', 'sneaky', 'megan', 'sister', 'rpg', 'fire', 'meshy09', 'mp5k', 'minigun', 'setup']) {
+  for (const mode of ['soap', 'sneaky', 'megan', 'sister', 'rpg', 'fire', 'meshy09', 'mp5k', 'minigun', 'inspector', 'setup']) {
     assert.ok(cap.includes(mode + ':'), 'falta modo de captura ' + mode);
   }
+  assert.ok(cap.includes('inspectorAudit'));
 });
 
 test('los siete modelos por clase estan en assets/soldier', () => {
@@ -231,7 +281,7 @@ test('el visor no aplica pose, clips ni retarget a los modelos Meshy', () => {
 test('el visor usa el cargador de armas compartido sin alias temporales', () => {
   assert.doesNotMatch(html, /viewerWeaponCacheKey/);
   assert.doesNotMatch(html, /WEAPON_MESH_FILE\[key\]=file/);
-  assert.match(html, /const holder=GUN_MESH_CACHE\[file\];/);
+  assert.match(html, /const sourceGun=GUN_MESH_CACHE\[meshFile\];/);
   assert.match(html, /const meshFile=weaponFileForRef\(wanted\);/);
   assert.doesNotMatch(html, /position\.set\(0\.18,0\.62,0\)/);
   assert.doesNotMatch(html, /if\(bS\)\{/);
@@ -254,22 +304,28 @@ test('Configurar partida permite elegir personaje por ranura', () => {
   assert.match(html, /geometry\.deleteAttribute\('skinWeight'\)[\s\S]{0,400}side:THREE\.FrontSide/);
 });
 
-test('los originales del visor traen arma por defecto y filtran por rol', () => {
+test('los originales del visor traen arma por defecto y pueden equipar las 23 armas originales', () => {
   const viewer = fs.readFileSync(path.join(ROOT, 'src', 'viewer', 'main.js'), 'utf8');
+  const troops = fs.readFileSync(path.join(ROOT, 'src', 'viewer', 'troop-cards.js'), 'utf8');
   const cast = fs.readFileSync(path.join(ROOT, 'src', 'data', 'cast.js'), 'utf8');
   const defaults = Object.fromEntries([...cast.matchAll(/name:'([^']+)'[^\n]*?defaultWeapon:'([^']+)'/g)].map(m => [m[1], m[2]]));
   assert.equal(Object.keys(defaults).length, 17);
   const esperado = {
-    'Hipster Dave': 'M40', 'Archie Fletcher': 'M40', 'Soap': 'M110 SASS', 'Spud': 'M24 SWS',
-    'Ivan Tkilya': 'M249 SAW', 'Mme La Hacque': 'MP7', 'Sneaky Pete': 'MP7',
+    'Hipster Dave': 'M4A1', 'Archie Fletcher': 'M249 SAW', 'Soap': 'M240B', 'Spud': 'RPG-7',
+    'Ivan Tkilya': 'M249 SAW', 'Mme La Hacque': 'MP7', 'Sneaky Pete': 'M40',
     'Sister Florence': 'M4A1', 'Riot Medic': 'M4A1', 'Textbook Kate': 'M4A1',
     'Big Time Taschmann': 'Remington 870', 'Megan McNick': 'Benelli M4', 'Carlito Grosso': 'M203',
-    'Riot Agent': 'M4A1', 'Riot Engineer': 'M4A1', 'Commander (M)': 'M4A1', 'Commander (F)': 'Desert Eagle'
+    'Riot Agent': 'MP5', 'Riot Engineer': 'M4A1', 'Commander (M)': 'M4A1', 'Commander (F)': 'Desert Eagle'
   };
   assert.deepEqual(defaults, esperado);
-  assert.match(viewer, /WEAPONS_ORIGINAL\[file\]\|\|\{\}\)\.roles/);
-  assert.match(viewer, /roleWeapons\.unshift\(entry\.defaultWeapon\)/);
-  assert.doesNotMatch(viewer, /viewer\.weapon=''; selectModel\('roles'/);
+  assert.match(viewer, /viewerWeaponFiles=\[/);
+  const weapons = viewer.split('const viewerWeaponFiles=[')[1].split('];')[0];
+  assert.equal((weapons.match(/'/g)||[]).length/2, 23);
+  assert.match(troops, /getWeaponFiles:\(\)=>tcWeaponFiles/);
+  assert.match(viewer, /originalWeaponProfile\(file\)/);
+  assert.match(viewer, /auWeaponFile\(weaponFileForRef\(weapon\)\|\|weapon\)/);
+  assert.doesNotMatch(viewer, /VIEWER_ROLE_WEAPONS/);
+  assert.doesNotMatch(viewer, /MAP_PIECES/);
 });
 
 test('el visor funde clips y dispara desde eventos del clip', () => {
@@ -282,4 +338,35 @@ test('el visor funde clips y dispara desde eventos del clip', () => {
   assert.match(viewer, /gun\.userData\._testFlash=1/);
   assert.doesNotMatch(viewer, /fireBtn\.onclick[\s\S]{0,600}auWeapon/);
   assert.doesNotMatch(viewer, /position\.set\(0\.18,0\.62,0\)/);
+});
+
+test('los roles del reparto original coinciden con el IPA', async () => {
+  const { CHARACTERS, ORIG_CAST } = await loadData();
+  const jugables = Object.fromEntries(CHARACTERS.map(entry => [entry.name, entry.role]));
+  assert.deepEqual(jugables, {
+    'Hipster Dave': 'Comando', 'Ivan Tkilya': 'Artillero', 'Sneaky Pete': 'Francotirador',
+    'Sister Florence': 'Médico', 'Big Time Taschmann': 'Ingeniero',
+    'Riot Agent': 'Espía', 'Commander (M)': 'Capitán'
+  });
+  const roles = Object.fromEntries(ORIG_CAST.map(entry => [entry.name, entry.role]));
+  for (const [name, role] of Object.entries({
+    'Hipster Dave': 'Comando', 'Archie Fletcher': 'Artillero', 'Soap': 'Artillero',
+    'Spud': 'Artillero', 'Ivan Tkilya': 'Artillero', 'Sneaky Pete': 'Francotirador',
+    'Mme La Hacque': 'Espía', 'Riot Agent': 'Espía'
+  })) assert.equal(roles[name], role, name);
+});
+
+test('los 10 desplegables tienen un SFX original accesible', async () => {
+  const { DEPLOYABLES } = await import('../src/data/deployables.js');
+  const sound = fs.readFileSync(path.join(ROOT, 'src', 'audio', 'sound.js'), 'utf8');
+  const arsenal = fs.readFileSync(path.join(ROOT, 'src', 'ui', 'arsenal.js'), 'utf8');
+  const inspector = fs.readFileSync(path.join(ROOT, 'src', 'viewer', 'inspector.js'), 'utf8');
+  assert.equal(DEPLOYABLES.length, 10);
+  for (const prop of DEPLOYABLES) {
+    assert.match(prop.sfx, /^sfx\/abilities\/[\w-]+\.(mp3|wav)$/, prop.key);
+    assert.ok(fs.existsSync(path.join(ROOT, 'assets', 'audio', prop.sfx)), prop.sfx);
+  }
+  assert.match(sound, /export function auDeployable\(key\)/);
+  assert.match(arsenal, /data-au-deployable/);
+  assert.match(inspector, /auDeployable\(insCurrent\.key\)/);
 });

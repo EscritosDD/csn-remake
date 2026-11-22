@@ -5,6 +5,6 @@ export const STEP_META={
   battle:{n:4,label:'Batalla',hint:'Mueve, dispara y termina el turno'}
 };
 
-export const AUX_LABELS={'scr-barracks':'Cuartel','scr-arsenal':'Arsenal','scr-viewer':'Visor 3D','scr-how':'Reglas'};
+export const AUX_LABELS={'scr-barracks':'Cuartel','scr-arsenal':'Armería','scr-viewer':'Tropas','scr-how':'Reglas'};
 
-export const AUX_HINTS={'scr-barracks':'Tropas, skins y monedas · opcional','scr-arsenal':'Datos reales de armas · opcional','scr-viewer':'Modelos y armas en 3D · opcional','scr-how':'Reglas rápidas · opcional'};
+export const AUX_HINTS={'scr-barracks':'Tropas, skins y monedas · opcional','scr-arsenal':'Armas originales, CSN y desplegables · opcional','scr-viewer':'Personajes con visor 3D integrado · opcional','scr-how':'Reglas rápidas · opcional'};

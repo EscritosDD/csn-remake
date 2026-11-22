@@ -1,4 +1,4 @@
-import { VIEW_MODE, T3, w2cx, init3D, setViewMode, build3DWorld, rebuildDyn3, rebuildHighlights3, updateHover3D, tickFx3D, updateUnitHuds3D, driveClipSoldier, driveRealSoldier, fitLiveGun3, CLIPLIB, CLIP_EVENT_LOG, skState } from './index.js';
+import { VIEW_MODE, T3, w2cx, init3D, setViewMode, build3DWorld, rebuildDyn3, rebuildHighlights3, updateHover3D, tickFx3D, updateUnitHuds3D, driveClipSoldier, driveRealSoldier, fitLiveGun3, updateGlbActor, crossFadeTo, CLIPLIB, CLIP_EVENT_LOG, skState } from './index.js';
 import { REDUCED_MOTION, FX } from '../render2d/index.js';
 import { domControl } from '../ui/index.js';
 import { tileWorldY } from '../game/index.js';
@@ -97,6 +97,11 @@ const {G,hoverTile,advanceUnitYaw,TURRET_POS}=ctx;
     if(mesh.userData.hpArc){const f=Math.max(0,Math.min(1,un.hp/un.maxHp));mesh.userData.hpArc.geometry.setDrawRange(0,Math.floor(64*6*f));mesh.userData.hpArc.visible=un.alive;}
     const ud=mesh.userData;
     const moving=Math.abs(un.x-rx)>0.03||Math.abs(un.y-ry)>0.03||!!un._drawPath;
+    if(ud.glbActor){
+      updateGlbActor(ud.glbActor,dt);
+      const state=moving?'walk':(un.firing?'fire':'idle');
+      if(ud.glbState!==state){crossFadeTo(ud.glbActor,state,0.18,true);ud.glbState=state;}
+    }
     mesh.position.y=0.05+tileWorldY(rx,ry)+(moving&&!REDUCED_MOTION?Math.abs(Math.sin((ud._gaitPhase||0)*Math.PI*2+un.id))*0.045:0);
     const yaw=advanceUnitYaw(un,t);
     mesh.rotation.y=-yaw;
@@ -104,7 +109,7 @@ const {G,hoverTile,advanceUnitYaw,TURRET_POS}=ctx;
     mesh.rotation.z=turnLean;
     if(un._turning&&!REDUCED_MOTION)mesh.position.y+=Math.sin((un._turnProg||0)*Math.PI)*0.025;
     if(ud.baseChev)ud.baseChev.visible=!!un.alive;
-    if(ud.real){if(CLIPLIB.ready)driveClipSoldier(un,mesh,t,moving);else driveRealSoldier(un,mesh,t,moving||!!un._turning);fitLiveGun3(un,mesh);}
+    if(ud.real&&!ud.glbActor){if(CLIPLIB.ready)driveClipSoldier(un,mesh,t,moving);else driveRealSoldier(un,mesh,t,moving||!!un._turning);fitLiveGun3(un,mesh);}
     else if(un.alive){
       mesh.rotation.z=turnLean;
       ud.body.position.y=REDUCED_MOTION?0:Math.sin(t/430+un.id*1.93)*0.02;

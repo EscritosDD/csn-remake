@@ -5,16 +5,12 @@ import { lsGet, lsSet } from '../core-and-audio.js';
 import { CAST_BODIES, CHAR_PREFS, charsForRole, loadChars, setCHAR_PREFS } from '../game/chars.js';
 import { rolePortraitURL, showScreen } from './ui-shell.js';
 import { ABILITY_CATALOG, ABILITY_IMPL, CLASS_LABEL } from './abilities.js';
+import { setArsSection } from './arsenal.js';
 
 export const COINS_KEY='radsoldiers_coins';
 
 export function armTab(which){
-  const esArmas=which!=='habilidades';
-  document.querySelectorAll('#armTabSeg button').forEach(x=>x.classList.toggle('on',x.dataset.armtab===(esArmas?'armas':'habilidades')));
-  const f=document.getElementById('arsFilters'),g=document.getElementById('arsenalGrid'),ap=document.getElementById('abilityPanel');
-  if(f)f.style.display=esArmas?'':'none';
-  if(g)g.style.display=esArmas?'':'none';
-  if(ap)ap.style.display=esArmas?'none':'';
+  setArsSection(which==='habilidades'?'abilities':'weapons');
 }
 
 export function renderAbilityCatalog(){

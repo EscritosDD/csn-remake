@@ -2,7 +2,10 @@ import { lsGet } from '../core/storage.js';
 import { DMR_WEAPONS, WEAPON_SFX, weaponSfxFile } from '../data/weapons.js';
 
 import { CHAR_VOICE } from '../data/cast.js';
+import { DEPLOYABLES } from '../data/deployables.js';
 import { VOICE_FILES } from '../data/roles.js';
+import { originalWeaponProfile } from '../render3d/assets-weapons.js';
+
 
 export const LS_SOUND='radsoldiers_sound';
 
@@ -28,30 +31,47 @@ export const AU_BASE='assets/audio/';
 
 export let AU_AMBIENT=null;
 
-const AUDIO_BUFFERS=new Map(),AUDIO_PENDING=new Map(),AUDIO_TEMPLATES=new Map();
+const AUDIO_BUFFERS=new Map(),AUDIO_PENDING=new Map();
 
-function auBuffer(path){
-  const ac=audioCtx();if(!ac)return null;
-  if(AUDIO_BUFFERS.has(path))return AUDIO_BUFFERS.get(path);
-  if(AUDIO_PENDING.has(path))return null;
+export function auBufferAsync(path){
+  if(AUDIO_BUFFERS.has(path))return Promise.resolve(AUDIO_BUFFERS.get(path));
+  if(AUDIO_PENDING.has(path))return AUDIO_PENDING.get(path);
+  const ac=audioCtx();
+  if(!ac)return Promise.resolve(null);
   const pending=fetch(AU_BASE+path).then(r=>{if(!r.ok)throw new Error(path);return r.arrayBuffer();}).then(data=>new Promise((resolve,reject)=>{const req=ac.decodeAudioData(data,resolve,reject);if(req&&req.then)req.then(resolve,reject);}))
     .then(buffer=>{AUDIO_BUFFERS.set(path,buffer);AUDIO_PENDING.delete(path);return buffer;}).catch(()=>{AUDIO_PENDING.delete(path);return null;});
-  AUDIO_PENDING.set(path,pending);return null;
+  AUDIO_PENDING.set(path,pending);return pending;
+}
+
+function playElement(path,level,loop){
+  const a=new Audio(AU_BASE+path);
+  a.volume=level;a.loop=!!loop;
+  try{const playing=a.play();if(playing&&playing.catch)playing.catch(()=>{});}catch(e){}
+  return a;
+}
+
+function playBuffer(ac,buffer,level){
+  const src=ac.createBufferSource(),gain=ac.createGain();
+  src.buffer=buffer;gain.gain.value=level;src.connect(gain);gain.connect(ac.destination);src.start();return src;
 }
 
 export function auPlay(path,vol,loop){
   if(!soundOn)return null;
   const level=vol==null?0.6:vol;
   try{
-    const ac=audioCtx(),buffer=ac&&auBuffer(path);
-    if(buffer){
-      const src=ac.createBufferSource(),gain=ac.createGain();
-      src.buffer=buffer;src.loop=!!loop;gain.gain.value=level;src.connect(gain);gain.connect(ac.destination);src.start();return src;
-    }
-    let a=AUDIO_TEMPLATES.get(path);
-    if(!a){a=new Audio(AU_BASE+path);AUDIO_TEMPLATES.set(path,a);}
-    try{a.pause();a.currentTime=0;}catch(e){}
-    a.volume=level;a.loop=!!loop;a.play().catch(()=>{});return a;
+    if(loop===true)return playElement(path,level,true);
+    let ac=null;
+    try{ac=audioCtx();}catch(e){}
+    if(!ac)return playElement(path,level,false);
+    if(ac.state==='suspended')ac.resume();
+    const cached=AUDIO_BUFFERS.get(path);
+    if(cached)return playBuffer(ac,cached,level);
+    auBufferAsync(path).then(buffer=>{
+      if(!buffer){playElement(path,level,false);return;}
+      if(ac.state==='suspended')ac.resume();
+      playBuffer(ac,buffer,level);
+    }).catch(()=>{});
+    return null;
   }catch(e){return null;}
 }
 
@@ -59,13 +79,28 @@ export function auWeapon(cat,weaponName){
   const f=weaponSfxFile(cat,weaponName);if(f)auPlay('sfx/weapons/'+f,f.endsWith('.wav')?0.35:0.45);
 }
 
+export function auWeaponFile(file){
+  const profile=originalWeaponProfile(file);
+  if(!profile||!profile.sfx)return null;
+  return auPlay('sfx/weapons/'+profile.sfx,profile.sfx.endsWith('.wav')?0.35:0.45);
+}
+
+export function auDeployable(key){
+  const prop=DEPLOYABLES.find(item=>item.key===key);
+  if(!prop||!prop.sfx)return null;
+  return auPlay(prop.sfx,prop.sfx.endsWith('.wav')?0.35:0.45);
+}
 
 export function auClick(){auPlay('sfx/ui/ui_click.mp3',0.35);}
 
 export function auVoice(un,ev,vol){
-  if(!un||!un.role)return;
+  if(!un||typeof un.role!=='string'||!un.role)return;
   let folder=null;
-  try{const nm=un.name||(globalThis.charNameFor ? globalThis.charNameFor(un.role) : '');if(nm&&CHAR_VOICE[nm])folder=CHAR_VOICE[nm];}catch(e){}
+  try{
+    const named=typeof un.name==='string'&&un.name.trim()?un.name:'';
+    const nm=named||(globalThis.charNameFor?globalThis.charNameFor(un.role):'');
+    if(typeof nm==='string'&&CHAR_VOICE[nm])folder=CHAR_VOICE[nm];
+  }catch(e){}
   if(!folder)folder=VOICE_FILES[un.role];
   if(!folder)return;
   auPlay('voice/'+folder+'/'+ev+'.mp3',vol==null?0.5:vol);

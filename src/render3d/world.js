@@ -9,12 +9,13 @@ import { skState, loadSkirmishGeo, buildSkirmishGeo3, makeDrone3 } from './asset
 import { makeRealSoldier3 } from './soldiers.js';
 import { getRealSpriteImage } from './real-sprites.js';
 import { buildThemedProps3 } from './world-props.js';
+import { disposeObject3D } from './asset-cache.js';
 
 export function build3DWorld(){
   if(!T3||!G)return;
   const sc=T3.scene;
-  if(T3.world){sc.remove(T3.world);}
-  ['unitsGroup','dynGroup','hlGroup','aimGroup','fxGroup'].forEach(k=>{if(T3[k])sc.remove(T3[k]);});
+  if(T3.world){sc.remove(T3.world);disposeObject3D(T3.world);}
+  ['unitsGroup','dynGroup','hlGroup','aimGroup','fxGroup'].forEach(k=>{if(T3[k]){sc.remove(T3[k]);disposeObject3D(T3[k]);}});
   const world=new THREE.Group();sc.add(world);T3.world=world;
   T3.unitsGroup=new THREE.Group();sc.add(T3.unitsGroup);
   T3.dynGroup=new THREE.Group();sc.add(T3.dynGroup);
@@ -215,7 +216,7 @@ export function build3DWorld(){
 
 export function rebuildDyn3(){
   if(!T3||!G)return;
-  while(T3.dynGroup.children.length)T3.dynGroup.remove(T3.dynGroup.children[0]);
+  while(T3.dynGroup.children.length){const child=T3.dynGroup.children[0];T3.dynGroup.remove(child);disposeObject3D(child);}
   (G.lootBoxes||[]).forEach(b=>{
     const grp=new THREE.Group();grp.position.set(w2cx(b.x),0,w2cx(b.y));grp.userData.loot=true;
     const sh=makeContactShadow3(0.36,0.05);if(sh)grp.add(sh);
@@ -264,7 +265,7 @@ export function rebuildDyn3(){
 
 export function rebuildHighlights3(){
   if(!T3||!G)return;
-  while(T3.hlGroup.children.length)T3.hlGroup.remove(T3.hlGroup.children[0]);
+  while(T3.hlGroup.children.length){const child=T3.hlGroup.children[0];T3.hlGroup.remove(child);disposeObject3D(child);}
   const u=G.selected;
   if(!u||!u.alive||u.team!==G.turn||G.aiBusy||G.over)return;
   if(!T3.hlTileGeo)T3.hlTileGeo=new THREE.PlaneGeometry(0.88,0.88);

@@ -6,7 +6,8 @@ import UnityPy
 from UnityPy.helpers.MeshHelper import MeshHandler
 
 RAW = r'D:\Juegos\CSN-repo\_original\ipa\Payload\radtactics.app\Data\Raw'
-BODIES = r'D:\Juegos\CSN-repo\assets\soldier\bodies'
+OBJ_BODIES = r'D:\Juegos\CSN-repo\assets\soldier\bodies'
+BODIES = os.environ.get('CSN_RIG_OUT', OBJ_BODIES)
 ORDER = ['Bip001','Bip001 Pelvis','Bip001 Spine','Bip001 Spine1','Bip001 Neck','Bip001 Head',
          'Bip001 L Clavicle','Bip001 L UpperArm','Bip001 L Forearm','Bip001 L Hand',
          'Bip001 R Clavicle','Bip001 R UpperArm','Bip001 R Forearm','Bip001 R Hand',
@@ -51,11 +52,15 @@ def mm(a, b):
 def mat_of(m):
     return [[float(getattr(m, 'e%d%d' % (r, c))) for c in range(4)] for r in range(4)]
 
+def unit_quat(q):
+    length = math.sqrt(sum(value * value for value in q))
+    return [value / length for value in q] if length > 1e-12 else [0.0, 0.0, 0.0, 1.0]
+
 def quat_from_mat(m):
     tr = m[0][0] + m[1][1] + m[2][2]
     if tr > 0:
         s = math.sqrt(tr + 1.0) * 2.0
-        return [(m[2][1] - m[1][2]) / s, (m[0][2] - m[2][0]) / s, (m[1][0] - m[0][1]) / s, 0.25 * s]
+        return unit_quat([(m[2][1] - m[1][2]) / s, (m[0][2] - m[2][0]) / s, (m[1][0] - m[0][1]) / s, 0.25 * s])
     i = max(range(3), key=lambda k: m[k][k])
     j, k = (i + 1) % 3, (i + 2) % 3
     s = math.sqrt(1.0 + m[i][i] - m[j][j] - m[k][k]) * 2.0
@@ -64,7 +69,16 @@ def quat_from_mat(m):
     q[3] = (m[k][j] - m[j][k]) / s
     q[j] = (m[j][i] + m[i][j]) / s
     q[k] = (m[k][i] + m[i][k]) / s
-    return q
+    return unit_quat(q)
+
+def rotation_of(m):
+    out = [row[:] for row in m]
+    for c in range(3):
+        length = math.sqrt(sum(out[r][c] * out[r][c] for r in range(3)))
+        if length > 1e-12:
+            for r in range(3):
+                out[r][c] /= length
+    return out
 
 def obj_z_scale(path):
     zs = []
@@ -111,12 +125,14 @@ for body, bundle, smr_pid in SPEC:
     remap = [ORDER.index(name) for name in bone_names]
     world = {}
     for slot, name in enumerate(bone_names):
-        matrix = inv(mat_of(mesh_obj.m_BindPose[slot]))
+        matrix = rotation_of(inv(mat_of(mesh_obj.m_BindPose[slot])))
         for r in range(3):
-            matrix[r][3] *= obj_z_scale(os.path.join(BODIES, body + '.obj'))
+            matrix[r][3] *= obj_z_scale(os.path.join(OBJ_BODIES, body + '.obj'))
         world[name] = matrix
     world['Bip001'] = [[1.0 if r == c else 0.0 for c in range(4)] for r in range(4)]
     world['Bip001 Neck'] = world['Bip001 Spine1']
+    if abs(world['Bip001 Pelvis'][0][3]) > 0.3:
+        world['Bip001 Pelvis'][0][3] = 0.0
     bones = []
     inverses = []
     for i, name in enumerate(ORDER):

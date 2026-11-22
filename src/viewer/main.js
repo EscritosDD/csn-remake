@@ -1,8 +1,18 @@
-import { MAP_PIECES } from '../data/map-pieces.js'; (function(){ const stage=document.getElementById('viewerCanvas'); if(!stage||typeof THREE==='undefined')return;
+import { ensureCardStage, activeCard, resizeStage, renderStage, snapshotStage, computeAccurateBounds, setCardModelBuilder, setCardStageCallbacks, setCardRestPose, setStageBaseDistance, setStageZoom, stageZoom, mountStageInto, unmountStage, scanCardBoxes, isCardStageRendering } from './card-stage.js';
+import { loadGlbActor, updateGlbActor, playOnce, disposeGlbActor } from '../render3d/actor-glb.js';
+import { setGlbLabActor } from '../ui/glb-lab.js';
+import { renderTroopCards } from './troop-cards.js';
+import { openInspector } from './inspector.js';
+import { originalWeaponProfile, WEAPONS_ORIGINAL, weaponFileForRef } from '../render3d/assets-weapons.js';
+import { DEPLOYABLES } from '../data/deployables.js';
+import { auWeaponFile, auVoice } from '../core-and-audio.js';
+(function(){ const stage=document.getElementById('viewerCanvas'); if(!stage||typeof THREE==='undefined')return;
   const status=document.getElementById('viewerStatus'); const zoomControl=document.getElementById('viewerZoom'); const texturePreview=document.getElementById('viewerTexture');
   const viewer={ renderer:null,scene:null,camera:null,spin:null,platform:null,meshyFill:null,meshyRim:null, baseDistance:3,drag:null,dragVel:0,lastFrame:0,selection:0,
     kind:'roles',name:'',skinIndex:0,weapon:'',weaponChar:'',weaponTouched:false,idleActor:null,gripActor:null,idleClipKey:'idle2h',testFire:null,
-    frameRequested:false,models:{roles:{},weapons:{},props:{},pieces:{}},textures:{},bodyGeo:{},bodyRig:{},pieceMap:'Skirmish_03' }; try{window.__csnViewer={get state(){return viewer;}};}catch(e){}
+    frameRequested:false,models:{roles:{},weapons:{},props:{}},textures:{},bodyGeo:{},bodyRig:{},cardModel:null,cardMode:false,inspectorOpen:false }; try{window.__csnViewer={get state(){return viewer;},getRoster:()=>viewerCharacters,getWeaponFiles:()=>viewerWeaponFiles,getEntry:key=>viewerCharacters.find(item=>item.key===key)||null,activate:spec=>activateSpec(activeCard().box||document.querySelector('#inspectorStage'),spec),fire:null,unmount:()=>unmountStage(),getCardBox:()=>activeCard().box};}catch(e){}
+  const cardStage=ensureCardStage(stage);
+  if(cardStage){viewer.renderer=cardStage.renderer;viewer.scene=cardStage.scene;viewer.camera=cardStage.camera;viewer.spin=cardStage.spin;viewer.platform=cardStage.platform;viewer.meshyFill=cardStage.meshyFill;viewer.meshyRim=cardStage.meshyRim;}
   const VIEWER_BODY_SKINS={ 'Soldier_SAS':['Soldier_SAS_d.png','Soldier_SAS_Decon_d.png','Soldier_SAS_Veteran_d.png'],
     'Soldier_Spud':['Soldier_d.png','Soldier_Decon_d.png','Soldier_ForestCamo_d.png','Soldier_Veteran_d.png'],
     'Soldier_Light':['Soldier_Light_d.png','Soldier_Light_Decon_d.png','Soldier_Light_DeltaForce_d.png','Soldier_Light_Halloween_d.png','Soldier_Light_Spetsnaz_d.png','Soldier_Light_Veteran_d.png'],
@@ -24,10 +34,8 @@ import { MAP_PIECES } from '../data/map-pieces.js'; (function(){ const stage=doc
     'Agent_Light':'Agent_Light.obj', 'Medic_therapist':'Medic_therapist_1248v.obj', 'Engineer_Light':'Engineer_Light.obj', 'Engineer_Heavy':'Engineer_Heavy.obj',
     'Engineer (RiotCop)':'Engineer_RiotCop.obj', 'CommanderM':'CommanderM.obj', 'Commander_F':'CommanderF.obj' };
   const VIEWER_BODY_OVERRIDE={'Archie Fletcher':'Soldier_Light_Rambo','Commander (M)':'CommanderM'};
-  const VIEWER_BODY_ROLE={'Medic':'Médico','Engineer':'Ingeniero','Agent_Heavy':'Comando','Commander':'Capitán'}; const VIEWER_ROLE_WEAPONS={};
-  if(typeof ROLES!=='undefined'&&typeof WEAPON_MESH_FILE!=='undefined'){ Object.keys(ROLES).forEach(role=>{
-      VIEWER_ROLE_WEAPONS[role]=(ROLES[role].weapons||[]).filter(w=>{const file=WEAPON_MESH_FILE[w];if(!file)return false;
-        const roles=String((WEAPONS_ORIGINAL[file]||{}).roles||'').split(/\s*\/\s*|,\s*/).filter(Boolean);return !roles.length||roles.includes(role);}); }); }; const VIEWER_MESHY_FRONT={Francotirador:1,Espia:1,Artillero:-1,Medico:1,Ingeniero:1};
+  const VIEWER_BODY_ROLE={'Medic':'Médico','Engineer':'Ingeniero','Agent_Heavy':'Comando','Commander':'Capitán'};
+  const VIEWER_MESHY_FRONT={Francotirador:1,Espia:1,Artillero:-1,Medico:1,Ingeniero:1};
   const viewerCharacters=[ ...ORIG_CAST.map((character,index)=>{ const role=character.role||VIEWER_ROLE_FALLBACK[character.name]||'';
       const body=VIEWER_BODY_OVERRIDE[character.name]||character.body; const bodyFile=VIEWER_BODY_FILE[body]||''; const bodyRole=VIEWER_BODY_ROLE[body]||''; return {
         key:'original:'+String(index+1).padStart(2,'0'), label:character.name,name:character.name,role,bio:character.bio||'', defaultWeapon:character.defaultWeapon||'', body,bodyFile,bodyRole,
@@ -37,19 +45,9 @@ import { MAP_PIECES } from '../data/map-pieces.js'; (function(){ const stage=doc
     ...MESHY_CAST.map(c=>({...c,key:c.key,label:c.label,name:c.name,role:c.role,mesh:c.mesh,bio:c.bio})) ]; viewerCharacters.forEach(entry=>{
     if(entry.mesh){entry.skins=[{key:'own',label:'Textura Meshy'}];return;}; const variants=VIEWER_BODY_SKINS[entry.body]||[]; const ordered=entry.outfit
       ?[entry.outfit,...variants.filter(file=>file!==entry.outfit)] :variants; entry.skins=ordered.map((file,index)=>({
-      key:'cast:'+file,label:'Skin '+String(index+1).padStart(2,'0')+' · '+file })); }); const viewerWeaponFiles=[
+      key:'cast:'+file,label:'Skin '+String(index+1).padStart(2,'0')+' · '+file })); });   const viewerWeaponFiles=[
     'AssaultRifle','Rifle','Pistol','SniperRifle_weapon','Shotgun','RPG','Crossbow', 'SledgeHammer','Uzi','Revolver','RiotShotgun','M95','LightMachineGun','Molotov',
-    'Knife','Katana','WoodAxe','MP5K','Chainsaw','Minigun','BaseballBat_SOURCE', 'SpikedClub_weapon','FragGrenade' ]; const viewerPropFiles=[
-    {key:'CommCrate_124tri',label:'Caja de botín',file:'CommCrate_124tri.obj',tex:'TreasureCrate_d.png',note:'Caja de comandante / botín del original.'},
-    {key:'CommCrate_180tri',label:'Caja de botín (variante)',file:'CommCrate_180tri.obj',tex:'TreasureCrate_d.png',note:'Variante de 180 triángulos de la caja.'},
-    {key:'UAV',label:'UAV',file:'UAV.obj',tex:'UAV_d.png',note:'Dron explorador del original.'},
-    {key:'GatlingTurret',label:'Torreta Gatling',file:'GatlingTurret.obj',tex:'MGTurret_d.png',note:'Torreta Gatling del original.'},
-    {key:'RocketTurret',label:'Torreta de cohetes',file:'RocketTurret.obj',tex:'RocketTurret_d.png',note:'Torreta de cohetes del original.'},
-    {key:'SpiderMine',label:'Mina',file:'SpiderMine.obj',tex:'SpiderMine_d.png',note:'Mina desplegable del original.'},
-    {key:'RemoteCharge',label:'Carga remota',file:'RemoteCharge.obj',tex:'RemoteCharge_d.png',note:'Carga remota del original.'},
-    {key:'DeployableCover',label:'Cobertura desplegable',file:'DeployableCover.obj',tex:'DeployableCover_d.png',note:'Cobertura desplegable del original.'},
-    {key:'ObjectiveRocket',label:'Cohete objetivo',file:'ObjectiveRocket.obj',tex:'Rocket_d.png',note:'Cohete objetivo del mapa.'},
-    {key:'RiotShieldBot',label:'Shield-O-Bot',file:'RiotShieldBot.obj',tex:'RiotShieldBot_d.png',note:'Robot escudo del original.'} ]; function abilityCardHTML(ability){
+    'Knife','Katana','WoodAxe','MP5K','Chainsaw','Minigun','BaseballBat_SOURCE', 'SpikedClub_weapon','FragGrenade' ]; const viewerPropFiles=DEPLOYABLES; function abilityCardHTML(ability){
     const obj=ability.obj?ABILITY_OBJECTS[ability.obj]:null; const objLine=obj ?'<br><span class="sub">Objeto: '+obj.name+'. '+(obj.model
         ?'<button type="button" data-viewer-prop="'+obj.model+'" style="text-decoration:underline;cursor:pointer">Ver en 3D</button> · '+obj.note :obj.note)+'</span>' :'';
     return '<div class="ab-card on" style="display:flex;gap:8px;align-items:center;text-align:left"><img src="assets/ui/ability/'+ability.icon+'.png" alt="" style="width:34px;height:34px;flex:none"/><span><b>'+ability.n+'</b><br><small>'+ability.d+objLine+'</small></span></div>';
@@ -58,33 +56,32 @@ import { MAP_PIECES } from '../data/map-pieces.js'; (function(){ const stage=doc
     if(!entry||!entry.name){box.innerHTML='';return;}; const list=CHARACTER_ABILITIES[entry.name]; if(list===undefined){box.innerHTML='';return;}; if(!list.length){
       box.innerHTML='<p class="sub" style="margin:0"><b>Habilidades:</b> el Capitán tenía una selección aparte de habilidades de comandante; las concretas no están en el material legible del original.</p>';
       return; }; box.innerHTML='<p class="sub" style="margin:0 0 6px"><b>Habilidades del original:</b></p>'+list.map(abilityCardHTML).join('');
-    box.querySelectorAll('[data-viewer-prop]').forEach(button=>{ button.onclick=()=>{
-        document.querySelectorAll('#viewerKinds button').forEach(item=>item.classList.toggle('on',item.dataset.kind==='props')); viewer.kind='props';viewer.skinIndex=0;
-        selectModel('props',button.dataset.viewerProp); }; }); };   const idleForWeapon=w=>{const cat=(typeof WEAPONS!=='undefined'&&WEAPONS[w]||{}).cat;return cat==='Pistolas'?'idle1h':cat==='Cuerpo a cuerpo'?'idleMelee':'idle2h';}; const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms)); function setStatus(message,visible){
+    box.querySelectorAll('[data-viewer-prop]').forEach(button=>{ button.onclick=()=>{if(window.openDeployable3D)window.openDeployable3D(button.dataset.viewerProp);}; }); };   const idleForWeapon=w=>{const file=weaponFileForRef(w)||w;const profile=file&&originalWeaponProfile(file);const cat=profile&&profile.cat||(file&&WEAPONS_ORIGINAL[file]||{}).cat||(typeof WEAPONS!=='undefined'&&WEAPONS[w]||{}).cat;return cat==='Pistolas'?'idle1h':cat==='Cuerpo a cuerpo'?'idleMelee':'idle2h';}; const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms)); function setStatus(message,visible){
 
-    status.textContent=message; status.style.display=visible?'grid':'none'; }; function ensureRenderer(){ if(viewer.renderer)return true; try{
-      viewer.renderer=new THREE.WebGLRenderer({antialias:true,alpha:true}); viewer.renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
-      viewer.renderer.setClearColor(0x11150f,0); stage.insertBefore(viewer.renderer.domElement,status); viewer.scene=new THREE.Scene();
-      viewer.scene.add(new THREE.HemisphereLight(0xe7f0d9,0x30372b,2)); const key=new THREE.DirectionalLight(0xffedc2,2.4);key.position.set(3,5,4);viewer.scene.add(key);
-      const fill=new THREE.DirectionalLight(0x9bb8d1,1.1);fill.position.set(-4,2,-3);viewer.scene.add(fill);
-      viewer.meshyFill=new THREE.DirectionalLight(0xd7ebff,1.8);viewer.meshyFill.position.set(-3,2,5);viewer.meshyFill.intensity=0;viewer.scene.add(viewer.meshyFill);
-      viewer.meshyRim=new THREE.DirectionalLight(0xffd9a8,2.2);viewer.meshyRim.position.set(3,4,-4);viewer.meshyRim.intensity=0;viewer.scene.add(viewer.meshyRim);
-      viewer.camera=new THREE.PerspectiveCamera(36,1,0.01,80); viewer.spin=new THREE.Group();viewer.scene.add(viewer.spin); viewer.platform=new THREE.Mesh(
-        new THREE.CircleGeometry(1,48), new THREE.MeshStandardMaterial({color:0x30382a,roughness:0.9,metalness:0}) ); viewer.platform.rotation.x=-Math.PI/2;
-      viewer.scene.add(viewer.platform); return true; }catch(error){ setStatus('No se pudo iniciar el visor WebGL: '+error.message,true); return false; } }; function updateCamera(){
-    const zoom=+(zoomControl.value||1); viewer.camera.position.set(0,viewer.baseDistance*0.22,viewer.baseDistance/zoom); viewer.camera.lookAt(0,0,0); }; function resize(){
-    if(!viewer.renderer||!document.getElementById('scr-viewer').classList.contains('on'))return; const width=Math.max(1,stage.clientWidth),height=Math.max(1,stage.clientHeight);
-    viewer.renderer.setSize(width,height,false); viewer.camera.aspect=width/height; viewer.camera.updateProjectionMatrix(); };   function frame(now){
-    if(!document.getElementById('scr-viewer').classList.contains('on')){ viewer.frameRequested=false; return; }; if(viewer.renderer){
+    status.textContent=message; status.style.display=visible?'grid':'none'; };   function ensureRenderer(){ if(viewer.renderer)return true; setStatus('No se pudo iniciar el visor WebGL.',true); return false; };   function updateCamera(){
+    const zoom=+(zoomControl&&zoomControl.value||stageZoom()||1); viewer.camera.position.set(0,viewer.baseDistance*0.22,viewer.baseDistance/zoom); viewer.camera.lookAt(0,0,0); }; function resize(){
+    if(!viewer.renderer)return; const target=activeCard().box||stage; resizeStage(target); viewer.camera.aspect=viewer.renderer.domElement.width/Math.max(1,viewer.renderer.domElement.height);
+    viewer.camera.updateProjectionMatrix(); };   function frame(now){
+    const visible=document.getElementById('scr-viewer').classList.contains('on')||viewer.inspectorOpen;
+    const liveBox=activeCard().box;
+    const mounted=!!(liveBox&&viewer.renderer&&viewer.renderer.domElement.parentNode===liveBox);
+    const inspectorLive=viewer.inspectorOpen&&!!liveBox&&liveBox.id==='inspectorStage'&&mounted;
+    if(!visible||!inspectorLive||isCardStageRendering()){
+      viewer.lastFrame=now;
+      requestAnimationFrame(frame);
+      return;
+    }
+    if(viewer.renderer){
       const dt=viewer.lastFrame?Math.min(0.05,(now-viewer.lastFrame)/1000):0.016;
+      if(viewer.glbActor)updateGlbActor(viewer.glbActor,dt);
       const clips=CLIPLIB.ready&&CLIPLIB.pack&&CLIPLIB.pack.clips;
       let clipKey=viewer.idleClipKey,clip=clips&&clips[clipKey],ct=(now/1000)%(clip&&clip.dur||1),signature=clipKey+'|'+(viewer.weapon||'');
       if(viewer.testFire&&clips&&clips[viewer.testFire.key]){
         const elapsed=(now-viewer.testFire.start)/1000,fire=clips[viewer.testFire.key];
         if(elapsed<fire.dur){clip=fire;clipKey=viewer.testFire.key;ct=elapsed;signature=clipKey+'|fire|'+(viewer.weapon||'');}else viewer.testFire=null;
       }
-      if(viewer.idleActor&&clip){ if(!poseViewerClip(viewer.idleActor,clip,ct,clipKey,signature,now,dt*1000))poseSpriteClip(null,viewer.idleActor,clip,ct,clipKey); }
-      if(viewer.testFire&&viewer.idleActor)dispatchViewerFire(viewer.idleActor,clip,clipKey,ct,viewer.weapon);
+      if(viewer.idleActor&&clip&&!viewer.glbActor){ if(!poseViewerClip(viewer.idleActor,clip,ct,clipKey,signature,now,dt*1000))poseSpriteClip(null,viewer.idleActor,clip,ct,clipKey); }
+      if(viewer.testFire&&viewer.idleActor&&!viewer.glbActor)dispatchViewerFire(viewer.idleActor,clip,clipKey,ct,viewer.weapon);
       if(viewer.gripActor&&viewer.gripActor.userData.gun)
         fitGunToHand3(viewer.gripActor.userData.gripUnit,viewer.gripActor,false);
       const testGun=viewer.gripActor&&viewer.gripActor.userData.gun,testFlash=testGun&&testGun.userData.flash;
@@ -94,79 +91,75 @@ import { MAP_PIECES } from '../data/map-pieces.js'; (function(){ const stage=doc
         testFlash.material.opacity=testGun.userData._testFlash;
       }
       if(!viewer.drag&&viewer.spin&&viewer.spin.children.length){ viewer.spin.rotation.y+=dt*0.22; if(Math.abs(viewer.dragVel)>1e-4){ viewer.spin.rotation.y+=viewer.dragVel*dt;
-          viewer.dragVel*=Math.exp(-dt/0.25); }else viewer.dragVel=0; }; viewer.renderer.render(viewer.scene,viewer.camera); refreshTexturePreview(); }; viewer.lastFrame=now;
-    requestAnimationFrame(frame); }; function refreshTexturePreview(){ let texture=null; if(viewer.spin)viewer.spin.traverse(object=>{ if(!texture&&object.material){
+          viewer.dragVel*=Math.exp(-dt/0.25); }else viewer.dragVel=0; } renderStage(); refreshTexturePreview();
+    }
+    viewer.lastFrame=now;
+    requestAnimationFrame(frame);
+  }
+  function refreshTexturePreview(){ let texture=null; if(viewer.spin)viewer.spin.traverse(object=>{ if(!texture&&object.material){
         const mats=Array.isArray(object.material)?object.material:[object.material]; const mat=mats.find(item=>item.map&&item.map.image); if(mat)texture=mat.map; } });
     const image=texture&&texture.image; const src=image&&(image.currentSrc||image.src); if(src&&texturePreview.src!==src){texturePreview.src=src;texturePreview.hidden=false;} }
-  function mount(model){ if(model.parent)model.parent.remove(model); model.position.set(0,0,0); while(viewer.spin.children.length)viewer.spin.remove(viewer.spin.children[0]);
-    if(model.userData&&model.userData.bones&&model.userData.bindLocal&&CLIPLIB.ready&&!model.userData._viewerClip)
+  function mount(model){
+    const glbActor=model&&model.userData?model.userData.glbActor:null;
+    if(viewer.glbActor&&viewer.glbActor!==glbActor)disposeGlbActor(viewer.glbActor);
+    viewer.glbActor=glbActor||null;setGlbLabActor(viewer.glbActor);
+    if(model.parent)model.parent.remove(model); model.position.set(0,0,0); while(viewer.spin.children.length)viewer.spin.remove(viewer.spin.children[0]);
+    if(!glbActor&&model.userData&&!model.userData.meshy&&CLIPLIB.ready)
       poseViewerRest(model,model.userData.idleClipKey||'idle2h',0);
     model.updateMatrixWorld(true);
-    model.traverse(object=>{ if(object.isSkinnedMesh&&object.skeleton)object.skeleton.update(); }); model.updateMatrixWorld(true); const bounds=new THREE.Box3();
-    const meshBounds=new THREE.Box3(); model.traverse(object=>{ if(!object.isMesh||!object.geometry)return; let p=object.parent;
-      while(p&&p!==model){if(p.userData&&p.userData.isViewerGun)return;p=p.parent;}; if(object.isSkinnedMesh){ if(object.computeBoundingBox)object.computeBoundingBox();
-        if(object.boundingBox&&!object.boundingBox.isEmpty()){ meshBounds.copy(object.boundingBox).applyMatrix4(object.matrixWorld); }else meshBounds.setFromObject(object,true);
-      }else meshBounds.setFromObject(object,true); bounds.union(meshBounds); }); const size=new THREE.Vector3(),center=new THREE.Vector3();
-    bounds.getSize(size);bounds.getCenter(center); if(!Number.isFinite(size.x)||Math.max(size.x,size.y,size.z)<0.001)throw new Error('El modelo no contiene geometría visible.');
+    model.traverse(object=>{ if(object.isSkinnedMesh&&object.skeleton)object.skeleton.update(); }); model.updateMatrixWorld(true); const bounds=computeAccurateBounds(model);
+    const size=new THREE.Vector3(),center=new THREE.Vector3();
+    bounds.getSize(size);bounds.getCenter(center);
+    if(!Number.isFinite(size.x)||Math.max(size.x,size.y,size.z)<0.001)throw new Error('El modelo no contiene geometría visible.');
     const centerOffset=viewerCenterOffset(center); const centered=new THREE.Group(); centered.position.set(centerOffset.x,centerOffset.y,centerOffset.z); centered.add(model);
-    viewer.spin.add(centered); centered.updateMatrixWorld(true); viewer.idleActor=viewer.kind==='roles'&&model.userData.animatable?model:null;
+    viewer.spin.add(centered); centered.updateMatrixWorld(true); viewer.idleActor=!glbActor&&viewer.kind==='roles'&&model.userData.animatable?model:null;
     viewer.gripActor=viewer.kind==='roles'&&model.userData.grip?model:null; if(viewer.meshyFill)viewer.meshyFill.intensity=viewer.kind==='roles'&&model.userData.meshy?1.8:0;
     if(viewer.meshyRim)viewer.meshyRim.intensity=viewer.kind==='roles'&&model.userData.meshy?2.2:0; viewer.idleClipKey=model.userData.idleClipKey||'idle2h';
     if(viewer.gripActor&&viewer.gripActor.userData.gun)
       fitGunToHand3(viewer.gripActor.userData.gripUnit,viewer.gripActor,false);
     viewer.spin.rotation.set(viewer.kind==='weapons'?0.25:0,-0.55,0); const platformRadius=Math.max(0.35,Math.max(size.x,size.z)*0.72);
     viewer.platform.scale.set(platformRadius,platformRadius,1); viewer.platform.position.y=bounds.min.y-center.y-0.02; resize();
-    viewer.baseDistance=fitViewerDistance(size,viewer.camera.fov,viewer.camera.aspect); updateCamera(); viewer.renderer.render(viewer.scene,viewer.camera); refreshTexturePreview();
-    setStatus('',false); }; function refreshList(){ const list=document.getElementById('viewerList'); const controls=document.getElementById('viewerCharacterControls');
-    const pieceControls=document.getElementById('viewerPieceControls'); const characterSelect=document.getElementById('viewerCharacterSelect');
-    controls.style.display=viewer.kind==='roles'?'grid':'none'; pieceControls.style.display=viewer.kind==='pieces'?'grid':'none';
-    list.style.display=viewer.kind==='roles'?'none':'flex'; if(viewer.kind==='roles'){ characterSelect.replaceChildren(); viewerCharacters.forEach(entry=>{
-        const option=document.createElement('option'); option.value=entry.key;option.textContent=entry.label; characterSelect.appendChild(option); });
-      characterSelect.value=viewer.name; const entry=viewerCharacters.find(item=>item.key===viewer.name)||viewerCharacters[0];
-      const skin=entry.skins[Math.min(viewer.skinIndex,entry.skins.length-1)]; document.getElementById('viewerSkinName').textContent=skin.label;
-      document.getElementById('viewerSkinPrev').disabled=entry.skins.length<2; document.getElementById('viewerSkinNext').disabled=entry.skins.length<2;
+    viewer.baseDistance=Math.min(6,fitViewerDistance(size,viewer.camera.fov,viewer.camera.aspect)); setStageBaseDistance(viewer.baseDistance); updateCamera(); renderStage(); refreshTexturePreview();
+    setStatus('',false); }; function refreshList(){
+    const list=document.getElementById('viewerList'); const controls=document.getElementById('viewerCharacterControls'); const characterSelect=document.getElementById('viewerCharacterSelect');
+    if(controls)controls.style.display=viewer.kind==='roles'?'grid':'none'; if(list)list.style.display=viewer.kind==='roles'?'none':'flex';
+    if(viewer.kind==='roles'){
+      if(characterSelect){characterSelect.replaceChildren(); viewerCharacters.forEach(entry=>{const option=document.createElement('option');option.value=entry.key;option.textContent=entry.label;characterSelect.appendChild(option);});characterSelect.value=viewer.name;}
+      const entry=viewerCharacters.find(item=>item.key===viewer.name)||viewerCharacters[0]; const skin=entry.skins[Math.min(viewer.skinIndex,entry.skins.length-1)];
+      const skinName=document.getElementById('viewerSkinName');if(skinName)skinName.textContent=skin.label;
+      const prev=document.getElementById('viewerSkinPrev'),next=document.getElementById('viewerSkinNext');if(prev)prev.disabled=entry.skins.length<2;if(next)next.disabled=entry.skins.length<2;
       const weaponSelect=document.getElementById('viewerWeaponSelect'); const weaponLabel=document.getElementById('viewerWeaponLabel');
-      const roleWeapons=((entry.role&&VIEWER_ROLE_WEAPONS[entry.role])||[]).slice(); const sculpted=!!entry.sculptedWeapon,noGrip=!entry.canGrip;
-      if(entry.defaultWeapon&&WEAPON_MESH_FILE[entry.defaultWeapon]&&!roleWeapons.includes(entry.defaultWeapon))roleWeapons.unshift(entry.defaultWeapon);
-      if(!sculpted&&!noGrip&&entry.defaultWeapon&&roleWeapons.includes(entry.defaultWeapon)&&(!viewer.weaponTouched||viewer.weaponChar!==entry.key))viewer.weapon=entry.defaultWeapon;
-      if(sculpted||noGrip||(viewer.weapon&&!roleWeapons.includes(viewer.weapon)))viewer.weapon=''; viewer.weaponChar=entry.key; weaponSelect.replaceChildren(); const noneOption=document.createElement('option');
-      noneOption.value='';noneOption.textContent=sculpted?'Sin acople (arma ya esculpida)':'Sin arma'; weaponSelect.appendChild(noneOption); roleWeapons.forEach(weapon=>{
-        const option=document.createElement('option'); option.value=weapon;option.textContent=weapon; weaponSelect.appendChild(option); }); weaponSelect.value=viewer.weapon||'';
-      weaponSelect.disabled=sculpted||noGrip; const fireBtn=document.getElementById('viewerFireBtn'); if(fireBtn)fireBtn.disabled=sculpted||noGrip||!viewer.weapon;
-      weaponLabel.style.display=roleWeapons.length||sculpted?'':'none';
-      document.getElementById('viewerWeaponLabelText').textContent=sculpted?'Arma del diseño propio (No se acopla otra arma)':'Arma'; return; }; if(viewer.kind==='pieces'){
-      const mapSelect=document.getElementById('viewerPieceMapSelect'); if(!mapSelect.options.length){ MAPS_ORIGINAL.forEach(map=>{ const option=document.createElement('option');
-          option.value=map.name;option.textContent=map.name+' ('+map.pieces+' piezas)'; mapSelect.appendChild(option); }); }; mapSelect.value=viewer.pieceMap;
-      const pieces=MAP_PIECES.filter(piece=>piece.m===viewer.pieceMap); document.getElementById('viewerPieceCount').textContent=pieces.length+' piezas · mapa '+viewer.pieceMap;
-      list.innerHTML=''; pieces.forEach((entry,index)=>{ const button=document.createElement('button'); const meshName=(entry.f||entry.k).split('/').pop();
-        button.type='button';button.textContent=entry.l+' · '+String(index+1).padStart(2,'0'); button.title=entry.f||entry.k;
-        button.setAttribute('aria-label',entry.l+' ('+meshName+')'); button.classList.toggle('on',viewer.name===entry.k); button.onclick=()=>selectModel('pieces',entry.k);
-        list.appendChild(button); }); return; }; const entries=viewer.kind==='props' ?viewerPropFiles.map(prop=>({key:prop.key,label:prop.label,file:prop.file}))
-      :viewerWeaponFiles.map(file=>({key:file,label:(WEAPONS_ORIGINAL[file]||{}).name||file,file})); list.innerHTML=''; entries.forEach(entry=>{
-      const button=document.createElement('button'); button.type='button';button.textContent=entry.label; button.classList.toggle('on',viewer.name===entry.key);
-      button.onclick=()=>selectModel(viewer.kind,entry.key); list.appendChild(button); }); }; function showModelInfo(kind,key){ const entry=kind==='roles'
-      ?viewerCharacters.find(item=>item.key===key) :kind==='props' ?viewerPropFiles.find(item=>item.key===key) :kind==='pieces' ?MAP_PIECES.find(item=>item.k===key)
-          :viewerWeaponFiles.includes(key)?{label:(WEAPONS_ORIGINAL[key]||{}).name||key,name:(WEAPONS_ORIGINAL[key]||{}).name||key,file:key,orig:WEAPONS_ORIGINAL[key]||null}:null;
-    if(!entry)throw new Error('El modelo seleccionado no pertenece al catálogo del visor.'); document.getElementById('viewerName').textContent=entry.name||entry.label||entry.l;
-    document.getElementById('viewerDescription').textContent=kind==='roles' ?(entry.mesh ?'Diseño Meshy independiente · '+entry.mesh+'.'
-        :'Rol: '+(entry.role||'—')+'. '+(entry.bio||'')) :kind==='props' ?(entry.note||'Objeto del original extraído de sus assetbundles.') :kind==='pieces'
-          ?'Pieza de '+entry.m+' · '+entry.s[0]+' × '+entry.s[1]+' × '+entry.s[2]+' unidades (1 unidad = 1 casilla).' :entry.orig
-            ?(entry.orig.cat+' · Roles: '+entry.orig.roles+' · '+entry.orig.dims[0]+' × '+entry.orig.dims[1]+' × '+entry.orig.dims[2]+(entry.orig.uses.length?(' · Usada por: '+entry.orig.uses.join(', ')):'' ))
-            :'Malla y textura del arsenal · '+entry.file+'.obj'; document.getElementById('viewerAssetInfo').textContent=kind==='roles' ?((entry.mesh
-        ?('Malla '+entry.mesh+'.obj · Textura Meshy.')
-        :('Malla '+entry.file+' · '+(entry.outfit?('Textura '+entry.outfit):entry.skins[Math.min(viewer.skinIndex,entry.skins.length-1)].label)+'.'))
-        +(viewer.weapon?(' Arma: '+viewer.weapon+' ('+((WEAPONS_ORIGINAL[WEAPON_MESH_FILE[viewer.weapon]]||{}).name||WEAPON_MESH_FILE[viewer.weapon])+')'+(weaponMeta(WEAPON_MESH_FILE[viewer.weapon])?' · socket '+weaponMeta(WEAPON_MESH_FILE[viewer.weapon]).attachmentJoint:'')+'.'):''))
-      :kind==='props' ?('Malla '+entry.file+' · Textura '+entry.tex+'.') :kind==='pieces' ?('Malla '+entry.f+' · Textura T_Atlas_01_D.png (atlas compartido).') :entry.orig
-            ?('Malla '+entry.file+'.obj · Textura '+entry.orig.tex+'.png ('+entry.orig.texSize[0]+'×'+entry.orig.texSize[1]+') · '+entry.orig.verts+' vértices · '+(entry.orig.cover?('Carátula: '+entry.orig.cover+'.'):('Sin carátula en el original.')))
-            :''; texturePreview.hidden=true; texturePreview.removeAttribute('src'); renderViewerAbilities(kind==='roles'?entry:null);
-    return {entry,skin:kind==='roles'?entry.skins[Math.min(viewer.skinIndex,entry.skins.length-1)]:null}; }; async function loadViewerProp(entry){
+      const sculpted=!!entry.sculptedWeapon,noGrip=!entry.canGrip;
+      const validWeapon=w=>!!w&&(viewerWeaponFiles.includes(w)||!!WEAPONS_ORIGINAL[w]||!!WEAPONS_ORIGINAL[weaponFileForRef(w)||'']);
+      if(viewer.weapon&&!viewerWeaponFiles.includes(viewer.weapon))viewer.weapon=weaponFileForRef(viewer.weapon)||viewer.weapon;
+      if(!sculpted&&!noGrip&&entry.defaultWeapon&&(!viewer.weaponTouched||viewer.weaponChar!==entry.key))viewer.weapon=weaponFileForRef(entry.defaultWeapon)||entry.defaultWeapon;
+      if(sculpted||noGrip||!validWeapon(viewer.weapon))viewer.weapon=''; viewer.weaponChar=entry.key;
+      if(weaponSelect){weaponSelect.replaceChildren();const noneOption=document.createElement('option');noneOption.value='';noneOption.textContent=sculpted?'Sin acople (arma ya esculpida)':'Sin arma';weaponSelect.appendChild(noneOption);
+        viewerWeaponFiles.forEach(weapon=>{const option=document.createElement('option');option.value=weapon;option.textContent=(WEAPONS_ORIGINAL[weapon]||{}).name||weapon;weaponSelect.appendChild(option);});weaponSelect.value=viewer.weapon||'';weaponSelect.disabled=sculpted||noGrip;}
+      const fireBtn=document.getElementById('viewerFireBtn');if(fireBtn)fireBtn.disabled=sculpted||noGrip||!viewer.weapon;
+      if(weaponLabel)weaponLabel.style.display=sculpted||noGrip?'none':'';
+      const labelText=document.getElementById('viewerWeaponLabelText');if(labelText)labelText.textContent=sculpted?'Arma del diseño propio (No se acople otra arma)':'Arma';return;
+    }
+    const entries=viewer.kind==='props'?viewerPropFiles.map(prop=>({key:prop.key,label:prop.label,file:prop.file})):viewerWeaponFiles.map(file=>({key:file,label:(WEAPONS_ORIGINAL[file]||{}).name||file,file}));
+    if(list){list.innerHTML='';entries.forEach(entry=>{const button=document.createElement('button');button.type='button';button.textContent=entry.label;button.classList.toggle('on',viewer.name===entry.key);button.onclick=()=>selectModel(viewer.kind,entry.key);list.appendChild(button);});}
+  }; function showModelInfo(kind,key){
+    const entry=kind==='roles'?viewerCharacters.find(item=>item.key===key):kind==='props'?viewerPropFiles.find(item=>item.key===key)
+      :viewerWeaponFiles.includes(key)?{label:(WEAPONS_ORIGINAL[key]||{}).name||key,name:(WEAPONS_ORIGINAL[key]||{}).name||key,file:key,orig:WEAPONS_ORIGINAL[key]||null}:null;
+    if(!entry)throw new Error('El modelo seleccionado no pertenece al catálogo del visor.');
+    const nameEl=document.getElementById('viewerName'),descEl=document.getElementById('viewerDescription'),assetEl=document.getElementById('viewerAssetInfo');
+    if(nameEl)nameEl.textContent=entry.name||entry.label;
+    if(descEl)descEl.textContent=kind==='roles'?(entry.mesh?'Diseño Meshy independiente · '+entry.mesh+'.':'Rol: '+(entry.role||'—')+'. '+(entry.bio||''))
+      :kind==='props'?(entry.note||'Objeto del original extraído de sus assetbundles.')
+      :entry.orig?(entry.orig.cat+' · Roles: '+entry.orig.roles+' · '+entry.orig.dims[0]+' × '+entry.orig.dims[1]+' × '+entry.orig.dims[2]+(entry.orig.uses.length?(' · Usada por: '+entry.orig.uses.join(', ')):''))
+      :'Malla y textura del arsenal · '+entry.file+'.obj';
+    if(assetEl)assetEl.textContent=kind==='roles'?((entry.mesh?('Malla '+entry.mesh+'.obj · Textura Meshy.'):('Malla '+entry.file+' · '+(entry.outfit?('Textura '+entry.outfit):entry.skins[Math.min(viewer.skinIndex,entry.skins.length-1)].label)+'.'))
+      +(viewer.weapon?(' Arma: '+viewer.weapon+'.'):'')):kind==='props'?('Malla '+entry.file+' · Textura '+entry.tex+'.')
+      :entry.orig?('Malla '+entry.file+'.obj · Textura '+entry.orig.tex+'.png ('+entry.orig.texSize[0]+'×'+entry.orig.texSize[1]+') · '+entry.orig.verts+' vértices · '+(entry.orig.cover?('Carátula: '+entry.orig.cover+'.'):('Sin carátula en el original.'))):'';
+    texturePreview.hidden=true;texturePreview.removeAttribute('src');renderViewerAbilities(kind==='roles'?entry:null);
+    return {entry,skin:kind==='roles'?entry.skins[Math.min(viewer.skinIndex,entry.skins.length-1)]:null};
+  }; async function loadViewerProp(entry){
     const path='assets/props/'+entry.file; if(viewer.bodyGeo[path])return viewer.bodyGeo[path];
     const text=await fetch(path).then(r=>{if(!r.ok)throw new Error('No se pudo cargar el objeto '+entry.file);return r.text();}); let count=0;
-    for(const line of text.split('\n')){if(line.startsWith('v '))count++;}; const skin={skinIndex:new Array(count*4).fill(0),skinWeight:new Array(count*4).fill(0)};
-    const geo=parseOBJ3(text,skin); geo.deleteAttribute('skinIndex'); geo.deleteAttribute('skinWeight'); geo.computeVertexNormals(); geo.computeBoundingBox();
-    const size=new THREE.Vector3(); geo.boundingBox.getSize(size); const max=Math.max(size.x,size.y,size.z)||1; if(max!==1)geo.scale(1/max,1/max,1/max); viewer.bodyGeo[path]=geo;
-    return geo; }; async function loadViewerPiece(entry){ const path='assets/maps/pieces/'+entry.f; if(viewer.bodyGeo[path])return viewer.bodyGeo[path];
-    const text=await fetch(path).then(r=>{if(!r.ok)throw new Error('No se pudo cargar la pieza '+entry.f);return r.text();}); let count=0;
     for(const line of text.split('\n')){if(line.startsWith('v '))count++;}; const skin={skinIndex:new Array(count*4).fill(0),skinWeight:new Array(count*4).fill(0)};
     const geo=parseOBJ3(text,skin); geo.deleteAttribute('skinIndex'); geo.deleteAttribute('skinWeight'); geo.computeVertexNormals(); geo.computeBoundingBox();
     const size=new THREE.Vector3(); geo.boundingBox.getSize(size); const max=Math.max(size.x,size.y,size.z)||1; if(max!==1)geo.scale(1/max,1/max,1/max); viewer.bodyGeo[path]=geo;
@@ -174,7 +167,7 @@ import { MAP_PIECES } from '../data/map-pieces.js'; (function(){ const stage=doc
   async function loadViewerMeshy(entry){ const base='assets/personajes_propios/'+entry.mesh; const [response,rigResponse,texture]=await Promise.all([
       fetch(base+'.obj'),fetch(base+'_rig.json'), new Promise((resolve,reject)=>{ new THREE.TextureLoader().load(base+'_tex.png',resolve,undefined,reject); }) ]);
     if(!response.ok)throw new Error('No se pudo cargar el OBJ Meshy de '+entry.mesh+'.'); if(!rigResponse.ok)throw new Error('No se pudo cargar el rig Meshy de '+entry.mesh+'.');
-    texture.colorSpace=THREE.SRGBColorSpace; const [objText,rawRig]=await Promise.all([response.text(),rigResponse.json()]); const rig=normalizeMeshyRig(rawRig);
+    texture.colorSpace=THREE.SRGBColorSpace; texture.generateMipmaps=false; texture.minFilter=THREE.LinearFilter; texture.magFilter=THREE.LinearFilter; texture.wrapS=THREE.ClampToEdgeWrapping; texture.wrapT=THREE.ClampToEdgeWrapping; texture.needsUpdate=true; const [objText,rawRig]=await Promise.all([response.text(),rigResponse.json()]); const rig=normalizeMeshyRig(rawRig);
     const geometry=parseViewerOBJ(objText,rig); const model=makeViewerRiggedModel(geometry,rig,texture,{ meshy:true,role:entry.role });
     if(rig.bones[1].pos[2]>rig.bones[1].pos[1]+0.1)model.rotation.x=-Math.PI/2; model.userData.gripUnit={role:entry.role,weapon:''}; return model; }
   function makeViewerRiggedModel(geometry,data,texture,options={}){return makeSkinnedModel(geometry,data,texture,options);}; function poseViewerRest(model,clipKey,ct){
@@ -215,7 +208,10 @@ import { MAP_PIECES } from '../data/map-pieces.js'; (function(){ const stage=doc
     let st=ud._viewerFireEvents; if(!st||st.key!==key){st={key:key,seen:{},ct:ct};ud._viewerFireEvents=st;}; if(ct<st.ct-0.08)st.seen={};
     for(let i=0;i<clip.events.length;i++){ const e=clip.events[i],f=e.f||''; if(st.seen[i]||e.t>ct+0.0005)continue; st.seen[i]=1;
       if(f==='PlayWeaponFire'||f==='PlayFiring'||(f==='OnAnimEvent'&&e.i===10)){
-        if(f!=='PlayFiring'&&typeof auWeapon==='function')auWeapon(((typeof WEAPONS!=='undefined'&&WEAPONS[weapon])||{}).cat,weapon);
+        const now=performance.now(); if(f!=='PlayFiring'&&(!ud._lastViewerSfx||now-ud._lastViewerSfx>110)){
+          if(typeof auWeaponFile==='function')auWeaponFile(weaponFileForRef(weapon)||weapon);
+          else if(typeof auWeapon==='function')auWeapon(((typeof WEAPONS!=='undefined'&&WEAPONS[weapon])||{}).cat,weapon);
+          ud._lastViewerSfx=now; }
         const gun=ud.gun; if(gun&&gun.userData.flash){gun.userData.flash.material.opacity=1;gun.userData._testFlash=1;} } }
     st.ct=ct; };
   async function loadViewerBody(file){ const path='assets/soldier/bodies/'+file; if(viewer.bodyGeo[path])return viewer.bodyGeo[path];
@@ -252,75 +248,202 @@ import { MAP_PIECES } from '../data/map-pieces.js'; (function(){ const stage=doc
       map:texture,roughness:0.85,metalness:0.02,transparent:false,opacity:1,depthWrite:true, side:THREE.FrontSide })); mesh.castShadow=true; const model=new THREE.Group();
     model.scale.setScalar(1.15); const spin=new THREE.Group();spin.rotation.y=Math.PI/2;model.add(spin); const tilt=new THREE.Group();tilt.rotation.x=-Math.PI/2;spin.add(tilt);
     mesh.scale.setScalar(0.95);tilt.add(mesh); model.userData.staticRole=true; return model; };   async function syncViewerGun(model,entry,token){
-    const wanted=(entry&&entry.sculptedWeapon)?'':(viewer.weapon||''); const current=(model.userData&&model.userData.viewerGunWeapon)||'';
+    const rawWanted=(entry&&entry.sculptedWeapon)?'':(viewer.weapon||''); const wanted=rawWanted?(weaponFileForRef(rawWanted)||rawWanted):''; const current=(model.userData&&model.userData.viewerGunWeapon)||'';
     if(model&&model.userData)model.userData.idleClipKey=wanted?idleForWeapon(wanted):'idle2h'; if(current===wanted)return;
 
     if(model.userData&&model.userData.viewerGun){ model.remove(model.userData.viewerGun); if(model.userData.gun===model.userData.viewerGun)model.userData.gun=null;
       model.userData.viewerGun=null; model.userData.viewerGunWeapon=''; }; if(!wanted)return; const meshFile=weaponFileForRef(wanted); if(!meshFile)return;
     if(!GUN_MESH_CACHE[meshFile])makeRealGun3(meshFile); if(!GUN_MESH_CACHE[meshFile]){ const started=Date.now(); while(GUN_MESH_CACHE[meshFile]===null&&Date.now()-started<10000){
         if(token!==viewer.selection)return; await wait(100); }; if(!GUN_MESH_CACHE[meshFile])throw new Error('No se pudo cargar la malla de esta arma.'); }
+    const sourceGun=GUN_MESH_CACHE[meshFile];
+    if(sourceGun.userData&&sourceGun.userData.texReady)await sourceGun.userData.texReady;
+    if(token!==viewer.selection)return;
     if(model.userData&&model.userData._viewerClip)model.userData._viewerBlend={clip:model.userData._viewerClip,ct:model.userData._viewerCt||0,t0:performance.now()};
-    if(!model.userData||!model.userData.grip)return; const holder=GUN_MESH_CACHE[meshFile].clone(true); const gunMeta=holder.userData.meta||weaponMeta(meshFile);
+    if(!model.userData||!model.userData.grip)return; const holder=sourceGun.clone(true); holder.userData.texReady=sourceGun.userData.texReady; const gunMeta=holder.userData.meta||weaponMeta(meshFile);
     const gunGroup=makeGunAnchor({role:entry.role,weapon:wanted}); gunGroup.userData.isViewerGun=true; gunGroup.add(holder);
     gunGroup.userData.file=meshFile; gunGroup.userData.meta=gunMeta; if(DEBUG_WEAPONS){
       const marker=new THREE.Mesh(new THREE.SphereGeometry(0.045,12,8),new THREE.MeshBasicMaterial({color:0xff3300,depthTest:false})); marker.userData.isViewerGun=true;
       gunGroup.add(marker); console.info('[debugWeapons]',meshFile,gunMeta&&gunMeta.attachmentJoint,holder.userData.calibration); }; model.add(gunGroup);
     model.userData.viewerGun=gunGroup; model.userData.viewerGunWeapon=wanted; if(model.userData.grip){ model.userData.gun=gunGroup;
       model.userData.gripUnit={role:entry.role,weapon:wanted}; fitGunToHand3(model.userData.gripUnit,model,false); } };   async function selectModel(kind,name){
-    viewer.kind=kind;viewer.name=name;viewer.testFire=null; const token=++viewer.selection; refreshList(); let selection; try{selection=showModelInfo(kind,name);}
-
-    catch(error){setStatus(error.message,true);return;}; if(!ensureRenderer())return; setStatus('Cargando modelo y textura…',true); try{ const {entry,skin}=selection;
-      const modelKey=kind==='roles'?name+'|'+skin.key:name; let model=viewer.models[kind][modelKey]; if(!model&&kind==='roles'){ if(entry.mesh){
-          model=await loadViewerMeshy(entry); }else{ const started=Date.now();
-          while((!REAL.ready||(entry.role&&!(REAL.byRole&&REAL.byRole[entry.role])))&&Date.now()-started<10000){ if(token!==viewer.selection)return; await wait(100); }
-          if(!REAL.ready||(entry.role&&!(REAL.byRole&&REAL.byRole[entry.role])))
-            throw new Error('El modelo original todavía no está disponible.');
-          model=await makeViewerOriginal(entry,skin); }; viewer.models.roles[modelKey]=model; }else if(!model&&kind==='props'){ const geo=await loadViewerProp(entry);
-        const texturePath='assets/props/'+entry.tex; let texture=viewer.textures[texturePath]; if(!texture){ texture=await new Promise((resolve,reject)=>{
-            new THREE.TextureLoader().load(texturePath,resolve,undefined,reject); }); texture.colorSpace=THREE.SRGBColorSpace; viewer.textures[texturePath]=texture; }
-        const mesh=new THREE.Mesh(geo.clone(),new THREE.MeshStandardMaterial({ map:texture,roughness:0.85,metalness:0.02,transparent:false,opacity:1,depthWrite:true,
-          side:THREE.DoubleSide })); mesh.castShadow=true; model=new THREE.Group(); model.scale.setScalar(1.15);
-        const spin=new THREE.Group();spin.rotation.y=Math.PI/2;model.add(spin); const tilt=new THREE.Group();tilt.rotation.x=-Math.PI/2;spin.add(tilt);
-        mesh.scale.setScalar(0.95);tilt.add(mesh); model.userData.staticRole=true; viewer.models.props[name]=model; }else if(!model&&kind==='pieces'){
-        const geo=await loadViewerPiece(entry); const texturePath='assets/maps/textures/T_Atlas_01_D.png'; let texture=viewer.textures[texturePath]; if(!texture){
-          texture=await new Promise((resolve,reject)=>{ new THREE.TextureLoader().load(texturePath,resolve,undefined,reject); }); texture.colorSpace=THREE.SRGBColorSpace;
-          viewer.textures[texturePath]=texture; }; const mesh=new THREE.Mesh(geo.clone(),new THREE.MeshStandardMaterial({
-          map:texture,roughness:0.85,metalness:0.02,transparent:false,opacity:1,depthWrite:true, side:THREE.DoubleSide })); mesh.castShadow=true; model=new THREE.Group();
-        model.scale.setScalar(1.15); const spin=new THREE.Group();spin.rotation.y=Math.PI/2;model.add(spin); const tilt=new THREE.Group();tilt.rotation.x=-Math.PI/2;spin.add(tilt);
-        mesh.scale.setScalar(0.95);tilt.add(mesh); model.userData.staticRole=true; viewer.models.pieces[name]=model; }else if(!model){ const meshFile=entry.file;
-        if(!GUN_MESH_CACHE[meshFile])makeRealGun3(meshFile); if(!GUN_MESH_CACHE[meshFile]){ const started=Date.now();
-          while(GUN_MESH_CACHE[meshFile]===null&&Date.now()-started<10000){ if(token!==viewer.selection)return; await wait(100); }
-          if(!GUN_MESH_CACHE[meshFile])throw new Error('No se pudo cargar la malla de esta arma.'); }; model=GUN_MESH_CACHE[meshFile].clone(true);
-        viewer.models.weapons[name]=model; }; if(token!==viewer.selection)return; if(kind==='roles'){ try{await syncViewerGun(model,entry,token);}
-        catch(error){setStatus('No se pudo equipar el arma: '+error.message,true);}; if(token!==viewer.selection)return; }; mount(model);
-      document.getElementById('viewerAssetInfo').textContent=kind==='roles'
-        ?(model.userData.meshy?'Malla OBJ y textura Meshy en pose del modelo · '+skin.label+'.':'Malla '+entry.file+' · '+skin.label+'.') :kind==='props'
-          ?('Malla '+entry.file+' · Textura '+entry.tex+'.') :kind==='pieces' ?('Malla '+entry.f+' · Textura T_Atlas_01_D.png (atlas compartido).')
-            :'Malla y textura del arsenal · '+entry.file+'.obj'; }catch(error){ if(token===viewer.selection)setStatus('No se pudo mostrar el modelo: '+error.message,true); } }
-  function activate(){ refreshList(); resize(); const kindButton=document.querySelector('#viewerKinds button.on'); viewer.kind=kindButton?kindButton.dataset.kind:'roles';
-    const names=viewer.kind==='roles'?viewerCharacters.map(entry=>entry.key):viewer.kind==='props'?viewerPropFiles.map(entry=>entry.key):viewer.kind==='pieces'?MAP_PIECES.filter(piece=>piece.m===viewer.pieceMap).map(piece=>piece.k):viewerWeaponFiles;
-    selectModel(viewer.kind,names.includes(viewer.name)?viewer.name:names[0]); if(!viewer.frameRequested){viewer.frameRequested=true;requestAnimationFrame(frame);} }
-  document.getElementById('viewerCharacterSelect').onchange=event=>{ viewer.skinIndex=0; viewer.weaponTouched=false; selectModel('roles',event.target.value); };
-  document.getElementById('viewerWeaponSelect').onchange=event=>{ viewer.weapon=event.target.value||''; viewer.weaponTouched=true; selectModel('roles',viewer.name); };
-  const fireTestBtn=document.getElementById('viewerFireBtn'); if(fireTestBtn)fireTestBtn.onclick=()=>{
-    const weapon=viewer.weapon; if(!weapon||viewer.kind!=='roles'||!viewer.idleActor)return;
-    const key=typeof fireClipFor==='function'?fireClipFor(weapon):(idleForWeapon(weapon)==='idle1h'?'fire1h':'fire2h');
+    viewer.kind=kind;viewer.name=name;viewer.testFire=null; const token=++viewer.selection; refreshList(); let selection;
+    try{selection=showModelInfo(kind,name);}catch(error){setStatus(error.message,true);return;}
+    if(!ensureRenderer())return; setStatus('Cargando modelo y textura…',true);
+    try{
+      const {entry,skin}=selection; const modelKey=kind==='roles'?name+'|'+skin.key:name; let model=viewer.models[kind][modelKey];
+      if(!model&&kind==='roles'){
+        if(entry.mesh){model=await loadViewerMeshy(entry);}
+        else{const started=Date.now();
+          while((!REAL.ready||(entry.role&&!(REAL.byRole&&REAL.byRole[entry.role])))&&Date.now()-started<10000){if(token!==viewer.selection)return;await wait(100);}
+          if(!REAL.ready||(entry.role&&!(REAL.byRole&&REAL.byRole[entry.role])))throw new Error('El modelo original todavía no está disponible.');
+          model=await makeViewerOriginal(entry,skin);}
+        viewer.models.roles[modelKey]=model;
+      }else if(!model&&kind==='props'){
+        const geo=await loadViewerProp(entry); const texturePath='assets/props/'+entry.tex; let texture=viewer.textures[texturePath];
+        if(!texture){texture=await new Promise((resolve,reject)=>{new THREE.TextureLoader().load(texturePath,resolve,undefined,reject);});texture.colorSpace=THREE.SRGBColorSpace;viewer.textures[texturePath]=texture;}
+        const mesh=new THREE.Mesh(geo.clone(),new THREE.MeshStandardMaterial({map:texture,roughness:0.85,metalness:0.02,transparent:false,opacity:1,depthWrite:true,side:THREE.DoubleSide}));
+        mesh.castShadow=true;model=new THREE.Group();model.scale.setScalar(1.15);const spin=new THREE.Group();spin.rotation.y=Math.PI/2;model.add(spin);
+        const tilt=new THREE.Group();tilt.rotation.x=-Math.PI/2;spin.add(tilt);mesh.scale.setScalar(0.95);tilt.add(mesh);model.userData.staticRole=true;viewer.models.props[name]=model;
+      }else if(!model){
+        const meshFile=entry.file; if(!GUN_MESH_CACHE[meshFile])makeRealGun3(meshFile);
+        if(!GUN_MESH_CACHE[meshFile]){const started=Date.now();while(GUN_MESH_CACHE[meshFile]===null&&Date.now()-started<10000){if(token!==viewer.selection)return;await wait(100);}
+          if(!GUN_MESH_CACHE[meshFile])throw new Error('No se pudo cargar la malla de esta arma.');}
+        const sourceGun=GUN_MESH_CACHE[meshFile];
+        if(sourceGun.userData&&sourceGun.userData.texReady)await sourceGun.userData.texReady;
+        if(token!==viewer.selection)return;
+        model=sourceGun.clone(true);model.userData.texReady=sourceGun.userData.texReady;viewer.models.weapons[name]=model;
+      }
+      if(token!==viewer.selection)return;
+      if(kind==='roles'){try{await syncViewerGun(model,entry,token);}catch(error){setStatus('No se pudo equipar el arma: '+error.message,true);}if(token!==viewer.selection)return;}
+      viewer.cardModel=model; mount(model);
+      const infoEl=document.getElementById('viewerAssetInfo');
+      if(infoEl)infoEl.textContent=kind==='roles'?(model.userData.meshy?'Malla OBJ y textura Meshy en pose del modelo · '+skin.label+'.':'Malla '+entry.file+' · '+skin.label+'.')
+        :kind==='props'?('Malla '+entry.file+' · Textura '+entry.tex+'.'):'Malla y textura del arsenal · '+entry.file+'.obj';
+      return model;
+    }catch(error){if(token===viewer.selection)setStatus('No se pudo mostrar el modelo: '+error.message,true);return null;}
+  }
+  function clearStagePlaceholder(box){
+    if(!box||box.id!=='inspectorStage')return;
+    const empty=box.querySelector('.card-3d-empty');
+    if(empty)empty.remove();
+    const img=box.querySelector('.card-3d-thumb');
+    if(img)img.classList.remove('is-hidden');
+  }
+  function showCsnPlaceholder(box,spec){
+    clearStagePlaceholder(box);
+    const empty=document.createElement('div');
+    empty.className='card-3d-empty';
+    const icon=document.createElement('span');icon.className='csn-ico';icon.textContent='◆';
+    const title=document.createElement('b');title.textContent=spec.label||(spec.csn&&spec.csn.cat)||'Arma CSN';
+    const note=document.createElement('span');note.textContent='Modelo 3D CSN pendiente';
+    empty.append(icon,title,note);
+    box.appendChild(empty);
+    const img=box.querySelector('.card-3d-thumb');
+    if(img)img.classList.add('is-hidden');
+  }
+  async function waitTextures(model){
+    if(!model||typeof model.traverse!=='function')return false;
+    const started=Date.now();
+    while(Date.now()-started<8000){
+      let ready=true,hasMap=false;
+      model.traverse(object=>{
+        if(!object.isMesh||!object.material)return;
+        const mats=Array.isArray(object.material)?object.material:[object.material];
+        for(const mat of mats){
+          if(!mat.map)continue;
+          hasMap=true;
+          const image=mat.map.image;
+          if(!image||image.complete===false)ready=false;
+        }
+      });
+      if(hasMap&&ready)return true;
+      await wait(60);
+    }
+    return false;
+  }
+  let cardBuild=null;
+  async function buildCardModel(spec){
+    if(!cardStage||!spec||!spec.kind)return null;
+    if(cardBuild)await cardBuild.catch(()=>{});
+    cardBuild=(async()=>{
+      viewer.cardMode=true;
+      if(spec.kind==='glb'){
+        if(!spec.glbUrl)throw new Error('Falta la ruta .glb.');
+        const actor=await loadGlbActor(spec.glbUrl,{height:1.08,rotationY:spec.rotationY||0});
+        actor.root.userData.glbActor=actor;
+        actor.root.userData.animatable=true;
+        actor.root.userData.grip=true;
+        actor.root.userData.idleClipKey='idle';
+        actor.root.userData.glbOwned=true;
+        viewer.cardModel=actor.root;
+        return actor.root;
+      }
+      if(spec.kind==='roles'){
+        const entry=viewerCharacters.find(item=>item.key===spec.key);
+        if(entry&&!entry.mesh){
+          const started=Date.now();
+          while((!REAL.ready||!CLIPLIB.ready||(entry.role&&!(REAL.byRole&&REAL.byRole[entry.role])))&&Date.now()-started<15000){await wait(50);}
+          if(!REAL.ready||!CLIPLIB.ready)throw new Error('Modelo original o clips todavía no disponibles.');
+        }
+        viewer.skinIndex=spec.skinIndex||0;viewer.weapon=spec.weapon||'';viewer.weaponTouched=true;viewer.weaponChar=spec.key;await selectModel('roles',spec.key);
+      }
+      else await selectModel(spec.kind,spec.key);
+      if(!viewer.cardModel||!await waitTextures(viewer.cardModel))return null;
+      return viewer.cardModel;
+    })();
+    try{return await cardBuild;}catch(error){if(typeof console!=='undefined'&&console.warn)console.warn('[cardStage:build]',error.message||error);return null;}finally{cardBuild=null;}
+  }
+  async function activateSpec(box,spec){
+    if(!box||!spec||!spec.kind||!cardStage)return;
+    if(spec.csn){unmountStage();showCsnPlaceholder(box,spec);if(viewer.inspectorOpen&&!viewer.frameRequested){viewer.frameRequested=true;requestAnimationFrame(frame);}return;}
+    clearStagePlaceholder(box);
+    const model=await buildCardModel(spec);
+    if(!model)return;
+    mountStageInto(box,spec);
+    setStageZoom(stageZoom(),false);
+    if(viewer.inspectorOpen&&!viewer.frameRequested){viewer.frameRequested=true;requestAnimationFrame(frame);}
+  }
+  function entryFor(spec){return viewerCharacters.find(item=>item.key===spec.key)||null;}
+  async function fireSpec(spec){
+    if(!spec)return;
+    if(spec.kind==='glb'){if(viewer.glbActor)playOnce(viewer.glbActor,'fire');return;}
+    if(spec.kind!=='roles')return;
+    const entry=entryFor(spec); if(!entry||entry.mesh)return;
+    const weapon=spec.weapon||entry.defaultWeapon||viewer.weapon; if(!weapon)return;
+    auVoice({name:entry.name,role:entry.role},'firing',0.55);
+    await activateSpec(activeCard().box||document.querySelector('.card-3d-box[data-card-spec]'),spec);
+    viewer.weapon=weapon;
+    const file=weaponFileForRef(weapon)||weapon; const profile=originalWeaponProfile(file)||{};
+    let key=profile.fireClip;
+    if(!key||!CLIPLIB.ready||!CLIPLIB.pack||!CLIPLIB.pack.clips||!CLIPLIB.pack.clips[key])key=typeof fireClipFor==='function'?fireClipFor(weapon):(idleForWeapon(weapon)==='idle1h'?'fire1h':'fire2h');
+    if(CLIPLIB.ready&&CLIPLIB.pack&&CLIPLIB.pack.clips&&CLIPLIB.pack.clips[key])viewer.testFire={key:key,start:performance.now()};
+  }
+  const cardEngine={scan:()=>scanCardBoxes(),activate:activateSpec,fire:fireSpec,activateFirst:()=>{
+    const box=document.querySelector('#troopGrid .card-3d-box[data-card-spec]');
+    if(box){try{return activateSpec(box,JSON.parse(box.dataset.cardSpec));}catch(error){return null;}}
+    return null;
+  }};
+  try{window.__csnCardEngine=cardEngine;window.__csnViewer.fire=fireSpec;}catch(error){}
+  setCardModelBuilder(buildCardModel);
+  setCardRestPose(model=>{
+    if(!model||model.userData&&model.userData.meshy)return;
+    poseViewerRest(model,model.userData&&model.userData.idleClipKey||'idle2h',0);
+    model.traverse(object=>{if(object.isSkinnedMesh&&object.skeleton)object.skeleton.update();});
+  });
+  setCardStageCallbacks({onActivate:activateSpec,onInspect:(box,spec)=>openInspector(spec),onZoom:value=>{if(zoomControl)zoomControl.value=String(value);}});
+  function activate(){
+    refreshList();resize();const kindButton=document.querySelector('#viewerKinds button.on');viewer.kind=kindButton?kindButton.dataset.kind:'roles';
+    const names=viewer.kind==='roles'?viewerCharacters.map(entry=>entry.key):viewer.kind==='props'?viewerPropFiles.map(entry=>entry.key):viewerWeaponFiles;
+    if(!names.includes(viewer.name)||viewer.cardMode)viewer.name=names[0];
+    selectModel(viewer.kind,viewer.name);
+    if(!viewer.frameRequested){viewer.frameRequested=true;requestAnimationFrame(frame);}
+    cardEngine.scan();
+  }
+  const characterSelect=document.getElementById('viewerCharacterSelect');if(characterSelect)characterSelect.onchange=event=>{viewer.skinIndex=0;viewer.weaponTouched=false;selectModel('roles',event.target.value);};
+  const weaponSelect=document.getElementById('viewerWeaponSelect');if(weaponSelect)weaponSelect.onchange=event=>{viewer.weapon=event.target.value||'';viewer.weaponTouched=true;selectModel('roles',viewer.name);};
+  const fireTestBtn=document.getElementById('viewerFireBtn');if(fireTestBtn)fireTestBtn.onclick=()=>{
+    const weapon=viewer.weapon;if(!weapon||viewer.kind!=='roles'||!viewer.idleActor)return;
+    const file=weaponFileForRef(weapon)||weapon;const profile=originalWeaponProfile(file)||{};
+    let key=profile.fireClip;if(!key||!CLIPLIB.ready||!CLIPLIB.pack||!CLIPLIB.pack.clips||!CLIPLIB.pack.clips[key])key=typeof fireClipFor==='function'?fireClipFor(weapon):(idleForWeapon(weapon)==='idle1h'?'fire1h':'fire2h');
     if(CLIPLIB.ready&&CLIPLIB.pack&&CLIPLIB.pack.clips&&CLIPLIB.pack.clips[key])viewer.testFire={key:key,start:performance.now()};
   };
-  document.getElementById('viewerPieceMapSelect').onchange=event=>{ viewer.pieceMap=event.target.value; viewer.skinIndex=0;
-    const names=MAP_PIECES.filter(piece=>piece.m===viewer.pieceMap).map(piece=>piece.k); selectModel('pieces',names[0]); }; const stepSkin=delta=>{
-    const entry=viewerCharacters.find(item=>item.key===viewer.name); if(!entry||entry.skins.length<2)return;
-    viewer.skinIndex=(viewer.skinIndex+delta+entry.skins.length)%entry.skins.length; selectModel('roles',entry.key); };
-  document.getElementById('viewerSkinPrev').onclick=()=>stepSkin(-1); document.getElementById('viewerSkinNext').onclick=()=>stepSkin(1);
-  document.querySelectorAll('#viewerKinds button').forEach(button=>{ button.onclick=()=>{
-      document.querySelectorAll('#viewerKinds button').forEach(item=>item.classList.toggle('on',item===button)); viewer.kind=button.dataset.kind; viewer.skinIndex=0;
-      const names=viewer.kind==='roles'?viewerCharacters.map(entry=>entry.key):viewer.kind==='props'?viewerPropFiles.map(entry=>entry.key):viewer.kind==='pieces'?MAP_PIECES.filter(piece=>piece.m===viewer.pieceMap).map(piece=>piece.k):viewerWeaponFiles;
-      selectModel(viewer.kind,names[0]); }; }); zoomControl.oninput=updateCamera; stage.addEventListener('wheel',event=>{ event.preventDefault();
-    zoomControl.value=String(Math.max(+zoomControl.min,Math.min(+zoomControl.max,+zoomControl.value+(event.deltaY<0?0.1:-0.1)))); updateCamera(); },{passive:false});
-  stage.addEventListener('pointerdown',event=>{ viewer.drag={x:event.clientX,y:event.clientY,t:event.timeStamp}; viewer.dragVel=0; stage.setPointerCapture(event.pointerId); });
-  stage.addEventListener('pointermove',event=>{ if(!viewer.drag)return; const dx=event.clientX-viewer.drag.x,dy=event.clientY-viewer.drag.y;
-    const dt=Math.max(0.008,Math.min(0.05,(event.timeStamp-viewer.drag.t)/1000)); viewer.drag={x:event.clientX,y:event.clientY,t:event.timeStamp}; viewer.spin.rotation.y+=dx*0.008;
-    viewer.spin.rotation.x=Math.max(-0.65,Math.min(0.65,viewer.spin.rotation.x+dy*0.006)); viewer.dragVel=Math.max(-3,Math.min(3,dx*0.008/dt)); });
-  const stopDrag=()=>{viewer.drag=null;}; stage.addEventListener('pointerup',stopDrag); stage.addEventListener('pointercancel',stopDrag);
-  const menuButton=document.getElementById('mnuViewer'); const tabButton=document.querySelector('#mainTabs [data-tab="viewer"]'); [menuButton,tabButton].forEach(button=>{
-    if(button)button.onclick=()=>{showScreen('scr-viewer');activate();}; }); window.addEventListener('resize',resize); })();
+  const stepSkin=delta=>{const entry=viewerCharacters.find(item=>item.key===viewer.name);if(!entry||entry.skins.length<2)return;
+    viewer.skinIndex=(viewer.skinIndex+delta+entry.skins.length)%entry.skins.length;selectModel('roles',entry.key);};
+  const skinPrev=document.getElementById('viewerSkinPrev'),skinNext=document.getElementById('viewerSkinNext');if(skinPrev)skinPrev.onclick=()=>stepSkin(-1);if(skinNext)skinNext.onclick=()=>stepSkin(1);
+  document.querySelectorAll('#viewerKinds button').forEach(button=>{button.onclick=()=>{
+    document.querySelectorAll('#viewerKinds button').forEach(item=>item.classList.toggle('on',item===button));viewer.kind=button.dataset.kind;viewer.skinIndex=0;
+    const names=viewer.kind==='roles'?viewerCharacters.map(entry=>entry.key):viewer.kind==='props'?viewerPropFiles.map(entry=>entry.key):viewerWeaponFiles;
+    selectModel(viewer.kind,names[0]);};});
+  if(zoomControl)zoomControl.oninput=()=>{setStageZoom(+zoomControl.value,false);updateCamera();};
+  stage.addEventListener('wheel',event=>{event.preventDefault();setStageZoom(stageZoom()+(event.deltaY<0?0.1:-0.1));},{passive:false});
+  stage.addEventListener('pointerdown',event=>{viewer.drag={x:event.clientX,y:event.clientY,t:event.timeStamp};viewer.dragVel=0;try{stage.setPointerCapture(event.pointerId);}catch(error){}});
+  stage.addEventListener('pointermove',event=>{if(!viewer.drag)return;const dx=event.clientX-viewer.drag.x,dy=event.clientY-viewer.drag.y;
+    const dt=Math.max(0.008,Math.min(0.05,(event.timeStamp-viewer.drag.t)/1000));viewer.drag={x:event.clientX,y:event.clientY,t:event.timeStamp};viewer.spin.rotation.y+=dx*0.008;
+    viewer.spin.rotation.x=Math.max(-0.65,Math.min(0.65,viewer.spin.rotation.x+dy*0.006));viewer.dragVel=Math.max(-3,Math.min(3,dx*0.008/dt));});
+  const stopDrag=()=>{viewer.drag=null;snapshotStage();};stage.addEventListener('pointerup',stopDrag);stage.addEventListener('pointercancel',stopDrag);
+  const menuButton=document.getElementById('mnuViewer');const tabButton=document.querySelector('#mainTabs [data-tab="viewer"]');[menuButton,tabButton].forEach(button=>{
+    if(button)button.onclick=()=>{showScreen('scr-viewer');activate();};});
+  window.addEventListener('resize',resize);
+  renderTroopCards(viewerCharacters,viewerWeaponFiles);
+  cardEngine.scan();
+})();

@@ -49,10 +49,10 @@ function loadEngine() {
   sb.window = sb; sb.self = sb; sb.globalThis = sb;
   vm.createContext(sb);
   const modules = [
-    'data/nations', 'data/weapons', 'data/roles', 'data/cast', 'data/maps', 'data/map-pieces', 'data/ui-copy', 'bridge', 'ui/ui-shell', 'ui/abilities', 'ui/unit-card', 'ui/arsenal', 'ui/barracks', 'ui/wiring', 'game/board', 'game/combat', 'game/gadgets', 'game/missions', 'game/turn', 'game/ai-escort', 'game/ai', 'game/input', 'game/chars', 'game/demo', 'game/keyboard', 'game/quick',
+    'data/nations', 'data/weapons', 'data/roles', 'data/cast', 'data/maps', 'data/map-pieces', 'data/deployables', 'data/ui-copy', 'data/skin-names', 'data/catalog-competitive', 'bridge', 'ui/ui-shell', 'ui/abilities', 'ui/unit-card', 'ui/arsenal', 'ui/barracks', 'ui/wiring', 'ui/glb-lab', 'game/board', 'game/combat', 'game/gadgets', 'game/missions', 'game/turn', 'game/ai-escort', 'game/ai', 'game/input', 'game/chars', 'game/demo', 'game/keyboard', 'game/quick',
     'core/storage', 'core/rng', 'core/time', 'core/geometry', 'audio/sound',
     'render2d/tiles', 'render2d/board', 'render2d/sprites', 'render2d/fx', 'render3d/runtime',
-    'render3d/scene', 'render3d/gun', 'render3d/fallback-soldier', 'render3d/assets-real', 'render3d/assets-geo', 'render3d/assets-meshy', 'render3d/env', 'render3d/assets-weapons', 'render3d/gun-pose', 'render3d/clips', 'render3d/retarget', 'render3d/soldiers', 'render3d/real-sprites', 'render3d/world-props', 'render3d/world', 'render3d/fx3d', 'render3d/camera3d'
+    'render3d/scene', 'render3d/gun', 'render3d/fallback-soldier', 'render3d/assets-real', 'render3d/assets-geo', 'render3d/assets-meshy', 'render3d/env', 'render3d/assets-weapons', 'render3d/gltf-loader', 'render3d/asset-cache', 'render3d/actor-glb', 'render3d/gun-pose', 'render3d/clips', 'render3d/retarget', 'render3d/soldiers', 'render3d/real-sprites', 'render3d/world-props', 'render3d/world', 'render3d/fx3d', 'render3d/camera3d', 'viewer/card-stage', 'viewer/troop-cards', 'viewer/inspector'
   ];
   for (const name of modules) {
     const src = fs.readFileSync(path.join(__dirname, '..', 'src', name + '.js'), 'utf8')

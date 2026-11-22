@@ -29,7 +29,7 @@ export const WEAPON_COVER_BY_FILE={
 };
 
 export const WEAPONS_ORIGINAL={
- 'AssaultRifle':{name:'Semi Auto Rifle',tex:'AssaultRifle_d',texSize:[256,256],dims:[0.776,0.108,0.3],verts:201,cover:'item_weapon_14_Semi_Auto_Rifle_alpha',cat:'Fusiles de asalto',uses:['M4A1','HK416','G36C','FAMAS'],roles:'Comando, Capitán, Espía'},
+   'AssaultRifle':{name:'Assault Rifle',tex:'AssaultRifle_d',texSize:[256,256],dims:[0.776,0.108,0.3],verts:201,cover:'item_weapon_14_Semi_Auto_Rifle_alpha',cat:'Fusiles de asalto',uses:['M4A1','HK416','G36C','FAMAS'],roles:'Comando, Capitán, Espía'},
  'Rifle':{name:'Semi Auto Rifle',tex:'Rifle_d',texSize:[256,256],dims:[0.945,0.085,0.229],verts:405,cover:'item_weapon_14_Semi_Auto_Rifle_alpha',cat:'Fusiles de asalto',uses:['AK-12','FN SCAR-L'],roles:'Comando',note:'Comparte la carátula 14 con AssaultRifle; la carátula 09 (M16A2) no está asignada a ninguna malla.'},
  'Pistol':{name:'M9',tex:'Pistol_d',texSize:[128,128],dims:[0.86,0.148,0.603],verts:196,cover:'item_weapon_06_M9_alpha',cat:'Pistolas',uses:['M9','Glock 17'],roles:'todos (secundaria)'},
  'SniperRifle_weapon':{name:'Sniper Rifle 1',tex:'SniperRifle_d',texSize:[256,256],dims:[1.13,0.186,0.293],verts:583,cover:'item_weapon_12_Sniper_Rifle_1_alpha',cat:'Francotirador',uses:['M40','M24 SWS','SVD Dragunov','PSG-1'],roles:'Francotirador, Comando'},
@@ -53,6 +53,30 @@ export const WEAPONS_ORIGINAL={
  'SpikedClub_weapon':{name:'Spiked Club',tex:'SpikedClub_d',texSize:[128,128],dims:[0.34,0.971,0.359],verts:331,cover:'item_weapon_spikedclub_alpha',cat:'Cuerpo a cuerpo',uses:[],roles:'sin asignar en el arsenal de CSN'},
  'FragGrenade':{name:'Frag Grenade',tex:'FragGrenade_d',texSize:[64,64],dims:[0.142,0.122,0.194],verts:123,cover:null,cat:'Consumible',uses:['Granada de fragmentación'],roles:'todos (consumible)',note:'Sin carátula en el original.'}
 };
+
+const ORIGINAL_MELEE=new Set(['Knife','Katana','WoodAxe','SledgeHammer','BaseballBat_SOURCE','SpikedClub_weapon','Chainsaw']);
+const ORIGINAL_THROW=new Set(['FragGrenade','Molotov']);
+const ORIGINAL_NO_FLASH=new Set([...ORIGINAL_MELEE,'Crossbow',...ORIGINAL_THROW]);
+const ORIGINAL_WEAPON_PROFILES={
+  'AssaultRifle':['idle2h','fireBurst','assaultrifle_fire.mp3'], 'Rifle':['idle2h','fire2h','semiautorifle_fire.mp3'],
+  'Pistol':['idle1h','fire1h','beretta_fire.mp3'], 'Revolver':['idle1h','fire1hHeavy','revolver_fire.mp3'],
+  'Uzi':['idle1h','fire1hBurst','submachinegun_fire.mp3'], 'MP5K':['idle2h','fireBurst','mp5k_fire.mp3'],
+  'LightMachineGun':['idle2h','fireBurst','lmg_fire.mp3'], 'Minigun':['idle2h','fireMini','minigun_fire.mp3'],
+  'SniperRifle_weapon':['idle2h','fireHeavy','sniperrifle_fire.mp3'], 'M95':['idle2h','fireHeavy','m95_fire.mp3'],
+  'Shotgun':['idle2h','fireHeavy','shotgun_fire.mp3'], 'RiotShotgun':['idle2h','fireHeavy','riotshotgun_fire.wav'],
+  'RPG':['idle2h','fireShoulder','rocketlauncher_fire.mp3'], 'Crossbow':['idle2h','fire2h','crossbow_fire.mp3'],
+  'Knife':['idleMelee','fireMelee','knife_slash_01.mp3'], 'Katana':['idleMelee','fireMelee','knife_slash_01.mp3'],
+  'WoodAxe':['idleMelee','fireMelee','axe_swing_01.mp3'], 'SledgeHammer':['idleMelee','fireMelee','2h_swing_01.mp3'],
+  'BaseballBat_SOURCE':['idleMelee','fireMelee','baseballbat_hit_01.mp3'], 'SpikedClub_weapon':['idleMelee','fireMelee','spikedclub_hit_01.mp3'],
+  'Chainsaw':['idleMelee','fireMelee','chainsaw_swing_01.mp3'],
+  'FragGrenade':['idle1h','throw','grenade_throw_01.mp3'], 'Molotov':['idle1h','throw','grenade_throw_01.mp3']
+};
+
+export function originalWeaponProfile(file){
+  const p=ORIGINAL_WEAPON_PROFILES[file];
+  if(!p)return null;
+  return {idleClip:p[0],fireClip:p[1],sfx:p[2],hasMuzzleFlash:!ORIGINAL_NO_FLASH.has(file),actionLabel:ORIGINAL_MELEE.has(file)?'Probar ataque':ORIGINAL_THROW.has(file)?'Probar lanzamiento':'Probar disparo'};
+}
 
 export let WEAPON_METADATA={};
 export function setWEAPON_METADATA(v){WEAPON_METADATA=v;}
@@ -90,28 +114,9 @@ export function renderWeaponThumb(weapon){
   if(WEAPON_THUMB_CACHE[weapon]!==undefined)return WEAPON_THUMB_CACHE[weapon];
   const file=WEAPON_MESH_FILE[weapon];
   if(!file){WEAPON_THUMB_CACHE[weapon]=null;return null;}
-  const holder=GUN_MESH_CACHE[file];
-  if(!holder)return null;
-  try{
-    if(!_wThumbR){
-      _wThumbR=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});
-      _wThumbR.setSize(192,128);_wThumbR.setClearColor(0x20241e,1);
-    }
-    const sc=new THREE.Scene();
-    sc.add(new THREE.HemisphereLight(0xffffff,0x404840,1.5));
-    const dl=new THREE.DirectionalLight(0xffffff,2.2);dl.position.set(2,3,2);sc.add(dl);
-    const g=holder.clone(true);
-    const bb=new THREE.Box3().setFromObject(g);const size=new THREE.Vector3();bb.getSize(size);const c=new THREE.Vector3();bb.getCenter(c);
-    const maxd=Math.max(size.x,size.y,size.z,0.01);
-    g.position.set(-c.x,-c.y,-c.z);
-    const wrap=new THREE.Group();wrap.add(g);wrap.scale.setScalar(1.9/maxd);
-    wrap.rotation.y=-0.7;wrap.rotation.x=0.25;
-    sc.add(wrap);
-    const cam=new THREE.PerspectiveCamera(38,192/128,0.01,50);cam.position.set(0,0.35,1.7);cam.lookAt(0,0,0);
-    _wThumbR.render(sc,cam);
-    const url=_wThumbR.domElement.toDataURL('image/png');
-    WEAPON_THUMB_CACHE[weapon]=url;return url;
-  }catch(e){WEAPON_THUMB_CACHE[weapon]=null;return null;}
+  if(!GUN_MESH_CACHE[file])return null;
+  WEAPON_THUMB_CACHE[weapon]=weaponCoverURL(weapon);
+  return WEAPON_THUMB_CACHE[weapon];
 }
 
 export function weaponCoverURL(weapon){
@@ -219,7 +224,9 @@ export function makeRealGun3(ref){
       (rb.min.z>0||rb.max.z<0)?-(rb.min.z+rb.max.z)/2:0];
     const mat=new THREE.MeshStandardMaterial({color:0xb8b8b8,roughness:0.80,metalness:0.03,transparent:false,opacity:1,depthWrite:true,alphaTest:0,side:THREE.FrontSide});
     const texLoad=new THREE.TextureLoader();
-    texLoad.load('assets/weapons/'+file+'_tex.png',t=>{t.colorSpace=THREE.SRGBColorSpace;t.generateMipmaps=false;t.minFilter=THREE.LinearFilter;t.magFilter=THREE.LinearFilter;t.wrapS=THREE.ClampToEdgeWrapping;t.wrapT=THREE.ClampToEdgeWrapping;t.needsUpdate=true;mat.map=t;mat.color.set(0xffffff);mat.needsUpdate=true;},undefined,e=>{console.error('[makeRealGun3:texture]',file,e);});
+    let resolveTex=null;
+    const texReady=new Promise(resolve=>{resolveTex=resolve;});
+    texLoad.load('assets/weapons/'+file+'_tex.png',t=>{t.colorSpace=THREE.SRGBColorSpace;t.generateMipmaps=false;t.minFilter=THREE.LinearFilter;t.magFilter=THREE.LinearFilter;t.wrapS=THREE.ClampToEdgeWrapping;t.wrapT=THREE.ClampToEdgeWrapping;t.needsUpdate=true;mat.map=t;mat.color.set(0xffffff);mat.needsUpdate=true;resolveTex(t);},undefined,e=>{console.error('[makeRealGun3:texture]',file,e);resolveTex(null);});
     const mesh=new THREE.Mesh(geo,mat);
     mesh.rotation.set(rot.x,rot.y,rot.z);
     mesh.position.set(pivot[0],pivot[1],pivot[2]);
@@ -227,7 +234,7 @@ export function makeRealGun3(ref){
     holder.add(mesh);
     holder.scale.setScalar(cal.scale||k);
     holder.rotation.x=-Math.PI/2;
-    holder.userData={file:file,meta:meta||null,calibration:cal,pivot:pivot,rot:rot,grip:{x:0,y:0,scale:1}};
+    holder.userData={file:file,meta:meta||null,calibration:cal,pivot:pivot,rot:rot,grip:{x:0,y:0,scale:1},texReady:texReady};
     GUN_MESH_CACHE[file]=holder;
     if(gunSwapWaiters[file]){gunSwapWaiters[file].forEach(fn=>{try{fn(holder);}catch(e){}});gunSwapWaiters[file]=[];}
   }).catch(()=>{delete GUN_MESH_CACHE[file];});
@@ -253,7 +260,7 @@ export function attachRealGun(un,gun){
       gun.userData.meta=g2.userData.meta;
       gun.userData.grip={x:0,y:0,scale:1};
       if(gun.userData.flash){
-        const cat=(WEAPONS[un.weapon]||{}).cat||'Fusiles de asalto';
+        const cat=(WEAPONS[un.weapon]||{}).cat||(file&&String((WEAPONS_ORIGINAL[file]||{}).cat||'').split(' / ')[0])||'Fusiles de asalto';
         const cal=holder.userData.calibration||{},mp=cal.muzzlePos;
         if(Array.isArray(mp)&&mp.length===3&&mp.every(Number.isFinite)){
           const p=new THREE.Vector3(mp[0],mp[1],mp[2]);
@@ -276,7 +283,8 @@ export function attachRealGun(un,gun){
 
 export function makeGunAnchor(un){
   const gun=new THREE.Group();
-  const cat=(WEAPONS[un.weapon]||{}).cat||'Fusiles de asalto';
+  const file=weaponFileForRef(un&&un.weapon);
+  const cat=(WEAPONS[un.weapon]||{}).cat||(file&&String((WEAPONS_ORIGINAL[file]||{}).cat||'').split(' / ')[0])||'Fusiles de asalto';
   const flash=new THREE.Mesh(new THREE.SphereGeometry(0.055,8,8),new THREE.MeshBasicMaterial({color:0xffd76a,transparent:true,opacity:0,depthWrite:false}));
   flash.position.set(weaponTargetLength(cat)*0.96,0.01,0);
   flash.userData.isFlash=true;

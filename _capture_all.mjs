@@ -83,6 +83,10 @@ const result = {
   viewer: null,
   viewerAudit: null,
   viewerProbe: null,
+  moduleProbe: null,
+  catalogAudit: null,
+  arsenalAudit: null,
+  inspectorAudit: null,
   move: null,
   combat: null,
   mobile: null,
@@ -144,6 +148,9 @@ try {
     if (m.method === 'Runtime.exceptionThrown') {
       errs.push(String(m.params.exceptionDetails?.exception?.description || '').slice(0, 140));
     }
+    if (m.method === 'Log.entryAdded' && m.params?.entry?.level === 'error') {
+      errs.push(String((m.params.entry.url ? m.params.entry.url + ' ' : '') + (m.params.entry.text || '')).slice(0, 140));
+    }
   };
   send = (method, params = {}) => new Promise(res => {
     const i = ++id;
@@ -169,6 +176,7 @@ try {
 
   await send('Page.enable');
   await send('Runtime.enable');
+  await send('Log.enable');
   if (mobileMode) {
     const dpr = Number(process.env.CSN_DPR || (software ? 1 : 2)) || 2;
     await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: dpr, mobile: true, screenOrientation: { type: 'portraitPrimary', angle: 0 } });
@@ -202,7 +210,10 @@ try {
       mp5k: "(async function(){document.querySelector('#mainTabs [data-tab=\"viewer\"]').click();await new Promise(r=>setTimeout(r,1500));document.querySelector('#viewerKinds [data-kind=\"weapons\"]').click();await new Promise(r=>setTimeout(r,1500));const b=[...document.querySelectorAll('#viewerList button')].find(x=>x.textContent.includes('MP5K'));if(!b)throw new Error('no MP5K');b.click();return b.textContent;})()",
       minigun: "(async function(){document.querySelector('#mainTabs [data-tab=\"viewer\"]').click();await new Promise(r=>setTimeout(r,1500));document.querySelector('#viewerKinds [data-kind=\"weapons\"]').click();await new Promise(r=>setTimeout(r,1500));const b=[...document.querySelectorAll('#viewerList button')].find(x=>x.textContent.includes('Minigun'));if(!b)throw new Error('no Minigun');b.click();return b.textContent;})()",
       how: "document.querySelector('#mainTabs [data-tab=\"how\"]').click()",
-      pieces: "document.querySelector('#mainTabs [data-tab=\"viewer\"]').click();document.querySelector('#viewerKinds [data-kind=\"pieces\"]').click()",
+      troops: "document.querySelector('#mainTabs [data-tab=\"viewer\"]').click()",
+      armory: "document.querySelector('#mainTabs [data-tab=\"arsenal\"]').click()",
+      deployables: "document.querySelector('#mainTabs [data-tab=\"arsenal\"]').click();document.querySelector('#arsSectionSeg [data-arssec=\"deployables\"]').click()",
+      inspector: "(async function(){document.querySelector('#mainTabs [data-tab=\"viewer\"]').click();await new Promise(r=>setTimeout(r,1500));const b=document.querySelector('#troopGrid .troop-card[data-origin=\"Juego original\"] [data-inspector-open]')||document.querySelector('#troopGrid [data-inspector-open]');if(!b)throw new Error('no inspector');b.click();await new Promise(r=>setTimeout(r,2500));return !!(window.__csnInspector&&window.__csnInspector.isOpen());})()",
       game: "quickStart('almacen')",
       game3d: "quickStart('skirmish')",
       resume: "quickStart('almacen');document.querySelector('#mainTabs [data-tab=\"viewer\"]').click();document.querySelector('#mainTabs [data-tab=\"play\"]').click()"
@@ -211,13 +222,33 @@ try {
     if (!screens[screenKey]) throw new Error('Pantalla ui no valida: ' + screenKey);
     await ev(screens[screenKey]);
     if (auditMode) {
-      for (const kind of ['roles', 'weapons', 'props', 'pieces']) {
-        await ev("(function(){const b=document.querySelector('#viewerKinds [data-kind=\"" + kind + "\"]');if(b)b.click();})()");
-        await sleep(350);
-        await ev("(function(){const b=document.querySelector('#viewerList button');if(b){b.click();return b.textContent;}return '';})()");
-        await sleep(750);
-      }
-      await ev("document.querySelector('#viewerKinds [data-kind=\"roles\"]').click()");
+      await ev("document.querySelector('#mainTabs [data-tab=\"viewer\"]').click()");
+      await sleep(350);
+      const rawModule = await ev("JSON.stringify({viewer:!!window.__csnViewer,cardEngine:!!window.__csnCardEngine,troopGrid:!!document.getElementById('troopGrid'),scripts:[...document.scripts].filter(s=>s.src).map(s=>s.src.split('/').slice(-2).join('/'))})");
+      try { result.moduleProbe = JSON.parse(rawModule); } catch { result.moduleProbe = rawModule; }
+      const rawCatalog = await ev("JSON.stringify((function(){const cards=[...document.querySelectorAll('#troopGrid .card-3d-box[data-card-spec]')],first=cards[0];if(first&&window.__csnCardEngine)window.__csnCardEngine.activate(first,JSON.parse(first.dataset.cardSpec));const troops=document.querySelectorAll('#troopGrid .troop-card').length,orig=document.querySelectorAll('#troopGrid .troop-card[data-origin=\"Juego original\"]').length,csn=document.querySelectorAll('#troopGrid .troop-card[data-origin=\"CSN\"]').length,files=(window.__csnViewer&&window.__csnViewer.getWeaponFiles&&window.__csnViewer.getWeaponFiles())||[];return {troops,orig,csn,weapons:files.length,opens:document.querySelectorAll('#troopGrid [data-inspector-open]').length,cards:cards.length,cardEngine:!!window.__csnCardEngine};})())");
+      try { result.catalogAudit = JSON.parse(rawCatalog); } catch { result.catalogAudit = rawCatalog; }
+      const rawInspector = await ev(`(async function(){
+        const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+        const button=document.querySelector('#troopGrid .troop-card[data-origin="Juego original"] [data-inspector-open]')||document.querySelector('#troopGrid [data-inspector-open]');
+        if(!button||!window.__csnInspector)return {ok:false,reason:'sin boton de inspector'};
+        button.click();await sleep(1800);
+        const root=document.getElementById('inspectorRoot'),stage=document.getElementById('inspectorStage');
+        const select=document.querySelector('[data-inspector-weapon]'),fire=document.getElementById('inspectorFire');
+        const label=document.querySelector('[data-inspector-skin-name]');
+        const data={ok:!root.hidden&&!!stage&&stage.isConnected,open:!root.hidden,stage:!!stage&&stage.isConnected,skins:label?label.textContent.trim():'',weaponOptions:select?select.options.length:0,fireLabel:fire?fire.textContent.trim():'',paused:!!(window.__csnViewer&&window.__csnViewer.state.inspectorOpen)};
+        window.__csnInspector.close();await sleep(300);
+        data.closed=root.hidden&&!document.body.classList.contains('inspector-open');
+        return data;
+      })()`, 30000);
+      try { result.inspectorAudit = JSON.parse(rawInspector); } catch { result.inspectorAudit = rawInspector; }
+      await sleep(1200);
+      await ev("document.querySelector('#mainTabs [data-tab=\"arsenal\"]').click()");
+      await sleep(350);
+      const rawArsenal = await ev("JSON.stringify((function(){const original=document.querySelectorAll('#arsenalGrid .weapon-original').length,csn=document.querySelectorAll('#arsenalGrid .weapon-csn').length,placeholder=document.querySelectorAll('#arsenalGrid .card-3d-empty').length;document.querySelector('#arsSectionSeg [data-arssec=\"deployables\"]').click();const deployables=document.querySelectorAll('#deployableGrid [data-card-spec]').length;return {original,csn,placeholder,deployables};})())");
+      try { result.arsenalAudit = JSON.parse(rawArsenal); } catch { result.arsenalAudit = rawArsenal; }
+      await sleep(1200);
+      await ev("document.querySelector('#mainTabs [data-tab=\"viewer\"]').click()");
       await sleep(350);
       const rawProbe = await ev(viewerAuditProbeExpr, 90000);
       try { result.viewerProbe = JSON.parse(rawProbe); } catch { result.viewerProbe = rawProbe; }
@@ -333,10 +364,17 @@ try {
   let viewerOk = !auditMode || !!(result.viewerAudit && Array.isArray(result.viewerAudit.models) && result.viewerAudit.models.length > 0 && result.viewerAudit.models.every(m => {
     if (!Number.isFinite(m.vol) || m.transparent !== false || m.opacity !== 1) return false;
     if (!m.size.every(n => Number.isFinite(n) && n > 0.001)) return false;
-    if (m.kind === 'roles' || m.kind === 'weapons') return m.side === 0 && m.alphaTest === 0 && (m.kind !== 'roles' || m.meshy || m.vol > 0);
+    if (m.kind === 'roles' || m.kind === 'weapons') return (m.side === 0 || (m.kind === 'roles' && m.meshy && m.side === 2)) && m.alphaTest === 0 && (m.kind !== 'roles' || m.meshy || m.vol > 0);
     return m.size.every(Number.isFinite);
   }));
   if (auditMode) {
+    const catalog = result.catalogAudit && typeof result.catalogAudit === 'object' ? result.catalogAudit : {};
+    const arsenalAudit = result.arsenalAudit && typeof result.arsenalAudit === 'object' ? result.arsenalAudit : {};
+    const inspectorAudit = result.inspectorAudit && typeof result.inspectorAudit === 'object' ? result.inspectorAudit : {};
+    const catalogOk = catalog.troops === 22 && catalog.orig === 17 && catalog.csn === 5 && catalog.weapons === 23 && catalog.opens === 22 && catalog.cardEngine === true;
+    const arsenalOk = arsenalAudit.original === 23 && arsenalAudit.csn === 37 && arsenalAudit.deployables === 10;
+    const inspectorOk = inspectorAudit.ok === true && inspectorAudit.open === true && inspectorAudit.stage === true && inspectorAudit.paused === true && inspectorAudit.weaponOptions >= 24 && /Probar/.test(inspectorAudit.fireLabel || '') && inspectorAudit.closed === true;
+    viewerOk = viewerOk && catalogOk && arsenalOk && inspectorOk;
     const probes = Array.isArray(result.viewerProbe) ? result.viewerProbe : [];
     const required = ['original:01', 'original:01+weapon', 'original:05', 'own:09'];
     const gunOk = probes.some(p => p.label === 'original:01+weapon' && p.gun);
@@ -351,7 +389,7 @@ try {
   if (mobileMode && !mobileOk) result.errores.push('movil: layout fuera de viewport');
   if (mobileMode && !geoOk) result.errores.push('movil: geometria del mapa no lista');
   if (software && !softwareOk) result.errores.push('swiftshader no activo');
-  if (auditMode && !viewerOk) result.errores.push('auditoria de visor incompleta');
+  if (auditMode && !viewerOk) result.errores.push('auditoria de visor/catalogo/inspector incompleta');
   if (!result.ok && errs.length === 0) result.errores.push('escena o captura vacia');
 } catch (e) {
   result.errores.push(String(e.message || e).slice(0, 200));

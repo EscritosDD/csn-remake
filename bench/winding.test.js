@@ -41,10 +41,13 @@ class Geometry {
   setIndex(index) { this.index = { array: index }; }
   computeVertexNormals() {
     const pos = this.position.array;
-    const idx = this.index.array;
+    const idx = this.index ? this.index.array : null;
     const nor = new Float32Array(pos.length);
-    for (let i = 0; i < idx.length; i += 3) {
-      const a = idx[i] * 3, b = idx[i + 1] * 3, c = idx[i + 2] * 3;
+    const count = idx ? idx.length : pos.length / 3;
+    for (let i = 0; i < count; i += 3) {
+      const a = (idx ? idx[i] : i) * 3;
+      const b = (idx ? idx[i + 1] : i + 1) * 3;
+      const c = (idx ? idx[i + 2] : i + 2) * 3;
       const ux = pos[b] - pos[a], uy = pos[b + 1] - pos[a + 1], uz = pos[b + 2] - pos[a + 2];
       const vx = pos[c] - pos[a], vy = pos[c + 1] - pos[a + 1], vz = pos[c + 2] - pos[a + 2];
       const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
@@ -56,6 +59,18 @@ class Geometry {
     }
     this.normal = new Attr(nor, 3);
   }
+  computeBoundingBox() {
+    const pos = this.position.array;
+    const min = [Infinity, Infinity, Infinity];
+    const max = [-Infinity, -Infinity, -Infinity];
+    for (let i = 0; i < pos.length; i += 3) {
+      for (let e = 0; e < 3; e++) {
+        min[e] = Math.min(min[e], pos[i + e]);
+        max[e] = Math.max(max[e], pos[i + e]);
+      }
+    }
+    this.boundingBox = { min, max };
+  }
 }
 const ctx = { THREE: { BufferGeometry: Geometry, Float32BufferAttribute: Attr } };
 vm.createContext(ctx);
@@ -63,18 +78,22 @@ vm.runInContext(extraerFn(html, 'parseOBJ3') + '\nthis.parseOBJ3 = parseOBJ3;', 
 vm.runInContext(extraerFn(html, 'parseOBJStatic') + '\nthis.parseOBJStatic = parseOBJStatic;', ctx);
 const parseOBJ3 = ctx.parseOBJ3;
 const parseOBJStatic = ctx.parseOBJStatic;
+const meshySrc = fs.readFileSync(path.join(root, 'src', 'render3d', 'assets-meshy.js'), 'utf8');
+vm.runInContext(extraerFn(meshySrc, 'parseMeshyOBJ') + '\nthis.parseMeshyOBJ = parseMeshyOBJ;', ctx);
+const parseMeshyOBJ = ctx.parseMeshyOBJ;
 
 function metricas(geo) {
   const pos = geo.position.array;
   const nor = geo.normal.array;
-  const idx = geo.index.array;
+  const idx = geo.index ? geo.index.array : null;
+  const count = idx ? idx.length : pos.length / 3;
   let volumen = 0;
   let alineadas = 0;
   let total = 0;
-  for (let i = 0; i < idx.length; i += 3) {
-    const a = idx[i] * 3;
-    const b = idx[i + 1] * 3;
-    const c = idx[i + 2] * 3;
+  for (let i = 0; i < count; i += 3) {
+    const a = (idx ? idx[i] : i) * 3;
+    const b = (idx ? idx[i + 1] : i + 1) * 3;
+    const c = (idx ? idx[i + 2] : i + 2) * 3;
     const ax = pos[a], ay = pos[a + 1], az = pos[a + 2];
     const bx = pos[b], by = pos[b + 1], bz = pos[b + 2];
     const cx = pos[c], cy = pos[c + 1], cz = pos[c + 2];
@@ -246,6 +265,85 @@ test('los 11 originales tienen rig de 20 huesos con pesos normalizados', () => {
     for (let i = 0; i < rig.skinWeight.length; i += 4) {
       const suma = rig.skinWeight.slice(i, i + 4).reduce((a, b) => a + b, 0);
       assert.ok(Math.abs(suma - 1) < 1e-3, body + ': pesos ' + suma);
+    }
+  }
+});
+
+test('parseMeshyOBJ corrige winding negativo y sincroniza UV, normales y skin', () => {
+  const obj = [
+    'v 0 0 0', 'v 1 0 0', 'v 0 1 0', 'v 0 0 1',
+    'vt 0 0', 'vt 1 0', 'vt 0 1', 'vt 1 1',
+    'vn 0 0 1',
+    'f 1/1/1 2/2/1 3/3/1',
+    'f 1/1/1 4/4/1 2/2/1',
+    'f 1/1/1 3/3/1 4/4/1',
+    'f 2/2/1 4/4/1 3/3/1'
+  ].join('\n');
+  const rig = {
+    skinIndex: [[0, 0, 0, 0], [1, 1, 1, 1], [2, 2, 2, 2], [3, 3, 3, 3]],
+    skinWeight: [[1, 0, 0, 0], [1, 0, 0, 0], [1, 0, 0, 0], [1, 0, 0, 0]]
+  };
+  const geo = parseMeshyOBJ(obj, rig);
+  const m = metricas(geo);
+  assert.ok(m.volumen > 0, 'volumen firmado ' + m.volumen.toFixed(4));
+  assert.ok(m.ratio > 0.9, 'normales alineadas ' + (m.ratio * 100).toFixed(1) + '%');
+  assert.deepEqual(Array.from(geo.skinIndex.array.slice(0, 12)), [0, 0, 0, 0, 2, 2, 2, 2, 1, 1, 1, 1]);
+  assert.deepEqual(Array.from(geo.skinWeight.array.slice(0, 12)), [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0]);
+  assert.deepEqual(Array.from(geo.uv.array.slice(0, 6)), [0, 0, 0, 1, 1, 0]);
+  assert.ok(geo.boundingBox, 'bounding box conservada');
+  assert.match(meshySrc, /swap\(positions,3,face\);swap\(outUvs,2,face\);swap\(vertexIds,1,face\);swap\(skinIndices,4,face\);swap\(skinWeights,4,face\)/);
+  assert.match(meshySrc, /geometry\.setAttribute\('normal',new THREE\.Float32BufferAttribute\(smoothNormals,3\)\)/);
+  assert.doesNotMatch(meshySrc, /geometry\.computeVertexNormals\(\)/);
+});
+
+test('parseMeshyOBJ comparte normales suaves entre vértices originales', () => {
+  const obj = [
+    'v 0 0 0', 'v 1 0 0', 'v 0 1 0', 'v 0 0 1',
+    'vt 0 0', 'vt 1 0', 'vt 0 1', 'vt 1 1',
+    'vn 0 0 1',
+    'f 1/1/1 2/2/1 3/3/1',
+    'f 1/1/1 4/4/1 2/2/1',
+    'f 1/1/1 3/3/1 4/4/1',
+    'f 2/2/1 4/4/1 3/3/1'
+  ].join('\n');
+  const rig = {
+    skinIndex: [[0, 0, 0, 0], [1, 1, 1, 1], [2, 2, 2, 2], [3, 3, 3, 3]],
+    skinWeight: [[1, 0, 0, 0], [1, 0, 0, 0], [1, 0, 0, 0], [1, 0, 0, 0]]
+  };
+  const geo = parseMeshyOBJ(obj, rig);
+  const pos = geo.position.array;
+  const nor = geo.normal.array;
+  const vistos = new Map();
+  for (let i = 0; i < pos.length; i += 3) {
+    const key = pos.slice(i, i + 3).join(',');
+    const normal = nor.slice(i, i + 3);
+    assert.ok(Math.abs(Math.hypot(...normal) - 1) < 1e-5, 'normal no unitaria');
+    if (vistos.has(key)) assert.deepEqual(normal, vistos.get(key), 'normal duplicada ' + key);
+    else vistos.set(key, normal);
+  }
+  const m = metricas(geo);
+  assert.ok(m.volumen > 0, 'volumen firmado ' + m.volumen.toFixed(4));
+  assert.ok(m.ratio > 0.9, 'normales alineadas ' + (m.ratio * 100).toFixed(1) + '%');
+});
+
+test('Meshy usa textura sin mipmaps, material mate a dos caras y quats normalizados', () => {
+  const viewer = fs.readFileSync(path.join(root, 'src', 'viewer', 'main.js'), 'utf8');
+  assert.match(meshySrc, /t\.colorSpace=THREE\.SRGBColorSpace;t\.generateMipmaps=false;t\.minFilter=THREE\.LinearFilter;t\.magFilter=THREE\.LinearFilter;t\.wrapS=THREE\.ClampToEdgeWrapping;t\.wrapT=THREE\.ClampToEdgeWrapping;t\.needsUpdate=true/);
+  assert.match(meshySrc, /roughness:meshy\?0\.90:0\.85,metalness:meshy\?0:0\.02/);
+  assert.match(meshySrc, /side:meshy\?THREE\.DoubleSide:THREE\.FrontSide/);
+  assert.match(meshySrc, /new THREE\.Quaternion\(b\.quat\[0\],b\.quat\[1\],b\.quat\[2\],b\.quat\[3\]\)\.normalize\(\)/);
+  assert.match(viewer, /texture\.generateMipmaps=false; texture\.minFilter=THREE\.LinearFilter/);
+});
+
+test('los 11 rigs del original tienen rotaciones unitarias y pelvis centrada', () => {
+  const dir = path.join(root, 'assets', 'soldier', 'bodies');
+  const bodies = ['Soldier_SAS', 'Soldier_Spud', 'Soldier_Heavy', 'Soldier_Light_Rambo', 'Agent_Light',
+    'Medic_therapist_1248v', 'Engineer_Light', 'Engineer_Heavy', 'Engineer_RiotCop', 'CommanderM', 'CommanderF'];
+  for (const body of bodies) {
+    const rig = JSON.parse(fs.readFileSync(path.join(dir, body + '_rig.json'), 'utf8'));
+    for (const bone of rig.bones) {
+      assert.ok(Math.abs(Math.hypot(...bone.quat) - 1) < 1e-3, body + ' ' + bone.name + ': quat no unitaria');
+      assert.ok(Math.abs(bone.pos[0]) < 0.3, body + ' ' + bone.name + ': pos.x ' + bone.pos[0]);
     }
   }
 });
