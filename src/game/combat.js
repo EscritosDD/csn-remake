@@ -130,17 +130,19 @@ export function spendEnergy(u,n){u.energy-=n;}
 
 export function fireClipFor(weaponName){
   const cat=(WEAPONS[weaponName]||{}).cat;
-  /* Todas las pistolas usan el clip de una mano, no solo la M9: antes
-     solo la M9 (PISTOL) caía en fire1h y las demás pistolas (Glock,
-     M1911, Desert Eagle…) usaban el clip de dos manos. */
+  if(weaponName==='M1911'||weaponName==='Desert Eagle')return 'fire1hHeavy';
+  if(weaponName==='MP7'||weaponName==='UMP45'||weaponName==='KRISS Vector')return 'fire1hBurst';
+  if(cat==='Subfusiles')return 'fireBurst';
+  if(weaponName==='M134 Minigun')return 'fireMini';
   if(cat==='Pistolas')return 'fire1h';
   if(cat==='Cuerpo a cuerpo')return 'fireMelee';
-  if(cat==='Ametralladoras')return 'fireMini';
-  if(cat==='Francotirador')return 'fireHeavy';
+  if(cat==='Ametralladoras')return 'fireBurst';
+  if(cat==='Francotirador')return (weaponName==='M110 SASS'||weaponName==='SVD Dragunov'||weaponName==='Mk 14 EBR'||weaponName==='PSG-1')?'fire2h':'fireHeavy';
   if(cat==='Lanzacohetes'||cat==='Lanzagranadas')return 'fireShoulder';
-  if(cat==='Escopetas')return 'fireBurst';
+  if(cat==='Escopetas')return 'fireHeavy';
   return 'fire2h';
 }
+
 
 export function playOnce(u,key){if(u){u._onceKey=key;u._onceT=FX.t;}}
 
@@ -154,15 +156,21 @@ export function damage(target,dmg,srcLabel,srcTeam){
   target.hp-=dmg;
   const dmgTeam=srcTeam||(G&&G._dmgTeam)||null;
   if(G&&G.stats&&dmgTeam&&dmgTeam!==target.team){const st=G.stats[dmgTeam];st.dmg+=dmg;if(target.hp<=0)st.kills++;}
-  target._hitT=FX.t;target._hitAmt=Math.min(1,dmg/70);
   /* Tipo de impacto, para elegir el clip del original en la vista 3D:
      explosión (barril, M67, salpicadura, lanzacohetes, lanzagranadas),
      ráfaga (ametralladoras) o bala; la muerte hereda el mismo tipo. */
   const expl=/explos|M67|salpicadura|barril|RPG|AT4|M72|M203|M32/i.test(srcLabel||'');
-  target._hitKind=expl?'expl':(/M249|M240|PKM|MG3/.test(srcLabel||'')?'burst':'bullet');
+  const kind=expl?'expl':(/M249|M240|PKM|MG3/.test(srcLabel||'')?'burst':'bullet');
+  target._hitAmt=Math.min(1,dmg/70);target._hitKind=kind;
+  const delayed=target._visualDelayUntil!=null&&FX.t<target._visualDelayUntil;
+  if(delayed)target._pendingHit={t:FX.t,amt:target._hitAmt,kind:kind,death:false};
+  else target._hitT=FX.t;
   /* Impacto seco del original (bala), solo en dano no explosivo. */
   if(!expl&&(!CLIPLIB.ready||window.__noClips||REDUCED_MOTION||VIEW_MODE!=='3d')){try{auPlay('sfx/weapons/bullet_hit_0'+(1+Math.floor(Math.random()*2))+'.mp3',0.25);}catch(e){}}
-  if(target.hp<=0&&target._deathT==null){target._deathT=FX.t;target._deathKind=expl?'expl':'bullet';}
+  if(target.hp<=0&&target._deathT==null){
+    if(delayed&&target._pendingHit)target._pendingHit.death=true;
+    else{target._deathT=FX.t;target._deathKind=kind;}
+  }
   if(target.x!=null){fxFloat(target.x,target.y,'−'+dmg,'#ffd9d2');fxBurst(target.x,target.y,7,'#ffb199');}
   log(srcLabel+' hace <b>'+dmg+'</b> de daño a '+target.role+' ('+target.team+'). Le quedan '+Math.max(0,target.hp)+' PV.');
   if(target.hp<=0){target.hp=0;target.alive=false;target.invisible=false;if(!target.isDrone)auVoice(target,'death',0.55);log('✕ '+target.role+' ('+target.team+') eliminado.');}
@@ -201,9 +209,10 @@ export function tryShoot(shooter,target,weaponName,multiplier,opts){
   if(!freeCost)spendEnergy(shooter,w.cost);shooter.hasShot=true;if(shooter.invisible){shooter.invisible=false;log('La invisibilidad del Espía se rompe al disparar.');}
   if(w.once)shooter.onceUsed=true;
   const f=angleToFacing(target.x-shooter.x,target.y-shooter.y);if(f!=null)shooter.facing=f;
-  shooter._shootT=FX.t;shooter._shootW=weaponName;shooter._shootCat=w.cat;shooter._shootAt=target&&target.x!=null?{x:target.x,y:target.y}:null;shooter._fireKey=fireClipFor(weaponName);
+  shooter._shootT=FX.t;shooter._shootW=weaponName;shooter._shootCat=w.cat;shooter._shootAt=target&&target.x!=null?{x:target.x,y:target.y}:null;shooter._shootTarget=target&&target.x!=null?target:null;shooter._fireKey=fireClipFor(weaponName);
   const fireClipNow=CLIPLIB.ready&&CLIPLIB.pack&&CLIPLIB.pack.clips&&CLIPLIB.pack.clips[shooter._fireKey];
   const deferredFire=!!(fireClipNow&&fireClipNow.events&&fireClipNow.events.length&&!window.__noClips&&!REDUCED_MOTION&&VIEW_MODE==='3d');
+  if(deferredFire&&shooter._shootTarget){shooter._shootTarget._visualDelayUntil=FX.t+1200;shooter._shootTarget._pendingHit=null;}
   if(!deferredFire){const m3=T3&&T3.units&&T3.units.get?T3.units.get(shooter.id):null;fireWeaponFeedback(shooter,m3&&m3.userData,true);}
   const roll=rng()*100;
   let hit=false;

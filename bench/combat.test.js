@@ -26,6 +26,19 @@ test('el retroceso del arma sigue el pulso del evento, no un temporizador fijo',
   assert.doesNotMatch(html, /FX\.t-un\._shootT\)\/220/);
 });
 
+test('el impacto visual espera al disparo y el audio va limitado por unidad', () => {
+  assert.match(html, /_shootTarget\._visualDelayUntil=FX\.t\+1200/);
+  assert.match(html, /releasePendingVisualHit\(shooter\)/);
+  assert.match(html, /t-un\._pendingHit\.t>1200/);
+  assert.match(html, /now-\(shooter&&shooter\._lastFxAt\|\|0\)>=100/);
+  assert.match(html, /shooter\._voicedShotAt!==shot/);
+  const viewer = fs.readFileSync(path.join(root, 'src', 'viewer', 'main.js'), 'utf8');
+  assert.match(viewer, /weaponSelect\.value=viewer\.weapon\|\|''/);
+  assert.match(viewer, /rigPose:!!character\.rigPose\|\|!!bodyRole/);
+  assert.match(viewer, /idleForWeapon\(wanted\)/);
+  assert.match(viewer, /viewerFireBtn/);
+});
+
 test('la captura de combate registra clip, eventos y pulsos', () => {
   assert.match(capture, /const combatMode = mapId\.startsWith\('combat:'\)/);
   assert.match(capture, /window\.__combatProbe/);

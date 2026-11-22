@@ -1,5 +1,6 @@
 import { lsGet } from '../core/storage.js';
-import { DMR_WEAPONS, WEAPON_SFX } from '../data/weapons.js';
+import { DMR_WEAPONS, WEAPON_SFX, weaponSfxFile } from '../data/weapons.js';
+
 import { CHAR_VOICE } from '../data/cast.js';
 import { VOICE_FILES } from '../data/roles.js';
 
@@ -27,15 +28,37 @@ export const AU_BASE='assets/audio/';
 
 export let AU_AMBIENT=null;
 
-export function auPlay(path,vol,loop){if(!soundOn)return null;try{const a=new Audio(AU_BASE+path);a.volume=vol==null?0.6:vol;if(loop)a.loop=true;a.play().catch(()=>{});return a;}catch(e){return null;}}
+const AUDIO_BUFFERS=new Map(),AUDIO_PENDING=new Map(),AUDIO_TEMPLATES=new Map();
+
+function auBuffer(path){
+  const ac=audioCtx();if(!ac)return null;
+  if(AUDIO_BUFFERS.has(path))return AUDIO_BUFFERS.get(path);
+  if(AUDIO_PENDING.has(path))return null;
+  const pending=fetch(AU_BASE+path).then(r=>{if(!r.ok)throw new Error(path);return r.arrayBuffer();}).then(data=>new Promise((resolve,reject)=>{const req=ac.decodeAudioData(data,resolve,reject);if(req&&req.then)req.then(resolve,reject);}))
+    .then(buffer=>{AUDIO_BUFFERS.set(path,buffer);AUDIO_PENDING.delete(path);return buffer;}).catch(()=>{AUDIO_PENDING.delete(path);return null;});
+  AUDIO_PENDING.set(path,pending);return null;
+}
+
+export function auPlay(path,vol,loop){
+  if(!soundOn)return null;
+  const level=vol==null?0.6:vol;
+  try{
+    const ac=audioCtx(),buffer=ac&&auBuffer(path);
+    if(buffer){
+      const src=ac.createBufferSource(),gain=ac.createGain();
+      src.buffer=buffer;src.loop=!!loop;gain.gain.value=level;src.connect(gain);gain.connect(ac.destination);src.start();return src;
+    }
+    let a=AUDIO_TEMPLATES.get(path);
+    if(!a){a=new Audio(AU_BASE+path);AUDIO_TEMPLATES.set(path,a);}
+    try{a.pause();a.currentTime=0;}catch(e){}
+    a.volume=level;a.loop=!!loop;a.play().catch(()=>{});return a;
+  }catch(e){return null;}
+}
 
 export function auWeapon(cat,weaponName){
-  if(weaponName&&DMR_WEAPONS.includes(weaponName)){auPlay('sfx/weapons/semiautorifle_fire.mp3',0.5);return;}
-  /* La ballesta tiene su propio sonido en el original; no está en el
-     arsenal de CSN, pero si se equipa (visor o rol futuro) suena el suyo. */
-  if(weaponName==='Crossbow'){auPlay('sfx/weapons/crossbow_fire.mp3',0.5);return;}
-  const f=WEAPON_SFX[cat];if(f)auPlay('sfx/weapons/'+f+'.mp3',0.45);
+  const f=weaponSfxFile(cat,weaponName);if(f)auPlay('sfx/weapons/'+f,f.endsWith('.wav')?0.35:0.45);
 }
+
 
 export function auClick(){auPlay('sfx/ui/ui_click.mp3',0.35);}
 

@@ -60,7 +60,11 @@ export function setWEAPON_METADATA(v){WEAPON_METADATA=v;}
 export let WEAPON_CALIBRATIONS={};
 export function setWEAPON_CALIBRATIONS(v){WEAPON_CALIBRATIONS=v;}
 
+export let WEAPON_SOCKETS={};
+export function setWEAPON_SOCKETS(v){WEAPON_SOCKETS=v;}
+
 export function weaponCalibration(file){return file&&WEAPON_CALIBRATIONS[file]||null;}
+
 
 export function weaponMeta(file){
   if(!file)return null;
@@ -213,9 +217,9 @@ export function makeRealGun3(ref){
     const pivot=[(rb.min.x>0||rb.max.x<0)?-(rb.min.x+rb.max.x)/2:0,
       (rb.min.y>0||rb.max.y<0)?-(rb.min.y+rb.max.y)/2:0,
       (rb.min.z>0||rb.max.z<0)?-(rb.min.z+rb.max.z)/2:0];
-    const mat=new THREE.MeshStandardMaterial({color:0x9a9a9a,roughness:0.72,metalness:0.25,transparent:false,opacity:1,depthWrite:true,alphaTest:0});
+    const mat=new THREE.MeshStandardMaterial({color:0xb8b8b8,roughness:0.80,metalness:0.03,transparent:false,opacity:1,depthWrite:true,alphaTest:0,side:THREE.FrontSide});
     const texLoad=new THREE.TextureLoader();
-    texLoad.load('assets/weapons/'+file+'_tex.png',t=>{t.colorSpace=THREE.SRGBColorSpace;mat.map=t;mat.color.set(0xffffff);mat.needsUpdate=true;},undefined,()=>{});
+    texLoad.load('assets/weapons/'+file+'_tex.png',t=>{t.colorSpace=THREE.SRGBColorSpace;t.generateMipmaps=false;t.minFilter=THREE.LinearFilter;t.magFilter=THREE.LinearFilter;t.wrapS=THREE.ClampToEdgeWrapping;t.wrapT=THREE.ClampToEdgeWrapping;t.needsUpdate=true;mat.map=t;mat.color.set(0xffffff);mat.needsUpdate=true;},undefined,e=>{console.error('[makeRealGun3:texture]',file,e);});
     const mesh=new THREE.Mesh(geo,mat);
     mesh.rotation.set(rot.x,rot.y,rot.z);
     mesh.position.set(pivot[0],pivot[1],pivot[2]);
@@ -223,7 +227,7 @@ export function makeRealGun3(ref){
     holder.add(mesh);
     holder.scale.setScalar(cal.scale||k);
     holder.rotation.x=-Math.PI/2;
-    holder.userData={file:file,meta:meta||null,calibration:cal,pivot:pivot,grip:{x:0,y:0,scale:1}};
+    holder.userData={file:file,meta:meta||null,calibration:cal,pivot:pivot,rot:rot,grip:{x:0,y:0,scale:1}};
     GUN_MESH_CACHE[file]=holder;
     if(gunSwapWaiters[file]){gunSwapWaiters[file].forEach(fn=>{try{fn(holder);}catch(e){}});gunSwapWaiters[file]=[];}
   }).catch(()=>{delete GUN_MESH_CACHE[file];});
@@ -248,7 +252,18 @@ export function attachRealGun(un,gun){
       gun.userData.file=g2.userData.file;
       gun.userData.meta=g2.userData.meta;
       gun.userData.grip={x:0,y:0,scale:1};
-      if(gun.userData.flash){const cat=(WEAPONS[un.weapon]||{}).cat||'Fusiles de asalto';gun.userData.flash.position.x=weaponTargetLength(cat)*0.96;gun.userData.flash.position.y=0;}
+      if(gun.userData.flash){
+        const cat=(WEAPONS[un.weapon]||{}).cat||'Fusiles de asalto';
+        const cal=holder.userData.calibration||{},mp=cal.muzzlePos;
+        if(Array.isArray(mp)&&mp.length===3&&mp.every(Number.isFinite)){
+          const p=new THREE.Vector3(mp[0],mp[1],mp[2]);
+          const rot=holder.userData.rot||{};
+          p.applyEuler(new THREE.Euler(rot.x||0,rot.y||0,rot.z||0));
+          const pv=holder.userData.pivot||[0,0,0];p.add(new THREE.Vector3(pv[0],pv[1],pv[2]));
+          p.applyEuler(new THREE.Euler(-Math.PI/2,0,0)).multiplyScalar(cal.scale||1);
+          gun.userData.flash.position.copy(p);
+        }else{gun.userData.flash.position.set(weaponTargetLength(cat)*0.96,0.01,0);}
+      }
     }catch(e){}
   };
   const holder=makeRealGun3(file);

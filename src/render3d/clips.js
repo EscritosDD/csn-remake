@@ -16,18 +16,36 @@ export const _retargetDelta=HAS_THREE?new THREE.Quaternion():null,_retargetInver
 
 export function clipPulse(v,ms,dt){return Math.max(0,(v||0)-dt/ms);}
 
+export function releasePendingVisualHit(shooter,t){
+  const target=shooter&&shooter._shootTarget,pending=target&&target._pendingHit;
+  if(!pending)return;
+  const now=(t==null&&typeof FX!=='undefined')?FX.t:t;
+  target._hitT=now;target._hitAmt=pending.amt;target._hitKind=pending.kind;
+  if(pending.death&&target._deathT==null){target._deathT=now;target._deathKind=pending.kind;}
+  target._pendingHit=null;target._visualDelayUntil=null;
+}
+
 export function fireWeaponFeedback(un,ud,full){
   const shooter=(un&&un.x!=null)?un:null,target=shooter&&shooter._shootAt,cat=shooter&&shooter._shootCat;
-  if(full&&shooter){auWeapon(cat,shooter._shootW);if(Math.random()<0.3)auVoice(shooter,'firing',0.4);}
+  const shot=shooter&&shooter._shootT,now=(typeof performance!=='undefined'?performance.now():Date.now());
+  if(shooter&&shot!==shooter._lastFxShot){shooter._lastFxShot=shot;shooter._lastFxAt=0;shooter._voicedShotAt=null;}
+  releasePendingVisualHit(shooter);
+  const loud=!!full&&now-(shooter&&shooter._lastFxAt||0)>=100;
+  if(loud&&shooter){
+    shooter._lastFxAt=now;
+    auWeapon(cat,shooter._shootW);
+    if(shooter._voicedShotAt!==shot){shooter._voicedShotAt=shot;if(Math.random()<0.6)auVoice(shooter,'firing',0.42);}
+  }
   if(ud){
     ud._firePulse=Math.max(ud._firePulse||0,full?1:0.42);
     ud._flashPulse=1;
   }
   if(shooter&&target&&target.x!=null){
-    if(full){fxBurst(shooter.x,shooter.y,3,'#ffe9a8');if(typeof fx3Shot==='function')fx3Shot(shooter,target,cat);}
-    fxTracer(shooter,target);
+    if(full&&loud){fxBurst(shooter.x,shooter.y,3,'#ffe9a8');if(typeof fx3Shot==='function')fx3Shot(shooter,target,cat);}
+    if(!full||loud)fxTracer(shooter,target);
   }
 }
+
 
 export function clipEventFeedback(un,ud,key,clip,e,ct,t){
   const f=e.f||'';let acted=false;
@@ -138,6 +156,7 @@ export function rootBonePositionForClip(rootBase,pelvisOffset,delta,rotatedPelvi
 
 export function driveClipSoldier(un,mesh,t,moving){
   if(window.__noClips)return; /* diagnostico: reposo puro */
+  if(un._pendingHit&&t-un._pendingHit.t>1200)releasePendingVisualHit(un,t);
   const ud=mesh.userData;if(ud&&ud.meshy)return;
   const pack=CLIPLIB.pack,clips=pack.clips,ts=t/1000;
   const wcat=WEAPONS[un.weapon]&&WEAPONS[un.weapon].cat;

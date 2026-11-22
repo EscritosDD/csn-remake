@@ -41,6 +41,23 @@ export const WEAPONS={
 
 export const PISTOL='M9';
 
-export const WEAPON_SFX={'Fusiles de asalto':'assaultrifle_fire','Subfusiles':'assaultrifle_fire','Ametralladoras':'assaultrifle_fire','Escopetas':'shotgun_fire','Francotirador':'sniperrifle_fire','Lanzacohetes':'rocketlauncher_fire','Lanzagranadas':'cluster_explode','Pistolas':'beretta_fire'};
+export const WEAPON_SFX={'Fusiles de asalto':'assaultrifle_fire','Subfusiles':'submachinegun_fire','Ametralladoras':'lmg_fire','Escopetas':'shotgun_fire','Francotirador':'sniperrifle_fire','Lanzacohetes':'rocketlauncher_fire','Lanzagranadas':'grenade_throw_02','Pistolas':'beretta_fire','Cuerpo a cuerpo':'2h_swing_01'};
+
+export const WEAPON_SFX_BY_WEAPON={
+  'M4A1':'assaultrifle_fire','AK-12':'assaultrifle_fire','HK416':'assaultrifle_fire','FN SCAR-L':'assaultrifle_fire','G36C':'assaultrifle_fire','FAMAS':'assaultrifle_fire',
+  'MP7':'submachinegun_fire','MP5':'mp5k_fire','FN P90':'submachinegun_fire','UMP45':'mp5k_fire','KRISS Vector':'submachinegun_fire',
+  'M249 SAW':'lmg_fire','M240B':'lmg_fire','PKM':'lmg_fire','MG3':'lmg_fire','Browning M2':'m95_fire','M134 Minigun':'minigun_fire',
+  'M40':'sniperrifle_fire','M24 SWS':'sniperrifle_fire','M110 SASS':'semiautorifle_fire','SVD Dragunov':'semiautorifle_fire','AW50':'m95_fire','Barrett M82':'m95_fire','Mk 14 EBR':'semiautorifle_fire','PSG-1':'semiautorifle_fire',
+  'Remington 870':'shotgun_fire','Benelli M4':'riotshotgun_fire.wav','Mossberg 500':'shotgun_fire',
+  'RPG-7':'rocketlauncher_fire','AT4':'rocketlauncher_fire','M72 LAW':'rocketlauncher_fire',
+  'M203':'grenade_throw_02','M32 MGL':'grenade_throw_02','Mk 19':'grenade_throw_02',
+  'M9':'beretta_fire','Glock 17':'beretta_fire','M1911':'revolver_fire','Desert Eagle':'revolver_fire'
+};
+
+export function weaponSfxFile(cat,weaponName){
+  const f=(weaponName&&WEAPON_SFX_BY_WEAPON[weaponName])||(weaponName&&DMR_WEAPONS.includes(weaponName)&&'semiautorifle_fire')||(weaponName==='Crossbow'&&'crossbow_fire')||(cat&&WEAPON_SFX[cat]);
+  return f?(f.includes('.')?f:f+'.mp3'):null;
+}
+
 
 export const DMR_WEAPONS=['M110 SASS','Mk 14 EBR','SVD Dragunov','Mk 14'];

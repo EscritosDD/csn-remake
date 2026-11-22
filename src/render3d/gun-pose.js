@@ -1,5 +1,6 @@
 import { HAS_THREE } from './env.js';
 import { roleLook } from '../data/roles.js';
+import { WEAPON_SOCKETS } from './assets-weapons.js';
 
 export const _gpDir=HAS_THREE?new THREE.Vector3():null,_gpTwoH=HAS_THREE?new THREE.Vector3():null,_gpFwd=HAS_THREE?new THREE.Vector3(1,0,0):null;
 
@@ -51,6 +52,12 @@ export function fitGunToHand3(un,grp,isLive){
   if(!ud||!ud.gun||!ud.byName||!ud.bones)return;
   const parent=ud.gun.parent;if(!parent)return;
   if(grp.updateWorldMatrix)grp.updateWorldMatrix(true,true);else grp.updateMatrixWorld(true);
+  const sr=WEAPON_SOCKETS.handRight&&WEAPON_SOCKETS.handRight.pos;
+  const sl=WEAPON_SOCKETS.handLeft&&WEAPON_SOCKETS.handLeft.pos;
+  if(Array.isArray(sr)&&sr.length===3&&sr.every(Number.isFinite))_gpPalmR.fromArray(sr);
+  else _gpPalmR.set(-0.103,0.016,0);
+  if(Array.isArray(sl)&&sl.length===3&&sl.every(Number.isFinite))_gpPalmL.fromArray(sl);
+  else _gpPalmL.set(-0.102,0.016,0);
   const bR=ud.bones[ud.byName['Bip001 R Hand']];
   const bFA=ud.bones[ud.byName['Bip001 R Forearm']];
   if(!bR||!bFA)return;

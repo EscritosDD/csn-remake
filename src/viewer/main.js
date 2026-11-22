@@ -1,7 +1,7 @@
 import { MAP_PIECES } from '../data/map-pieces.js'; (function(){ const stage=document.getElementById('viewerCanvas'); if(!stage||typeof THREE==='undefined')return;
   const status=document.getElementById('viewerStatus'); const zoomControl=document.getElementById('viewerZoom'); const texturePreview=document.getElementById('viewerTexture');
   const viewer={ renderer:null,scene:null,camera:null,spin:null,platform:null,meshyFill:null,meshyRim:null, baseDistance:3,drag:null,dragVel:0,lastFrame:0,selection:0,
-    kind:'roles',name:'',skinIndex:0,weapon:'',idleActor:null,gripActor:null,idleClipKey:'idle2h',
+    kind:'roles',name:'',skinIndex:0,weapon:'',idleActor:null,gripActor:null,idleClipKey:'idle2h',testFire:null,
     frameRequested:false,models:{roles:{},weapons:{},props:{},pieces:{}},textures:{},bodyGeo:{},pieceMap:'Skirmish_03' }; try{window.__csnViewer={get state(){return viewer;}};}catch(e){}
   const VIEWER_BODY_SKINS={ 'Soldier_SAS':['Soldier_SAS_d.png','Soldier_SAS_Decon_d.png','Soldier_SAS_Veteran_d.png'],
     'Soldier_Spud':['Soldier_d.png','Soldier_Decon_d.png','Soldier_ForestCamo_d.png','Soldier_Veteran_d.png'],
@@ -30,6 +30,7 @@ import { MAP_PIECES } from '../data/map-pieces.js'; (function(){ const stage=doc
   const viewerCharacters=[ ...ORIG_CAST.map((character,index)=>{ const role=character.role||VIEWER_ROLE_FALLBACK[character.name]||'';
       const body=VIEWER_BODY_OVERRIDE[character.name]||character.body; const bodyFile=VIEWER_BODY_FILE[body]||''; const bodyRole=VIEWER_BODY_ROLE[body]||''; return {
         key:'original:'+String(index+1).padStart(2,'0'), label:character.name,name:character.name,role,bio:character.bio||'', body,bodyFile,bodyRole,
+        rigPose:!!character.rigPose||!!bodyRole||(!bodyFile&&!bodyRole),
         outfit:VIEWER_CAST_TEXTURE[character.name]||'', file:bodyFile||(bodyRole?ROLE_MODEL_FILES[bodyRole]+'.obj':'soldier.obj') }; }),
     ...MESHY_CAST.map(c=>({...c,key:c.key,label:c.label,name:c.name,role:c.role,mesh:c.mesh,bio:c.bio})) ]; viewerCharacters.forEach(entry=>{
     if(entry.mesh){entry.skins=[{key:'own',label:'Textura Meshy'}];return;}; const variants=VIEWER_BODY_SKINS[entry.body]||[]; const ordered=entry.outfit
@@ -57,7 +58,8 @@ import { MAP_PIECES } from '../data/map-pieces.js'; (function(){ const stage=doc
       return; }; box.innerHTML='<p class="sub" style="margin:0 0 6px"><b>Habilidades del original:</b></p>'+list.map(abilityCardHTML).join('');
     box.querySelectorAll('[data-viewer-prop]').forEach(button=>{ button.onclick=()=>{
         document.querySelectorAll('#viewerKinds button').forEach(item=>item.classList.toggle('on',item.dataset.kind==='props')); viewer.kind='props';viewer.skinIndex=0;
-        selectModel('props',button.dataset.viewerProp); }; }); }; const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms)); function setStatus(message,visible){
+        selectModel('props',button.dataset.viewerProp); }; }); };   const idleForWeapon=w=>{const cat=(typeof WEAPONS!=='undefined'&&WEAPONS[w]||{}).cat;return cat==='Pistolas'?'idle1h':cat==='Cuerpo a cuerpo'?'idleMelee':'idle2h';}; const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms)); function setStatus(message,visible){
+
     status.textContent=message; status.style.display=visible?'grid':'none'; }; function ensureRenderer(){ if(viewer.renderer)return true; try{
       viewer.renderer=new THREE.WebGLRenderer({antialias:true,alpha:true}); viewer.renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
       viewer.renderer.setClearColor(0x11150f,0); stage.insertBefore(viewer.renderer.domElement,status); viewer.scene=new THREE.Scene();
@@ -72,12 +74,21 @@ import { MAP_PIECES } from '../data/map-pieces.js'; (function(){ const stage=doc
     if(!viewer.renderer||!document.getElementById('scr-viewer').classList.contains('on'))return; const width=Math.max(1,stage.clientWidth),height=Math.max(1,stage.clientHeight);
     viewer.renderer.setSize(width,height,false); viewer.camera.aspect=width/height; viewer.camera.updateProjectionMatrix(); }; function frame(now){
     if(!document.getElementById('scr-viewer').classList.contains('on')){ viewer.frameRequested=false; return; }; if(viewer.renderer){
-      const idle=CLIPLIB.ready&&CLIPLIB.pack&&CLIPLIB.pack.clips[viewer.idleClipKey];
-      if(viewer.idleActor&&idle)
-        poseSpriteClip(null,viewer.idleActor,idle,(now/1000)%idle.dur,viewer.idleClipKey);
+      const clips=CLIPLIB.ready&&CLIPLIB.pack&&CLIPLIB.pack.clips;
+      let clipKey=viewer.idleClipKey,clip=clips&&clips[clipKey],ct=(now/1000)%(clip&&clip.dur||1);
+      if(viewer.testFire&&clips&&clips[viewer.testFire.key]){
+        const elapsed=(now-viewer.testFire.start)/1000,fire=clips[viewer.testFire.key];
+        if(elapsed<fire.dur){clip=fire;clipKey=viewer.testFire.key;ct=elapsed;}else viewer.testFire=null;
+      }
+      if(viewer.idleActor&&clip)poseSpriteClip(null,viewer.idleActor,clip,ct,clipKey);
       if(viewer.gripActor&&viewer.gripActor.userData.gun)
         fitGunToHand3(viewer.gripActor.userData.gripUnit,viewer.gripActor,false);
       const dt=viewer.lastFrame?Math.min(0.05,(now-viewer.lastFrame)/1000):0.016;
+      const testGun=viewer.gripActor&&viewer.gripActor.userData.gun,testFlash=testGun&&testGun.userData.flash;
+      if(testFlash&&testGun.userData._testFlash>0){
+        testGun.userData._testFlash=Math.max(0,testGun.userData._testFlash-dt*6);
+        testFlash.material.opacity=testGun.userData._testFlash;
+      }
       if(!viewer.drag&&viewer.spin&&viewer.spin.children.length){ viewer.spin.rotation.y+=dt*0.22; if(Math.abs(viewer.dragVel)>1e-4){ viewer.spin.rotation.y+=viewer.dragVel*dt;
           viewer.dragVel*=Math.exp(-dt/0.25); }else viewer.dragVel=0; }; viewer.renderer.render(viewer.scene,viewer.camera); refreshTexturePreview(); }; viewer.lastFrame=now;
     requestAnimationFrame(frame); }; function refreshTexturePreview(){ let texture=null; if(viewer.spin)viewer.spin.traverse(object=>{ if(!texture&&object.material){
@@ -114,8 +125,9 @@ import { MAP_PIECES } from '../data/map-pieces.js'; (function(){ const stage=doc
       const roleWeapons=(entry.role&&VIEWER_ROLE_WEAPONS[entry.role])||[]; const sculpted=!!entry.sculptedWeapon;
       if(sculpted||(viewer.weapon&&!roleWeapons.includes(viewer.weapon)))viewer.weapon=''; weaponSelect.replaceChildren(); const noneOption=document.createElement('option');
       noneOption.value='';noneOption.textContent=sculpted?'Sin acople (arma ya esculpida)':'Sin arma'; weaponSelect.appendChild(noneOption); roleWeapons.forEach(weapon=>{
-        const option=document.createElement('option'); option.value=weapon;option.textContent=weapon; weaponSelect.appendChild(option); }); weaponSelect.value='';
-      weaponSelect.disabled=sculpted; weaponLabel.style.display=roleWeapons.length||sculpted?'':'none';
+        const option=document.createElement('option'); option.value=weapon;option.textContent=weapon; weaponSelect.appendChild(option); }); weaponSelect.value=viewer.weapon||'';
+      weaponSelect.disabled=sculpted; const fireBtn=document.getElementById('viewerFireBtn'); if(fireBtn)fireBtn.disabled=sculpted||!viewer.weapon;
+      weaponLabel.style.display=roleWeapons.length||sculpted?'':'none';
       document.getElementById('viewerWeaponLabelText').textContent=sculpted?'Arma del diseño propio (No se acopla otra arma)':'Arma'; return; }; if(viewer.kind==='pieces'){
       const mapSelect=document.getElementById('viewerPieceMapSelect'); if(!mapSelect.options.length){ MAPS_ORIGINAL.forEach(map=>{ const option=document.createElement('option');
           option.value=map.name;option.textContent=map.name+' ('+map.pieces+' piezas)'; mapSelect.appendChild(option); }); }; mapSelect.value=viewer.pieceMap;
@@ -192,8 +204,10 @@ import { MAP_PIECES } from '../data/map-pieces.js'; (function(){ const stage=doc
     geometry.deleteAttribute('skinIndex'); geometry.deleteAttribute('skinWeight'); geometry.computeVertexNormals(); const mesh=new THREE.Mesh(geometry,new THREE.MeshStandardMaterial({
       map:texture,roughness:0.85,metalness:0.02,transparent:false,opacity:1,depthWrite:true, side:THREE.FrontSide })); mesh.castShadow=true; const model=new THREE.Group();
     model.scale.setScalar(1.15); const spin=new THREE.Group();spin.rotation.y=Math.PI/2;model.add(spin); const tilt=new THREE.Group();tilt.rotation.x=-Math.PI/2;spin.add(tilt);
-    mesh.scale.setScalar(0.95);tilt.add(mesh); model.userData.staticRole=true; return model; }; async function syncViewerGun(model,entry,token){
-    const wanted=(entry&&entry.sculptedWeapon)?'':(viewer.weapon||''); const current=(model.userData&&model.userData.viewerGunWeapon)||''; if(current===wanted)return;
+    mesh.scale.setScalar(0.95);tilt.add(mesh); model.userData.staticRole=true; return model; };   async function syncViewerGun(model,entry,token){
+    const wanted=(entry&&entry.sculptedWeapon)?'':(viewer.weapon||''); const current=(model.userData&&model.userData.viewerGunWeapon)||'';
+    if(model&&model.userData)model.userData.idleClipKey=wanted?idleForWeapon(wanted):'idle2h'; if(current===wanted)return;
+
     if(model.userData&&model.userData.viewerGun){ model.remove(model.userData.viewerGun); if(model.userData.gun===model.userData.viewerGun)model.userData.gun=null;
       model.userData.viewerGun=null; model.userData.viewerGunWeapon=''; }; if(!wanted)return; const meshFile=weaponFileForRef(wanted); if(!meshFile)return;
     if(!GUN_MESH_CACHE[meshFile])makeRealGun3(meshFile); if(!GUN_MESH_CACHE[meshFile]){ const started=Date.now(); while(GUN_MESH_CACHE[meshFile]===null&&Date.now()-started<10000){
@@ -205,8 +219,9 @@ import { MAP_PIECES } from '../data/map-pieces.js'; (function(){ const stage=doc
       const marker=new THREE.Mesh(new THREE.SphereGeometry(0.045,12,8),new THREE.MeshBasicMaterial({color:0xff3300,depthTest:false})); marker.userData.isViewerGun=true;
       gunGroup.add(marker); console.info('[debugWeapons]',meshFile,gunMeta&&gunMeta.attachmentJoint,holder.userData.calibration); }; model.add(gunGroup);
     model.userData.viewerGun=gunGroup; model.userData.viewerGunWeapon=wanted; if(model.userData.grip){ model.userData.gun=gunGroup;
-      model.userData.gripUnit={role:entry.role,weapon:wanted}; fitGunToHand3(model.userData.gripUnit,model,false); } }; async function selectModel(kind,name){
-    viewer.kind=kind;viewer.name=name; const token=++viewer.selection; refreshList(); let selection; try{selection=showModelInfo(kind,name);}
+      model.userData.gripUnit={role:entry.role,weapon:wanted}; fitGunToHand3(model.userData.gripUnit,model,false); } };   async function selectModel(kind,name){
+    viewer.kind=kind;viewer.name=name;viewer.testFire=null; const token=++viewer.selection; refreshList(); let selection; try{selection=showModelInfo(kind,name);}
+
     catch(error){setStatus(error.message,true);return;}; if(!ensureRenderer())return; setStatus('Cargando modelo y textura…',true); try{ const {entry,skin}=selection;
       const modelKey=kind==='roles'?name+'|'+skin.key:name; let model=viewer.models[kind][modelKey]; if(!model&&kind==='roles'){ if(entry.mesh){
           model=await loadViewerMeshy(entry); }else{ const started=Date.now();
@@ -240,6 +255,14 @@ import { MAP_PIECES } from '../data/map-pieces.js'; (function(){ const stage=doc
     selectModel(viewer.kind,names.includes(viewer.name)?viewer.name:names[0]); if(!viewer.frameRequested){viewer.frameRequested=true;requestAnimationFrame(frame);} }
   document.getElementById('viewerCharacterSelect').onchange=event=>{ viewer.skinIndex=0; viewer.weapon=''; selectModel('roles',event.target.value); };
   document.getElementById('viewerWeaponSelect').onchange=event=>{ viewer.weapon=event.target.value||''; selectModel('roles',viewer.name); };
+  const fireTestBtn=document.getElementById('viewerFireBtn'); if(fireTestBtn)fireTestBtn.onclick=()=>{
+    const weapon=viewer.weapon; if(!weapon||viewer.kind!=='roles'||!viewer.idleActor)return;
+    const key=typeof fireClipFor==='function'?fireClipFor(weapon):(idleForWeapon(weapon)==='idle1h'?'fire1h':'fire2h');
+    if(CLIPLIB.ready&&CLIPLIB.pack&&CLIPLIB.pack.clips&&CLIPLIB.pack.clips[key])viewer.testFire={key:key,start:performance.now()};
+    if(typeof auWeapon==='function')auWeapon((typeof WEAPONS!=='undefined'&&WEAPONS[weapon]||{}).cat,weapon);
+    const gun=viewer.gripActor&&viewer.gripActor.userData.gun;
+    if(gun&&gun.userData.flash){gun.userData.flash.material.opacity=1;gun.userData._testFlash=1;}
+  };
   document.getElementById('viewerPieceMapSelect').onchange=event=>{ viewer.pieceMap=event.target.value; viewer.skinIndex=0;
     const names=MAP_PIECES.filter(piece=>piece.m===viewer.pieceMap).map(piece=>piece.k); selectModel('pieces',names[0]); }; const stepSkin=delta=>{
     const entry=viewerCharacters.find(item=>item.key===viewer.name); if(!entry||entry.skins.length<2)return;

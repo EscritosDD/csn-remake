@@ -180,8 +180,23 @@ test('las 23 armas tienen volumen positivo con parseOBJStatic', () => {
   assert.equal(files.length, 23);
   for (const file of files) {
     const txt = fs.readFileSync(path.join(dir, file), 'latin1');
+    const puntos = [];
+    let degeneradas = 0;
+    for (const linea of txt.split(/\r?\n/)) {
+      const p = linea.trim().split(/\s+/);
+      if (p[0] === 'v') puntos.push([+p[1], +p[2], +p[3]]);
+      else if (p[0] === 'f') {
+        const ids = p.slice(1).map(token => parseInt(token.split('/')[0], 10) - 1);
+        const [a, b, c] = ids.map(i => puntos[i]);
+        const ux = b[0] - a[0], uy = b[1] - a[1], uz = b[2] - a[2];
+        const vx = c[0] - a[0], vy = c[1] - a[1], vz = c[2] - a[2];
+        const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+        if (Math.sqrt(nx * nx + ny * ny + nz * nz) * 0.5 < 1e-8) degeneradas++;
+      }
+    }
     const geo = parseOBJStatic(txt);
     const m = metricas(geo);
+    assert.equal(degeneradas, 0, file + ': ' + degeneradas + ' caras degeneradas');
     assert.ok(m.volumen > 0, file + ': volumen ' + m.volumen.toFixed(4));
     assert.ok(Array.from(geo.normal.array).every(Number.isFinite), file + ': normales no finitas');
   }

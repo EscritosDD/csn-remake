@@ -113,7 +113,50 @@ test('las 23 armas tienen calibracion por bounds reales', () => {
     assert.ok(entry.scale > 0 && entry.scale < 20, 'escala rara de ' + key);
     assert.equal(entry.gripOffset.length, 3);
     assert.equal(Object.hasOwn(entry, 'socket'), false, 'las calibraciones no deben fijar socket por nombre');
+    assert.deepEqual(entry.forwardAxis, [1, 0, 0], 'eje de boca en +X para ' + key);
+    assert.deepEqual(entry.muzzleDir, [1, 0, 0], 'direccion de boca en +X para ' + key);
+    assert.equal(entry.muzzlePos.length, 3, 'boca real de ' + key);
+    assert.ok(entry.muzzlePos.every(Number.isFinite), 'boca finita de ' + key);
+    assert.ok(entry.muzzlePos[0] > 0, 'boca hacia +X en ' + key);
+    assert.equal(entry.sourceDims.length, 3);
+    assert.ok(entry.sourceDims.every(value => Number.isFinite(value) && value > 0), 'dimensiones reales de ' + key);
+    assert.ok(entry.sourceBounds.min.every(Number.isFinite) && entry.sourceBounds.max.every(Number.isFinite));
   }
+});
+
+test('los sockets de mano y las bocas del IPA estan extraidos', () => {
+  const sockets = JSON.parse(fs.readFileSync(path.join(ROOT, 'assets', 'weapons', 'weapon_sockets.json'), 'utf8'));
+  assert.ok(sockets.handRight && sockets.handRight.pos.length === 3 && sockets.handRight.pos.every(Number.isFinite));
+  assert.ok(sockets.handLeft && sockets.handLeft.pos.length === 3 && sockets.handLeft.pos.every(Number.isFinite));
+  assert.ok(Object.keys(sockets.muzzles).length >= 14);
+  for (const muzzle of Object.values(sockets.muzzles)) {
+    assert.ok(muzzle.pos.every(Number.isFinite));
+    assert.ok(muzzle.rot.length === 4 && muzzle.rot.every(Number.isFinite));
+  }
+});
+
+test('el audio de armas procede de los AudioClip del original', () => {
+  const dir = path.join(ROOT, 'assets', 'audio', 'sfx', 'weapons');
+  const files = ['assaultrifle_fire.mp3', 'semiautorifle_fire.mp3', 'submachinegun_fire.mp3', 'mp5k_fire.mp3',
+    'lmg_fire.mp3', 'minigun_fire.mp3', 'm95_fire.mp3', 'sniperrifle_fire.mp3', 'shotgun_fire.mp3',
+    'riotshotgun_fire.wav', 'jackhammer_fire.mp3', 'rocketlauncher_fire.mp3', 'launcher_explode.mp3',
+    'cluster_explode.mp3', 'beretta_fire.mp3', 'revolver_fire.mp3', 'grenade_throw_02.mp3',
+    'knife_slash_01.mp3', 'knife_stab_01.mp3', 'axe_swing_01.mp3', '2h_swing_01.mp3',
+    'spikedclub_hit_01.mp3', 'baseballbat_hit_01.mp3', 'chainsaw_swing_01.mp3'];
+  for (const file of files) assert.ok(fs.existsSync(path.join(dir, file)), 'falta ' + file);
+  const weapons = fs.readFileSync(path.join(ROOT, 'src', 'data', 'weapons.js'), 'utf8');
+  assert.doesNotMatch(weapons, /Lanzagranadas':'cluster_explode/);
+  assert.match(weapons, /WEAPON_SFX_BY_WEAPON/);
+});
+
+test('el material de las armas usa la textura del IPA sin alias ni mipmaps', () => {
+  const src = fs.readFileSync(path.join(ROOT, 'src', 'render3d', 'assets-weapons.js'), 'utf8');
+  assert.match(src, /color:0xb8b8b8,roughness:0\.80,metalness:0\.03/);
+  assert.match(src, /side:THREE\.FrontSide/);
+  assert.match(src, /t\.generateMipmaps=false;t\.minFilter=THREE\.LinearFilter;t\.magFilter=THREE\.LinearFilter/);
+  assert.match(src, /t\.wrapS=THREE\.ClampToEdgeWrapping;t\.wrapT=THREE\.ClampToEdgeWrapping/);
+  const socketSrc = fs.readFileSync(path.join(ROOT, 'src', 'render3d', 'gun-pose.js'), 'utf8');
+  assert.match(socketSrc, /WEAPON_SOCKETS\.handRight/);
 });
 
 test('la captura auditoriza el visor y la verificacion la ejecuta', () => {

@@ -400,11 +400,26 @@ test('dead shooters cannot fire', () => {
 
 test('weapon families select their authored firing clip', () => {
   const api = loadEngine();
-  const pick = cat => Object.keys(api.WEAPONS).find(name => api.WEAPONS[name].cat === cat);
-  assert.equal(api.fireClipFor(pick('Pistolas')), 'fire1h');
-  assert.equal(api.fireClipFor(pick('Ametralladoras')), 'fireMini');
+  const clip = name => api.fireClipFor(name);
+  assert.equal(clip('M1911'), 'fire1hHeavy');
+  assert.equal(clip('Desert Eagle'), 'fire1hHeavy');
+  assert.equal(clip('M9'), 'fire1h');
+  assert.equal(clip('MP7'), 'fire1hBurst');
+  assert.equal(clip('UMP45'), 'fire1hBurst');
+  assert.equal(clip('KRISS Vector'), 'fire1hBurst');
+  assert.equal(clip('MP5'), 'fireBurst');
+  assert.equal(clip('M249 SAW'), 'fireBurst');
+  assert.equal(clip('M134 Minigun'), 'fireMini');
+  assert.equal(clip('Remington 870'), 'fireHeavy');
+  assert.equal(clip('M40'), 'fireHeavy');
+  assert.equal(clip('M110 SASS'), 'fire2h');
+  assert.equal(clip('SVD Dragunov'), 'fire2h');
+  assert.equal(clip('Mk 14 EBR'), 'fire2h');
+  assert.equal(clip('PSG-1'), 'fire2h');
+  assert.equal(clip('M203'), 'fireShoulder');
+  assert.equal(clip('RPG-7'), 'fireShoulder');
   api.WEAPONS.Katana = { cat: 'Cuerpo a cuerpo' };
-  assert.equal(api.fireClipFor('Katana'), 'fireMelee');
+  assert.equal(clip('Katana'), 'fireMelee');
 });
 
 test('clip events fire once per crossing and reset when the clip rewinds', () => {

@@ -33,7 +33,7 @@ d('SPAWNS_A',()=>r.SPAWNS_A);d('SPAWNS_B',()=>r.SPAWNS_B);d('SPRITE_AIM_CT',()=>
 d('STEP_META',()=>r.STEP_META);d('T3',()=>r.T3);d('TEX3',()=>r.TEX3);d('TRANQ_COST',()=>r.TRANQ_COST);
 d('TURRET_POS',()=>r.TURRET_POS,v=>{r.TURRET_POS=v;});d('TUT_TEXTS',()=>r.TUT_TEXTS);d('VIEW_MODE',()=>r.VIEW_MODE);d('VOICE_FILES',()=>r.VOICE_FILES);
 d('W',()=>r.W,v=>{r.W=v;});d('H',()=>r.H,v=>{r.H=v;});d('WEAPONS',()=>r.WEAPONS);d('WEAPONS_ORIGINAL',()=>r.WEAPONS_ORIGINAL);
-d('WEAPON_CALIBRATIONS',()=>r.WEAPON_CALIBRATIONS);d('WEAPON_COVER_BY_FILE',()=>r.WEAPON_COVER_BY_FILE);d('WEAPON_LEN',()=>r.WEAPON_LEN);d('WEAPON_MESH_FILE',()=>r.WEAPON_MESH_FILE);
+d('WEAPON_CALIBRATIONS',()=>r.WEAPON_CALIBRATIONS);d('WEAPON_SOCKETS',()=>r.WEAPON_SOCKETS);d('WEAPON_COVER_BY_FILE',()=>r.WEAPON_COVER_BY_FILE);d('WEAPON_LEN',()=>r.WEAPON_LEN);d('WEAPON_MESH_FILE',()=>r.WEAPON_MESH_FILE);
 d('WEAPON_METADATA',()=>r.WEAPON_METADATA);d('WEAPON_SFX',()=>r.WEAPON_SFX);d('WEAPON_THUMB_CACHE',()=>r.WEAPON_THUMB_CACHE);d('_cq',()=>r._cq);
 d('_gpDir',()=>r._gpDir);d('_gpOrigin',()=>r._gpOrigin);d('_gpPalmR',()=>r._gpPalmR);d('_gpRPalm',()=>r._gpRPalm);
 d('_gpUp',()=>r._gpUp);d('_hitWhite',()=>r._hitWhite);d('_keysHeld',()=>r._keysHeld);d('_retargetDelta',()=>r._retargetDelta);
