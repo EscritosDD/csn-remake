@@ -41,7 +41,7 @@ if ($rama -eq "main") {
 }
 
 Write-Host "`n-- ficheros criticos (local vs GitHub) --"
-foreach ($f in @("index.html","assets/soldier.obj","assets/soldier_rig.json","assets/weapons/AssaultRifle.obj","assets/soldier_clips.json","docs/Examen_para_continuar.md")) {
+foreach ($f in @("index.html","assets/soldier.obj","assets/soldier_rig.json","assets/weapons/AssaultRifle.obj","assets/soldier_clips.json","docs/historico/Examen_para_continuar.md")) {
   if (-not (Test-Path $f)) { "{0,-42} NO EXISTE EN LOCAL" -f $f; continue }
   $loc = (git hash-object -- $f)
   $rem = (git rev-parse "origin/main:$f" 2>$null)

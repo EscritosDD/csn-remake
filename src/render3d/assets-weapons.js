@@ -8,7 +8,7 @@ export const WEAPON_MESH_FILE={
   'AW50':'M95','Barrett M82':'M95','Mk 14 EBR':'M95','PSG-1':'SniperRifle_weapon',
   'Remington 870':'Shotgun','Benelli M4':'RiotShotgun','Mossberg 500':'Shotgun',
   'RPG-7':'RPG','AT4':'RPG','M72 LAW':'RPG',
-  'M203':'RPG','M32 MGL':'RPG','Mk 19':'RPG',
+  'M203':'RPG','M32 MGL':'RPG','Mk 19':'RPG','M134 Minigun':'Minigun',
   'M9':'Pistol','Glock 17':'Pistol','M1911':'Revolver','Desert Eagle':'Revolver'
 };
 
@@ -48,7 +48,8 @@ export const WEAPONS_ORIGINAL={
  'WoodAxe':{name:'Axe',tex:'WoodAxe_d',texSize:[128,128],dims:[0.313,0.068,0.854],verts:126,cover:'item_weapon_01_axe_alpha',cat:'Cuerpo a cuerpo',uses:[],roles:'sin asignar en el arsenal de CSN'},
  'MP5K':{name:'MP5K',tex:'MP5K_d',texSize:[128,128],dims:[0.393,0.08,0.271],verts:204,cover:'item_weapon_18_mp5k_alpha',cat:'Subfusiles',uses:['MP5','UMP45','KRISS Vector'],roles:'Espía, Comando'},
  'Chainsaw':{name:'Chainsaw',tex:'Chainsaw_d',texSize:[256,256],dims:[0.311,0.286,0.877],verts:334,cover:'item_large_weapon_chainsaw_alpha',cat:'Cuerpo a cuerpo',uses:[],roles:'sin asignar en el arsenal de CSN'},
- 'Minigun':{name:'Minigun',tex:'Minigun_d',texSize:[256,256],dims:[0.849,0.419,0.402],verts:527,cover:'item_weapon_16_minigun_alpha',cat:'Torreta (emplazamiento)',uses:['M134 Minigun'],roles:'Ingeniero (torreta)'},
+  'Minigun':{name:'Minigun',tex:'Minigun_d',texSize:[256,256],dims:[0.849,0.419,0.402],verts:527,cover:'item_weapon_16_minigun_alpha',cat:'Ametralladoras',uses:['M134 Minigun'],roles:'Ingeniero (torreta)'},
+
  'BaseballBat_SOURCE':{name:'Baseball Bat',tex:'BaseballBat_d',texSize:[128,128],dims:[0.118,0.098,0.963],verts:179,cover:'item_weapon_04_Baseball___bat_alpha',cat:'Cuerpo a cuerpo',uses:[],roles:'sin asignar en el arsenal de CSN'},
  'SpikedClub_weapon':{name:'Spiked Club',tex:'SpikedClub_d',texSize:[128,128],dims:[0.34,0.971,0.359],verts:331,cover:'item_weapon_spikedclub_alpha',cat:'Cuerpo a cuerpo',uses:[],roles:'sin asignar en el arsenal de CSN'},
  'FragGrenade':{name:'Frag Grenade',tex:'FragGrenade_d',texSize:[64,64],dims:[0.142,0.122,0.194],verts:123,cover:null,cat:'Consumible',uses:['Granada de fragmentación'],roles:'todos (consumible)',note:'Sin carátula en el original.'}
@@ -285,11 +286,22 @@ export function makeGunAnchor(un){
   const gun=new THREE.Group();
   const file=weaponFileForRef(un&&un.weapon);
   const cat=(WEAPONS[un.weapon]||{}).cat||(file&&String((WEAPONS_ORIGINAL[file]||{}).cat||'').split(' / ')[0])||'Fusiles de asalto';
-  const flash=new THREE.Mesh(new THREE.SphereGeometry(0.055,8,8),new THREE.MeshBasicMaterial({color:0xffd76a,transparent:true,opacity:0,depthWrite:false}));
+  const profile=originalWeaponProfile(file);
+  const hasFlash=!profile||profile.hasMuzzleFlash!==false;
+  const flashMat=new THREE.MeshBasicMaterial({color:0xffd76a,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide});
+  const flash=new THREE.Mesh(new THREE.PlaneGeometry(0.18,0.18),flashMat);
+  const cross=new THREE.Mesh(new THREE.PlaneGeometry(0.18,0.18),flashMat);
+  cross.rotation.x=Math.PI/2;
+  cross.userData.isFlash=true;
+  flash.add(cross);
   flash.position.set(weaponTargetLength(cat)*0.96,0.01,0);
   flash.userData.isFlash=true;
+  flash.visible=hasFlash;
+  flash.renderOrder=3;
+  cross.renderOrder=3;
   gun.add(flash);
   gun.userData.flash=flash;
+  gun.userData.hasMuzzleFlash=hasFlash;
   gun.userData.cat=cat;
   gun.userData.grip={x:0,y:0,scale:1};
   gun.userData.scale=1;

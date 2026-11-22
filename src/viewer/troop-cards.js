@@ -1,4 +1,4 @@
-import { WEAPONS_ORIGINAL, WEAPON_MESH_FILE, originalWeaponProfile } from '../render3d/assets-weapons.js';
+import { WEAPONS_ORIGINAL, originalWeaponProfile } from '../render3d/assets-weapons.js';
 import { prettySkinName } from '../data/skin-names.js';
 import { CHARACTER_ABILITIES, ABILITY_OBJECTS } from '../data/cast.js';
 import { scanCardBoxes } from './card-stage.js';
@@ -9,8 +9,7 @@ const tcState={origin:'Todas',role:'Todas',cards:{}};
 const tcEsc=value=>String(value==null?'':value).replace(/[&<>"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[char]));
 const tcScan=()=>{if(typeof scanCardBoxes==='function')scanCardBoxes();};
 const tcSpecAttr=spec=>'data-card-spec=\''+JSON.stringify(spec).replace(/'/g,'&#39;')+'\'';
-const tcFileForWeapon=ref=>WEAPON_MESH_FILE[ref]||ref||'';
-const tcCardState=entry=>tcState.cards[entry.key]||(tcState.cards[entry.key]={skinIndex:0,weapon:tcFileForWeapon(entry.defaultWeapon||'')});
+const tcCardState=entry=>tcState.cards[entry.key]||(tcState.cards[entry.key]={skinIndex:0,weapon:''});
 
 function tcCard3dBox(spec,label){
   return '<div class="card-3d-box" '+tcSpecAttr(spec)+' aria-label="Modelo 3D de '+tcEsc(label)+'"><img class="card-3d-thumb is-loading" alt="" hidden/><span class="card-3d-badge">3D</span></div>';
@@ -29,7 +28,7 @@ function tcTroopCardHTML(entry,index){
   const csn=!!entry.mesh;
   const saved=tcCardState(entry);
   const origin=csn?'CSN':'Juego original';
-  const weapon=csn?'':(saved.weapon||tcFileForWeapon(entry.defaultWeapon||''));
+  const weapon=csn?'':(saved.weapon||'');
   const profile=csn?null:originalWeaponProfile(weapon);
   const skinIndex=Math.min(saved.skinIndex||0,Math.max(0,(entry.skins||[]).length-1));
   const skin=entry.skins&&entry.skins[skinIndex];

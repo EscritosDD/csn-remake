@@ -3,7 +3,7 @@ import { prettySkinName } from '../data/skin-names.js';
 import { CHARACTER_ABILITIES, ABILITY_OBJECTS } from '../data/cast.js';
 import { DEPLOYABLES } from '../data/deployables.js';
 import { auWeaponFile, auDeployable, auVoice } from '../core-and-audio.js';
-import { setCardStagePaused, setStageZoom, stageZoom, renderStage, scanCardBoxes } from './card-stage.js';
+import { getCardStage, setCardStagePaused, setStageZoom, stageZoom, renderStage, snapshotStage, scanCardBoxes } from './card-stage.js';
 
 const insEsc=value=>String(value==null?'':value).replace(/[&<>"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[char]));
 let insRoot=null;
@@ -12,6 +12,7 @@ let insPanel=null;
 let insTitle=null;
 let insKicker=null;
 let insFire=null;
+let insAuto=null;
 let insPrev=null;
 let insNext=null;
 let insCurrent=null;
@@ -28,6 +29,7 @@ function insElements(){
   insTitle=document.getElementById('inspectorTitle');
   insKicker=document.getElementById('inspectorKicker');
   insFire=document.getElementById('inspectorFire');
+  insAuto=document.getElementById('inspectorAuto');
   insPrev=document.getElementById('inspectorPrev');
   insNext=document.getElementById('inspectorNext');
   return true;
@@ -37,7 +39,8 @@ function insViewer(){return typeof window!=='undefined'?window.__csnViewer:null;
 function insEngine(){return typeof window!=='undefined'?window.__csnCardEngine:null;}
 
 function insWriteSpec(spec){
-  insCurrent=spec&&spec.kind==='roles'&&spec.weapon?{...spec,weapon:weaponFileForRef(spec.weapon)||spec.weapon}:spec;
+  insCurrent={...spec,inspect:false};
+  if(insCurrent.kind==='roles')insCurrent.weapon=insCurrent.weapon?weaponFileForRef(insCurrent.weapon)||insCurrent.weapon:'';
   if(insStage)insStage.dataset.cardSpec=JSON.stringify(insCurrent);
 }
 
@@ -53,7 +56,7 @@ function insWeaponOptions(current){
     if(!groups.has(cat))groups.set(cat,[]);
     groups.get(cat).push(file);
   });
-  return '<option value="">Sin arma</option>'+[...groups.entries()].map(([cat,files])=>
+  return '<option value="">Sin arma (solo personaje)</option>'+[...groups.entries()].map(([cat,files])=>
     '<optgroup label="'+insEsc(cat)+'">'+files.map(file=>'<option value="'+insEsc(file)+'"'+(file===current?' selected':'')+'>'+insEsc((WEAPONS_ORIGINAL[file]||{}).name||file)+'</option>').join('')+'</optgroup>').join('');
 }
 
@@ -146,6 +149,7 @@ function insRenderPanel(){
 
 function insUpdateFire(){
   if(!insFire||!insCurrent)return;
+  insFire.disabled=false;
   const viewer=insViewer();
   if(insCurrent.kind==='glb'){
     insFire.hidden=false;
@@ -159,6 +163,7 @@ function insUpdateFire(){
     const file=weaponFileForRef(insCurrent.weapon||'');
     const profile=file&&originalWeaponProfile(file);
     insFire.hidden=false;
+    if(!file){insFire.disabled=true;insFire.textContent='Elige un arma para probar disparo';insFire.onclick=null;return;}
     insFire.textContent='▶ '+(profile&&profile.actionLabel||'Probar disparo');
     insFire.onclick=()=>{if(viewer&&viewer.fire){const label=insFire.textContent;insFire.textContent='▶ Reproduciendo…';setTimeout(()=>{insFire.textContent=label;},900);viewer.fire(insCurrent);}};
     return;
@@ -183,7 +188,7 @@ function insNavEntries(){
   const viewer=insViewer();
   if(!viewer||!insCurrent)return [];
   if(insCurrent.kind==='roles')return (viewer.getRoster()||[]).map(entry=>({
-    kind:'roles',key:entry.key,skinIndex:0,weapon:weaponFileForRef(entry.defaultWeapon||'')||'',
+    kind:'roles',key:entry.key,skinIndex:0,weapon:'',
     file:entry.file||entry.mesh||'',label:entry.label
   }));
   if(insCurrent.kind==='weapons')return (viewer.getWeaponFiles()||[]).map(file=>({
@@ -204,9 +209,44 @@ function insNavigate(delta){
   insOpen(entries[next]);
 }
 
+function insBindDrag(){
+  if(!insStage||insStage.dataset.csnDragBound==='1')return;
+  insStage.dataset.csnDragBound='1';
+  let drag=null,dragVel=0;
+  const state=()=>insViewer()&&insViewer().state;
+  insStage.addEventListener('pointerdown',event=>{
+    if(event.button!==undefined&&event.button!==0)return;
+    if(!getCardStage())return;
+    drag={x:event.clientX,y:event.clientY,t:event.timeStamp};
+    if(state()){state().drag=drag;state().dragVel=0;}
+    try{insStage.setPointerCapture(event.pointerId);}catch(error){}
+  });
+  insStage.addEventListener('pointermove',event=>{
+    if(!drag)return;
+    const stage=getCardStage();if(!stage)return;
+    const dx=event.clientX-drag.x,dy=event.clientY-drag.y;
+    const dt=Math.max(0.008,Math.min(0.05,(event.timeStamp-drag.t)/1000));
+    drag={x:event.clientX,y:event.clientY,t:event.timeStamp};
+    stage.spin.rotation.y+=dx*0.008;
+    stage.spin.rotation.x=Math.max(-0.65,Math.min(0.65,stage.spin.rotation.x+dy*0.006));
+    dragVel=Math.max(-3,Math.min(3,dx*0.008/dt));
+    if(state()){state().drag=drag;state().dragVel=dragVel;}
+    renderStage();
+  });
+  const end=()=>{if(!drag)return;drag=null;if(state()){state().drag=null;state().dragVel=dragVel;}snapshotStage();};
+  insStage.addEventListener('pointerup',end);
+  insStage.addEventListener('pointercancel',end);
+  insStage.addEventListener('wheel',event=>{
+    event.preventDefault();
+    setStageZoom(stageZoom()+(event.deltaY<0?0.12:-0.12));
+    renderStage();
+  },{passive:false});
+}
+
 function insBind(){
   if(insBound)return;
   insBound=true;
+  insBindDrag();
   const close=document.getElementById('inspectorClose');
   if(close)close.onclick=closeInspector;
   const backdrop=insRoot.querySelector('[data-inspector-close]');
@@ -221,7 +261,13 @@ function insBind(){
   });
   document.querySelectorAll('[data-inspector-zoom]').forEach(button=>{button.onclick=()=>{setStageZoom(stageZoom()+(+button.dataset.inspectorZoom||0),false);renderStage();};});
   const reset=document.getElementById('inspectorReset');
-  if(reset)reset.onclick=()=>{setStageZoom(1,false);renderStage();};
+  if(reset)reset.onclick=()=>{const stage=getCardStage();if(stage)stage.spin.rotation.set(0,-0.55,0);setStageZoom(1,false);renderStage();};
+  if(insAuto)insAuto.onclick=()=>{
+    const viewer=insViewer();const next=!(viewer&&viewer.state&&viewer.state.inspectorAutoSpin);
+    if(viewer&&viewer.state)viewer.state.inspectorAutoSpin=next;
+    insAuto.setAttribute('aria-pressed',next?'true':'false');
+    insAuto.classList.toggle('on',next);
+  };
   if(insPrev)insPrev.onclick=()=>insNavigate(-1);
   if(insNext)insNext.onclick=()=>insNavigate(1);
 }
@@ -231,7 +277,8 @@ export async function openInspector(spec){
   insBind();
   setCardStagePaused(true);
   const viewer=insViewer();
-  if(viewer&&viewer.state)viewer.state.inspectorOpen=true;
+  if(viewer&&viewer.state){viewer.state.inspectorOpen=true;viewer.state.inspectorAutoSpin=false;}
+  if(insAuto){insAuto.setAttribute('aria-pressed','false');insAuto.classList.remove('on');}
   insRoot.hidden=false;
   document.body.classList.add('inspector-open');
   insWriteSpec({...spec});
@@ -251,7 +298,7 @@ export function closeInspector(){
   insRoot.hidden=true;
   document.body.classList.remove('inspector-open');
   const viewer=insViewer();
-  if(viewer&&viewer.state)viewer.state.inspectorOpen=false;
+  if(viewer&&viewer.state){viewer.state.inspectorOpen=false;viewer.state.inspectorAutoSpin=false;}
   if(viewer&&viewer.unmount)viewer.unmount();
   setCardStagePaused(false);
   scanCardBoxes();

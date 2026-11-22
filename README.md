@@ -20,6 +20,9 @@ El servidor del repo sirve también `.glb`/`.gltf` con MIME correcto.
 
 No vale abrirlo como archivo (`file://`): el juego carga assets por HTTP.
 
+Navegación principal: **Jugar · Armería · Tropas · Cómo se juega**. El Cuartel
+sigue accesible desde el menú de inicio.
+
 ## Verificar que todo está sano
 
 ```
@@ -29,9 +32,9 @@ powershell -ExecutionPolicy Bypass -File bench/VERIFICAR.ps1
 
 `VERIFICAR.ps1` hace 13 comprobaciones: sintaxis, 19 tableros, reglas, datos,
 winding, suite npm, rejillas IPA, capturas `debugGrid`, clips, humo 3D,
-auditoría del visor, movimiento, combate y móvil/SwiftShader. Último cierre:
-**TODO OK 13/13**, **77/77 tests** y `viewer:audit-all ok=True` (4 modelos).
-Los siete cuerpos IPA han sido restaurados, Meshy sigue aislado en
+auditoría del visor, movimiento, combate y móvil/SwiftShader. El cierre debe
+quedar en **TODO OK 13/13** con `viewer:audit-all ok=True`. Los siete cuerpos
+IPA están en `assets/soldier/`, Meshy sigue aislado en
 `assets/personajes_propios/`, los materiales usan `alphaTest:0` y las armas
 comparten cañón `+X` con empuñadura `(0,0,0)`.
 
@@ -42,13 +45,16 @@ Depuración en el navegador: `?debugGrid=1` muestra rejillas 2D/3D y
 
 | Ruta | Qué es |
 |---|---|
-| `index.html` | El juego completo: interfaz, motor, escena 3D y datos (un solo archivo). |
+| `index.html` | HTML/CSS estático y dos tags module: `src/main.js` y `src/viewer/main.js`. |
+| `src/` | JavaScript vivo en módulos ES: datos, núcleo, audio, reglas, render 2D/3D, UI, bridge y visor. |
+| `styles/` | `theme.css`, `layout.css`, `game.css`, `viewer.css` y `cards.css`. |
 | `assets/soldier/` | Los **7 modelos por clase** del IPA (malla + rig + textura) y sus escalas. |
+| `assets/competitive/` | `manifest.json` y contenedores `chars/`, `weapons/`, `anims/` para el Modo Competitivo `.glb`. |
 | `assets/audio/` | **195 clips del original**: armas, voces por personaje, ambiente por mapa, música y habilidades. |
 | `assets/maps/` | Geometría de los 8 Skirmish del IPA y sus atlas. |
 | `assets/ui/` | Retratos, naciones, modos, iconos de habilidad del original, logo y arte de la portada. |
 | `bench/` | Verificación: `bench/VERIFICAR.ps1`, `check-syntax.js`, `boards.js`, `rules.test.js`, `data.test.js`, `harness.js`. |
-| `docs/` | Diseño, arquitectura, equilibrio medido, catálogo de habilidades, capturas 3D y planes. |
+| `docs/` | Diseño, arquitectura, equilibrio medido, catálogo de habilidades, capturas 3D e índice en `docs/README.md`. |
 | `_original/` | IPA, zip y código descompilado del original: referencia privada, no la carga el juego. |
 
 ## Herramientas de medida
@@ -63,14 +69,12 @@ Depuración en el navegador: `?debugGrid=1` muestra rejillas 2D/3D y
 
 ## Documentos clave
 
-- [Estado final de sesión](docs/ESTADO_SESION_2026-11-21.md) — cambios, gates, pendientes y plan para mañana.
-- [Arquitectura](docs/ARQUITECTURA.md) — estructura, funciones con su línea y reglas de edición.
+- [Índice de documentación](docs/README.md) — entrada limpia a toda la documentación vigente e histórica.
+- [Arquitectura](docs/ARQUITECTURA.md) — módulos, flujo de partida, visor 3D y reglas de edición.
 - [Auditoría global 3D](docs/auditoria_global_3d.md) — 338 OBJ, 0 sin caras, 0 NaN, 13 rigs.
-- [Plan director](docs/historico/Plan_director_original_base.md) — fases, criterios y estado.
 - [Catálogo de habilidades del original](docs/Catalogo_habilidades_original.md) — las 52 con su estado.
 - [Capturas 3D](docs/Capturas_3D.md) — los 13 mapas y las 6 misiones.
 - [Equilibrio medido](docs/Equilibrio_medido.md) — cifras por modo×mapa.
-- [Informe CSN vs original](docs/Informe_CSN_vs_original.md) — 16 áreas con fuentes.
 
 ## Aviso sobre los assets del original
 
@@ -89,12 +93,16 @@ código propio queda pendiente de Dani.
 ## Estructura del repositorio
 
 ```
-index.html            el juego completo (un solo archivo)
+index.html            HTML/CSS estatico y dos tags module (src/main.js, src/viewer/main.js)
+src/                  JavaScript vivo en modulos ES (datos, core, audio, juego, render, UI, visor)
+styles/               CSS estatico (theme, layout, game, viewer, cards)
 assets/               mallas, texturas, audio, iconos y geometria de mapas
+assets/competitive/   manifest y contenedores chars/, weapons/, anims/ para modelos .glb
 bench/                verificacion y pruebas (VERIFICAR.ps1, rules, datos, tableros, harness)
 docs/                 documentacion (indice en docs/README.md)
 docs/historico/       planes y auditorias de sesiones anteriores
-tools/                reparacion y auditoria de assets (repair_zero_face_objs.py, auditar_assets_3d.py, generate_weapon_calibrations.py, extract_maps_grid.py)
+docs/capturas/        capturas locales generadas por _capture_all.mjs (ignoradas por Git)
+tools/                reparacion y auditoria de assets
 _capture_all.mjs      generador de capturas 3D
 ```
 

@@ -1,147 +1,91 @@
-# Arquitectura de CSN (para quien siga el proyecto)
+# Arquitectura de CSN
 
-Todo el juego vive en **`index.html`** (un solo archivo, ~10.000 lineas de
-script inline) mas la carpeta `assets/`. Three.js r158 esta vendorizado en
-`assets/three.min.js`. No hay build: se sirve con cualquier servidor de
-estaticos (`python -m http.server 8000`) y se abre en el navegador.
+CSN es un juego estático HTML5/Canvas/Three.js sin bundlers ni dependencias npm.
+`index.html` contiene HTML/CSS y dos tags module: `src/main.js` y
+`src/viewer/main.js`. El JavaScript vivo está en `src/**/*.js`; `src/package.json`
+declara los módulos ES. `assets/three.min.js` se carga como script clásico.
 
-## Datos (bloques `const`)
+## Árbol funcional
 
-| Bloque | Linea | Contenido |
-|---|---|---|
-| `MAP_DEFS` | 1292 |
-| `WEAPONS` | 815 |
-| `ROLES` | 877 |
-| `CHARACTERS` | 864 |
-| `OWN_CAST` | 6932 |
-| `ORIG_CAST` | 6960 |
-| `NATIONS` | 778 |
-| `SKINS` | 808 |
-| `CAMPAIGN_MISSIONS` | 956 |
-| `DEFAULT_SQUADS` | 887 |
-| `BODIES` | 856 |
-| `DOM_ZONES` | 934 |
-| `ESCORT_START` | 951 |
-| `ESCORT_EXT` | 952 |
-| `ROLE_MODEL_FILES` | 4731 |
-| `CHAR_VOICE` | 1997 |
-| `MUSIC_TRACKS` | 2017 |
-| `WEAPON_SFX` | 1994 |
-| `LS_CHARS` | 6927 |
-
-## Motor (funciones clave)
-
-| Funcion | Linea |
+| Ruta | Contenido |
 |---|---|
-| `startGame()` | 1727 |
-| `endTurn()` | 2581 |
-| `tryShoot()` | 1815 |
-| `damage()` | 1781 |
-| `hitChance()` | 1681 |
-| `hasLOS()` | 1651 |
-| `coverLevel()` | 1659 |
-| `isFlanked()` | 1674 |
-| `aiUnitAct()` | 2652 |
-| `endGame()` | 2528 |
-| `updateUI()` | 3401 |
-| `draw()` | 3704 |
-| `build3DWorld()` | 5952 |
-| `makeRealSoldier3()` | 4993 |
-| `makeSoldier3()` | 4560 |
-| `makeGunProp3()` | 4882 |
-| `buildThemedProps3()` | 5768 |
-| `renderBarracks()` | 7061 |
-| `renderAbilityCatalog()` | 7052 |
-| `renderCampaignPanel()` | 1073 |
-| `openSetup()` | 1103 |
-| `squadRows()` | 1154 |
-| `loadRealSoldier()` | 4732 |
-| `auVoice()` | 2006 |
-| `auMusicStart()` | 2019 |
-| `quickStart()` | 6913 |
-| `deployTurret()` | 2428 |
-| `fireArtillery()` | 2149 |
-| `fireOrbital()` | 2079 |
-| `throwGrenade()` | 1949 |
-| `placeMine()` | 2250 |
-| `setOverwatch()` | 1892 |
-| `guideDrone()` | 2332 |
+| `styles/` | `theme.css`, `layout.css`, `game.css`, `viewer.css`, `cards.css`. |
+| `src/data/` | Naciones, armas, roles, cast, mapas, map-pieces, textos UI, desplegables, nombres de skins y catálogo competitivo. |
+| `src/core/` | Storage, RNG, tiempo y geometría. |
+| `src/audio/` | Sonido sintetizado y audio original. |
+| `src/core-and-audio.js` | Agregador de `core/` y `audio/`. |
+| `src/game/` | Reglas, IA, input, turnos, misiones, personajes, demo, teclado y quick actions. |
+| `src/render2d/` | Tablero, tiles, sprites, FX y fachada `index.js`. |
+| `src/render3d/` | Escena, assets, clips, retarget, soldados, armas, FX, cámara, runtime, carga GLTF, actor GLB, caché de assets y fachada `index.js`. |
+| `src/ui/` | Shell, unit card, arsenal, habilidades, cuartel, laboratorio GLB, wiring y fachada `index.js`. |
+| `src/bridge.js` | `installEarlyBridge` e `installFullBridge`; expone estado de `main.js` a capturas, visor y tests. |
+| `src/viewer/` | `main.js` (visor/galería), `card-stage.js` (único renderer), `inspector.js` y `troop-cards.js`. |
+| `assets/competitive/` | `manifest.json` y contenedores `chars/`, `weapons/`, `anims/` para modelos `.glb`. |
+| `bench/` | Tests y verificaciones; no se sirve por HTTP. |
+
+## Arranque y gate
+
+```
+node server.js
+npm run lint && npm test
+powershell -ExecutionPolicy Bypass -File bench\VERIFICAR.ps1
+```
+
+`VERIFICAR.ps1` comprueba sintaxis, tableros, reglas, datos, winding, suite
+npm, rejillas IPA, capturas `debugGrid`, clips, humo 3D, auditoría del visor,
+movimiento, combate y móvil/SwiftShader. Debe terminar en **TODO OK 13/13**.
+Si el humo headless falla de forma aislada con `visor: exit -1073740791`, se
+repite `VERIFICAR.ps1` antes de investigar.
 
 ## Flujo de una partida
 
-1. `openSetup(mode)` prepara `setup` y pinta la configuracion.
-2. `squadRows` / `readSquad` construyen las escuadras por hueco (rol + arma).
-3. `startGame(squadA, squadB)` crea `G` (unidades, mapa, zonas, estadisticas)
-   y arranca el ambiente y la musica del original.
-4. `updateUI` pinta HUD y tarjeta; `draw` pinta la vista clasica; en 3D,
-   `build3DWorld` + `__render3D` construyen y animan la escena.
-5. `tryShoot` / `damage` resuelven el combate (con `hitChance`, `coverLevel`,
-   `hasLOS`); `endTurn` cierra el turno, dispara torretas y pasa a la IA
-   (`aiUnitAct`).
-6. `endGame` decide el ganador y pinta resultados + monedas.
+1. `openSetup(mode)` prepara `setup` y pinta la configuración.
+2. Las filas de escuadra construyen huecos con rol + arma.
+3. `startGame(squadA, squadB)` crea `G` (unidades, mapa, zonas, estadísticas) y
+   arranca ambiente y música del original.
+4. `updateUI` pinta HUD y tarjeta; en 3D, `build3DWorld` y `__render3D`
+   construyen y animan la escena. La vista 2D es alternativa.
+5. `tryShoot` / `damage` resuelven combate con `hitChance`, `coverLevel`,
+   `hasLOS` e `isFlanked`; `endTurn` dispara torretas y pasa a la IA.
+6. `endGame` decide ganador, premios y pantalla de resultados.
 
-## Escena 3D
+`src/main.js` conserva el marcador `/* ================= INIT ================= */`
+antes del IIFE de INIT. El bridge se instala en dos fases:
+`installEarlyBridge` antes del marcador y `installFullBridge` después.
 
-- `build3DWorld` monta tablero, props del tema (`buildThemedProps3`),
-  unidades (`makeRealSoldier3` con el modelo de su clase del IPA) y utileria
-  (armas con `makeGunProp3`).
-- `buildThemedProps3` solo se llama cuando no hay geometria IPA visible
-  (`!geoShown`), para que los props procedurales no atraviesen el mapa real.
-- Los modelos de clase estan en `assets/soldier/<Clase>.obj` + `_rig.json` +
-  `_tex.png`, con escala en `assets/soldier_scales.json`.
-- `mount()` pone la pose de reposo antes de medir bounds y usa
-  `SkinnedMesh.computeBoundingBox()` transformado por `matrixWorld`.
-- `makeRealGun3()` y `makeGunAnchor()` leen
-  `assets/weapons/weapon_calibrations.json`: `meshPivot=[0,0,0]`, escala por
-  eje maximo del bounds real y `gripOffset`. Ya no hay `socket`,
-  `supportSocket` ni offsets de Barracks en gameplay.
-- Todas las armas comparten el mismo holder: cañon `+X`, escala una sola vez y
-  empuñadura `(0,0,0)`; el visor no crea un arma procedural paralela.
-- Los personajes Meshy no reciben pose, clips, retarget ni acople de arma: su
-  `sculptedWeapon` deshabilita el selector de arma del visor.
-- La vista 3D es la principal; la 2D es alternativa.
-- Depuracion: `?debugGrid=1` dibuja la rejilla 2D y el grupo 3D
-  `debugGrid3D`; `?debugWeapons=1` marca el origen del arma y muestra su
-  calibracion por consola.
+## Escena 3D y visor
 
-## Verificacion (usar siempre)
+- Modo Historia usa el IPA en `assets/soldier/`; Modo Competitivo usa `.glb` en
+  `assets/competitive/`. No se mezclan fuentes.
+- `src/viewer/card-stage.js` es el único `WebGLRenderer`. El visor y el
+  Inspector reutilizan ese renderer mediante `getCardStage()`.
+- Los modelos de clase del IPA viven en `assets/soldier/<Clase>.obj` con su
+  `_rig.json` y `_tex.png`; escalas en `assets/soldier_scales.json`.
+- Las armas comparten holder con cañón `+X` y empuñadura `(0,0,0)`; se acoplan
+  con `fitGunToHand3()` y sockets reales de `assets/weapons/weapon_sockets.json`.
+- Los cinco personajes Meshy siguen aislados: no reciben pose, clips,
+  retarget ni acople de arma.
+- `mount()` reengancha el modelo sin saltos y alinea la plataforma antes de
+  medir bounds.
+- Depuración: `?debugGrid=1` muestra rejillas 2D/3D; `?debugWeapons=1` marca el
+  socket real de cada arma.
 
-```
-npm run lint && npm test
-npm run verify
-powershell -ExecutionPolicy Bypass -File bench\VERIFICAR.ps1
-node _capture_all.mjs viewer:audit-all VIEWAUDIT_FINAL 8000
-python tools\auditar_assets_3d.py
-```
+## Reglas de edición
 
-`VERIFICAR.ps1` comprueba sintaxis, 19 tableros, reglas, datos, winding,
-rejillas IPA, capturas `debugGrid`, humo 3D, **auditoria del visor**, clips,
-movimiento, combate y movil/SwiftShader. El ultimo cierre dio **TODO OK
-13/13**, `npm test` **77/77** y `viewer:audit-all` `ok=True` con 4 modelos.
-El balance se mide con
-`bench/harness.js <modo> <mapa> <partidas> <formato>` y las capturas con
-`_capture_all.mjs`.
+1. No reintroducir `<script>` inline en `index.html`.
+2. No añadir `"type":"module"` a `package.json` raíz.
+3. No crear otro `WebGLRenderer`; usar `getCardStage()`.
+4. No mezclar IPA/Modo Historia con `.glb`/Modo Competitivo.
+5. Conservar alias históricos usados por tests y capturas (`MESHY_LOADING`,
+   `DOM_MAX_ROUNDS`, `ESCORT_DRONE_*`, `LS_WINS`, `FLASH_RANGE`, etc.).
+6. No sobreescribir con bridge getters los wrappers de `src/main.js`:
+   `__build3D`, `__render3D`, `__renderDemo`, `quickStart`, `quickSmoke`,
+   `quickFlash`.
+7. Comprobar unicidad de anclas antes de reemplazar; hay fragmentos repetidos.
+8. Cada módulo en `src/` debe mantenerse por debajo de 450 líneas.
+9. Tras cualquier cambio: `npm run lint`, `npm test` y `VERIFICAR.ps1`.
 
-## Reglas de edicion que han costado errores
+## Documentación
 
-1. **Anclas unicas**: muchos fragmentos se repiten (dos `army`/`squad`,
-   varios `</style>`, `if(theme===...)`). Comprobar `s.count(old)==1` antes
-   de reemplazar.
-2. **Bloques de props**: todo `if(theme===...){` insertado debe cerrarse
-   antes de la linea original. Si no, "Unexpected end of input".
-3. **`byName` en el rig** se define despues del `bind`; no usar antes.
-4. **Escala por clase**: los modelos del IPA vienen en unidades distintas.
-5. Tras cada cambio: `node bench/check-syntax.js` y la bateria completa.
-6. **Cero parches por nombre** en el motor (`if (entry.name === ...)`): las
-   excepciones van en datos de calibracion o en el pipeline de assets.
-7. **IPA y Meshy no se mezclan**: la fuente de verdad es `assets/soldier/`;
-   Meshy vive aislado en `assets/personajes_propios/`.
-8. **No cerrar en falso**: si falta el original `.glb` o la fuente Meshy sin
-   soldar, se documenta como pendiente; no se inventa un loader ni se copia
-   un modelo sobre el rig IPA.
-9. **Materiales**: personajes y armas del visor usan `alphaTest:0`,
-   `transparent:false`, `opacity:1` y `FrontSide`; no se reintroduzca
-   `alphaTest:0.5` ni `DoubleSide` en esas mallas.
-10. **Visor**: no llamar a `viewer`/`selectModel` desde `_capture_all.mjs`
-   porque viven fuera del scope global; usar el DOM (`#viewerCharacterSelect`,
-   `#viewerWeaponSelect`, `#viewerKinds`, `#viewerList`).
+El índice limpio está en `docs/README.md`. Los informes y planes antiguos viven
+en `docs/historico/` y no son fuente de verdad.

@@ -235,8 +235,14 @@ try {
         button.click();await sleep(1800);
         const root=document.getElementById('inspectorRoot'),stage=document.getElementById('inspectorStage');
         const select=document.querySelector('[data-inspector-weapon]'),fire=document.getElementById('inspectorFire');
+        const auto=document.getElementById('inspectorAuto'),reset=document.getElementById('inspectorReset');
         const label=document.querySelector('[data-inspector-skin-name]');
-        const data={ok:!root.hidden&&!!stage&&stage.isConnected,open:!root.hidden,stage:!!stage&&stage.isConnected,skins:label?label.textContent.trim():'',weaponOptions:select?select.options.length:0,fireLabel:fire?fire.textContent.trim():'',paused:!!(window.__csnViewer&&window.__csnViewer.state.inspectorOpen)};
+        const startFireLabel=fire?fire.textContent.trim():'',startFireDisabled=!!fire&&fire.disabled;
+        const weaponOption=select&&[...select.options].find(option=>option.value);
+        if(select&&weaponOption){select.value=weaponOption.value;select.dispatchEvent(new Event('change',{bubbles:true}));await sleep(900);}
+        const data={ok:!root.hidden&&!!stage&&stage.isConnected,open:!root.hidden,stage:!!stage&&stage.isConnected,skins:label?label.textContent.trim():'',weaponOptions:select?select.options.length:0,startFireLabel,startFireDisabled,fireLabel:fire?fire.textContent.trim():'',fireDisabled:!!fire&&fire.disabled,dragBound:!!stage&&stage.dataset.csnDragBound==='1',autoButton:!!auto,paused:!!(window.__csnViewer&&window.__csnViewer.state.inspectorOpen)};
+        if(auto){auto.click();await sleep(200);data.autoPressedAfter=auto.getAttribute('aria-pressed');data.autoState=!!(window.__csnViewer&&window.__csnViewer.state.inspectorAutoSpin);}
+        if(reset)reset.click();
         window.__csnInspector.close();await sleep(300);
         data.closed=root.hidden&&!document.body.classList.contains('inspector-open');
         return data;
@@ -373,7 +379,7 @@ try {
     const inspectorAudit = result.inspectorAudit && typeof result.inspectorAudit === 'object' ? result.inspectorAudit : {};
     const catalogOk = catalog.troops === 22 && catalog.orig === 17 && catalog.csn === 5 && catalog.weapons === 23 && catalog.opens === 22 && catalog.cardEngine === true;
     const arsenalOk = arsenalAudit.original === 23 && arsenalAudit.csn === 37 && arsenalAudit.deployables === 10;
-    const inspectorOk = inspectorAudit.ok === true && inspectorAudit.open === true && inspectorAudit.stage === true && inspectorAudit.paused === true && inspectorAudit.weaponOptions >= 24 && /Probar/.test(inspectorAudit.fireLabel || '') && inspectorAudit.closed === true;
+    const inspectorOk = inspectorAudit.ok === true && inspectorAudit.open === true && inspectorAudit.stage === true && inspectorAudit.paused === true && inspectorAudit.weaponOptions >= 24 && /Elige/.test(inspectorAudit.startFireLabel || '') && inspectorAudit.startFireDisabled === true && /Probar/.test(inspectorAudit.fireLabel || '') && inspectorAudit.fireDisabled === false && inspectorAudit.dragBound === true && inspectorAudit.autoButton === true && inspectorAudit.autoPressedAfter === 'true' && inspectorAudit.autoState === true && inspectorAudit.closed === true;
     viewerOk = viewerOk && catalogOk && arsenalOk && inspectorOk;
     const probes = Array.isArray(result.viewerProbe) ? result.viewerProbe : [];
     const required = ['original:01', 'original:01+weapon', 'original:05', 'own:09'];

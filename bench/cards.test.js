@@ -100,6 +100,9 @@ test('el inspector ampliado reúne skins, 23 armas, sonido y desplegables', asyn
   assert.match(inspector, /prettySkinName/);
   assert.match(inspector, /data-inspector-skin-step/);
   assert.match(inspector, /getWeaponFiles\(\)/);
+  assert.match(inspector, /Sin arma \(solo personaje\)/);
+  assert.match(inspector, /Elige un arma para probar disparo/);
+  assert.match(inspector, /insFire\.disabled=true/);
   assert.match(inspector, /Inspeccionar desplegable/);
   assert.match(inspector, /auWeaponFile/);
   assert.match(inspector, /insFire\.textContent='▶ '\+\(profile&&profile\.actionLabel\|\|'Probar disparo'\)/);
@@ -208,9 +211,31 @@ test('el Inspector navega personajes, armas y desplegables con flechas', () => {
 test('las 23 armas originales se pueden equipar y disparar desde cualquier personaje', () => {
   const weapons = read('src/render3d/assets-weapons.js');
   assert.match(viewer, /const validWeapon=w=>!!w&&\(viewerWeaponFiles\.includes\(w\)\|\|!!WEAPONS_ORIGINAL\[w\]\|\|!!WEAPONS_ORIGINAL\[weaponFileForRef\(w\)\|\|''\]\)/);
-  assert.match(viewer, /viewer\.weapon=weaponFileForRef\(entry\.defaultWeapon\)\|\|entry\.defaultWeapon/);
+  assert.match(viewer, /if\(!viewer\.weaponTouched\|\|viewer\.weaponChar!==entry\.key\)viewer\.weapon=''/);
   assert.match(viewer, /viewer\.weapon=spec\.weapon\|\|'';viewer\.weaponTouched=true;viewer\.weaponChar=spec\.key;await selectModel\('roles',spec\.key\)/);
   assert.match(viewer, /const wanted=rawWanted\?\(weaponFileForRef\(rawWanted\)\|\|rawWanted\):''/);
-  assert.match(viewer, /const idleForWeapon=w=>\{const file=weaponFileForRef\(w\)\|\|w;const profile=file&&originalWeaponProfile\(file\)/);
+  assert.match(viewer, /const idleForWeapon=w=>\{const file=weaponFileForRef\(w\)\|\|w;const profile=file&&originalWeaponProfile\(file\);return profile\?profile\.idleClip:'idle2h'/);
   assert.match(weapons, /const cat=\(WEAPONS\[un\.weapon\]\|\|\{\}\)\.cat\|\|\(file&&String\(\(WEAPONS_ORIGINAL\[file\]\|\|\{\}\)\.cat\|\|''\)\.split\(' \/ '\)\[0\]\)\|\|'Fusiles de asalto'/);
+});
+
+test('Tropas arranca sin arma y el Inspector no hereda el gesto de inspección', () => {
+  assert.ok(troops.includes("{skinIndex:0,weapon:''}"));
+  assert.ok(troops.includes("const weapon=csn?'':(saved.weapon||'');"));
+  assert.ok(inspector.includes('insCurrent={...spec,inspect:false};'));
+  assert.ok(inspector.includes("kind:'roles',key:entry.key,skinIndex:0,weapon:'',"));
+  assert.match(inspector, /insStage\.addEventListener\('pointerdown'/);
+  assert.match(inspector, /insStage\.addEventListener\('pointermove'/);
+  assert.ok(inspector.includes('stage.spin.rotation.set(0,-0.55,0);'));
+  assert.match(indexHtml, /id="inspectorAuto"/);
+  assert.match(viewer, /if\(!viewer\.inspectorOpen\|\|viewer\.inspectorAutoSpin\)viewer\.spin\.rotation\.y\+=dt\*0\.22/);
+});
+
+test('Minigun está en Ametralladoras y las armas sin fogonazo nunca disparan flash', () => {
+  assert.ok(weaponsJs.includes("'M134 Minigun':'Minigun'"));
+  assert.ok(weaponsJs.includes("cat:'Ametralladoras',uses:['M134 Minigun']"));
+  assert.ok(weaponsJs.includes('blending:THREE.AdditiveBlending'));
+  assert.ok(weaponsJs.includes('flash.visible=hasFlash'));
+  assert.match(viewer, /profile\.hasMuzzleFlash!==false/);
+  assert.match(viewer, /_testFlash-dt\*12/);
+  assert.ok(weaponsJs.includes("'Crossbow'") && weaponsJs.includes("ORIGINAL_NO_FLASH"));
 });

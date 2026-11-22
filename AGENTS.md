@@ -19,6 +19,8 @@
 - Refactor puro: no cambiar reglas de combate, balance, visuales, controles ni textos.
 - No añadir `"type":"module"` a `package.json` raíz; `src/package.json` ya declara módulos ES.
 - `assets/three.min.js` se carga como script clásico, no como módulo.
+- Modo Historia usa el IPA en `assets/soldier/`; Modo Competitivo usa `.glb` en `assets/competitive/`. No mezclar fuentes.
+- `src/viewer/card-stage.js` es el único `WebGLRenderer`; reutilizar `getCardStage()` en lugar de crear otro.
 - Todos los módulos nuevos deben añadirse a los arrays `modules` de:
   - `bench/rules.test.js`
   - `bench/harness.js`
@@ -26,17 +28,18 @@
 - `src/main.js` debe seguir importando/refreshando el bridge en dos fases: `installEarlyBridge` antes del marcador INIT y `installFullBridge` después.
 
 ## Arquitectura actual
-- `styles/`: CSS extraído (`theme.css`, `layout.css`, `game.css`, `viewer.css`).
-- `src/data/`: naciones, armas, roles, cast, mapas, map-pieces, textos UI.
+- `styles/`: `theme.css`, `layout.css`, `game.css`, `viewer.css`, `cards.css`.
+- `src/data/`: naciones, armas, roles, cast, mapas, map-pieces, textos UI, desplegables, nombres de skins y catálogo competitivo.
 - `src/core/`: storage, RNG, tiempo y geometría.
 - `src/audio/`: sonido sintetizado y audio original.
 - `src/core-and-audio.js`: agregador de core/audio.
 - `src/game/`: reglas, IA, input, turnos, misiones, personajes, demo, teclado y quick actions.
 - `src/render2d/`: tablero, tiles, sprites, FX y fachada `index.js`.
-- `src/render3d/`: escena, assets, clips, retarget, soldados, armas, FX, cámara, runtime y fachada `index.js`.
-- `src/ui/`: shell, unit card, arsenal, habilidades, cuartel, wiring y fachada `index.js`.
+- `src/render3d/`: escena, assets, clips, retarget, soldados, armas, FX, cámara, runtime, carga GLTF, actor GLB, caché de assets y fachada `index.js`.
+- `src/ui/`: shell, unit card, arsenal, habilidades, cuartel, laboratorio GLB, wiring y fachada `index.js`.
 - `src/bridge.js`: `installEarlyBridge`/`installFullBridge`; exporta las variables de `main.js` a `window` para capturas, visor y tests.
-- `src/viewer/main.js`: visor 3D de galería; consume el bridge global y `MAP_PIECES`.
+- `src/viewer/`: `main.js` (visor/galería), `card-stage.js` (único renderer), `inspector.js` y `troop-cards.js`.
+- `assets/competitive/`: `manifest.json` y contenedores `chars/`, `weapons/`, `anims/` para el Modo Competitivo.
 
 ## Alias y compatibilidad
 - Conservar alias históricos usados por tests/capturas: `MESHY_LOADING→MESHY_MODELS`, `DOM_MAX_ROUNDS→DOM_TARGET`, `ESCORT_DRONE_*`/`ESCORT_GUIDES_PER_ROUND→ESCORT_MAX_ROUNDS`, `LS_WINS`/`LS_GAMES→LS_NATION`, `FLASH_RANGE`/`STUN_*→FLASH_COST`.
@@ -45,7 +48,7 @@
 
 ## Tamaño y estilo
 - Objetivo: cada módulo en `src/` por debajo de 450 líneas.
-- Estado actual: `src/main.js` 302 líneas; `src/viewer/main.js` 252 líneas; módulo más grande `src/ui/ui-shell.js` 377 líneas.
+- Estado actual: `src/main.js` 302 líneas; `src/viewer/main.js` 449 líneas; `src/viewer/card-stage.js` 449 líneas; módulo más grande `src/ui/ui-shell.js` 377 líneas.
 - Preferir extraer bloques completos a módulos con `ctx` antes que duplicar estado.
 - Si se compactan líneas, validar siempre con `npm run lint` y la suite headless.
 - No añadir comentarios nuevos salvo marcadores funcionales exigidos por tests.
@@ -63,7 +66,7 @@
 - `mount()` debe reenganchar el modelo sin saltos y alinear la plataforma.
 
 ## Tests útiles
-- `npm test`: 78 tests, incluyen reglas, datos, clips, XSS, UI, movimiento, colisiones y combate.
+- `npm test`: suite node:test de reglas, datos, clips, XSS, UI, tarjetas, movimiento, colisiones y combate.
 - `node --test bench/map-collision.test.js`: rejillas IPA y físicas.
 - `node _capture_all.mjs <mapa> <prefijo> 12000 --2d`: captura/debugGrid.
 - `node _capture_all.mjs viewer:audit-all VIEWAUDIT 8000`: auditoría del visor.

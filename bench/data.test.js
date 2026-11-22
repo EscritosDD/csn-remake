@@ -198,6 +198,28 @@ test('los 23 perfiles originales enlazan clips, audio y acciones', async () => {
   assert.match(soundSrc, /auPlay\('sfx\/weapons\/'\+profile\.sfx,profile\.sfx\.endsWith\('\.wav'\)\?0\.35:0\.45\)/);
 });
 
+test('idleForWeapon usa el clip del perfil y el acople distingue armas de una mano', async () => {
+  const { WEAPONS_ORIGINAL, originalWeaponProfile } = await import('../src/render3d/assets-weapons.js');
+  const { gunIsOneHanded } = await import('../src/render3d/gun-pose.js');
+  const viewer = fs.readFileSync(path.join(ROOT, 'src', 'viewer', 'main.js'), 'utf8');
+  const pose = fs.readFileSync(path.join(ROOT, 'src', 'render3d', 'gun-pose.js'), 'utf8');
+  const idle = {
+    Pistol: 'idle1h', Revolver: 'idle1h', Uzi: 'idle1h', FragGrenade: 'idle1h', Molotov: 'idle1h',
+    Knife: 'idleMelee', Katana: 'idleMelee', WoodAxe: 'idleMelee', SledgeHammer: 'idleMelee',
+    BaseballBat_SOURCE: 'idleMelee', SpikedClub_weapon: 'idleMelee', Chainsaw: 'idleMelee',
+    AssaultRifle: 'idle2h', MP5K: 'idle2h', Minigun: 'idle2h', SniperRifle_weapon: 'idle2h'
+  };
+  for (const [file, clip] of Object.entries(idle)) assert.equal(originalWeaponProfile(file).idleClip, clip, file);
+  assert.match(viewer, /return profile\?profile\.idleClip:'idle2h'/);
+  const oneHand = ['Pistol', 'Revolver', 'Uzi', 'FragGrenade', 'Molotov', 'Knife', 'Katana', 'WoodAxe', 'BaseballBat_SOURCE', 'SpikedClub_weapon'];
+  const twoHand = ['AssaultRifle', 'MP5K', 'LightMachineGun', 'Minigun', 'SniperRifle_weapon', 'Crossbow', 'RPG', 'SledgeHammer', 'Chainsaw'];
+  for (const file of oneHand) assert.equal(gunIsOneHanded(file, WEAPONS_ORIGINAL[file].cat), true, file);
+  for (const file of twoHand) assert.equal(gunIsOneHanded(file, WEAPONS_ORIGINAL[file].cat), false, file);
+  assert.match(pose, /rigSpan:rigSpan/);
+  assert.match(pose, /w2hPrev:ud\._viewW2H\|\|0/);
+  assert.match(pose, /quaternion\.slerp/);
+});
+
 test('el material de las armas usa la textura del IPA sin alias ni mipmaps', () => {
   const src = fs.readFileSync(path.join(ROOT, 'src', 'render3d', 'assets-weapons.js'), 'utf8');
   assert.match(src, /color:0xb8b8b8,roughness:0\.80,metalness:0\.03/);
@@ -304,7 +326,7 @@ test('Configurar partida permite elegir personaje por ranura', () => {
   assert.match(html, /geometry\.deleteAttribute\('skinWeight'\)[\s\S]{0,400}side:THREE\.FrontSide/);
 });
 
-test('los originales del visor traen arma por defecto y pueden equipar las 23 armas originales', () => {
+test('los originales del visor arrancan sin arma y pueden equipar las 23 armas originales', () => {
   const viewer = fs.readFileSync(path.join(ROOT, 'src', 'viewer', 'main.js'), 'utf8');
   const troops = fs.readFileSync(path.join(ROOT, 'src', 'viewer', 'troop-cards.js'), 'utf8');
   const cast = fs.readFileSync(path.join(ROOT, 'src', 'data', 'cast.js'), 'utf8');
@@ -322,6 +344,8 @@ test('los originales del visor traen arma por defecto y pueden equipar las 23 ar
   const weapons = viewer.split('const viewerWeaponFiles=[')[1].split('];')[0];
   assert.equal((weapons.match(/'/g)||[]).length/2, 23);
   assert.match(troops, /getWeaponFiles:\(\)=>tcWeaponFiles/);
+  assert.ok(viewer.includes("if(!viewer.weaponTouched||viewer.weaponChar!==entry.key)viewer.weapon='';"));
+  assert.ok(!viewer.includes('entry.defaultWeapon&&'));
   assert.match(viewer, /originalWeaponProfile\(file\)/);
   assert.match(viewer, /auWeaponFile\(weaponFileForRef\(weapon\)\|\|weapon\)/);
   assert.doesNotMatch(viewer, /VIEWER_ROLE_WEAPONS/);

@@ -1,18 +1,16 @@
 # Documentación de CSN
 
-Qué hay aquí y para qué sirve. Si vienes nuevo, lee en este orden.
+Índice único de documentación. Fuentes de verdad: `AGENTS.md`, `README.md`,
+`docs/ARQUITECTURA.md` y este archivo. El resto es referencia o histórico.
 
-## Para seguir desarrollando (empieza aquí)
+## Para seguir desarrollando
 
 | Documento | Para qué |
 |---|---|
-| **[ESTADO_SESION_2026-11-21.md](ESTADO_SESION_2026-11-21.md)** | **Estado final de la última sesión.** Cambios por ronda, gates ejecutados, archivos tocados, bloqueos externos y plan para mañana |
-| **[Examen_para_continuar.md](Examen_para_continuar.md)** | **El informe de traspaso.** Estado real verificado, cómo ejecutar y verificar, arquitectura por líneas, tareas pendientes, los problemas abiertos con todo lo probado, y las recetas que funcionan (mallas de clase, armas) |
-| [ARQUITECTURA.md](ARQUITECTURA.md) | Dónde está cada bloque del código (funciones y líneas reales) y las trampas al editar |
+| [ARQUITECTURA.md](ARQUITECTURA.md) | Módulos ESM reales, flujo de partida, visor 3D y trampas al editar |
 | [Equilibrio_medido.md](Equilibrio_medido.md) | Cifras de balance por modo y mapa, con n y metodología |
 | [Catalogo_habilidades_original.md](Catalogo_habilidades_original.md) | Las 52 habilidades del original: 22 implementadas en CSN y el resto pendiente |
-| [COMO_TRABAJAR_CON_ZAI.md](COMO_TRABAJAR_CON_ZAI.md) | Flujo con rama de pruebas: aplicar patch, verlo, promoverlo a main o descartarlo |
-| [Prompt_arranque_Z.ai.md](Prompt_arranque_Z.ai.md) | **Prompt listo para pegar** si el trabajo lo retoma otra IA (reglas de la casa y tareas priorizadas) |
+| [Capturas_3D.md](Capturas_3D.md) | Cómo regenerar capturas, rejilla de depuración, auditoría del visor y verificación móvil |
 
 ## Diseño y referencia
 
@@ -22,19 +20,27 @@ Qué hay aquí y para qué sirve. Si vienes nuevo, lee en este orden.
 | [Arsenal_real.md](Arsenal_real.md) | Las 37 armas con sus datos reales y su traducción al juego |
 | [Estetica_original.md](Estetica_original.md) | Paletas y aspecto del original |
 | [Arte_visual.md](Arte_visual.md) | Material en uso (mallas, mapas, audio, UI) y referencia histórica |
-| [Informe_CSN_vs_original.md](Informe_CSN_vs_original.md) | Comparación lado a lado con RAD Soldiers |
-
-## Auditorías y capturas
-
-| Documento | Para qué |
-|---|---|
 | [auditoria_global_3d.md](auditoria_global_3d.md) | Auditoría generada de todos los OBJ/rigs/texturas: 338 OBJ, 0 sin caras, 0 NaN, 13 rigs |
-| [Auditoria_visual_profunda_2026-11-19.md](Auditoria_visual_profunda_2026-11-19.md) | Hallazgos visuales reproducibles, hipótesis separadas y prompt técnico para OpenCode |
-| [Auditoria_profunda_v2.md](Auditoria_profunda_v2.md) | Los fallos de la tanda de corrección y cómo se arreglaron |
-| [Capturas_3D.md](Capturas_3D.md) | Cómo regenerar capturas, rejilla de depuración, auditoría del visor y verificación móvil |
 
 ## Histórico (`historico/`)
 
-Planes, auditorías y notas de sesiones anteriores. Se conservan como registro;
-algunas describen estados que ya no existen. **No son la fuente de verdad**: para
-trabajar, usa los documentos de arriba.
+Planes, informes y notas de sesiones anteriores. Se conservan como registro;
+algunos describen estados que ya no existen. **No son la fuente de verdad**.
+
+| Documento | Para qué |
+|---|---|
+| [ESTADO_SESION_2026-11-21.md](historico/ESTADO_SESION_2026-11-21.md) |Estado final de la última sesión con gates y archivos tocados |
+| [Examen_para_continuar.md](historico/Examen_para_continuar.md) |Informe de traspaso con estado verificado, pendientes y recetas |
+| [COMO_TRABAJAR_CON_ZAI.md](historico/COMO_TRABAJAR_CON_ZAI.md) |Flujo con rama de pruebas: aplicar patch, verlo, promoverlo o descartarlo |
+| [Prompt_arranque_Z.ai.md](historico/Prompt_arranque_Z.ai.md) |Prompt histórico para retomar el trabajo con otra IA |
+| [README_ENTREGA.md](historico/README_ENTREGA.md) |Entrega de modelos propios de Dani (Meshy AI) |
+| [README_MODELOS_NUEVOS.md](historico/README_MODELOS_NUEVOS.md) |Guía histórica de los modelos nuevos |
+| [Modelos_propios_Meshy.md](historico/Modelos_propios_Meshy.md) |Mapeo, pipeline y verificación de modelos Meshy |
+| [Personajes_propios_Studio.md](historico/Personajes_propios_Studio.md) |Guía breve de personajes propios para Studio |
+| [guia_rapida.md](historico/guia_rapida.md) |Comandos históricos del pipeline de modelos |
+| [Auditoria_profunda_v2.md](historico/Auditoria_profunda_v2.md) |Fallos de la tanda de corrección y cómo se arreglaron |
+| [Auditoria_visual_profunda_2026-11-19.md](historico/Auditoria_visual_profunda_2026-11-19.md) |Hallazgos visuales reproducibles e hipótesis separadas |
+| [Informe_CSN_vs_original.md](historico/Informe_CSN_vs_original.md) |Comparación lado a lado con RAD Soldiers |
+
+`docs/capturas/` contiene capturas locales generadas por `_capture_all.mjs`;
+está ignorado por Git.

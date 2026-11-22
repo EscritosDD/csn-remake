@@ -15,9 +15,14 @@ __pycache__/
 _extract/
 *.log
 *.zip
+auditoria_*.txt
+diagnostico_*.txt
+examen_*.txt
+inspeccion_*.txt
 
 # Capturas de documentacion (se generan localmente con _capture_all.mjs, no van al repo)
 docs/capturas/
+docs/capturas/*.png
 
 # Borradores de interfaz de aistudio (no los usa el juego)
 public/assets/aistudio/
