@@ -287,8 +287,8 @@ export function driveClipSoldier(un,mesh,t,moving){
   const rootBase=ud.bindPos[0],pelvOff=ud.bindPos[1];
   rootBonePositionForClip(rootBase,pelvOff,ud.curDelta,_cv.copy(pelvOff).applyQuaternion(ud.bones[0].quaternion),_cv2);
   ud.bones[0].position.copy(_cv2);
-  if(ud.gun&&ud.gun.userData&&ud.gun.userData.flash){
-    ud.gun.userData.flash.material.opacity=Math.min(0.95,(ud._flashPulse||0)*0.95);
+  if(ud.gun&&ud.gun.userData&&ud.gun.userData.flash){const f=Math.min(0.95,(ud._flashPulse||0)*0.95);
+    ud.gun.userData.flash.traverse(o=>{if(o.isMesh&&o.material)o.material.opacity=f;else if(o.isPointLight)o.intensity=f*1.5;});
   }
   if(ud.hitColor&&_hitWhite&&ud.mesh3.material.color){
     ud.mesh3.material.color.copy(ud.hitColor).lerp(_hitWhite,Math.min(0.55,(ud._hitPulse||0)*0.55));

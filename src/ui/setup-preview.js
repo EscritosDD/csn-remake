@@ -33,6 +33,27 @@ export function squadCardMarkup(opts){
     '<label>Personaje<select data-kind="char" data-team="'+previewEsc(opts.team)+'" data-slot="'+previewEsc(opts.i)+'" aria-label="Personaje" '+locked+'></select></label></div></div>';
 }
 
+export function fillSquadSelects(row,opts){
+  const roles=Object.keys(opts.ROLES||{});
+  const role=roles.includes(opts.role)?opts.role:(roles[0]||'Comando');
+  const rsel=row&&row.querySelector('[data-kind="role"]');
+  const wsel=row&&row.querySelector('[data-kind="weapon"]');
+  const csel=row&&row.querySelector('[data-kind="char"]');
+  const option=(value,label)=>'<option value="'+previewEsc(value)+'">'+previewEsc(label)+'</option>';
+  if(rsel)rsel.innerHTML=roles.map(r=>option(r,r)).join('');
+  if(rsel)rsel.value=role;
+  const weapons=opts.fixedDef?[opts.fixedDef.weapon]:(((opts.ROLES||{})[role]||{}).weapons||[]);
+  const weapon=weapons.includes(opts.weapon)?opts.weapon:(weapons[0]||'');
+  if(wsel)wsel.innerHTML=weapons.map(w=>option(w,w)).join('');
+  if(wsel)wsel.value=weapon;
+  const chars=(opts.chars||[]).map(c=>({key:opts.characterKey(c),name:c.name,ref:c}));
+  const charOptions=opts.fixedDef&&opts.fixedCharKey?[{key:opts.fixedCharKey,name:opts.fixedDef.charName||opts.fixedDef.role,ref:null}]:chars;
+  const charKey=charOptions.some(c=>c.key===opts.selectedCharKey)?opts.selectedCharKey:(charOptions[0]&&charOptions[0].key||'');
+  if(csel)csel.innerHTML=charOptions.map(c=>option(c.key,c.name)).join('');
+  if(csel)csel.value=charKey;
+  return {role,weapon,charKey,chars:charOptions.map(c=>c.ref).filter(Boolean)};
+}
+
 export function updateSquadCard(row,opts){
   if(!row)return;
   const rsel=row.querySelector('[data-kind="role"]');

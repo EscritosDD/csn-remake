@@ -1,6 +1,9 @@
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const root = path.dirname(__dirname);
 
 async function load() {
   const [maps, cast, roles, weapons, tutorial] = await Promise.all([
@@ -71,3 +74,23 @@ test('el tutorial avanza con acciones reales y exige cobertura', async () => {
   assert.equal(tutorial.tutorialCompleted(), true);
   assert.deepEqual(events, ['select', 'move', 'shoot', 'grenade', 'endTurn']);
 });
+
+test('la campaña despliega la misión directamente sin abrir el configurador', () => {
+  const main = fs.readFileSync(path.join(root, 'src', 'main.js'), 'utf8');
+  const missions = fs.readFileSync(path.join(root, 'src', 'game', 'missions.js'), 'utf8');
+  const bridge = fs.readFileSync(path.join(root, 'src', 'bridge.js'), 'utf8');
+  assert.match(main, /function missionSquad\(list\)\{return list\.map\(entry=>\(\{role:entry\.role,weapon:entry\.weapon,charKey:rosterKey\(entry\.charName\)\}\)\);\}/);
+  assert.match(main, /if\(!myNation\)\{myNation=NATIONS\[0\];setDemoNation\(myNation\);\}/);
+  assert.match(main, /Object\.assign\(setup,\{mode,campaignMission:idx,isTutorial:mode==='tutorial',map:mission\.map,fmt:mission\.playerRoster\.length,opp:'ia'/);
+  assert.match(main, /hideCampaignView\(\);[\s\S]*?\$\('#setupArea'\)\.style\.display='none';[\s\S]*?showScreen\('scr-play'\);[\s\S]*?setViewMode3\('3d'\);[\s\S]*?startGame\(missionSquad\(mission\.playerRoster\),missionSquad\(mission\.enemyRoster\)\)/);
+  assert.match(main, /function deployCampaignMission\(idx\)\{const index=Math\.max\(0,Math\.min\(CAMPAIGN_MISSIONS\.length-1,idx\|\|0\)\);deployMissionData\(CAMPAIGN_MISSIONS\[index\],'campana',index\);\}/);
+  assert.match(main, /function startTutorial\(\)\{deployMissionData\(TUTORIAL_MISSION,'tutorial',0\);\}/);
+  assert.match(main, /startTutorialFlow\(\);/);
+  assert.doesNotMatch(missions, /openSetup\('campana'/);
+  assert.match(missions, /closeModal\(\);deployMission\('\+\(idx\+1\)\+'\)/);
+  assert.match(missions, /closeModal\(\);deployMission\('\+idx\+'\)/);
+  assert.match(missions, /closeModal\(\);deployMission\(0\)/);
+  assert.match(bridge, /d\('deployMission',\(\)=>r\.deployMission\)/);
+  assert.match(bridge, /d\('startTutorial',\(\)=>r\.startTutorial\)/);
+});
+

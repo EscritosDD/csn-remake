@@ -20,7 +20,7 @@ test('los eventos reales del clip alimentan el feedback de combate', () => {
 });
 
 test('el retroceso del arma sigue el pulso del evento, no un temporizador fijo', () => {
-  assert.match(html, /if\(isLive&&ud\._firePulse>0\)\{/);
+  assert.match(html, /const hardTrack=!!\(ud\._firePulse>0\|\|ud\._testFlash>0/);
   assert.match(html, /pose\.origin\.addScaledVector\(pose\.dir,-0\.055\*ud\._firePulse\)/);
   assert.match(html, /pose\.quat\.multiply\(_gpRecoil\.setFromAxisAngle/);
   assert.doesNotMatch(html, /FX\.t-un\._shootT\)\/220/);

@@ -112,7 +112,10 @@ test('la campaña tiene vista propia y el briefing no usa handlers inline', () =
   assert.doesNotMatch(campaignUiSource,/onclick="/);
   assert.match(html,/function showMissionBriefing\(index\)\{[\s\S]*?id="briefDeploy"[\s\S]*?getElementById\('briefDeploy'\)/);
   assert.match(html,/deployMission\(idx\)/);
-  assert.match(html,/function deployCampaignMission\(idx\)\{openSetup\('campana',idx\);launchConfigured\(\);\}/);
+  assert.match(html,/function deployMissionData\(mission,mode,idx\)\{/);
+  assert.match(html,/function deployCampaignMission\(idx\)\{const index=Math\.max\(0,Math\.min\(CAMPAIGN_MISSIONS\.length-1,idx\|\|0\)\)/);
+  assert.match(html,/deployMissionData\(CAMPAIGN_MISSIONS\[index\],'campana',index\)/);
+  assert.doesNotMatch(html,/function deployCampaignMission\(idx\)\{openSetup\('campana'/);
   assert.match(html,/b\.onclick=\(\)=>\{if\(state!=='locked'\)showMissionBriefing\(i\);\}/);
   assert.match(html,/campaignBtn'\);if\(cb\)cb\.onclick=openView/);
   assert.match(html,/mnuChallenges'\);if\(ch\)ch\.onclick=openView/);
@@ -132,4 +135,23 @@ test('Configurar partida muestra mapa y tarjetas visuales sin otro renderer', as
   assert.match(css,/\.setup-map-preview/);
   assert.match(css,/\.squad-card/);
   assert.match(css,/\.sq-weapon-cover/);
+});
+
+test('las tarjetas de escuadra pueblan rol, arma y personaje', async () => {
+  const { fillSquadSelects } = await import('../src/ui/setup-preview.js');
+  const mk = () => ({ innerHTML: '', value: '' });
+  const fields = { role: mk(), weapon: mk(), char: mk() };
+  const row = { querySelector: sel => fields[sel.match(/data-kind="([^"]+)"/)[1]] };
+  const ROLES = { Comando: { weapons: ['M4A1', 'MP5'] }, Médico: { weapons: ['M4A1'] } };
+  const chars = [{ key: 'original:Hipster Dave', name: 'Hipster Dave' }];
+  const characterKey = c => c.key;
+  const picked = fillSquadSelects(row, { role: 'Comando', weapon: 'M4A1', chars, characterKey, ROLES, selectedCharKey: 'original:Hipster Dave' });
+  assert.equal(fields.role.value, 'Comando');
+  assert.equal(fields.weapon.value, 'M4A1');
+  assert.equal(fields.char.value, 'original:Hipster Dave');
+  assert.match(fields.role.innerHTML, /value="Médico"/);
+  assert.match(fields.char.innerHTML, /value="original:Hipster Dave"/);
+  assert.equal(picked.charKey, 'original:Hipster Dave');
+  assert.equal(picked.chars.length, 1);
+  assert.match(html, /fillSquadSelects\(row,\{role:r,weapon,fixedDef/);
 });

@@ -24,7 +24,7 @@ const i = code.indexOf(mark);
 if (i >= 0) code = code.slice(0, i);
 
 // Exportar la API del motor al sandbox (mismo ámbito léxico).
-code += '\n;globalThis.__g={startGame,runAI,endTurn,aiUnitAct,checkWin,endGame,'
+code += '\n;globalThis.__g={startGame,runAI,endTurn,aiUnitAct,checkWin,endGame,deployMission:deployCampaignMission,startTutorial,tutorialIndex,'
   + 'get G(){return G;},get setup(){return setup;},set myNation(v){myNation=v;},get myNation(){return myNation;},'
   + 'ROLES,BODIES,WEAPONS,DEFAULT_SQUADS,NATIONS,'
   + 'mkSquad(n){return DEFAULT_SQUADS[n].map(r=>({role:r,weapon:ROLES[r].weapons[0]}));}};';

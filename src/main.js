@@ -19,7 +19,7 @@ import { installEarlyBridge, installFullBridge } from './bridge.js';
 import { TUTORIAL_MISSION, TUTORIAL_STEPS, radioLines, campaignStars, missionById, rosterKey } from './data/maps.js';
 import { activeOriginalMission } from './ui/ui-shell.js';
 import { wireCampaignUI, renderTutorialStep, hideTutorialStep, tutorialHint, renderCampaignRadio, showMissionBriefing } from './ui/campaign-ui.js';
-import { configureTutorial, startTutorial, skipTutorial, replayTutorial, tutorialAdvance, tutorialEvent, tutorialCheck, isTutorialActive, tutorialStep, LS_TUTORIAL } from './game/tutorial.js';
+import { configureTutorial, startTutorial as startTutorialFlow, skipTutorial, replayTutorial, tutorialAdvance, tutorialEvent, tutorialCheck, isTutorialActive, tutorialStep, tutorialIndex, LS_TUTORIAL } from './game/tutorial.js';
 "use strict";
 let flowStep='nation';
 let myNation=null, pickedNation=null;
@@ -47,6 +47,20 @@ document.querySelectorAll('#mapSeg button').forEach(b=>b.onclick=()=>{setup.map=
 document.querySelectorAll('#oppSeg button').forEach(b=>b.onclick=()=>{setup.opp=b.dataset.opp;document.querySelectorAll('#oppSeg button').forEach(x=>x.classList.toggle('on',x===b));buildSquads();});
 wireSkinSeg('skinSegA','skinA');wireSkinSeg('skinSegB','skinB');
 $('#cancelSetup').onclick=()=>{const original=setup.mode==='campana'||setup.mode==='tutorial';$('#setupArea').style.display='none';$('#menuArea').style.display='block';document.body.dataset.state='menu';syncPlayingViewport();setStep('mode');refreshGuerra();if(original)showCampaignView();};
+function missionSquad(list){return list.map(entry=>({role:entry.role,weapon:entry.weapon,charKey:rosterKey(entry.charName)}));}
+function deployMissionData(mission,mode,idx){
+  if(!myNation){myNation=NATIONS[0];setDemoNation(myNation);}
+  Object.assign(setup,{mode,campaignMission:idx,isTutorial:mode==='tutorial',map:mission.map,fmt:mission.playerRoster.length,opp:'ia',rivalNation:null,difficulty:mission.difficulty,skinA:'estandar',squadChars:{A:{},B:{}}});
+  hideCampaignView();
+  $('#setupArea').style.display='none';
+  showScreen('scr-play');
+  setViewMode3('3d');
+  startGame(missionSquad(mission.playerRoster),missionSquad(mission.enemyRoster));
+  if(mode==='tutorial'){
+    G.campaignName=mission.id;G.campaignTitle=mission.title;G.campaignTurnLimit=mission.turnLimit;
+    startTutorialFlow();
+  }
+}
 function launchConfigured(){
   const mission=activeOriginalMission();
   const squadA=readSquad('A'),squadB=readSquad('B');
@@ -55,10 +69,10 @@ function launchConfigured(){
   G.campaignName=mission.id;G.campaignTitle=mission.title;G.campaignTurnLimit=mission.turnLimit;
   const lines=radioLines(mission.id);
   if(lines[0]){toast('📻 '+lines[0]);log('📻 '+lines[0]);}
-  if(setup.mode==='tutorial')startTutorial();
+  if(setup.mode==='tutorial')startTutorialFlow();
 }
-function beginTutorial(){openSetup('tutorial');launchConfigured();}
-function deployCampaignMission(idx){openSetup('campana',idx);launchConfigured();}
+function startTutorial(){deployMissionData(TUTORIAL_MISSION,'tutorial',0);}
+function deployCampaignMission(idx){const index=Math.max(0,Math.min(CAMPAIGN_MISSIONS.length-1,idx||0));deployMissionData(CAMPAIGN_MISSIONS[index],'campana',index);}
 $('#launchBtn').onclick=launchConfigured;
 function advanceUnitYaw(un,t){
   const target=facingYaw(un);
@@ -235,7 +249,7 @@ set pickedNation(v){pickedNation=v;},get nationById(){return nationById;},get na
 get nativeBlocked(){return nativeBlocked;},get nativeEdgeBits(){return nativeEdgeBits;},get nativeSolidEdge(){return nativeSolidEdge;},
 get nativeTile(){return nativeTile;},get noiseBurst(){return noiseBurst;},get normalizeMeshyRig(){return normalizeMeshyRig;},
 get normalizeMeshyRigGlobal(){return normalizeMeshyRigGlobal;},get obAt(){return obAt;},get openBarracks(){return openBarracks;},
-get openSetup(){return openSetup;},get deployCampaignMission(){return deployCampaignMission;},get showCampaignView(){return showCampaignView;},get hideCampaignView(){return hideCampaignView;},get refreshSetupPreview(){return refreshSetupPreview;},get parseMeshyOBJ(){return parseMeshyOBJ;},get parseOBJ3(){return parseOBJ3;},
+get openSetup(){return openSetup;},get deployCampaignMission(){return deployCampaignMission;},get deployMission(){return deployCampaignMission;},get showCampaignView(){return showCampaignView;},get hideCampaignView(){return hideCampaignView;},get refreshSetupPreview(){return refreshSetupPreview;},get parseMeshyOBJ(){return parseMeshyOBJ;},get parseOBJ3(){return parseOBJ3;},
 get parseOBJStatic(){return parseOBJStatic;},get pathDist(){return pathDist;},get pickupLoot(){return pickupLoot;},
 get placeCover(){return placeCover;},get placeHealthCrate(){return placeHealthCrate;},get placeMine(){return placeMine;},
 get playOnce(){return playOnce;},get poseSpriteAim(){return poseSpriteAim;},get poseSpriteClip(){return poseSpriteClip;},
@@ -266,7 +280,7 @@ get teleportUnit(){return teleportUnit;},get texMat3(){return texMat3;},get thro
 get throwFlash(){return throwFlash;},get throwGas(){return throwGas;},get throwGrenade(){return throwGrenade;},
 get throwMolotov(){return throwMolotov;},get throwSmoke(){return throwSmoke;},get throwTranq(){return throwTranq;},
 get tickFx3D(){return tickFx3D;},get tileFromEvent(){return tileFromEvent;},get tileWorldY(){return tileWorldY;},
-get toast(){return toast;},get tone(){return tone;},get toonGrad3(){return toonGrad3;},get activeOriginalMission(){return activeOriginalMission;},get campaignStars(){return campaignStars;},get isTutorialActive(){return isTutorialActive;},get missionById(){return missionById;},get radioLines(){return radioLines;},get renderTutorialStep(){return renderTutorialStep;},get showMissionBriefing(){return showMissionBriefing;},get replayTutorial(){return replayTutorial;},get rosterKey(){return rosterKey;},get skipTutorial(){return skipTutorial;},get startTutorial(){return startTutorial;},get tutorialAdvance(){return tutorialAdvance;},get tutorialCheck(){return tutorialCheck;},get tutorialEvent(){return tutorialEvent;},get tutorialIndex(){return tutorialIndex;},get tutorialStep(){return tutorialStep;},
+get toast(){return toast;},get tone(){return tone;},get toonGrad3(){return toonGrad3;},get activeOriginalMission(){return activeOriginalMission;},get campaignStars(){return campaignStars;},get isTutorialActive(){return isTutorialActive;},get missionById(){return missionById;},get radioLines(){return radioLines;},get renderTutorialStep(){return renderTutorialStep;},get showMissionBriefing(){return showMissionBriefing;},get replayTutorial(){return replayTutorial;},get rosterKey(){return rosterKey;},get skipTutorial(){return skipTutorial;},get startTutorial(){return startTutorial;},get startTutorialFlow(){return startTutorialFlow;},get tutorialAdvance(){return tutorialAdvance;},get tutorialCheck(){return tutorialCheck;},get tutorialEvent(){return tutorialEvent;},get tutorialIndex(){return tutorialIndex;},get tutorialStep(){return tutorialStep;},
 get tryShoot(){return tryShoot;},get turretFire(){return turretFire;},get tutHide(){return tutHide;},
 get tutShow(){return tutShow;},get uid(){return uid;},set uid(v){uid=v;},
 get undoLastMove(){return undoLastMove;},get unitAt(){return unitAt;},get unitHasAction(){return unitHasAction;},
@@ -311,7 +325,7 @@ window.quickFlash=function(){ quickFlash({myNation,setup,get G(){return G;}}); }
 wireUI({get G(){return G;},TUT_TEXTS,tutShow,tutHide});
 /* ================= INIT ================= */
 buildNationGrid();buildArsenal();
-wireCampaignUI({getMission:()=>activeOriginalMission()||TUTORIAL_MISSION,getProgress:loadCampaign,saveCampaign,renderCampaignPanel,showCampaignView,hideCampaignView,showModal,closeModal,deployMission:deployCampaignMission,audio:auVoice,toast,startTutorial:beginTutorial,skipTutorial,replayTutorial:beginTutorial,tutorialAdvance});
+wireCampaignUI({getMission:()=>activeOriginalMission()||TUTORIAL_MISSION,getProgress:loadCampaign,saveCampaign,renderCampaignPanel,showCampaignView,hideCampaignView,showModal,closeModal,deployMission:deployCampaignMission,audio:auVoice,toast,startTutorial,skipTutorial,replayTutorial:startTutorial,tutorialAdvance});
 loadSkirmishTop('skirmish03');loadSkirmishTop('skirmish04');
 (function(){
   setCHAR_PREFS(loadChars());

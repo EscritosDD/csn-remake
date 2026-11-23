@@ -49,7 +49,7 @@
 
 ## Tamaño y estilo
 - Objetivo: cada módulo en `src/` por debajo de 450 líneas.
-- Estado actual: `src/main.js` 338 líneas; `src/viewer/main.js` 449 líneas; `src/viewer/card-stage.js` 449 líneas; módulo más grande `src/ui/ui-shell.js` 448 líneas; 75 módulos en `src/`.
+- Estado actual: `src/main.js` 352 líneas; `src/viewer/main.js` 448 líneas; `src/viewer/card-stage.js` 449 líneas; módulo más grande `src/ui/ui-shell.js` 445 líneas; 75 módulos en `src/`.
 - Preferir extraer bloques completos a módulos con `ctx` antes que duplicar estado.
 - Si se compactan líneas, validar siempre con `npm run lint` y la suite headless.
 - No añadir comentarios nuevos salvo marcadores funcionales exigidos por tests.

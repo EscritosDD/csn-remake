@@ -17,7 +17,7 @@ export function disposeObject3D(root){
     if(Array.isArray(material))material.forEach(collectMaterial);
     else collectMaterial(material);
   });
-  textures.forEach(texture=>{if(texture.userData&&texture.userData.glbOwned&&typeof texture.dispose==='function')texture.dispose();});
+  textures.forEach(texture=>{if(texture.userData&&texture.userData.glbOwned&&!texture.userData.sharedAsset&&typeof texture.dispose==='function')texture.dispose();});
   materials.forEach(material=>{if(material.userData&&material.userData.glbOwned&&typeof material.dispose==='function')material.dispose();});
   geometries.forEach(geometry=>{if(geometry.userData&&geometry.userData.glbOwned&&typeof geometry.dispose==='function')geometry.dispose();});
   return {geometries:geometries.size,materials:materials.size,textures:textures.size};

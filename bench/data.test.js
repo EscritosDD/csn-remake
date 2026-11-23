@@ -236,7 +236,7 @@ test('la captura auditoriza el visor y la verificacion la ejecuta', () => {
   assert.ok(cap.includes("mapId.startsWith('viewer:')"));
   assert.ok(cap.includes("result.viewerAudit = result.viewer"));
   assert.ok(verify.includes('viewer:audit-all'));
-  for (const mode of ['soap', 'sneaky', 'megan', 'sister', 'rpg', 'fire', 'meshy09', 'mp5k', 'minigun', 'inspector', 'setup']) {
+  for (const mode of ['soap', 'sneaky', 'megan', 'sister', 'rpg', 'fire', 'pistol', 'pistolfire', 'assaultfire', 'mp5kfire', 'campaign1', 'meshy09', 'mp5k', 'minigun', 'inspector', 'setup']) {
     assert.ok(cap.includes(mode + ':'), 'falta modo de captura ' + mode);
   }
   assert.ok(cap.includes('inspectorAudit'));
@@ -347,7 +347,7 @@ test('los originales del visor arrancan sin arma y pueden equipar las 23 armas o
   assert.ok(viewer.includes("if(!viewer.weaponTouched||viewer.weaponChar!==entry.key)viewer.weapon='';"));
   assert.ok(!viewer.includes('entry.defaultWeapon&&'));
   assert.match(viewer, /originalWeaponProfile\(file\)/);
-  assert.match(viewer, /auWeaponFile\(weaponFileForRef\(weapon\)\|\|weapon\)/);
+  assert.match(viewer, /auWeaponFile\(file\)/);
   assert.doesNotMatch(viewer, /VIEWER_ROLE_WEAPONS/);
   assert.doesNotMatch(viewer, /MAP_PIECES/);
 });
@@ -358,7 +358,8 @@ test('el visor funde clips y dispara desde eventos del clip', () => {
   assert.match(viewer, /typeof CLIP_BLEND_MS!=='undefined'\?CLIP_BLEND_MS:200/);
   assert.match(viewer, /typeof _smooth01==='function'\?_smooth01\(0,1,p\)/);
   assert.match(viewer, /function dispatchViewerFire\(actor,clip,key,ct,weapon\)/);
-  assert.match(viewer, /f==='PlayWeaponFire'\|\|f==='PlayFiring'/);
+  assert.doesNotMatch(viewer, /f==='PlayWeaponFire'\|\|f==='PlayFiring'/);
+  assert.match(viewer, /f==='PlayFiring'\|\|!\(f==='PlayWeaponFire'/);
   assert.match(viewer, /gun\.userData\._testFlash=1/);
   assert.doesNotMatch(viewer, /fireBtn\.onclick[\s\S]{0,600}auWeapon/);
   assert.doesNotMatch(viewer, /position\.set\(0\.18,0\.62,0\)/);

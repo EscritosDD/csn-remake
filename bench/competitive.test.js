@@ -46,8 +46,10 @@ function srcFiles(dir){
   });
 }
 
-test('ningún módulo de src deja un if/for/while con cuerpo vacío',()=>{
-  const phantom=/\b(?:if|for|while)\s*\([^)]*\)\s*;[ \t]*(?:\r?\n|$)/;
+test('ningún módulo de src deja un if/for/while/else con cuerpo vacío',()=>{
+  const phantom=/\b(?:if|for|while)\s*\([^)]*\)[\r\n\t ]*;|\belse[\r\n\t ]*;/;
+  assert.equal(phantom.test('if(x)\n;'),true);
+  assert.equal(phantom.test('if(x){}else\n;'),true);
   for(const file of srcFiles(path.join(root,'src'))){
     const source=fs.readFileSync(file,'utf8');
     assert.equal(phantom.test(source),false,file+' contiene un cuerpo vacío fantasma');

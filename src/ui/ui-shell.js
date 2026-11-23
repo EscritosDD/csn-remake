@@ -3,7 +3,7 @@ import { ROLES, ROLE_NAMES, BODIES, DEFAULT_SQUADS, ROLE_PORTRAIT } from '../dat
 import { WEAPONS } from '../data/weapons.js';
 import { CAMPAIGN_MISSIONS, CAMPAIGN_CHAPTERS, TUTORIAL_MISSION, SKIRMISH_GEO, MAP_DEFS, rosterKey } from '../data/maps.js';
 import { renderCampaignRadio, starMarkup, showMissionBriefing } from './campaign-ui.js';
-import { mapPreviewURL, squadCardMarkup, updateSquadCard } from './setup-preview.js';
+import { mapPreviewURL, squadCardMarkup, fillSquadSelects, updateSquadCard } from './setup-preview.js';
 import { charsForRole, characterKey } from '../game/chars.js';
 import { STEP_META, AUX_LABELS, AUX_HINTS } from '../data/ui-copy.js';
 import { lsGet, lsSet } from '../core/storage.js';
@@ -398,17 +398,14 @@ export function squadRows(containerId,team){
     const wsel=row.querySelector('[data-kind="weapon"]');
     const csel=row.querySelector('[data-kind="char"]');
     let opts=[];
-    const paint=()=>updateSquadCard(row,{role,weapon,fixedDef,skin,bonusHp:bonus*25,bonusEnergy:bonus,chars:opts,characterKey,ROLES,BODIES,WEAPONS,portraitURL:rolePortraitURL,weaponURL:weaponCoverURL});
+    const paint=()=>updateSquadCard(row,{role:rsel.value||role,weapon:wsel.value||weapon,fixedDef,skin,bonusHp:bonus*25,bonusEnergy:bonus,chars:opts,characterKey,ROLES,BODIES,WEAPONS,portraitURL:rolePortraitURL,weaponURL:weaponCoverURL});
     const fill=()=>{
-      const r=rsel.value;
-      const weapons=fixedDef?[fixedDef.weapon]:ROLES[r].weapons;
-      wsel.innerHTML=weapons.map(w=>'<option '+(w===weapon?'selected':'')+'>'+w+'</option>').join('');
-      opts=charsForRole(r,origOnly);
-      csel.innerHTML=opts.map(c=>'<option value="'+characterKey(c)+'">'+c.name+'</option>').join('');
-      const chosen=fixedDef?rosterKey(fixedDef.charName):(setup.squadChars[team]&&setup.squadChars[team][i])||characterKey(opts[0]);
-      csel.value=opts.some(c=>characterKey(c)===chosen)?chosen:characterKey(opts[0]);
+      const r=rsel.value||role;
+      const chosen=fixedDef?rosterKey(fixedDef.charName):(setup.squadChars[team]&&setup.squadChars[team][i])||'';
+      const picked=fillSquadSelects(row,{role:r,weapon,fixedDef,fixedCharKey:fixedDef?rosterKey(fixedDef.charName):'',chars:charsForRole(r,origOnly),characterKey,ROLES,selectedCharKey:chosen});
+      opts=picked.chars;
       if(!setup.squadChars[team])setup.squadChars[team]={};
-      setup.squadChars[team][i]=csel.value;
+      setup.squadChars[team][i]=picked.charKey;
       paint();
     };
     csel.onchange=()=>{if(!setup.squadChars[team])setup.squadChars[team]={};setup.squadChars[team][i]=csel.value;paint();};

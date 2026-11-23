@@ -193,11 +193,13 @@ try {
 
   let mobileStart = null;
   if (uiMode || mobileMode) {
+    const viewerScreen=(char,weapon,wait,fire)=>{const fireAction=fire?"document.getElementById('viewerFireBtn').click();await sleep("+wait+");":"";return "(async function(){const sleep=ms=>new Promise(r=>setTimeout(r,ms));document.querySelector('#mainTabs [data-tab=\"viewer\"]').click();await sleep(1500);const c=document.getElementById('viewerCharacterSelect');c.value='"+char+"';c.dispatchEvent(new Event('change',{bubbles:true}));await sleep(1800);const w=document.getElementById('viewerWeaponSelect');for(let i=0;i<100&&(w.options.length<2||w.disabled);i++)await sleep(100);for(let a=0;a<4;a++){w.value='"+weapon+"';w.dispatchEvent(new Event('change',{bubbles:true}));for(let i=0;i<50&&!(window.__csnViewer.state.gripActor&&window.__csnViewer.state.gripActor.userData.gun);i++)await sleep(100);if(w.value==='"+weapon+"'&&window.__csnViewer.state.gripActor&&window.__csnViewer.state.gripActor.userData.gun)break;await sleep(300);}await sleep(150);const b=document.querySelector('#troopGrid .card-3d-box[data-card-spec]');if(b&&window.__csnCardEngine)await window.__csnCardEngine.activate(b,{kind:'roles',key:'"+char+"',skinIndex:0,weapon:'"+weapon+"'});await sleep(300);"+fireAction+"const s=window.__csnViewer.state,ia=s.idleActor,ga=s.gripActor,g=ga&&ga.userData.gun,f=g&&g.userData.flash;return JSON.stringify({weapon:w.value,idle:s.idleClipKey,fire:s.testFire,same:ia===ga,idleGun:!!(ia&&ia.userData.gun),gripGun:!!g,events:ia&&ia.userData._viewerFireEvents?ia.userData._viewerFireEvents.shots:null,testFlash:g&&g.userData._testFlash,flash:f?f.children.map(o=>o.material?o.material.opacity:o.intensity):null,last:s.lastFrame,now:performance.now(),frameReq:s.frameRequested,visible:document.getElementById('scr-viewer').classList.contains('on'),card:!!window.__csnViewer.getCardBox()});})()";};
     const screens = {
       nation: "localStorage.removeItem('radsoldiers_nation');location.reload();",
       menu: "showScreen('scr-play')",
       campanhub: "showScreen('scr-play');showCampaignView()",
       brief: "showScreen('scr-play');showMissionBriefing(0)",
+      campaign1: "deployMission(0)",
       setup: "openSetup('eliminacion')",
       barracks: "document.getElementById('mnuBarracks').click()",
       viewer: "document.querySelector('#mainTabs [data-tab=\"viewer\"]').click()",
@@ -208,6 +210,10 @@ try {
       sister: "(async function(){document.querySelector('#mainTabs [data-tab=\"viewer\"]').click();await new Promise(r=>setTimeout(r,1500));const c=document.getElementById('viewerCharacterSelect');c.value='original:08';c.dispatchEvent(new Event('change',{bubbles:true}));await new Promise(r=>setTimeout(r,1800));return c.value+'|M4A1';})()",
       rpg: "(async function(){document.querySelector('#mainTabs [data-tab=\"viewer\"]').click();await new Promise(r=>setTimeout(r,1500));document.querySelector('#viewerKinds [data-kind=\"weapons\"]').click();await new Promise(r=>setTimeout(r,1500));const b=[...document.querySelectorAll('#viewerList button')].find(x=>x.textContent.includes('RPG'));if(!b)throw new Error('no RPG');b.click();return b.textContent;})()",
       fire: "(async function(){document.querySelector('#mainTabs [data-tab=\"viewer\"]').click();await new Promise(r=>setTimeout(r,1500));const c=document.getElementById('viewerCharacterSelect');c.value='original:01';c.dispatchEvent(new Event('change',{bubbles:true}));await new Promise(r=>setTimeout(r,1800));document.getElementById('viewerFireBtn').click();await new Promise(r=>setTimeout(r,1300));return JSON.stringify(window.__csnViewer.state.testFire);})()",
+      pistol: viewerScreen('original:01','Pistol',0,false),
+      pistolfire: viewerScreen('original:01','Pistol',1260,true),
+      assaultfire: viewerScreen('original:01','AssaultRifle',1100,true),
+      mp5kfire: viewerScreen('original:06','MP5K',1100,true),
       meshy09: "(async function(){document.querySelector('#mainTabs [data-tab=\"viewer\"]').click();await new Promise(r=>setTimeout(r,1500));const c=document.getElementById('viewerCharacterSelect');c.value='own:09';c.dispatchEvent(new Event('change',{bubbles:true}));return c.value;})()",
       mp5k: "(async function(){document.querySelector('#mainTabs [data-tab=\"viewer\"]').click();await new Promise(r=>setTimeout(r,1500));document.querySelector('#viewerKinds [data-kind=\"weapons\"]').click();await new Promise(r=>setTimeout(r,1500));const b=[...document.querySelectorAll('#viewerList button')].find(x=>x.textContent.includes('MP5K'));if(!b)throw new Error('no MP5K');b.click();return b.textContent;})()",
       minigun: "(async function(){document.querySelector('#mainTabs [data-tab=\"viewer\"]').click();await new Promise(r=>setTimeout(r,1500));document.querySelector('#viewerKinds [data-kind=\"weapons\"]').click();await new Promise(r=>setTimeout(r,1500));const b=[...document.querySelectorAll('#viewerList button')].find(x=>x.textContent.includes('Minigun'));if(!b)throw new Error('no Minigun');b.click();return b.textContent;})()",
@@ -222,7 +228,8 @@ try {
     };
     const screenKey = auditMode ? 'viewer' : (mobileMode === 'game' ? 'game3d' : (mobileMode || uiMode));
     if (!screens[screenKey]) throw new Error('Pantalla ui no valida: ' + screenKey);
-    await ev(screens[screenKey]);
+    const uiProbe = await ev(screens[screenKey]);
+    if (uiMode && uiProbe !== null && uiProbe !== undefined) { try { result.uiProbe = JSON.parse(uiProbe); } catch { result.uiProbe = uiProbe; } }
     if (auditMode) {
       await ev("document.querySelector('#mainTabs [data-tab=\"viewer\"]').click()");
       await sleep(350);

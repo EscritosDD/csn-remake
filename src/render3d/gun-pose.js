@@ -110,18 +110,19 @@ export function fitGunToHand3(un,grp,isLive){
   });
   if(!pose)return;
   ud._viewW2H=force1h||is1h?0:pose.w2h;
-  if(isLive&&ud._firePulse>0){
+  const hardTrack=!!(ud._firePulse>0||ud._testFlash>0||/^(fire|throw|melee|deploy|interact)/.test(ck));
+  if(hardTrack){
     pose.origin.addScaledVector(pose.dir,-0.055*ud._firePulse);
     pose.quat.multiply(_gpRecoil.setFromAxisAngle(_gpUp,0.035*ud._firePulse));
   }
   const gunRef=gunData.file||ud.gun;
-  if(ud._viewGunRef!==gunRef){
+  if(ud._viewGunRef!==gunRef||hardTrack||isLive){
     ud._viewGunRef=gunRef;
     ud.gun.position.copy(pose.origin);
     ud.gun.quaternion.copy(pose.quat);
   }else{
-    ud.gun.position.lerp(pose.origin,isLive?0.45:0.28);
-    ud.gun.quaternion.slerp(pose.quat,isLive?0.35:0.22);
+    ud.gun.position.lerp(pose.origin,0.28);
+    ud.gun.quaternion.slerp(pose.quat,0.22);
   }
 }
 

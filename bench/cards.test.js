@@ -236,6 +236,36 @@ test('Minigun está en Ametralladoras y las armas sin fogonazo nunca disparan fl
   assert.ok(weaponsJs.includes('blending:THREE.AdditiveBlending'));
   assert.ok(weaponsJs.includes('flash.visible=hasFlash'));
   assert.match(viewer, /profile\.hasMuzzleFlash!==false/);
-  assert.match(viewer, /_testFlash-dt\*12/);
+  assert.match(viewer, /_testFlash-dt\*16/);
+  assert.match(viewer, /f==='PlayFiring'\|\|!\(f==='PlayWeaponFire'/);
+  assert.doesNotMatch(viewer, /f==='PlayWeaponFire'\|\|f==='PlayFiring'/);
   assert.ok(weaponsJs.includes("'Crossbow'") && weaponsJs.includes("ORIGINAL_NO_FLASH"));
+});
+
+test('el visor cambia el idle exacto de cada arma y no reconstruye al disparar', () => {
+  assert.match(viewer, /viewer\.idleClipKey=model\.userData\.idleClipKey\|\|\(viewer\.weapon\?idleForWeapon\(viewer\.weapon\):'idle2h'\)/);
+  assert.match(viewer, /viewer\.idleClipKey=viewer\.weapon\?idleForWeapon\(viewer\.weapon\):'idle2h'/);
+  assert.match(viewer, /model\.userData\.idleClipKey=idleKey;if\(viewer\.idleClipKey!==idleKey\)/);
+  assert.match(viewer, /const same=viewer\.cardMode&&!viewer\.glbActor&&viewer\.name===spec\.key&&viewer\.weapon===weapon&&viewer\.idleActor/);
+  assert.match(viewer, /viewer\.idleClipKey=idleForWeapon\(weapon\)/);
+  assert.match(viewer, /viewer\.idleActor\.userData\._firePulse=Math\.max\(0,viewer\.idleActor\.userData\._firePulse-dt\*5\.5\)/);
+  assert.match(viewer, /if\(!visible\|\|!mounted\|\|isCardStageRendering\(\)/);
+  assert.doesNotMatch(viewer, /if\(!visible\|\|!inspectorLive/);
+  const pose = read('src/render3d/gun-pose.js');
+  assert.match(pose, /const hardTrack=!!\(ud\._firePulse>0\|\|ud\._testFlash>0\|\|\/\^\(fire\|throw\|melee\|deploy\|interact\)\//);
+  assert.match(pose, /ud\.gun\.position\.copy\(pose\.origin\)/);
+  assert.doesNotMatch(pose, /isLive\?0\.45:0\.28/);
+});
+
+test('el fogonazo es texturizado, compartido y se coloca en la boca real', () => {
+  assert.match(weaponsJs, /export function positionGunFlash\(gunGroup,holder,cat\)/);
+  assert.match(weaponsJs, /positionGunFlash\(gun,holder,cat\)/);
+  assert.match(weaponsJs, /positionGunFlash\(gun,holder,cat\)/);
+  assert.match(weaponsJs, /tex\.userData=\{sharedAsset:true\}/);
+  assert.match(weaponsJs, /new THREE\.CanvasTexture\(canvas\)/);
+  assert.match(weaponsJs, /new THREE\.PointLight\(0xffb84a,0,2\.2\)/);
+  assert.match(weaponsJs, /\[\[0,0,0\],\[Math\.PI\/2,0,0\],\[0,Math\.PI\/2,0\]\]/);
+  assert.match(viewer, /flash\.traverse\(o=>\{if\(o\.isMesh&&o\.material\)o\.material\.opacity=1;else if\(o\.isPointLight\)o\.intensity=1\.4;\}\)/);
+  assert.match(read('src/render3d/asset-cache.js'), /!texture\.userData\.sharedAsset/);
+  assert.match(read('src/render3d/clips.js'), /flash\.traverse\(o=>\{if\(o\.isMesh&&o\.material\)o\.material\.opacity=f/);
 });

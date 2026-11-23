@@ -57,7 +57,7 @@ d('checkOverwatch',()=>r.checkOverwatch);d('checkWin',()=>r.checkWin);d('classic
 d('clipEventFeedback',()=>r.clipEventFeedback);d('clipPulse',()=>r.clipPulse);d('clipTrackAt',()=>r.clipTrackAt);d('closeModal',()=>r.closeModal);
 d('coinsGet',()=>r.coinsGet);d('coinsSet',()=>r.coinsSet);d('coverBonus',()=>r.coverBonus);d('coverLevel',()=>r.coverLevel);
 d('damage',()=>r.damage);d('demoStatus',()=>r.demoStatus);d('demoUnit',()=>r.demoUnit);d('deployTurret',()=>r.deployTurret);
-d('deployedAt',()=>r.deployedAt);d('dispatchClipEvents',()=>r.dispatchClipEvents);d('dist',()=>r.dist);d('domControl',()=>r.domControl);
+d('deployedAt',()=>r.deployedAt);d('deployMission',()=>r.deployMission);d('deployCampaignMission',()=>r.deployCampaignMission);d('dispatchClipEvents',()=>r.dispatchClipEvents);d('dist',()=>r.dist);d('domControl',()=>r.domControl);
 d('domZones',()=>r.domZones);d('draw',()=>r.draw);d('drawBarrel',()=>r.drawBarrel);d('drawContainer',()=>r.drawContainer);
 d('drawCrate',()=>r.drawCrate);d('drawDeployed',()=>r.drawDeployed);d('drawDrone',()=>r.drawDrone);d('drawFX',()=>r.drawFX);
 d('drawFloorTile',()=>r.drawFloorTile);d('drawMedkit',()=>r.drawMedkit);d('drawMovePath',()=>r.drawMovePath);d('drawPlatform',()=>r.drawPlatform);
@@ -105,7 +105,7 @@ d('sfx',()=>r.sfx);d('shade',()=>r.shade);d('shadeHex',()=>r.shadeHex);d('shorte
 d('showModal',()=>r.showModal);d('showScreen',()=>r.showScreen);d('skState',()=>r.skState);d('skyTheme3',()=>r.skyTheme3);
 d('smokeAt',()=>r.smokeAt);d('smokeBlocksLOS',()=>r.smokeBlocksLOS);d('smoothDrawStep',()=>r.smoothDrawStep);d('soldierColors3',()=>r.soldierColors3);
 d('spawnsFor',()=>r.spawnsFor);d('spendEnergy',()=>r.spendEnergy);d('spriteDataURI',()=>r.spriteDataURI);d('squadRows',()=>r.squadRows);
-d('startDrawMove',()=>r.startDrawMove);d('startGame',()=>r.startGame);d('sweepDetect',()=>r.sweepDetect);d('syncDiffSeg',()=>r.syncDiffSeg);
+d('startDrawMove',()=>r.startDrawMove);d('startGame',()=>r.startGame);d('startTutorial',()=>r.startTutorial);d('startTutorialFlow',()=>r.startTutorialFlow);d('tutorialIndex',()=>r.tutorialIndex);d('sweepDetect',()=>r.sweepDetect);d('syncDiffSeg',()=>r.syncDiffSeg);
 d('syncMapSeg',()=>r.syncMapSeg);d('syncPlayingViewport',()=>r.syncPlayingViewport);d('syncSkinSegs',()=>r.syncSkinSegs);d('teamName',()=>r.teamName);
 d('teleportUnit',()=>r.teleportUnit);d('texMat3',()=>r.texMat3);d('throwBees',()=>r.throwBees);d('throwFlash',()=>r.throwFlash);
 d('throwGas',()=>r.throwGas);d('throwGrenade',()=>r.throwGrenade);d('throwMolotov',()=>r.throwMolotov);d('throwSmoke',()=>r.throwSmoke);

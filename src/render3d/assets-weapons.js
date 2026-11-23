@@ -78,6 +78,44 @@ export function originalWeaponProfile(file){
   if(!p)return null;
   return {idleClip:p[0],fireClip:p[1],sfx:p[2],hasMuzzleFlash:!ORIGINAL_NO_FLASH.has(file),actionLabel:ORIGINAL_MELEE.has(file)?'Probar ataque':ORIGINAL_THROW.has(file)?'Probar lanzamiento':'Probar disparo'};
 }
+let _flashTex=null;
+function flashTexture(){
+  if(_flashTex)return _flashTex;
+  if(typeof document==='undefined'||!document.createElement||!THREE.CanvasTexture)return null;
+  const canvas=document.createElement('canvas');canvas.width=128;canvas.height=128;
+  const ctx=canvas.getContext&&canvas.getContext('2d');if(!ctx)return null;
+  ctx.clearRect(0,0,128,128);ctx.translate(64,64);
+  for(let i=0;i<6;i++){
+    ctx.save();ctx.rotate(i*Math.PI/3);
+    const ray=ctx.createLinearGradient(0,0,0,-62);
+    ray.addColorStop(0,'rgba(255,248,214,0.95)');ray.addColorStop(0.32,'rgba(255,185,64,0.55)');ray.addColorStop(1,'rgba(255,130,20,0)');
+    ctx.fillStyle=ray;ctx.beginPath();ctx.moveTo(-4,0);ctx.lineTo(0,-62);ctx.lineTo(4,0);ctx.closePath();ctx.fill();ctx.restore();
+  }
+  const core=ctx.createRadialGradient(0,0,0,0,0,32);
+  core.addColorStop(0,'rgba(255,255,246,1)');core.addColorStop(0.28,'rgba(255,225,138,0.92)');core.addColorStop(0.62,'rgba(255,168,46,0.48)');core.addColorStop(1,'rgba(255,120,18,0)');
+  ctx.fillStyle=core;ctx.beginPath();ctx.arc(0,0,32,0,Math.PI*2);ctx.fill();
+  const tex=new THREE.CanvasTexture(canvas);
+  if(THREE.SRGBColorSpace)tex.colorSpace=THREE.SRGBColorSpace;
+  tex.generateMipmaps=false;tex.minFilter=THREE.LinearFilter;tex.magFilter=THREE.LinearFilter;
+  tex.userData={sharedAsset:true};tex.needsUpdate=true;_flashTex=tex;return tex;
+}
+export function positionGunFlash(gunGroup,holder,cat){
+  const flash=gunGroup&&gunGroup.userData&&gunGroup.userData.flash;if(!flash)return null;
+  const hud=(holder&&holder.userData)||{};
+  const cal=hud.calibration||weaponCalibration(hud.file)||gunGroup.userData.calibration||{};
+  const mp=cal.muzzlePos;
+  if(Array.isArray(mp)&&mp.length===3&&mp.every(Number.isFinite)){
+    const p=new THREE.Vector3(mp[0],mp[1],mp[2]);const rot=hud.rot||{};
+    p.applyEuler(new THREE.Euler(rot.x||0,rot.y||0,rot.z||0));
+    const pv=hud.pivot||[0,0,0];p.add(new THREE.Vector3(pv[0],pv[1],pv[2]));
+    p.applyEuler(new THREE.Euler(-Math.PI/2,0,0)).multiplyScalar(cal.scale||1);flash.position.copy(p);
+  }else if(holder&&THREE.Box3){
+    const box=new THREE.Box3().setFromObject(holder),size=new THREE.Vector3();box.getSize(size);
+    flash.position.set(Math.max(box.max.x,size.x*0.9),0.01,0);
+  }else flash.position.set(weaponTargetLength(cat)*0.96,0.01,0);
+  flash.visible=gunGroup.userData.hasMuzzleFlash!==false;
+  return flash;
+}
 
 export let WEAPON_METADATA={};
 export function setWEAPON_METADATA(v){WEAPON_METADATA=v;}
@@ -262,15 +300,7 @@ export function attachRealGun(un,gun){
       gun.userData.grip={x:0,y:0,scale:1};
       if(gun.userData.flash){
         const cat=(WEAPONS[un.weapon]||{}).cat||(file&&String((WEAPONS_ORIGINAL[file]||{}).cat||'').split(' / ')[0])||'Fusiles de asalto';
-        const cal=holder.userData.calibration||{},mp=cal.muzzlePos;
-        if(Array.isArray(mp)&&mp.length===3&&mp.every(Number.isFinite)){
-          const p=new THREE.Vector3(mp[0],mp[1],mp[2]);
-          const rot=holder.userData.rot||{};
-          p.applyEuler(new THREE.Euler(rot.x||0,rot.y||0,rot.z||0));
-          const pv=holder.userData.pivot||[0,0,0];p.add(new THREE.Vector3(pv[0],pv[1],pv[2]));
-          p.applyEuler(new THREE.Euler(-Math.PI/2,0,0)).multiplyScalar(cal.scale||1);
-          gun.userData.flash.position.copy(p);
-        }else{gun.userData.flash.position.set(weaponTargetLength(cat)*0.96,0.01,0);}
+        positionGunFlash(gun,holder,cat);
       }
     }catch(e){}
   };
@@ -288,19 +318,21 @@ export function makeGunAnchor(un){
   const cat=(WEAPONS[un.weapon]||{}).cat||(file&&String((WEAPONS_ORIGINAL[file]||{}).cat||'').split(' / ')[0])||'Fusiles de asalto';
   const profile=originalWeaponProfile(file);
   const hasFlash=!profile||profile.hasMuzzleFlash!==false;
-  const flashMat=new THREE.MeshBasicMaterial({color:0xffd76a,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide});
-  const flash=new THREE.Mesh(new THREE.PlaneGeometry(0.18,0.18),flashMat);
-  const cross=new THREE.Mesh(new THREE.PlaneGeometry(0.18,0.18),flashMat);
-  cross.rotation.x=Math.PI/2;
-  cross.userData.isFlash=true;
-  flash.add(cross);
+  const flashMat=new THREE.MeshBasicMaterial({map:flashTexture(),color:0xffffff,transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide});
+  const flashGeo=new THREE.PlaneGeometry(0.18,0.18);
+  const flash=new THREE.Group();
+  [[0,0,0],[Math.PI/2,0,0],[0,Math.PI/2,0]].forEach(rot=>{
+    const plane=new THREE.Mesh(flashGeo,flashMat);plane.rotation.set(rot[0],rot[1],rot[2]);
+    plane.userData.isFlash=true;plane.renderOrder=3;flash.add(plane);
+  });
+  const flashLight=new THREE.PointLight(0xffb84a,0,2.2);flashLight.userData.isFlashLight=true;flash.add(flashLight);
   flash.position.set(weaponTargetLength(cat)*0.96,0.01,0);
   flash.userData.isFlash=true;
+  flash.userData.flashLight=flashLight;
   flash.visible=hasFlash;
-  flash.renderOrder=3;
-  cross.renderOrder=3;
   gun.add(flash);
   gun.userData.flash=flash;
+  gun.userData.flashLight=flashLight;
   gun.userData.hasMuzzleFlash=hasFlash;
   gun.userData.cat=cat;
   gun.userData.grip={x:0,y:0,scale:1};

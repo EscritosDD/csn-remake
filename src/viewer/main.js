@@ -3,7 +3,7 @@ import { loadGlbActor, updateGlbActor, playOnce, disposeGlbActor } from '../rend
 import { setGlbLabActor } from '../ui/glb-lab.js';
 import { renderTroopCards } from './troop-cards.js';
 import { openInspector } from './inspector.js';
-import { originalWeaponProfile, WEAPONS_ORIGINAL, weaponFileForRef } from '../render3d/assets-weapons.js';
+import { originalWeaponProfile, WEAPONS_ORIGINAL, weaponFileForRef, positionGunFlash } from '../render3d/assets-weapons.js';
 import { DEPLOYABLES } from '../data/deployables.js';
 import { auWeaponFile, auVoice } from '../core-and-audio.js';
 (function(){ const stage=document.getElementById('viewerCanvas'); if(!stage||typeof THREE==='undefined')return;
@@ -65,8 +65,7 @@ import { auWeaponFile, auVoice } from '../core-and-audio.js';
     const visible=document.getElementById('scr-viewer').classList.contains('on')||viewer.inspectorOpen;
     const liveBox=activeCard().box;
     const mounted=!!(liveBox&&viewer.renderer&&viewer.renderer.domElement.parentNode===liveBox);
-    const inspectorLive=viewer.inspectorOpen&&!!liveBox&&liveBox.id==='inspectorStage'&&mounted;
-    if(!visible||!inspectorLive||isCardStageRendering()){
+    if(!visible||!mounted||isCardStageRendering()||(viewer.inspectorOpen&&(!liveBox||liveBox.id!=='inspectorStage'))){
       viewer.lastFrame=now;
       requestAnimationFrame(frame);
       return;
@@ -76,20 +75,15 @@ import { auWeaponFile, auVoice } from '../core-and-audio.js';
       if(viewer.glbActor)updateGlbActor(viewer.glbActor,dt);
       const clips=CLIPLIB.ready&&CLIPLIB.pack&&CLIPLIB.pack.clips;
       let clipKey=viewer.idleClipKey,clip=clips&&clips[clipKey],ct=(now/1000)%(clip&&clip.dur||1),signature=clipKey+'|'+(viewer.weapon||'');
-      if(viewer.testFire&&clips&&clips[viewer.testFire.key]){
-        const elapsed=(now-viewer.testFire.start)/1000,fire=clips[viewer.testFire.key];
-        if(elapsed<fire.dur){clip=fire;clipKey=viewer.testFire.key;ct=elapsed;signature=clipKey+'|fire|'+(viewer.weapon||'');}else viewer.testFire=null;
-      }
+      if(viewer.testFire&&clips&&clips[viewer.testFire.key]){const elapsed=(now-viewer.testFire.start)/1000,fire=clips[viewer.testFire.key];
+        if(elapsed<fire.dur){clip=fire;clipKey=viewer.testFire.key;ct=elapsed;signature=clipKey+'|fire|'+(viewer.weapon||'');}else viewer.testFire=null;}
+      if(viewer.idleActor&&viewer.idleActor.userData&&viewer.idleActor.userData._firePulse>0)viewer.idleActor.userData._firePulse=Math.max(0,viewer.idleActor.userData._firePulse-dt*5.5);
       if(viewer.idleActor&&clip&&!viewer.glbActor){ if(!poseViewerClip(viewer.idleActor,clip,ct,clipKey,signature,now,dt*1000))poseSpriteClip(null,viewer.idleActor,clip,ct,clipKey); }
       if(viewer.testFire&&viewer.idleActor&&!viewer.glbActor)dispatchViewerFire(viewer.idleActor,clip,clipKey,ct,viewer.weapon);
-      if(viewer.gripActor&&viewer.gripActor.userData.gun)
-        fitGunToHand3(viewer.gripActor.userData.gripUnit,viewer.gripActor,false);
+      if(viewer.gripActor&&viewer.gripActor.userData.gun)fitGunToHand3(viewer.gripActor.userData.gripUnit,viewer.gripActor,false);
       const testGun=viewer.gripActor&&viewer.gripActor.userData.gun,testFlash=testGun&&testGun.userData.flash;
-
-      if(testFlash&&testGun.userData._testFlash>0){
-        testGun.userData._testFlash=Math.max(0,testGun.userData._testFlash-dt*12);
-        testFlash.material.opacity=testGun.userData._testFlash;
-      }
+      if(testFlash&&testGun.userData._testFlash>0){const k=testGun.userData._testFlash=Math.max(0,testGun.userData._testFlash-dt*16),sharp=k<0.45?k/0.45:1;
+        testFlash.traverse(o=>{if(o.isMesh&&o.material)o.material.opacity=sharp;else if(o.isPointLight)o.intensity=k*1.4;});testFlash.scale.setScalar(0.65+0.35*k);}
       if(!viewer.drag&&viewer.spin&&viewer.spin.children.length){
         if(Math.abs(viewer.dragVel)>1e-4){ viewer.spin.rotation.y+=viewer.dragVel*dt; viewer.dragVel*=Math.exp(-dt/0.25); }
         else { viewer.dragVel=0; if(!viewer.inspectorOpen||viewer.inspectorAutoSpin)viewer.spin.rotation.y+=dt*0.22; }
@@ -116,7 +110,7 @@ import { auWeaponFile, auVoice } from '../core-and-audio.js';
     const centerOffset=viewerCenterOffset(center); const centered=new THREE.Group(); centered.position.set(centerOffset.x,centerOffset.y,centerOffset.z); centered.add(model);
     viewer.spin.add(centered); centered.updateMatrixWorld(true); viewer.idleActor=!glbActor&&viewer.kind==='roles'&&model.userData.animatable?model:null;
     viewer.gripActor=viewer.kind==='roles'&&model.userData.grip?model:null; if(viewer.meshyFill)viewer.meshyFill.intensity=viewer.kind==='roles'&&model.userData.meshy?1.8:0;
-    if(viewer.meshyRim)viewer.meshyRim.intensity=viewer.kind==='roles'&&model.userData.meshy?2.2:0; viewer.idleClipKey=model.userData.idleClipKey||'idle2h';
+    if(viewer.meshyRim)viewer.meshyRim.intensity=viewer.kind==='roles'&&model.userData.meshy?2.2:0; viewer.idleClipKey=model.userData.idleClipKey||(viewer.weapon?idleForWeapon(viewer.weapon):'idle2h');
     if(viewer.gripActor&&viewer.gripActor.userData.gun)
       fitGunToHand3(viewer.gripActor.userData.gripUnit,viewer.gripActor,false);
     viewer.spin.rotation.set(viewer.kind==='weapons'?0.25:0,-0.55,0); const platformRadius=Math.max(0.35,Math.max(size.x,size.z)*0.72);
@@ -207,17 +201,17 @@ import { auWeaponFile, auVoice } from '../core-and-audio.js';
     rootBonePositionForClip(ud.bindPos[0],_vpPelvis,ud.curDelta,_vpRootOut.copy(_vpPelvis).applyQuaternion(ud.bones[0].quaternion),ud.bones[0].position);
     model.updateMatrixWorld(true); return true; }
   function dispatchViewerFire(actor,clip,key,ct,weapon){ const ud=actor&&actor.userData; if(!ud||!clip||!clip.events||!clip.events.length)return;
-    let st=ud._viewerFireEvents; if(!st||st.key!==key){st={key:key,seen:{},ct:ct};ud._viewerFireEvents=st;}; if(ct<st.ct-0.08)st.seen={};
+    let st=ud._viewerFireEvents; if(!st||st.key!==key){st={key:key,seen:{},ct:ct,shots:0};ud._viewerFireEvents=st;}; if(ct<st.ct-0.08)st.seen={};
+    const file=weaponFileForRef(weapon)||weapon,profile=originalWeaponProfile(file),canFire=!profile||profile.hasMuzzleFlash!==false;
     for(let i=0;i<clip.events.length;i++){ const e=clip.events[i],f=e.f||''; if(st.seen[i]||e.t>ct+0.0005)continue; st.seen[i]=1;
-      if(f==='PlayWeaponFire'||f==='PlayFiring'||(f==='OnAnimEvent'&&e.i===10)){
-        const now=performance.now(); if(f!=='PlayFiring'&&(!ud._lastViewerSfx||now-ud._lastViewerSfx>110)){
-          if(typeof auWeaponFile==='function')auWeaponFile(weaponFileForRef(weapon)||weapon);
-          else if(typeof auWeapon==='function')auWeapon(((typeof WEAPONS!=='undefined'&&WEAPONS[weapon])||{}).cat,weapon);
-          ud._lastViewerSfx=now; }
-        const gun=ud.gun,file=weaponFileForRef(weapon)||weapon,profile=originalWeaponProfile(file);
-        if(gun&&gun.userData.flash&&(!profile||profile.hasMuzzleFlash!==false)){
-          const flash=gun.userData.flash; flash.material.opacity=1; flash.rotation.z=Math.random()*Math.PI;
-          const s=0.85+Math.random()*0.3; flash.scale.set(s,s,s); gun.userData._testFlash=1; } } }
+      if(f==='PlayFiring'||!(f==='PlayWeaponFire'||(f==='OnAnimEvent'&&Number(e.i)===10))||!canFire)continue;
+      const now=performance.now(),throttle=/Mini/.test(file)?55:(/fireBurst|fire1hBurst|fireMini/.test((profile&&profile.fireClip)||key)?95:140);
+      if(!ud._lastViewerSfx||now-ud._lastViewerSfx>throttle){if(typeof auWeaponFile==='function')auWeaponFile(file);else if(typeof auWeapon==='function')auWeapon(((typeof WEAPONS!=='undefined'&&WEAPONS[weapon])||{}).cat,weapon);ud._lastViewerSfx=now;}
+      ud._firePulse=1;const gun=ud.gun,flash=gun&&gun.userData&&gun.userData.flash;st.shots++;
+      if(flash&&gun.userData.hasMuzzleFlash!==false){const sign=st.shots%2?1:-1,s=0.78+Math.random()*0.34;
+        flash.rotation.x=sign*(0.18+Math.random()*0.32);flash.rotation.z=Math.random()*Math.PI;flash.scale.set(s,s,s);
+        flash.traverse(o=>{if(o.isMesh&&o.material)o.material.opacity=1;else if(o.isPointLight)o.intensity=1.4;});gun.userData._testFlash=1;}
+    }
     st.ct=ct; };
   async function loadViewerBody(file){ const path='assets/soldier/bodies/'+file; if(viewer.bodyGeo[path])return viewer.bodyGeo[path];
     const rigPath=path.replace(/\.obj$/, '_rig.json'); const [response,rigResponse]=await Promise.all([fetch(path),fetch(rigPath)]);
@@ -254,7 +248,9 @@ import { auWeaponFile, auVoice } from '../core-and-audio.js';
     model.scale.setScalar(1.15); const spin=new THREE.Group();spin.rotation.y=Math.PI/2;model.add(spin); const tilt=new THREE.Group();tilt.rotation.x=-Math.PI/2;spin.add(tilt);
     mesh.scale.setScalar(0.95);tilt.add(mesh); model.userData.staticRole=true; return model; };   async function syncViewerGun(model,entry,token){
     const rawWanted=(entry&&entry.sculptedWeapon)?'':(viewer.weapon||''); const wanted=rawWanted?(weaponFileForRef(rawWanted)||rawWanted):''; const current=(model.userData&&model.userData.viewerGunWeapon)||'';
-    if(model&&model.userData)model.userData.idleClipKey=wanted?idleForWeapon(wanted):'idle2h'; if(current===wanted)return;
+    const idleKey=wanted?idleForWeapon(wanted):'idle2h';
+    if(model&&model.userData){model.userData.idleClipKey=idleKey;if(viewer.idleClipKey!==idleKey){viewer.idleClipKey=idleKey;if(model.userData._viewerClip)model.userData._viewerBlend={clip:model.userData._viewerClip,ct:model.userData._viewerCt||0,t0:performance.now()};}if(!wanted)viewer.testFire=null;}
+    if(current===wanted)return;
     if(model.userData&&model.userData.viewerGun){ model.remove(model.userData.viewerGun); if(model.userData.gun===model.userData.viewerGun)model.userData.gun=null;
       model.userData.viewerGun=null; model.userData.viewerGunWeapon=''; }; if(!wanted)return; const meshFile=weaponFileForRef(wanted); if(!meshFile)return;
     if(!GUN_MESH_CACHE[meshFile])makeRealGun3(meshFile); if(!GUN_MESH_CACHE[meshFile]){ const started=Date.now(); while(GUN_MESH_CACHE[meshFile]===null&&Date.now()-started<10000){
@@ -262,13 +258,13 @@ import { auWeaponFile, auVoice } from '../core-and-audio.js';
     const sourceGun=GUN_MESH_CACHE[meshFile]; if(sourceGun.userData&&sourceGun.userData.texReady)await sourceGun.userData.texReady; if(token!==viewer.selection)return;
     if(model.userData&&model.userData._viewerClip)model.userData._viewerBlend={clip:model.userData._viewerClip,ct:model.userData._viewerCt||0,t0:performance.now()};
     if(!model.userData||!model.userData.grip)return; const holder=sourceGun.clone(true); holder.userData.texReady=sourceGun.userData.texReady; const gunMeta=holder.userData.meta||weaponMeta(meshFile);
-    const gunGroup=makeGunAnchor({role:entry.role,weapon:wanted}); gunGroup.userData.isViewerGun=true; gunGroup.add(holder);
+    const gunGroup=makeGunAnchor({role:entry.role,weapon:wanted}); gunGroup.userData.isViewerGun=true; gunGroup.add(holder); positionGunFlash(gunGroup,holder,gunGroup.userData.cat);
     gunGroup.userData.file=meshFile; gunGroup.userData.meta=gunMeta; if(DEBUG_WEAPONS){
       const marker=new THREE.Mesh(new THREE.SphereGeometry(0.045,12,8),new THREE.MeshBasicMaterial({color:0xff3300,depthTest:false})); marker.userData.isViewerGun=true;
       gunGroup.add(marker); console.info('[debugWeapons]',meshFile,gunMeta&&gunMeta.attachmentJoint,holder.userData.calibration); }; model.add(gunGroup);
     model.userData.viewerGun=gunGroup; model.userData.viewerGunWeapon=wanted; if(model.userData.grip){ model.userData.gun=gunGroup;
       model.userData.gripUnit={role:entry.role,weapon:wanted}; fitGunToHand3(model.userData.gripUnit,model,false); } };   async function selectModel(kind,name){
-    viewer.kind=kind;viewer.name=name;viewer.testFire=null; const token=++viewer.selection; refreshList(); let selection;
+    viewer.kind=kind;viewer.name=name;viewer.testFire=null;if(kind!=='roles')viewer.weapon='';viewer.idleClipKey=viewer.weapon?idleForWeapon(viewer.weapon):'idle2h'; const token=++viewer.selection; refreshList(); let selection;
     try{selection=showModelInfo(kind,name);}catch(error){setStatus(error.message,true);return;}
     if(!ensureRenderer())return; setStatus('Cargando modelo y textura…',true);
     try{
@@ -390,13 +386,14 @@ import { auWeaponFile, auVoice } from '../core-and-audio.js';
     if(spec.kind!=='roles')return;
     const entry=entryFor(spec); if(!entry||entry.mesh)return;
     const weapon=spec.weapon||viewer.weapon; if(!weapon)return;
-    auVoice({name:entry.name,role:entry.role},'firing',0.55);
-    await activateSpec(activeCard().box||document.querySelector('.card-3d-box[data-card-spec]'),spec);
-    viewer.weapon=weapon;
-    const file=weaponFileForRef(weapon)||weapon; const profile=originalWeaponProfile(file)||{};
-    let key=profile.fireClip;
-    if(!key||!CLIPLIB.ready||!CLIPLIB.pack||!CLIPLIB.pack.clips||!CLIPLIB.pack.clips[key])key=typeof fireClipFor==='function'?fireClipFor(weapon):(idleForWeapon(weapon)==='idle1h'?'fire1h':'fire2h');
-    if(CLIPLIB.ready&&CLIPLIB.pack&&CLIPLIB.pack.clips&&CLIPLIB.pack.clips[key])viewer.testFire={key:key,start:performance.now()};
+    const file=weaponFileForRef(weapon)||weapon,profile=originalWeaponProfile(file)||{};
+    let key=profile.fireClip;if(!key||!CLIPLIB.ready||!CLIPLIB.pack||!CLIPLIB.pack.clips||!CLIPLIB.pack.clips[key])key=typeof fireClipFor==='function'?fireClipFor(weapon):(idleForWeapon(weapon)==='idle1h'?'fire1h':'fire2h');
+    if(!CLIPLIB.ready||!CLIPLIB.pack||!CLIPLIB.pack.clips||!CLIPLIB.pack.clips[key])return;
+    const same=viewer.cardMode&&!viewer.glbActor&&viewer.name===spec.key&&viewer.weapon===weapon&&viewer.idleActor;
+    if(!same){viewer.weapon=weapon;viewer.weaponTouched=true;await activateSpec(activeCard().box||document.querySelector('.card-3d-box[data-card-spec]'),spec);}
+    viewer.weapon=weapon;viewer.idleClipKey=idleForWeapon(weapon);
+    const actor=viewer.idleActor||viewer.gripActor;if(actor&&actor.userData){actor.userData._viewerFireEvents=null;actor.userData._lastViewerSfx=0;}
+    viewer.testFire={key:key,start:performance.now()};auVoice({name:entry.name,role:entry.role},'firing',0.55);
   }
   const cardEngine={scan:()=>scanCardBoxes(),activate:activateSpec,fire:fireSpec,activateFirst:()=>{
     const box=document.querySelector('#troopGrid .card-3d-box[data-card-spec]');
@@ -425,7 +422,9 @@ import { auWeaponFile, auVoice } from '../core-and-audio.js';
     const weapon=viewer.weapon;if(!weapon||viewer.kind!=='roles'||!viewer.idleActor)return;
     const file=weaponFileForRef(weapon)||weapon;const profile=originalWeaponProfile(file)||{};
     let key=profile.fireClip;if(!key||!CLIPLIB.ready||!CLIPLIB.pack||!CLIPLIB.pack.clips||!CLIPLIB.pack.clips[key])key=typeof fireClipFor==='function'?fireClipFor(weapon):(idleForWeapon(weapon)==='idle1h'?'fire1h':'fire2h');
-    if(CLIPLIB.ready&&CLIPLIB.pack&&CLIPLIB.pack.clips&&CLIPLIB.pack.clips[key])viewer.testFire={key:key,start:performance.now()};
+    if(CLIPLIB.ready&&CLIPLIB.pack&&CLIPLIB.pack.clips&&CLIPLIB.pack.clips[key]){const ud=viewer.idleActor.userData;
+      ud._viewerFireEvents=null;ud._lastViewerSfx=0;ud._firePulse=1;viewer.idleClipKey=idleForWeapon(weapon);viewer.testFire={key:key,start:performance.now()};
+      const entry=viewerCharacters.find(item=>item.key===viewer.name);if(entry)auVoice({name:entry.name,role:entry.role},'firing',0.55);}
   };
   const stepSkin=delta=>{const entry=viewerCharacters.find(item=>item.key===viewer.name);if(!entry||entry.skins.length<2)return;
     viewer.skinIndex=(viewer.skinIndex+delta+entry.skins.length)%entry.skins.length;selectModel('roles',entry.key);};
