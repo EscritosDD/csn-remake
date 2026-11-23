@@ -21,7 +21,7 @@ export function updateUI(){
   tutorialCheck(G);
   const pill=$('#turnPill');
   pill.className='turn-pill '+G.turn;
-  pill.textContent=G.over?'Partida terminada':'Turno: '+teamName(G.turn)+(G.aiBusy?' · la IA está jugando…':'');
+  pill.textContent=G.over?'FIN':(G.turn==='A'?'J1':'RIVAL')+' · TURNO'+(G.aiBusy?' · IA':'');
   $('#roundLabel').textContent='Ronda '+G.round+(effMode(G)==='dominacion'?(' / '+DOM_MAX_ROUNDS):effMode(G)==='escolta'?(' / '+ESCORT_MAX_ROUNDS):'')+' · '+G.map.name+' · '+(effMode(G)==='eliminacion'?'Eliminación':effMode(G)==='dominacion'?'Dominación':effMode(G)==='escolta'?'Escolta del dron':G.mode==='guerra'?'Guerra de Naciones':G.mode==='tutorial'||G.isTutorial?('Instrucción de Dave'):G.mode==='campana'?('Campaña · Misión '+(G.campaignMission+1)+' · '+CAMPAIGN_MISSIONS[G.campaignMission].title):'Captura de baliza')+(G.opp==='ia'?(' · IA '+G.difficulty):'')+' · Quedan '+aliveCount('A')+' contra '+aliveCount('B');
   $('#hudScoreA').textContent='J1 · '+aliveCount('A');
   $('#hudScoreB').textContent='RIVAL · '+aliveCount('B');

@@ -237,3 +237,25 @@ test('el HUD de batalla y el resultado usan tarjetas arcade reutilizables', asyn
   assert.doesNotMatch(indexHtml, /id="roster"/);
   assert.equal((indexHtml.match(/class="turn-banner hud-topbar"/g) || []).length, 1);
 });
+
+test('el HUD de combate queda en una barra compacta con registro plegado', () => {
+  const topbar = indexHtml.split('class="turn-banner hud-topbar"')[1]?.split('<div class="game-layout">')[0] || '';
+  assert.doesNotMatch(topbar, /<img\b|hud-kicker|Urban Tactical Arcade/);
+  assert.doesNotMatch(topbar, /Turno: Jugador 1|Cerrar turno ⏭|>Abandonar</);
+  for (const id of ['turnPill', 'roundLabel', 'hudScoreA', 'hudScoreB', 'undoBtn', 'soundBtn', 'logBtn', 'endTurnBtn', 'quitBtn']) {
+    assert.match(topbar, new RegExp('id="' + id + '"'), id);
+  }
+  const view = indexHtml.split('id="viewSeg"')[1]?.split('</div>')[0] || '';
+  assert.match(view, /data-view="3d"[^>]*>3D<\/button>/);
+  assert.match(view, /data-view="2d"[^>]*>2D<\/button>/);
+  assert.doesNotMatch(view, /Vista 3D · el tablero con volumen|Vista 2D \(alternativa\)/);
+  assert.match(indexHtml, /<details class="weapon-drawer">[\s\S]*?id="weaponInfo"/);
+  assert.doesNotMatch(indexHtml, /<h3>Ficha del arma<\/h3>/);
+  assert.match(css, /\.weapon-drawer\{/);
+  assert.match(html, /getElementById\('logBtn'\)\?\.addEventListener\('click'/);
+  assert.match(html, /getElementById\('logDrawer'\);if\(d\)d\.open=!d\.open/);
+  assert.match(html, /pill\.textContent=G\.over\?'FIN'/);
+  assert.match(css, /@media\(max-width:900px\)\{\.hud-topbar\{grid-template-columns:minmax\(0,1fr\) auto/);
+  assert.match(css, /\.hud-actions\{grid-column:1\/-1;grid-row:2/);
+  assert.match(css, /\.hud-btn\{padding:6px 7px;font-size:11px\}/);
+});

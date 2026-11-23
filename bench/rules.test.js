@@ -499,11 +499,30 @@ test('el reparto resuelve cuerpo exacto, textura de cast y rechaza cuerpos sin m
   assert.ok(api.REAL.bodyLoading);
 });
 
+test('el soldado prioriza actor GLB, malla propia, cuerpo del cast y finalmente el generico', () => {
+  const read = f => fs.readFileSync(path.join(__dirname, '..', 'src', f), 'utf8');
+  const src = read('render3d/soldiers.js');
+  const glb = src.indexOf('if(un.glbActor&&un.glbActor.root)return makeGlbSoldier3(un);');
+  const meshy = src.indexOf('const meshy=(!window.__forceBaseModel&&un.charMesh&&MESHY_MODELS[un.charMesh])||null;');
+  const body = src.indexOf('const bodySpec=!meshy&&!window.__forceBaseModel?bodySpecForUnit(un):null;');
+  const record = src.indexOf('const bodyRec=bodySpec&&REAL.byBody[bodySpec.key]?REAL.byBody[bodySpec.key]:null;');
+  const model = src.indexOf('const RD=meshy||bodyRec||');
+  const exact = src.indexOf('const exactTex=(meshy||bodyRec)&&castTex?castTex:null;');
+  assert.ok(glb >= 0 && meshy > glb && body > meshy && record > body && model > record && exact > model);
+  assert.match(src, /presentation\.preserveTexture\s*\?new THREE\.MeshStandardMaterial\(\{map:roleTex,roughness:0\.82,metalness:0\.02,side:materialSide\}\)/);
+  assert.match(src, /if\(presentation\.emissiveIntensity>0\)\{/);
+  assert.match(read('game/combat.js'), /ensureSquadBodies\(G\.units\)/);
+});
+
 test('baliza y torreta se dibujan solo en sus modos y las rejillas se precargan antes de desplegar', () => {
   const read = f => fs.readFileSync(path.join(__dirname, '..', 'src', f), 'utf8');
   const world = read('render3d/world.js');
   assert.match(world, /const drawBeacon3=mode3==='baliza'\|\|mode3==='dominacion'/);
   assert.match(world, /if\(mode3!=='dominacion'\)\{/);
+  assert.match(world, /tileWorldY\(BEACON\[0\]\.x,BEACON\[0\]\.y\)\+0\.06/);
+  assert.match(world, /tileWorldY\(TURRET_POS\.x,TURRET_POS\.y\)\+0\.06/);
+  assert.match(world, /tileWorldY\(Math\.floor\(anchor\.x\),Math\.floor\(anchor\.y\)\)\+0\.07/);
+  assert.match(read('game/missions.js'), /effMode\(G\)!=='dominacion'&&G\.map\.turret\.owner===ownerTeam/);
   assert.match(world, /w2cz\(/);
   assert.doesNotMatch(world, /w2cx\([^)]*\.y\)/);
   assert.match(read('game/board.js'), /if\(!gridsReady\)gridsReady=Promise\.all/);

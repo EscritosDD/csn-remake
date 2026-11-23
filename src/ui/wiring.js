@@ -8,6 +8,7 @@ export function wireUI(ctx){
 const {TUT_TEXTS,tutShow,tutHide}=ctx;
 document.addEventListener('pointerdown',()=>{audioCtx();});
 document.getElementById('undoBtn')?.addEventListener('click',undoLastMove);
+document.getElementById('logBtn')?.addEventListener('click',()=>{const d=document.getElementById('logDrawer');if(d)d.open=!d.open;});
 document.getElementById('quickStartBtn').onclick=()=>window.quickStart('almacen');
 document.getElementById('quickSkirmishBtn').onclick=()=>window.quickStart('skirmish');
 document.getElementById('heroSkirmishBtn').onclick=()=>window.quickStart('skirmish');

@@ -260,7 +260,7 @@
     <!-- GAME -->
     <div id="gameArea" style="display:none;margin-top:18px">
       <div class="turn-banner hud-topbar">
-        <div class="hud-identity"><img src="assets/ui/logo_csn.png" alt=""/><div><span class="hud-kicker">Urban Tactical Arcade</span><span class="turn-pill A" id="turnPill">Turno: Jugador 1</span></div></div>
+        <div class="hud-identity"><span class="turn-pill A" id="turnPill">J1 · TURNO</span></div>
         <div class="hud-center"><span class="sub hud-round" id="roundLabel">Ronda 1</span>
           <div class="hud-scores"><span class="hud-team A" id="hudScoreA">J1 · 0</span><span class="hud-vs">VS</span><span class="hud-team B" id="hudScoreB">RIVAL · 0</span></div>
           <div class="hud-meters">
@@ -270,20 +270,20 @@
           </div>
         </div>
         <div class="hud-actions">
-          <button class="btn hud-btn" id="undoBtn" disabled title="Deshacer último movimiento (Z)">↶ Deshacer <span class="kbd">Z</span></button>
-          <button class="btn hud-btn" id="soundBtn">🔊 Sonido: sí</button>
-          <button class="btn primary hud-btn end" id="endTurnBtn">Cerrar turno ⏭</button>
-          <button class="btn danger hud-btn" id="quitBtn">Abandonar</button>
+          <button class="btn hud-btn" id="undoBtn" disabled title="Deshacer último movimiento (Z)">↶ Z</button>
+          <button class="btn hud-btn" id="soundBtn" title="Activar o silenciar el audio">🔊 Sonido: sí</button>
+          <button class="btn hud-btn" id="logBtn" type="button" title="Abrir o cerrar el registro de combate">📋 Registro</button>
+          <button class="btn primary hud-btn end" id="endTurnBtn" title="Cerrar turno">⏭ Turno</button>
+          <button class="btn danger hud-btn" id="quitBtn" title="Abandonar la partida">✕ Salir</button>
         </div>
       </div>
       <div class="game-layout">
         <div>
           <div class="view-toggle">
-            <div class="seg" id="viewSeg">
-              <button data-view="3d" class="on">Vista 3D · el tablero con volumen</button>
-              <button data-view="2d" class="btn small" style="opacity:.7" title="Alternativa para moviles o si el 3D no funciona">Vista 2D (alternativa)</button>
+            <div class="seg" id="viewSeg" title="Clic o toque: mover/disparar · arrastrar o Q/E: girar · rueda: zoom · Tab: cambia de soldado">
+              <button data-view="3d" class="on" title="Vista 3D · tablero con volumen">3D</button>
+              <button data-view="2d" class="btn small" title="Vista 2D alternativa para móviles o si el 3D falla">2D</button>
             </div>
-            <span class="sub">Clic/toca para mover o disparar · Arrastra con botón derecho (o <span class="kbd">Q</span>/<span class="kbd">E</span>) para girar cámara · Rueda para zoom · <span class="kbd">Tab</span> cambia soldado.</span>
           </div>
           <div id="glFail" role="alert"></div>
           <div class="board-wrap"><div id="glWrap" style="display:none"><div class="gl-overlay" id="glOverlay"><div class="gl-tooltip" id="glTooltip"></div><div id="glUnitHuds"></div><div id="glFloats"></div></div><div class="gl-controls"><button type="button" data-cam="rotL" title="Girar cámara izquierda (Q)">⟲ Q</button><button type="button" data-cam="reset" title="Restaurar cámara (C)">C</button><button type="button" data-cam="rotR" title="Girar cámara derecha (E)">E ⟳</button><button type="button" data-cam="zoomIn" title="Acercar (+)">+</button><button type="button" data-cam="zoomOut" title="Alejar (−)">−</button></div><span class="gl-badge">3D · soldado original + cámara táctica</span></div><canvas id="board" width="960" height="960"></canvas></div>
@@ -298,10 +298,10 @@
             <div class="hud-vitals" id="squadVitals"></div>
           </div>
           <div class="unit-card" id="unitCard"></div>
-          <div class="panel" style="padding:14px">
-            <h3>Ficha del arma</h3>
+          <details class="weapon-drawer">
+            <summary>Ficha del arma</summary>
             <div id="weaponInfo" class="sub">Selecciona un soldado para ver su arma, sus datos reales y su especial.</div>
-          </div>
+          </details>
         </aside>
       </div>
     </div>

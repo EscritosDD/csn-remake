@@ -12,9 +12,6 @@ canvas#board{width:100%;height:auto;display:block;border-radius:6px;touch-action
 
 .hud-topbar{position:sticky;top:0;z-index:20;display:grid;grid-template-columns:minmax(210px,1fr) minmax(260px,1.2fr) auto;gap:12px;align-items:center;padding:10px 14px;background:linear-gradient(180deg,var(--surface),var(--bg-elev));border:2px solid var(--line-strong);border-radius:16px;box-shadow:0 6px 0 rgba(0,0,0,.35)}
 .hud-identity{display:flex;align-items:center;gap:10px;min-width:0}
-.hud-identity img{width:46px;height:46px;object-fit:contain;flex:none;filter:drop-shadow(0 3px 0 rgba(0,0,0,.35))}
-.hud-identity>div{display:flex;flex-direction:column;gap:2px;min-width:0}
-.hud-kicker{font-family:'Barlow Condensed';font-size:11px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-lime)}
 .hud-center{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0}
 .hud-round{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .hud-scores{display:flex;align-items:center;gap:10px}
@@ -41,7 +38,7 @@ canvas#board{width:100%;height:auto;display:block;border-radius:6px;touch-action
 .hud-vital-bar{height:8px;border-radius:999px;background:var(--bg);border:1px solid var(--line);overflow:hidden}
 .hud-vital-bar i{display:block;height:100%;background:var(--vital);transition:width .2s}
 .hud-vital-hp{font-family:'JetBrains Mono';font-size:11px;text-align:right;white-space:nowrap}
-@media(max-width:900px){.hud-topbar{grid-template-columns:1fr}.hud-actions{justify-content:flex-start}.battle-side{max-height:none}}
+@media(max-width:900px){.hud-topbar{grid-template-columns:minmax(0,1fr) auto;gap:6px 8px;padding:7px 9px;border-radius:10px}.hud-identity{grid-column:1;grid-row:1}.hud-center{grid-column:2;grid-row:1;align-items:flex-end}.hud-round{font-size:10px}.hud-actions{grid-column:1/-1;grid-row:2;justify-content:center;gap:4px}.hud-btn{padding:6px 7px;font-size:11px}.battle-side{max-height:none}}
 
 .beacon-meter{display:flex;gap:5px;align-items:center;font-size:13px;font-weight:700}
 
@@ -265,6 +262,12 @@ html[data-view="3d"] .legend{display:none!important}
 .log-drawer>summary::before{content:"▸ ";color:var(--amber)}
 .log-drawer[open]>summary::before{content:"▾ ";color:var(--amber)}
 .log-drawer .log{height:130px;border:0;border-radius:0;padding:8px 12px;font-size:12px}
+.weapon-drawer{border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);overflow:hidden}
+.weapon-drawer>summary{cursor:pointer;padding:8px 12px;font-weight:700;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-gold);list-style:none;user-select:none}
+.weapon-drawer>summary::-webkit-details-marker{display:none}
+.weapon-drawer>summary::before{content:"▸ ";color:var(--amber)}
+.weapon-drawer[open]>summary::before{content:"▾ ";color:var(--amber)}
+.weapon-drawer #weaponInfo{padding:0 12px 10px;font-size:12px}
 .unit-card{padding:10px}
 .unit-card h3{font-size:17px}
 .unit-card .hpbar{margin:6px 0 3px}
