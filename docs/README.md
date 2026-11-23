@@ -5,10 +5,12 @@
 
 ## Estado vigente (2026-11-23)
 
-- 75 módulos ESM en `src/`, 0 `<script>` inline, 2 tags module en `index.html`.
-- `npm test`: 127 pruebas en verde; `VERIFICAR.ps1`: **TODO OK 13/13**.
-- Módulos más largos: `src/viewer/card-stage.js` (449 líneas), `src/viewer/main.js`
-  (448), `src/ui/ui-shell.js` (445), `src/data/maps.js` (360).
+- 79 módulos ESM en `src/`, 0 `<script>` inline, 2 tags module en `index.html`.
+- `npm test`: 131 pruebas en verde; `VERIFICAR.ps1`: **TODO OK 13/13**.
+- Módulos más largos: `src/viewer/card-stage.js` (449 líneas), `src/ui/ui-shell.js`
+  (433), `src/viewer/main.js` (420), `src/data/maps.js` (360).
+- Rediseño **Urban Tactical Arcade · Splatoon Pop** cerrado en seis sprints;
+  detalle en [REDISENO_ARCADE_2026-11-23.md](REDISENO_ARCADE_2026-11-23.md).
 - Modo Historia: `campaignBtn`/`mnuChallenges` → `#campaignHub` →
   `showMissionBriefing()` → despliegue directo; tutorial de Dave con 6 pasos y
   radio/medallas/veterania persistidos.
@@ -21,6 +23,7 @@
 | Documento | Para qué |
 |---|---|
 | [ARQUITECTURA.md](ARQUITECTURA.md) | Módulos ESM reales, flujo de partida, visor 3D y trampas al editar |
+| [REDISENO_ARCADE_2026-11-23.md](REDISENO_ARCADE_2026-11-23.md) | Informe ejecutivo de los seis sprints, gates y capturas del rediseño |
 | [Equilibrio_medido.md](Equilibrio_medido.md) | Cifras de balance por modo y mapa, con n y metodología |
 | [Catalogo_habilidades_original.md](Catalogo_habilidades_original.md) | Las 52 habilidades del original: 22 implementadas en CSN y el resto pendiente |
 | [Capturas_3D.md](Capturas_3D.md) | Cómo regenerar capturas, rejilla de depuración, auditoría del visor y verificación móvil |

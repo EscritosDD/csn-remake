@@ -10,6 +10,7 @@ document.addEventListener('pointerdown',()=>{audioCtx();});
 document.getElementById('undoBtn')?.addEventListener('click',undoLastMove);
 document.getElementById('quickStartBtn').onclick=()=>window.quickStart('almacen');
 document.getElementById('quickSkirmishBtn').onclick=()=>window.quickStart('skirmish');
+document.getElementById('heroSkirmishBtn').onclick=()=>window.quickStart('skirmish');
 (function(){
   const ga=document.getElementById('gameArea');
   if(ga&&!document.getElementById('actionBar')){

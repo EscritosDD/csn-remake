@@ -31,6 +31,7 @@ export function gunPoseFromHand(rPalm,fa,grip,lPalm,opts){
   if(_gpDir.lengthSq()<1e-6)return null;
   _gpDir.normalize();
   const is1h=!!(opts&&opts.is1h);
+  const isMini=(opts&&opts.file)==='Minigun';
   const roleH=(opts&&opts.roleH)||1;
   const roleAvg=(opts&&opts.rigSpan)||(opts&&opts.roleAvg)||1;
   const w2hPrev=Math.max(0,Math.min(1,Number(opts&&opts.w2hPrev)||0));
@@ -50,12 +51,15 @@ export function gunPoseFromHand(rPalm,fa,grip,lPalm,opts){
       }
     }
   }
+  if(isMini){const my=Math.max(-0.14,Math.min(0.16,_gpDir.y)),mh=Math.sqrt(Math.max(1e-6,1-my*my)),ml=Math.hypot(_gpDir.x,_gpDir.z)||1;
+    _gpDir.x=_gpDir.x/ml*mh;_gpDir.z=_gpDir.z/ml*mh;_gpDir.y=my;}
   _gpZ.crossVectors(_gpDir,_gpUp);
   if(_gpZ.lengthSq()<1e-4)_gpZ.set(0,0,1);else _gpZ.normalize();
   _gpY.crossVectors(_gpZ,_gpDir).normalize();
   const g=grip||{x:0.2,y:-0.05,scale:1};
   const gs=g.scale||1;
   _gpOrigin.copy(rPalm).addScaledVector(_gpDir,-g.x*gs).addScaledVector(_gpY,-g.y*gs);
+  if(isMini)_gpOrigin.addScaledVector(_gpDir,0.085).addScaledVector(_gpZ,-0.055);
   _gpMat.makeBasis(_gpDir,_gpY,_gpZ);
   _gpQuat.setFromRotationMatrix(_gpMat);
   return {origin:_gpOrigin,dir:_gpDir,quat:_gpQuat,w2h};
@@ -103,6 +107,7 @@ export function fitGunToHand3(un,grp,isLive){
   const force1h=(ck==='death'||ck==='deathExpl'||ck==='hit'||ck==='hitBurst'||ck==='hitExpl'||ck==='throw'||ck==='deploy'||ck==='interact'||ck==='victory'||ck==='pickup');
   const pose=gunPoseFromHand(_gpRPalm,_gpFA,gunData.grip,hasL?_gpLPalm:null,{
     is1h:is1h,
+    file:gunData.file||'',
     force1h:force1h,
     roleH:lk.s[1],
     rigSpan:rigSpan,

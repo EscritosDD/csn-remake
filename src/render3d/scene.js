@@ -1,6 +1,7 @@
 import { shadeHex, SKIN_TONES } from '../render2d/sprites.js';
 import { ROLES } from '../data/roles.js';
 import { SKINS } from '../data/nations.js';
+import { TEAM_A, TEAM_B } from './env.js';
 
 export let VIEW_MODE='3d';
 
@@ -33,9 +34,9 @@ export function toonGrad3(){
     try{
       const gc=document.createElement('canvas');gc.width=8;gc.height=1;
       const gx=gc.getContext('2d');
-      gx.fillStyle='#63686c';gx.fillRect(0,0,2,1);
-      gx.fillStyle='#9fa5a8';gx.fillRect(2,0,2,1);
-      gx.fillStyle='#d1d5d4';gx.fillRect(4,0,2,1);
+      gx.fillStyle='#4a5056';gx.fillRect(0,0,2,1);
+      gx.fillStyle='#8d9498';gx.fillRect(2,0,2,1);
+      gx.fillStyle='#d8dede';gx.fillRect(4,0,2,1);
       gx.fillStyle='#ffffff';gx.fillRect(6,0,2,1);
       _toonGrad=new THREE.CanvasTexture(gc);
       _toonGrad.minFilter=THREE.NearestFilter;_toonGrad.magFilter=THREE.NearestFilter;
@@ -227,7 +228,7 @@ export function soldierColors3(un){
     uni:isNat?nc[0]:(un.skin==='camuflaje'?'#5a6346':(isClass?(ROLES[un.role]?ROLES[un.role].color:SKINS.estandar.uniform):SKINS.estandar.uniform)),
     helm:isNat?((nc[2]==='#FFFFFF'||nc[2]===nc[0])?shadeHex(nc[0],-25):nc[2]):SKINS.estandar.helmet,
     band:isNat?nc[1]:'#3e4630',
-    team:un.team==='A'?'#387EC9':'#C95338',
+    team:un.team==='A'?TEAM_A:TEAM_B,
     role:ROLES[un.role].color,
     skin:SKIN_TONES[un.id%SKIN_TONES.length]
   };

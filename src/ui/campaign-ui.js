@@ -1,4 +1,6 @@
-import { CAMPAIGN_MISSIONS, TUTORIAL_MISSION, radioLines, rosterKey } from '../data/maps.js';
+import { CAMPAIGN_MISSIONS, TUTORIAL_MISSION, MAP_DEFS, SKIRMISH_GEO, radioLines, rosterKey } from '../data/maps.js';
+import { mapPreviewURL } from './setup-preview.js';
+import { tallyStars, campaignObjectiveLabel, nextMissionIndex } from './campaign-tally.js';
 
 let radioMissionId=TUTORIAL_MISSION.id;
 let radioIndex=0;
@@ -64,9 +66,10 @@ export function briefingMarkup(mission,index,progress){
   const tutorial=index<0;
   const done=tutorial?(progress&&progress.tutorialDone?3:0):(progress&&progress.medals&&progress.medals[index]||0);
   const roster=(list)=>list.map(r=>'<li><b>'+esc(r.charName)+'</b> · '+esc(r.role)+' · '+esc(r.weapon)+'</li>').join('');
-  const label=tutorial?'Instrucción · 6 pasos':'Misión '+(index+1)+' de '+CAMPAIGN_MISSIONS.length;
-  const limit=tutorial?'Sin límite de rondas':'Límite para 3 estrellas: '+mission.turnLimit+' rondas sin bajas.';
-  return '<div class="briefWrap"><span class="tag amber">'+esc(label)+'</span><h2>'+esc(mission.title)+'</h2><p>'+esc(mission.brief)+'</p>'+radioMarkup(mission,radioIndex)+'<div class="brief-grid"><div><h3>Tu escuadra</h3><ul>'+roster(mission.playerRoster)+'</ul></div><div><h3>Rival</h3><ul>'+roster(mission.enemyRoster)+'</ul></div></div><p class="sub">Progreso: '+starMarkup(done)+' · '+esc(limit)+'</p></div>';
+  const label=tutorial?'Fase 0 · Instrucción':'Misión '+(index+1)+' de '+CAMPAIGN_MISSIONS.length;
+  const limit=tutorial?'Sin límite de rondas':'3 ★ con 0 bajas en '+mission.turnLimit+' rondas.';
+  const thumb=mapPreviewURL(mission.map,MAP_DEFS,SKIRMISH_GEO);
+  return '<div class="briefWrap"><div class="brief-hero"><img src="'+esc(thumb)+'" alt=""/><div><span class="tag amber">'+esc(label)+'</span><h2>'+esc(mission.title)+'</h2><p>'+esc(mission.brief)+'</p><div class="brief-badges"><span>'+esc(campaignObjectiveLabel(mission.objective))+'</span><span>'+mission.playerRoster.length+' vs '+mission.enemyRoster.length+'</span><span>IA '+esc(mission.difficulty)+'</span></div></div></div>'+radioMarkup(mission,radioIndex)+'<div class="brief-grid"><div><h3>Tu escuadra</h3><ul>'+roster(mission.playerRoster)+'</ul></div><div><h3>Rival</h3><ul>'+roster(mission.enemyRoster)+'</ul></div></div><p class="sub">Medallas: '+tallyStars(done)+' · '+esc(limit)+'</p></div>';
 }
 
 export function setCampaignActions(actions){campaignActions=actions||{};}
@@ -85,14 +88,17 @@ export function showMissionBriefing(index){
     ? '<button class="btn primary big" id="briefDeploy" type="button">▶ Iniciar instrucción</button>'
     : '<button class="btn primary big" id="briefDeploy" type="button">▶ Desplegar misión</button>';
   a.showModal(briefingMarkup(mission,currentBrief,progress)+'<div class="brief-actions">'+buttons+'<button class="btn big" id="briefClose" type="button">Cerrar</button></div>');
+  const box=document.getElementById('modalBox');
+  if(box)box.classList.add('brief-modal');
   const deploy=document.getElementById('briefDeploy');
   if(deploy)deploy.onclick=()=>{
+    if(box)box.classList.remove('brief-modal');
     if(a.closeModal)a.closeModal();
     if(tutorial&&a.startTutorial)a.startTutorial();
     else if(!tutorial&&a.deployMission)a.deployMission(idx);
   };
   const close=document.getElementById('briefClose');
-  if(close)close.onclick=()=>{if(a.closeModal)a.closeModal();};
+  if(close)close.onclick=()=>{if(box)box.classList.remove('brief-modal');if(a.closeModal)a.closeModal();};
   try{if(a.audio)a.audio({name:'Hipster Dave',role:'Comando'},'select',0.45);}catch(e){}
 }
 
@@ -107,6 +113,7 @@ export function wireCampaignUI(ctx){
   const ch=document.getElementById('mnuChallenges');if(ch)ch.onclick=openView;
   const br=document.getElementById('campaignHubBack');if(br)br.onclick=()=>{if(ctx.hideCampaignView)ctx.hideCampaignView();};
   const cont=document.getElementById('campaignContinue');if(cont)cont.onclick=()=>{const c=ctx.getProgress?ctx.getProgress():null;showMissionBriefing(c&&!c.done?c.next:0);};
+  const nextBtn=document.getElementById('campaignNextBtn');if(nextBtn)nextBtn.onclick=()=>{const c=ctx.getProgress?ctx.getProgress():null;const idx=nextMissionIndex(c,CAMPAIGN_MISSIONS);if(ctx.deployMission)ctx.deployMission(idx);};
   const tut=document.getElementById('campaignTutorial');if(tut)tut.onclick=()=>showMissionBriefing(-1);
   const tutBtn=document.getElementById('tutorialBtn');if(tutBtn)tutBtn.onclick=()=>showMissionBriefing(-1);
   const reset=document.getElementById('campaignResetBtn');if(reset)reset.onclick=()=>{

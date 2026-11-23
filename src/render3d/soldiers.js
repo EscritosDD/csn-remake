@@ -1,7 +1,8 @@
 import { shadeHex } from '../render2d/sprites.js';
 import { ROLES, gameplayModelPresentation } from '../data/roles.js';
 import { sculptedWeaponUnit } from '../data/cast.js';
-import { mat3, box3, makeContactShadow3, nationTintColor, camoTexture, emblemTexture, soldierColors3 } from './scene.js';
+import { mat3, box3, makeContactShadow3, nationTintColor, camoTexture, emblemTexture, soldierColors3, toonGrad3 } from './scene.js';
+import { TEAM_A_HEX, TEAM_B_HEX, TEAM_B, SELECT_LIME_HEX } from './env.js';
 import { makeGunAnchor, attachRealGun } from './assets-weapons.js';
 import { REAL } from './assets-real.js';
 import { MESHY_MODELS, validatedRigBoneInverses, sameRigBoneOrder } from './assets-meshy.js';
@@ -12,13 +13,13 @@ export function makeGlbSoldier3(un){
   if(!actor||!actor.root)return null;
   const c=soldierColors3(un),g=new THREE.Group();
   g.scale.setScalar(1.15);
-  const hpArc=new THREE.Mesh(new THREE.RingGeometry(0.44,0.54,64,1,0,Math.PI*2),new THREE.MeshBasicMaterial({color:un.team==='A'?0x4fdc6e:0x4f8fe0,transparent:true,opacity:0.92,side:THREE.DoubleSide,depthWrite:false}));
+  const hpArc=new THREE.Mesh(new THREE.RingGeometry(0.44,0.54,64,1,0,Math.PI*2),new THREE.MeshBasicMaterial({color:un.team==='A'?TEAM_A_HEX:TEAM_B_HEX,transparent:true,opacity:0.92,side:THREE.DoubleSide,depthWrite:false}));
   hpArc.rotation.x=-Math.PI/2;hpArc.position.y=0.05;g.add(hpArc);
   const roleRing=new THREE.Mesh(new THREE.RingGeometry(0.36,0.405,48,1,0,Math.PI*2),new THREE.MeshBasicMaterial({color:new THREE.Color(c.role),transparent:true,opacity:0.85,side:THREE.DoubleSide,depthWrite:false}));
   roleRing.rotation.x=-Math.PI/2;roleRing.position.y=0.055;g.add(roleRing);
   const shadow=makeContactShadow3(0.42,0.008);if(shadow)g.add(shadow);
   g.add(new THREE.Mesh(new THREE.CylinderGeometry(0.31,0.34,0.035,24),mat3(c.team,0.6)));
-  const chev=new THREE.Mesh(new THREE.ConeGeometry(0.085,0.14,3),new THREE.MeshBasicMaterial({color:un.team==='A'?0x7ae7ff:0xffa07a}));
+  const chev=new THREE.Mesh(new THREE.ConeGeometry(0.085,0.14,3),new THREE.MeshBasicMaterial({color:un.team==='A'?TEAM_A_HEX:TEAM_B_HEX}));
   chev.rotation.z=-Math.PI/2;chev.scale.set(0.28,1,1);chev.position.set(0.37,0.036,0);g.add(chev);
   const segs=[];
   for(let i=0;i<un.maxEnergy;i++){
@@ -26,7 +27,7 @@ export function makeGlbSoldier3(un){
     const s=box3(0.075,0.028,0.045,'#69d66f',Math.cos(a)*0.42,0.035,Math.sin(a)*0.42,0.5);
     s.rotation.y=-a;g.add(s);segs.push(s);
   }
-  const selRing=new THREE.Mesh(new THREE.TorusGeometry(0.5,0.016,8,40),new THREE.MeshBasicMaterial({color:0xffffff}));
+  const selRing=new THREE.Mesh(new THREE.TorusGeometry(0.5,0.016,8,40),new THREE.MeshBasicMaterial({color:SELECT_LIME_HEX}));
   selRing.rotation.x=Math.PI/2;selRing.position.y=0.03;selRing.visible=false;g.add(selRing);
   const spin=new THREE.Group();spin.rotation.y=Math.PI/2;g.add(spin);spin.add(actor.root);
   g.userData.hpArc=hpArc;g.userData.segs=segs;g.userData.selRing=selRing;g.userData.baseChev=chev;
@@ -41,7 +42,7 @@ export function makeRealSoldier3(un){
   g.scale.setScalar(1.15); /* soldados un poco mas grandes que una casilla, como el original */
   /* Arco de vida en el suelo (verde el jugador, azul el rival): media luna
      por PV con drawRange sobre un anillo de 64 segmentos. */
-  const hpArc=new THREE.Mesh(new THREE.RingGeometry(0.44,0.54,64,1,0,Math.PI*2),new THREE.MeshBasicMaterial({color:un.team==='A'?0x4fdc6e:0x4f8fe0,transparent:true,opacity:0.92,side:THREE.DoubleSide,depthWrite:false}));
+  const hpArc=new THREE.Mesh(new THREE.RingGeometry(0.44,0.54,64,1,0,Math.PI*2),new THREE.MeshBasicMaterial({color:un.team==='A'?TEAM_A_HEX:TEAM_B_HEX,transparent:true,opacity:0.92,side:THREE.DoubleSide,depthWrite:false}));
   hpArc.rotation.x=-Math.PI/2;hpArc.position.y=0.05;g.add(hpArc);g.userData.hpArc=hpArc;
   /* Anillo fino del color del rol: distingue a cada especialista de un vistazo. */
   const roleRing=new THREE.Mesh(new THREE.RingGeometry(0.36,0.405,48,1,0,Math.PI*2),new THREE.MeshBasicMaterial({color:new THREE.Color(c.role),transparent:true,opacity:0.85,side:THREE.DoubleSide,depthWrite:false}));
@@ -49,7 +50,7 @@ export function makeRealSoldier3(un){
   const contactSh=makeContactShadow3(0.42,0.008);if(contactSh)g.add(contactSh);
   const base=new THREE.Mesh(new THREE.CylinderGeometry(0.31,0.34,0.035,24),mat3(c.team,0.6));
   base.position.y=0.02;base.receiveShadow=true;g.add(base);
-  const chev=new THREE.Mesh(new THREE.ConeGeometry(0.085,0.14,3),new THREE.MeshBasicMaterial({color:un.team==='A'?0x7ae7ff:0xffa07a}));
+  const chev=new THREE.Mesh(new THREE.ConeGeometry(0.085,0.14,3),new THREE.MeshBasicMaterial({color:un.team==='A'?TEAM_A_HEX:TEAM_B_HEX}));
   chev.rotation.z=-Math.PI/2;chev.scale.set(0.28,1,1);chev.position.set(0.37,0.036,0);g.add(chev);
   const segs=[];
   for(let i=0;i<un.maxEnergy;i++){
@@ -57,7 +58,7 @@ export function makeRealSoldier3(un){
     const s=box3(0.075,0.028,0.045,'#69d66f',Math.cos(a)*0.42,0.035,Math.sin(a)*0.42,0.5);
     s.rotation.y=-a;g.add(s);segs.push(s);
   }
-  const selRing=new THREE.Mesh(new THREE.TorusGeometry(0.5,0.016,8,40),new THREE.MeshBasicMaterial({color:0xffffff}));
+  const selRing=new THREE.Mesh(new THREE.TorusGeometry(0.5,0.016,8,40),new THREE.MeshBasicMaterial({color:SELECT_LIME_HEX}));
   selRing.rotation.x=Math.PI/2;selRing.position.y=0.03;selRing.visible=false;g.add(selRing);
   /* la malla real, colgando del giro de ejes: el espacio del IPA es Z
      arriba; el grupo spin+tilt lo deja Y arriba y mirando a +X, y el
@@ -93,17 +94,7 @@ export function makeRealSoldier3(un){
   /* Material cartoon: rampa de 4 pasos en el canal de luz (MeshToonMaterial)
      para el look cel del original, con la textura real del IPA. Si algo
      fallara, se queda el material estándar de siempre. */
-  let gradTex=null;
-  try{
-    const gc=document.createElement('canvas');gc.width=8;gc.height=1;
-    const gx=gc.getContext('2d');
-    gx.fillStyle='#5f6468';gx.fillRect(0,0,2,1);
-    gx.fillStyle='#9aa0a3';gx.fillRect(2,0,2,1);
-    gx.fillStyle='#cbcfce';gx.fillRect(4,0,2,1);
-    gx.fillStyle='#ffffff';gx.fillRect(6,0,2,1);
-    gradTex=new THREE.CanvasTexture(gc);
-    gradTex.minFilter=THREE.NearestFilter;gradTex.magFilter=THREE.NearestFilter;
-  }catch(e){}
+  const gradTex=toonGrad3();
   const materialSide=presentation.twoSided?THREE.DoubleSide:THREE.FrontSide;
   const mat=presentation.preserveTexture
     ?new THREE.MeshStandardMaterial({map:roleTex,roughness:0.85,metalness:0.02,side:materialSide})
@@ -119,7 +110,7 @@ export function makeRealSoldier3(un){
     try{const cn=un.name||charNameFor(un.role);const ce=OWN_CAST.concat(ORIG_CAST).find(c=>c.name===cn);if(ce&&ce.tint)mat.color.copy(new THREE.Color(ce.tint)).lerp(new THREE.Color('#ffffff'),0.42);}catch(e){}
   }
   if(un.skin==='clase'&&ROLES[un.role]){mat.color.copy(new THREE.Color(ROLES[un.role].color)).lerp(new THREE.Color('#ffffff'),0.30);}
-  if(un.team==='B'&&!presentation.preserveTexture){mat.color.lerp(new THREE.Color('#c95338'),0.22);}
+  if(un.team==='B'&&!presentation.preserveTexture){mat.color.lerp(new THREE.Color(TEAM_B),0.22);}
   if(presentation.emissiveIntensity>0){
     mat.emissiveMap=mat.map;
     mat.emissive.copy(mat.color);

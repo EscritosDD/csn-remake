@@ -31,7 +31,7 @@ export function init3D(){
   renderer.setPixelRatio(isSw?1:Math.min(isMobileGL3()?1.5:(window.devicePixelRatio||1),2));
   renderer.outputColorSpace=THREE.SRGBColorSpace;
   renderer.toneMapping=THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure=1.08;
+  renderer.toneMappingExposure=1.12;
   renderer.shadowMap.enabled=!isSw;
   if(!isSw)renderer.shadowMap.type=THREE.PCFSoftShadowMap;
   wrap.appendChild(renderer.domElement);
@@ -40,7 +40,7 @@ export function init3D(){
   scene.fog=new THREE.Fog(0x212922,28,50);
   const camera=new THREE.PerspectiveCamera(37.5,1.6,0.1,120);
   scene.add(new THREE.HemisphereLight(0xd8ecff,0x3c462e,1.15));
-  const sun=new THREE.DirectionalLight(0xeb825c,1.8); /* cálida del original (0,92, 0,51, 0,36) */
+  const sun=new THREE.DirectionalLight(0xeb825c,1.6); /* cálida del original (0,92, 0,51, 0,36) */
   sun.position.set(-7,13,5);
   if(!isSw){
     sun.castShadow=true;
@@ -50,8 +50,9 @@ export function init3D(){
   }
   scene.add(sun);
   const fill=new THREE.DirectionalLight(0xa6cfff,0.55);fill.position.set(7,5,-6);scene.add(fill); /* fría del original (0,65, 0,81, 1,0) */
+  const rim=new THREE.DirectionalLight(0x9fe8ff,0.85);rim.position.set(5,8,-9);scene.add(rim);
   const camState={yaw:-0.4363,curYaw:-0.4363,dist:8.5,curDist:8.5,panX:0,curPanX:0,panZ:0.35,curPanZ:0.35}; /* cámara del original: yaw 335°, distancia 8,5 (zoom 0,5), FOV 37,5° */
-  setT3({renderer:renderer,scene:scene,camera:camera,isSw:isSw,cam:camState,units:new Map(),hudPool:new Map(),fxItems:[],dynSig:'__none__',hlSig:'__none__',hoverSig:'__none__',ray:new THREE.Raycaster(),lastW:0,lastH:0,lastFrame:0,lastRender:0});
+  setT3({renderer:renderer,scene:scene,camera:camera,isSw:isSw,rim:rim,cam:camState,units:new Map(),hudPool:new Map(),fxItems:[],dynSig:'__none__',hlSig:'__none__',hoverSig:'__none__',ray:new THREE.Raycaster(),lastW:0,lastH:0,lastFrame:0,lastRender:0});
   /* Máscaras de casilla del original (floortile_*, 256×256, blancas sobre negro: el color lo pone el material, como alphaMap). */
   T3.tileMasks={};
   ['attack','placement','heal','aoe','returnfire','willattack'].forEach(function(mk){

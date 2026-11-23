@@ -1,6 +1,8 @@
 import { cheb } from '../core-and-audio.js';
 import { WEAPONS, PISTOL } from '../data/weapons.js';
 import { VIEW_MODE, T3, w2cx } from './scene.js';
+import { TEAM_A, TEAM_B } from './env.js';
+import { arcadeTracer, arcadeHit, arcadeExplosion, arcadeFloat, tickArcadeFx } from './fx-arcade.js';
 
 export function fx3Spawn(mesh,life,onTick){
   if(!T3||!T3.fxGroup)return;
@@ -11,16 +13,7 @@ export function fx3Spawn(mesh,life,onTick){
 
 export function fx3Shot(from,to,cat){
   if(!T3||VIEW_MODE!=='3d'||REDUCED_MOTION||!from||!to||from.x==null||to.x==null)return;
-  const p0=new THREE.Vector3(w2cx(from.x),0.72,w2cx(from.y));
-  const p1=new THREE.Vector3(w2cx(to.x),0.64,w2cx(to.y));
-  const dir=p1.clone().sub(p0);const len=Math.max(0.2,dir.length());
-  const col=cat==='Francotirador'?0x9ce2ff:(cat==='Lanzacohetes'||cat==='Lanzagranadas'?0xff9b42:0xffe484);
-  const bolt=new THREE.Mesh(new THREE.BoxGeometry(0.05,0.05,Math.min(0.9,len*0.45)),new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:0.95}));
-  bolt.position.copy(p0);bolt.lookAt(p1);
-  fx3Spawn(bolt,150,(it,k)=>{
-    bolt.position.lerpVectors(p0,p1,k);
-    bolt.material.opacity=Math.max(0,1-k*0.6);
-  });
+  arcadeTracer(from,to,cat,G&&G.turn||'A',FX.t,REDUCED_MOTION);
 }
 
 export function fx3Proj(from,to,kind){
@@ -39,50 +32,17 @@ export function fx3Proj(from,to,kind){
 
 export function fx3Explosion(x,y,kind){
   if(!T3||VIEW_MODE!=='3d'||REDUCED_MOTION)return;
-  const cx=w2cx(x),cz=w2cx(y);
-  const col=kind==='heal'?0x67e87a:(kind==='smoke'?0xd6dbe0:(kind==='flash'?0xfff2a8:0xff7b29));
-  const ring=new THREE.Mesh(new THREE.RingGeometry(0.18,0.34,24),new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:0.85,side:THREE.DoubleSide,depthWrite:false}));
-  ring.rotation.x=-Math.PI/2;ring.position.set(cx,0.12,cz);
-  fx3Spawn(ring,460,(it,k)=>{
-    const sc=1+k*(kind==='heal'?2.4:3.6);
-    ring.scale.setScalar(sc);
-    ring.position.y=kind==='heal'?0.12+k*0.9:0.12;
-    ring.material.opacity=Math.max(0,(1-k)*0.85);
-  });
-  const core=new THREE.Mesh(new THREE.SphereGeometry(0.28,12,10),new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:0.75,depthWrite:false}));
-  core.position.set(cx,0.42,cz);
-  fx3Spawn(core,340,(it,k)=>{
-    const sc=1+k*(kind==='smoke'?2.4:1.9);
-    core.scale.setScalar(sc);
-    core.material.opacity=Math.max(0,(1-k)*0.75);
-  });
+  arcadeExplosion(x,y,kind,FX.t,REDUCED_MOTION);
 }
 
 export function fx3Sparks(x,y,n,col){
   if(!T3||VIEW_MODE!=='3d'||REDUCED_MOTION)return;
-  const cnt=Math.min(12,Math.max(3,Math.round((n||6)/2)));
-  const cx=w2cx(x),cz=w2cx(y);
-  for(let i=0;i<cnt;i++){
-    const a=(i/cnt)*Math.PI*2+Math.random()*0.6,sp=0.9+Math.random()*1.6;
-    const vx=Math.cos(a)*sp,vz=Math.sin(a)*sp,vy=1.5+Math.random()*1.4;
-    const m=new THREE.Mesh(new THREE.BoxGeometry(0.06,0.06,0.06),new THREE.MeshBasicMaterial({color:col||'#ffb03a',transparent:true,opacity:0.95}));
-    m.position.set(cx,0.55,cz);
-    fx3Spawn(m,420,(it,k)=>{
-      const age=k*0.42;
-      m.position.set(cx+vx*age,Math.max(0.08,0.55+vy*age-3.8*age*age),cz+vz*age);
-      m.material.opacity=Math.max(0,1-k);
-    });
-  }
+  arcadeHit(x,y,n,col,FX.t,REDUCED_MOTION);
 }
 
 export function fx3Float(x,y,txt,col){
   if(!T3||VIEW_MODE!=='3d'||REDUCED_MOTION)return;
-  const host=document.getElementById('glFloats');if(!host)return;
-  while(host.children.length>10)host.firstChild.remove();
-  const el=document.createElement('div');
-  el.className='gl-float';el.textContent=txt;el.style.color=col||'#ffffff';
-  el.dataset.wx=String(w2cx(x));el.dataset.wz=String(w2cx(y));el.dataset.born=String(FX.t);
-  host.appendChild(el);
+  arcadeFloat(x,y,txt,col,FX.t,REDUCED_MOTION);
 }
 
 export function tickFx3D(w,h){
@@ -93,21 +53,7 @@ export function tickFx3D(w,h){
     if(age>=it.life){T3.fxGroup.remove(it.mesh);T3.fxItems.splice(i,1);}
     else{it.onTick(it,Math.max(0,Math.min(1,age/it.life)));}
   }
-  const host=document.getElementById('glFloats');
-  if(host&&host.children.length){
-    const v=T3._projV||(T3._projV=new THREE.Vector3());
-    for(let i=host.children.length-1;i>=0;i--){
-      const el=host.children[i],age=now-(+el.dataset.born||0);
-      if(age>=950){el.remove();continue;}
-      const k=age/950;
-      v.set(+el.dataset.wx,1.58+k*0.85,+el.dataset.wz).project(T3.camera);
-      if(v.z>=-1&&v.z<=1){
-        const sx=(v.x*0.5+0.5)*w,sy=(-v.y*0.5+0.5)*h;
-        el.style.left=sx.toFixed(1)+'px';el.style.top=sy.toFixed(1)+'px';
-        el.style.opacity=k<0.65?'1':String(Math.max(0,1-(k-0.65)/0.35));
-      } else el.style.opacity='0';
-    }
-  }
+  tickArcadeFx(w,h,FX.t);
 }
 
 export function updateHover3D(w,h){
@@ -233,7 +179,7 @@ export function updateUnitHuds3D(w,h){
     const sig=pct+'|'+hp+'/'+maxHp+'|'+team+'|'+tag+'|'+(vet||0);
     if(sig!==rec.lastSig){
       rec.lastSig=sig;
-      rec.dot.style.background=team==='A'?'#39c2d7':'#ff7a45';
+      rec.dot.style.background=team==='A'?TEAM_A:TEAM_B;
       rec.fill.style.width=pct+'%';
       rec.fill.className='gl-hp-fill'+(pct<=30?' low':pct<=55?' med':'');
       if(rec.num)rec.num.textContent=hp+'/'+maxHp;

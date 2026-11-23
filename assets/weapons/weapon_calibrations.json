@@ -893,8 +893,8 @@
     "muzzleSource": "bounds"
   },
   "Minigun": {
-    "scale": 0.754256244,
-    "targetLength": 0.64,
+    "scale": 0.895679290,
+    "targetLength": 0.76,
     "meshPivot": [
       0.0,
       0.0,

@@ -347,3 +347,36 @@ test('los 11 rigs del original tienen rotaciones unitarias y pelvis centrada', (
     }
   }
 });
+
+test('loadViewerBody escala huesos y matrices bind con la geometría sin mutar el rig original', () => {
+  const src = fs.readFileSync(path.join(root, 'src', 'viewer', 'body-loader.js'), 'utf8')
+    .replace(/^\s*import\s+[^;]+;\s*$/gm, '').replace(/^export\s+/gm, '');
+  const sb = { Math, Object, Array, Number, console };
+  sb.globalThis = sb;
+  vm.createContext(sb);
+  vm.runInContext(src + '\n;globalThis.__bl={scaleRigForGeometry,blWorldMatrices,rigBindError,scaledRigInverse,createBodyLoader};', sb);
+  const bl = sb.__bl;
+  const rig = JSON.parse(fs.readFileSync(path.join(root, 'assets', 'soldier', 'bodies', 'Engineer_RiotCop_rig.json'), 'utf8'));
+  const handBefore = rig.bones.find(b => b.name === 'Bip001 R Hand').pos.slice();
+  const inverseBefore = rig.boneInverses[13].slice();
+  const scale = 1.37;
+  const result = bl.scaleRigForGeometry(rig, scale, null);
+  assert.ok(result.maxError <= 0.001, 'error bind ' + result.maxError);
+  assert.deepEqual(rig.bones.find(b => b.name === 'Bip001 R Hand').pos, handBefore, 'el rig original no se muta');
+  assert.deepEqual(rig.boneInverses[13], inverseBefore, 'las inversas originales no se mutan');
+  result.rig.bones.forEach((bone, i) => {
+    bone.pos.forEach((value, axis) => assert.ok(Math.abs(value - rig.bones[i].pos[axis] * scale) < 1e-9, bone.name + ' eje ' + axis));
+  });
+  result.rig.boneInverses.forEach((matrix, i) => {
+    for (const offset of [3, 7, 11]) {
+      assert.ok(Math.abs(matrix[offset] - rig.boneInverses[i][offset] * scale) < 1e-9, 'inversa ' + i);
+    }
+    for (const offset of [0, 1, 2, 4, 5, 6, 8, 9, 10]) assert.equal(matrix[offset], rig.boneInverses[i][offset], 'rotación de la inversa ' + i);
+  });
+  const worlds = bl.blWorldMatrices(result.rig.bones);
+  let maxError = 0;
+  result.rig.skinBones.forEach((boneIndex, i) => { maxError = Math.max(maxError, bl.rigBindError(worlds[boneIndex], result.rig.boneInverses[i])); });
+  assert.ok(maxError <= 0.001, 'bind recalculado ' + maxError);
+  assert.match(src, /scale!==1\?scaleRigForGeometry\(sourceRig,scale,three\)\.rig:sourceRig/);
+  assert.match(src, /validatedRigBoneInverses\(data,joints\)/);
+});

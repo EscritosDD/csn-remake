@@ -16,8 +16,8 @@ declara los módulos ES. `assets/three.min.js` se carga como script clásico.
 | `src/core-and-audio.js` | Agregador de `core/` y `audio/`. |
 | `src/game/` | Reglas, IA, input, turnos, misiones, personajes, demo, teclado y quick actions. |
 | `src/render2d/` | Tablero, tiles, sprites, FX y fachada `index.js`. |
-| `src/render3d/` | Escena, assets, clips, retarget, soldados, armas, FX, cámara, runtime, carga GLTF, actor GLB, caché de assets y fachada `index.js`. |
-| `src/ui/` | Shell, campaña, previsualización de escuadra, unit card, arsenal, habilidades, cuartel, laboratorio GLB, wiring y fachada `index.js`. |
+| `src/render3d/` | Escena, assets, clips, retarget, soldados, armas, FX, paleta `env.js`, FX arcade con pool, cámara, runtime, carga GLTF, actor GLB, caché de assets y fachada `index.js`. |
+| `src/ui/` | Shell, campaña, previsualización de escuadra, HUD arcade, unit card, arsenal, habilidades, cuartel, laboratorio GLB, wiring y fachada `index.js`. |
 | `src/bridge.js` | `installEarlyBridge` e `installFullBridge`; expone estado de `main.js` a capturas, visor y tests. |
 | `src/viewer/` | `main.js` (visor/galería), `card-stage.js` (único renderer), `inspector.js` y `troop-cards.js`. |
 | `assets/competitive/` | `manifest.json` y contenedores `chars/`, `weapons/`, `anims/` para modelos `.glb`. |
@@ -88,7 +88,7 @@ antes del IIFE de INIT. El bridge se instala en dos fases:
    `__build3D`, `__render3D`, `__renderDemo`, `quickStart`, `quickSmoke`,
    `quickFlash`.
 7. Comprobar unicidad de anclas antes de reemplazar; hay fragmentos repetidos.
-8. Cada módulo en `src/` debe mantenerse por debajo de 450 líneas; ahora hay 75 módulos y `src/ui/ui-shell.js` está en 448.
+8. Cada módulo en `src/` debe mantenerse por debajo de 450 líneas; ahora hay 79 módulos y `src/ui/ui-shell.js` está en 433.
 9. La campaña usa `#campaignHub` y `showMissionBriefing()`; los botones del modal se enlazan después de `showModal()`, sin `onclick` inline.
 10. Tras cualquier cambio: `npm run lint`, `npm test` y `VERIFICAR.ps1`.
 

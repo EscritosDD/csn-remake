@@ -1,6 +1,7 @@
 import { shadeHex } from '../render2d/sprites.js';
 import { roleLook } from '../data/roles.js';
 import { mat3, box3, makeContactShadow3, soldierColors3 } from './scene.js';
+import { TEAM_A_HEX, TEAM_B_HEX, SELECT_LIME_HEX } from './env.js';
 import { makeGunProp3 } from './gun.js';
 
 export function makeSoldier3(un){
@@ -12,7 +13,7 @@ export function makeSoldier3(un){
   const contactSh=makeContactShadow3(0.42,0.008);if(contactSh)g.add(contactSh);
   const base=new THREE.Mesh(new THREE.CylinderGeometry(0.31,0.34,0.035,24),mat3(c.team,0.6));
   base.position.y=0.02;base.receiveShadow=true;g.add(base);
-  const chev=new THREE.Mesh(new THREE.ConeGeometry(0.085,0.14,3),new THREE.MeshBasicMaterial({color:un.team==='A'?0x7ae7ff:0xffa07a}));
+  const chev=new THREE.Mesh(new THREE.ConeGeometry(0.085,0.14,3),new THREE.MeshBasicMaterial({color:un.team==='A'?TEAM_A_HEX:TEAM_B_HEX}));
   chev.rotation.z=-Math.PI/2;chev.scale.set(0.28,1,1);chev.position.set(0.37,0.036,0);g.add(chev);
   const segs=[];
   for(let i=0;i<un.maxEnergy;i++){
@@ -20,7 +21,7 @@ export function makeSoldier3(un){
     const s=box3(0.075,0.028,0.045,'#69d66f',Math.cos(a)*0.42,0.035,Math.sin(a)*0.42,0.5);
     s.rotation.y=-a;g.add(s);segs.push(s);
   }
-  const selRing=new THREE.Mesh(new THREE.TorusGeometry(0.5,0.016,8,40),new THREE.MeshBasicMaterial({color:0xffffff}));
+  const selRing=new THREE.Mesh(new THREE.TorusGeometry(0.5,0.016,8,40),new THREE.MeshBasicMaterial({color:SELECT_LIME_HEX}));
   selRing.rotation.x=Math.PI/2;selRing.position.y=0.03;selRing.visible=false;g.add(selRing);
   /* cuerpo articulado: caderas, hombros, cuello y arma con pivote propio.
      Este soldado de cajas es solo la reserva: se usa si la malla real del

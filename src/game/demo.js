@@ -22,7 +22,7 @@ export function buildDemo(){
   renderer.setPixelRatio(isSw?1:Math.min(isMobileGL3()?1.5:(window.devicePixelRatio||1),2));
   renderer.outputColorSpace=THREE.SRGBColorSpace;
   renderer.toneMapping=THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure=1.08;
+  renderer.toneMappingExposure=1.12;
   renderer.shadowMap.enabled=!isSw;
   if(!isSw)renderer.shadowMap.type=THREE.PCFSoftShadowMap;
   wrap.appendChild(renderer.domElement);
@@ -32,11 +32,12 @@ export function buildDemo(){
   scene.fog=new THREE.Fog(sky.fog,22,42);
   const camera=new THREE.PerspectiveCamera(37.5,2,0.1,120);
   scene.add(new THREE.HemisphereLight(0xd8ecff,0x3c462e,1.15));
-  const sun=new THREE.DirectionalLight(0xffe8b8,1.8);
+  const sun=new THREE.DirectionalLight(0xffe8b8,1.6);
   sun.position.set(-6,12,5);
   if(!isSw){sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.bias=-0.0005;sun.shadow.normalBias=0.02;}
   scene.add(sun);
   const fill=new THREE.DirectionalLight(0x8ec5ff,0.55);fill.position.set(7,5,-6);scene.add(fill);
+  const rim=new THREE.DirectionalLight(0x9fe8ff,0.85);rim.position.set(5,8,-9);scene.add(rim);
   const stage=new THREE.Group();scene.add(stage);
   const apron=new THREE.Mesh(new THREE.PlaneGeometry(26,26),texMat3('apron',null,0.95));
   apron.rotation.x=-Math.PI/2;apron.position.y=-0.12;apron.receiveShadow=true;stage.add(apron);
@@ -100,7 +101,7 @@ export function buildDemo(){
     mesh.rotation.y=d[1]==='A'?-Math.PI/2:Math.PI/2;
     stage.add(mesh);return mesh;
   });
-  DEMO={renderer:renderer,scene:scene,camera:camera,stage:stage,meshes:meshes,units:units,beacon:beacon,lastW:0,lastH:0};
+  DEMO={renderer:renderer,scene:scene,camera:camera,rim:rim,stage:stage,meshes:meshes,units:units,beacon:beacon,lastW:0,lastH:0};
   demoStatus(REAL.ready
     ? 'Vista 3D activa: el soldado que gira es el del original de 2012 (su malla, su textura y su esqueleto), sobre el escenario en volumen. Pulsa «Jugar ahora en 3D» y lo mueves tú.'
     : 'Vista 3D activa: escenario en volumen y soldados sobre la cuadrícula, renderizados ahora mismo. Pulsa «Jugar ahora en 3D» y juegas en este mismo 3D.');

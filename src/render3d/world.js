@@ -10,10 +10,13 @@ import { makeRealSoldier3 } from './soldiers.js';
 import { getRealSpriteImage } from './real-sprites.js';
 import { buildThemedProps3 } from './world-props.js';
 import { disposeObject3D } from './asset-cache.js';
+import { resetArcadeFx } from './fx-arcade.js';
+import { TEAM_A, TEAM_B, TEAM_A_HEX, TEAM_B_HEX, SELECT_LIME_HEX, SELECT_GOLD_HEX } from './env.js';
 
 export function build3DWorld(){
   if(!T3||!G)return;
   const sc=T3.scene;
+  resetArcadeFx();
   if(T3.world){sc.remove(T3.world);disposeObject3D(T3.world);}
   ['unitsGroup','dynGroup','hlGroup','aimGroup','fxGroup'].forEach(k=>{if(T3[k]){sc.remove(T3[k]);disposeObject3D(T3[k]);}});
   const world=new THREE.Group();sc.add(world);T3.world=world;
@@ -124,7 +127,7 @@ export function build3DWorld(){
   const zoneDisc=(list,col)=>{list.forEach(s=>{
     const p=new THREE.Mesh(new THREE.PlaneGeometry(0.94,0.94),new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:0.13,depthWrite:false}));
     p.rotation.x=-Math.PI/2;p.position.set(w2cx(s.x),0.055,w2cx(s.y));world.add(p);});};
-  zoneDisc(spawnsFor('A'),0x39c2d7);zoneDisc(spawnsFor('B'),0xff7a45);
+  zoneDisc(spawnsFor('A'),TEAM_A_HEX);zoneDisc(spawnsFor('B'),TEAM_B_HEX);
   /* baliza: zona ámbar que pulsa */
   const beacon=new THREE.Mesh(new THREE.PlaneGeometry(1.94,1.94),new THREE.MeshBasicMaterial({color:0xf2b234,transparent:true,opacity:0.16,depthWrite:false}));
   const bx=BEACON[0].x+0.5,by=BEACON[0].y+0.5;
@@ -232,12 +235,12 @@ export function rebuildDyn3(){
     const disc=new THREE.Mesh(new THREE.CylinderGeometry(0.3,0.34,0.16,20),mat3('#79828a',0.6));
     disc.position.y=0.12;disc.castShadow=true;grp.add(disc);
     grp.add(box3(0.44,0.06,0.07,'#23262a',0.18,0.26,0,0.5));
-    const ring=new THREE.Mesh(new THREE.TorusGeometry(0.4,0.015,8,32),new THREE.MeshBasicMaterial({color:t.team==='A'?0x39c2d7:0xff7a45}));
+    const ring=new THREE.Mesh(new THREE.TorusGeometry(0.4,0.015,8,32),new THREE.MeshBasicMaterial({color:t.team==='A'?TEAM_A_HEX:TEAM_B_HEX}));
     ring.rotation.x=Math.PI/2;ring.position.y=0.04;grp.add(ring);
     grp.rotation.y=t.team==='A'?0:Math.PI;
     T3.dynGroup.add(grp);
   });
-  if(G.map.turret.owner&&T3.cannonCore)T3.cannonCore.material=mat3(G.map.turret.owner==='A'?'#387EC9':'#C95338',0.5);
+  if(G.map.turret.owner&&T3.cannonCore)T3.cannonCore.material=mat3(G.map.turret.owner==='A'?TEAM_A:TEAM_B,0.5);
   (G.smoke||[]).forEach(sm=>{
     const grp=new THREE.Group();grp.position.set(w2cx(sm.x),0,w2cx(sm.y));
     const cloud=new THREE.Mesh(new THREE.SphereGeometry(0.52,10,8),new THREE.MeshBasicMaterial({color:0xd6dbe0,transparent:true,opacity:sm.left<=1?0.42:0.55,depthWrite:false}));
@@ -251,7 +254,7 @@ export function rebuildDyn3(){
     const grp=new THREE.Group();grp.position.set(w2cx(mn.x),0,w2cx(mn.y));
     const body=new THREE.Mesh(new THREE.BoxGeometry(0.34,0.1,0.2),mat3('#3d4436',0.7));body.position.y=0.06;body.castShadow=true;grp.add(body);
     const led=new THREE.Mesh(new THREE.SphereGeometry(0.035,8,6),new THREE.MeshBasicMaterial({color:0xff4747}));led.position.set(0,0.13,0);grp.add(led);
-    const ring=new THREE.Mesh(new THREE.TorusGeometry(0.3,0.014,8,28),new THREE.MeshBasicMaterial({color:mn.team==='A'?0x39c2d7:0xff7a45}));ring.rotation.x=Math.PI/2;ring.position.y=0.03;grp.add(ring);
+    const ring=new THREE.Mesh(new THREE.TorusGeometry(0.3,0.014,8,28),new THREE.MeshBasicMaterial({color:mn.team==='A'?TEAM_A_HEX:TEAM_B_HEX}));ring.rotation.x=Math.PI/2;ring.position.y=0.03;grp.add(ring);
     T3.dynGroup.add(grp);
   });
   G.units.forEach(un=>{
@@ -281,7 +284,7 @@ export function rebuildHighlights3(){
     p.rotation.x=-Math.PI/2;p.position.set(w2cx(x),0.068,w2cx(y));T3.hlGroup.add(p);
   };
   if(G.actionMode==='move'){
-    reachable(u,u.energy).forEach((d,k)=>{const parts=k.split(',');addTile(+parts[0],+parts[1],'move',0x2690ff,0.34,'placement');});
+    reachable(u,u.energy).forEach((d,k)=>{const parts=k.split(',');addTile(+parts[0],+parts[1],'move',SELECT_LIME_HEX,0.34,'placement');});
   } else if(G.actionMode==='shoot'||G.actionMode==='pistol'){
     const w=G.actionMode==='pistol'?WEAPONS[PISTOL]:WEAPONS[u.weapon];
     G.units.forEach(foe=>{
@@ -294,8 +297,8 @@ export function rebuildHighlights3(){
       const dp=hitChance(u,G.drone,w);
       if(dp>0)addRing(G.drone.x,G.drone.y,'tgt',0xff3d3d,0.92);
     }
-    G.map.barrels.forEach(b=>{if(b.alive&&cheb(u,b)<=w.rng&&hasLOS(u,b)&&!smokeBlocksLOS(u,b))addRing(b.x,b.y,'prop',0xf2b234,0.85);});
-    G.map.obstacles.forEach(o=>{if(o.type==='crate'&&cheb(u,o)<=w.rng&&hasLOS(u,o)&&!smokeBlocksLOS(u,o))addRing(o.x,o.y,'prop',0xf2b234,0.75);});
+    G.map.barrels.forEach(b=>{if(b.alive&&cheb(u,b)<=w.rng&&hasLOS(u,b)&&!smokeBlocksLOS(u,b))addRing(b.x,b.y,'prop',SELECT_GOLD_HEX,0.85);});
+    G.map.obstacles.forEach(o=>{if(o.type==='crate'&&cheb(u,o)<=w.rng&&hasLOS(u,o)&&!smokeBlocksLOS(u,o))addRing(o.x,o.y,'prop',SELECT_GOLD_HEX,0.75);});
   } else if(G.actionMode==='grenade'){
     for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(cheb(u,{x:x,y:y})<=3&&cheb(u,{x:x,y:y})>0)addTile(x,y,'gren',0xe5484d,0.25,'aoe');
   } else if(G.actionMode==='smoke'){
@@ -314,7 +317,7 @@ export function rebuildHighlights3(){
       G.units.forEach(a=>{if(a.team===u.team&&dist(u,a)<=1&&((!a.alive&&u.revives>0)||(a.alive&&a.hp<a.maxHp&&u.heals>0))){addTile(a.x,a.y,'deploy',0x57c46a,0.34);addRing(a.x,a.y,'heal',0x57c46a,0.92);}});
       if(G.drone&&G.drone.alive&&u.team==='A'&&dist(u,G.drone)<=1&&G.drone.hp<G.drone.maxHp&&u.heals>0)addRing(G.drone.x,G.drone.y,'heal',0x57c46a,0.92);
     } else if(u.role==='Capitán'){
-      G.units.forEach(a=>{if(a.alive&&a.team===u.team&&a!==u){addTile(a.x,a.y,'cmd',0xf2b234,0.28);addRing(a.x,a.y,'prop',0xf2b234,0.9);}});
+      G.units.forEach(a=>{if(a.alive&&a.team===u.team&&a!==u){addTile(a.x,a.y,'cmd',SELECT_GOLD_HEX,0.28);addRing(a.x,a.y,'prop',SELECT_GOLD_HEX,0.9);}});
     } else if(u.role==='Francotirador'){
       const w=WEAPONS[u.weapon];
       G.units.forEach(foe=>{if(foe.alive&&foe.team!==u.team&&hitChance(u,foe,w)>0)addRing(foe.x,foe.y,'tgt',0xff3d3d,0.95);});

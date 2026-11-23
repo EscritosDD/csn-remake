@@ -13,6 +13,7 @@ const arsenal = read('src/ui/arsenal.js');
 const troops = read('src/viewer/troop-cards.js');
 const inspector = read('src/viewer/inspector.js');
 const weaponsJs = read('src/render3d/assets-weapons.js');
+const arcade = read('src/render3d/fx-arcade.js');
 const soundJs = read('src/audio/sound.js');
 const indexHtml = read('index.html');
 const cardsCss = read('styles/cards.css');
@@ -40,6 +41,8 @@ test('las tarjetas 3D comparten un único renderer con buffer de captura', () =>
   assert.match(viewer, /ensureCardStage\(stage\)/);
   assert.match(viewer, /setCardModelBuilder\(buildCardModel\)/);
   assert.match(viewer, /window\.__csnCardEngine=cardEngine/);
+  assert.doesNotMatch(arcade, /new THREE\.WebGLRenderer/);
+  assert.match(arcade, /REDUCED_MOTION/);
 });
 
 test('el visor usa el motor de tarjetas sin controles de piezas', () => {
@@ -73,7 +76,7 @@ test('Tropas muestra tarjetas limpias y abre el inspector ampliado', async () =>
   assert.match(troops, /getWeaponFiles:\(\)=>tcWeaponFiles/);
   assert.match(cardsCss, /minmax\(260px,1fr\)/);
   assert.match(cardsCss, /gap:14px/);
-  assert.match(cardsCss, /transform 220ms cubic-bezier\(0\.22,1,0\.36,1\),box-shadow 220ms ease,border-color 220ms ease/);
+  assert.match(cardsCss, /transform 220ms var\(--pop\),box-shadow 220ms var\(--pop\),border-color 220ms ease/);
   assert.match(cardsCss, /background:var\(--stage\)/);
 });
 
@@ -269,3 +272,45 @@ test('el fogonazo es texturizado, compartido y se coloca en la boca real', () =>
   assert.match(read('src/render3d/asset-cache.js'), /!texture\.userData\.sharedAsset/);
   assert.match(read('src/render3d/clips.js'), /flash\.traverse\(o=>\{if\(o\.isMesh&&o\.material\)o\.material\.opacity=f/);
 });
+
+test('la Minigun acota el pitch y apoya el arma a la altura de la cadera', () => {
+  const src = read('src/render3d/gun-pose.js');
+  class Vec3 {
+    constructor(x = 0, y = 0, z = 0) { this.x = x; this.y = y; this.z = z; }
+    set(x, y, z) { this.x = x; this.y = y; this.z = z; return this; }
+    copy(v) { return this.set(v.x, v.y, v.z); }
+    sub(v) { this.x -= v.x; this.y -= v.y; this.z -= v.z; return this; }
+    lengthSq() { return this.x * this.x + this.y * this.y + this.z * this.z; }
+    normalize() { const n = Math.sqrt(this.lengthSq()) || 1; this.x /= n; this.y /= n; this.z /= n; return this; }
+    distanceTo(v) { return Math.hypot(this.x - v.x, this.y - v.y, this.z - v.z); }
+    lerp(v, t) { this.x += (v.x - this.x) * t; this.y += (v.y - this.y) * t; this.z += (v.z - this.z) * t; return this; }
+    crossVectors(a, b) { return this.set(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x); }
+    addScaledVector(v, s) { this.x += v.x * s; this.y += v.y * s; this.z += v.z * s; return this; }
+    fromArray(a) { return this.set(a[0], a[1], a[2]); }
+  }
+  const sb = { Math, Number, Object, Array, console, HAS_THREE: true, WEAPON_MESH_FILE: {},
+    THREE: { Vector3: Vec3, Quaternion: class { setFromRotationMatrix() { return this; } }, Matrix4: class { makeBasis() { return this; } } } };
+  sb.globalThis = sb;
+  vm.createContext(sb);
+  vm.runInContext(src.replace(/^\s*import\s+[^;]+;\s*$/gm, '').replace(/\bexport\s+/g, '') + '\n;globalThis.__pose=gunPoseFromHand;', sb);
+  const palm = new Vec3(0, 0, 0), forearm = new Vec3(0, -1, 0);
+  const grip = { x: 0, y: 0, scale: 1 };
+  const mini = sb.__pose(palm, forearm, grip, null, { file: 'Minigun' });
+  const miniDir = [mini.dir.x, mini.dir.y, mini.dir.z], miniOrigin = [mini.origin.x, mini.origin.y, mini.origin.z];
+  const rifle = sb.__pose(palm, forearm, grip, null, { file: 'AssaultRifle' });
+  assert.ok(miniDir[1] >= -0.14 && miniDir[1] <= 0.16, 'pitch minigun ' + miniDir[1]);
+  assert.ok(Math.abs(miniDir[1] - 0.16) < 1e-9, 'pitch final ' + miniDir[1]);
+  assert.ok(Math.abs(Math.hypot(...miniDir) - 1) < 1e-9, 'dirección normalizada');
+  assert.ok(rifle.dir.y > 0.5, 'otras armas conservan la inclinación: ' + rifle.dir.y);
+  assert.ok(miniOrigin[0] > 0.07, 'apoyo frontal ' + miniOrigin[0]);
+  assert.ok(miniOrigin[2] < -0.04, 'apoyo lateral ' + miniOrigin[2]);
+  assert.ok(Math.abs(miniOrigin[1]) < 0.02, 'altura de cadera ' + miniOrigin[1]);
+  assert.match(src, /const my=Math\.max\(-0\.14,Math\.min\(0\.16,_gpDir\.y\)\),mh=Math\.sqrt/);
+  assert.match(src, /_gpDir\.x=_gpDir\.x\/ml\*mh;_gpDir\.z=_gpDir\.z\/ml\*mh;_gpDir\.y=my/);
+  assert.match(src, /_gpOrigin\.addScaledVector\(_gpDir,0\.085\)\.addScaledVector\(_gpZ,-0\.055\)/);
+  assert.match(src, /file:gunData\.file\|\|''/);
+  const cal = JSON.parse(read('assets/weapons/weapon_calibrations.json'));
+  assert.ok(cal.Minigun.targetLength > cal.LightMachineGun.targetLength, 'minigun imponente');
+  assert.ok(Math.abs(cal.Minigun.scale * cal.Minigun.sourceDims[0] - cal.Minigun.targetLength) < 1e-6);
+});
+

@@ -36,8 +36,10 @@ npm run lint && npm test
 powershell -ExecutionPolicy Bypass -File bench/VERIFICAR.ps1
 ```
 
-La suite `npm test` cubre 127 pruebas; `src/` tiene 75 módulos ESM y todos
-quedan por debajo de 450 líneas.
+La suite `npm test` cubre 131 pruebas; `src/` tiene 79 módulos ESM y todos
+quedan por debajo de 450 líneas. El cierre del rediseño
+**Urban Tactical Arcade · Splatoon Pop** está documentado en
+[docs/REDISENO_ARCADE_2026-11-23.md](docs/REDISENO_ARCADE_2026-11-23.md).
 
 `VERIFICAR.ps1` hace 13 comprobaciones: sintaxis, 19 tableros, reglas, datos,
 winding, suite npm, rejillas IPA, capturas `debugGrid`, clips, humo 3D,

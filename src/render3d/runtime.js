@@ -1,4 +1,4 @@
-import { VIEW_MODE, T3, w2cx, init3D, setViewMode, build3DWorld, rebuildDyn3, rebuildHighlights3, updateHover3D, tickFx3D, updateUnitHuds3D, driveClipSoldier, driveRealSoldier, fitLiveGun3, updateGlbActor, crossFadeTo, CLIPLIB, CLIP_EVENT_LOG, skState } from './index.js';
+import { VIEW_MODE, T3, w2cx, init3D, setViewMode, build3DWorld, rebuildDyn3, rebuildHighlights3, updateHover3D, tickFx3D, updateUnitHuds3D, driveClipSoldier, driveRealSoldier, fitLiveGun3, updateGlbActor, crossFadeTo, CLIPLIB, CLIP_EVENT_LOG, skState, arcadeFxStats, TEAM_A_HEX, TEAM_B_HEX } from './index.js';
 import { REDUCED_MOTION, FX } from '../render2d/index.js';
 import { domControl } from '../ui/index.js';
 import { tileWorldY } from '../game/index.js';
@@ -63,7 +63,7 @@ const {G,hoverTile,advanceUnitYaw,TURRET_POS}=ctx;
       if(m.userData.light)m.userData.light.material.opacity=0.5+0.5*Math.abs(Math.sin(t/330));
     } else {m.position.y=0.12;m.rotation.z=0.55;}
   }
-  if(T3.domRings)T3.domRings.forEach(dr=>{const dc=domControl(dr.zone);dr.ring.material.color.set(dc==='A'?0x39c2d7:dc==='B'?0xff7a45:0xf4f1e6);});
+  if(T3.domRings)T3.domRings.forEach(dr=>{const dc=domControl(dr.zone);dr.ring.material.color.set(dc==='A'?TEAM_A_HEX:dc==='B'?TEAM_B_HEX:0xf4f1e6);});
   if(T3.dust&&!REDUCED_MOTION){T3.dust.rotation.y=t/60000;T3.dust.position.y=Math.sin(t/1400)*0.08;}
   if(T3.cannon){
     let ang=G.map.turret.owner==='B'?Math.PI:0;
@@ -131,5 +131,5 @@ const {G,hoverTile,advanceUnitYaw,TURRET_POS}=ctx;
     T3.lastRender=t;
     T3.renderer.render(T3.scene,T3.camera);
   }
-  try{const _s=skState(G.map.theme);window.__csn3d={theme:G.map.theme,geo:!!(_s&&_s.ready),units:T3.units?T3.units.size:0,tris:T3.renderer.info.render.triangles,calls:T3.renderer.info.render.calls,sw:T3.isSw,frame:((window.__csn3d&&window.__csn3d.frame)||0)+1,ev:CLIP_EVENT_LOG.length,evLast:CLIP_EVENT_LOG[CLIP_EVENT_LOG.length-1]||null};}catch(e){}
+  try{const _s=skState(G.map.theme);window.__csn3d={theme:G.map.theme,geo:!!(_s&&_s.ready),units:T3.units?T3.units.size:0,tris:T3.renderer.info.render.triangles,calls:T3.renderer.info.render.calls,sw:T3.isSw,frame:((window.__csn3d&&window.__csn3d.frame)||0)+1,ev:CLIP_EVENT_LOG.length,evLast:CLIP_EVENT_LOG[CLIP_EVENT_LOG.length-1]||null,exp:T3.renderer.toneMappingExposure,rim:!!T3.rim,arc:arcadeFxStats()};}catch(e){}
 }

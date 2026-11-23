@@ -5,6 +5,7 @@ import { lsGet, lsSet } from '../core/storage.js';
 import { sfx, auPlay } from '../core-and-audio.js';
 import { fx3Explosion, fx3Shot } from '../render3d/fx3d.js';
 import { DOM_TARGET, DOM_MAX_ROUNDS, ESCORT_MAX_ROUNDS, ESCORT_GUIDES_PER_ROUND, LS_NATION, LS_WINS, LS_GAMES, LS_CAMPAIGN, loadCampaign, saveCampaign, effMode, domControl, domZones, isExtraction, openSetup, renderCampaignPanel, renderNationChip } from '../ui/ui-shell.js';
+import { resultMarkup } from '../ui/arcade-hud.js';
 import { blocked, inBeacon, hasLOS, smokeBlocksLOS } from './board.js';
 import { damage, log, playOnce, spendEnergy, tryShoot, aliveCount, teamName, hasCharAction, hasCharIcon, pickupLoot, checkOverwatch } from './combat.js';
 import { completeTutorial, isTutorialActive } from './tutorial.js';
@@ -340,7 +341,9 @@ export function endGame(winner,reason){
   const squadLine='<p class="sub" style="margin:8px 0 0;font-size:12px">Tu escuadra: '+G.units.filter(u=>u.team==='A'&&!u.isDrone).map(u=>u.name+' ('+u.role+', '+(SKINS[u.skin]?SKINS[u.skin].name:'Estándar')+')').join(' · ')+'</p>';
   const resTable='<div class="res-table"><div class="res-row head"><span>Bando</span><span>Vivos</span><span>Daño</span><span>Derribos</span></div>'+
     ['A','B'].map(t=>'<div class="res-row"><span>'+(t==='A'?'Tú':'Rival')+'</span><span>'+aliveN(t)+'</span><span>'+ST[t].dmg+'</span><span>'+ST[t].kills+'</span></div>').join('')+'</div>';
-  const won=(winner==='A'),lbl=(winner==='A'?'VICTORIA':winner==='draw'?'EMPATE':'DERROTA');
+  const won=(winner==='A');
   const modeArt=effMode(G)==='dominacion'?'modo_dominacion':effMode(G)==='escolta'?'modo_escolta':effMode(G)==='baliza'?'modo_baliza':'modo_eliminacion';
-  showModal('<div class="endWrap '+(won?'win':'lose')+'"><div class="endBanner">'+lbl+'</div><img class="endArt" src="assets/ui/'+modeArt+'.png" alt=""/><h2>'+title+'</h2><p><b>'+reason+'</b></p>'+extra+'<p class="sub">Partida de '+G.round+' rondas. Supervivientes: '+survivors+'</p>'+resTable+squadLine+'<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px">'+campaignButtons+'<button class="btn primary big" onclick="closeModal();backToMenu()">Volver al menú</button>'+(G.mode==='campana'||G.mode==='tutorial'?'':'<button class="btn big" onclick="closeModal();openSetup(G.mode)">Revancha</button>')+'</div></div>');
+  const modeLabel=effMode(G)==='dominacion'?'DOMINACIÓN':effMode(G)==='escolta'?'ESCOLTA':effMode(G)==='baliza'?'BALIZA':'ELIMINACIÓN';
+  const endButtons=campaignButtons+'<button class="btn primary big" onclick="closeModal();backToMenu()">Volver al menú</button>'+(G.mode==='campana'||G.mode==='tutorial'?'':'<button class="btn big" onclick="closeModal();openSetup(G.mode)">Revancha</button>');
+  showModal(resultMarkup({winner:winner,round:G.round,modeLabel:modeLabel,art:'assets/ui/'+modeArt+'.png',title:title,reason:reason,extra:extra,survivors:survivors,table:resTable,squadLine:squadLine,buttons:endButtons}));
 }

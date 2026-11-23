@@ -16,7 +16,7 @@
 
 .viewer-list button{background:var(--panel2);border:1.5px solid var(--line);border-radius:8px;color:var(--ink);padding:9px 12px;text-align:left;font-weight:600}
 
-.viewer-list button.on{border-color:var(--amber);background:color-mix(in srgb,var(--amber) 12%,var(--panel2))}
+.viewer-list button.on{border-color:var(--ink-cyan);background:color-mix(in srgb,var(--ink-cyan) 14%,var(--panel2));box-shadow:inset 3px 0 0 var(--ink-cyan)}
 
 .viewer-stage{min-width:0}
 
@@ -28,7 +28,7 @@
 
 .viewer-meta{display:grid;grid-template-columns:minmax(0,1fr) 120px;gap:12px;align-items:center;margin-top:10px}
 
-.viewer-texture{width:120px;height:76px;object-fit:contain;background:#11150f;border:1px solid var(--line);border-radius:7px}
+.viewer-texture{width:120px;height:76px;object-fit:contain;background:var(--bg-elev);border:1px solid var(--line);border-radius:7px}
 
 .viewer-zoom{display:flex;align-items:center;gap:10px;margin-top:10px;color:var(--muted);font-size:13px}
 

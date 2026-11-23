@@ -49,10 +49,10 @@ function loadEngine() {
   sb.window = sb; sb.self = sb; sb.globalThis = sb;
   vm.createContext(sb);
   const modules = [
-    'data/nations', 'data/weapons', 'data/roles', 'data/cast', 'data/campaign', 'data/maps', 'data/map-pieces', 'data/deployables', 'data/ui-copy', 'data/skin-names', 'data/catalog-competitive', 'bridge', 'ui/campaign-ui', 'ui/setup-preview', 'ui/ui-shell', 'ui/abilities', 'ui/unit-card', 'ui/arsenal', 'ui/barracks', 'ui/wiring', 'ui/glb-lab', 'game/board', 'game/combat', 'game/gadgets', 'game/missions', 'game/turn', 'game/ai-escort', 'game/ai', 'game/tutorial', 'game/input', 'game/chars', 'game/demo', 'game/keyboard', 'game/quick',
+    'data/nations', 'data/weapons', 'data/roles', 'data/cast', 'data/campaign', 'data/maps', 'data/map-pieces', 'data/deployables', 'data/ui-copy', 'data/skin-names', 'data/catalog-competitive', 'bridge', 'ui/arcade-hud', 'ui/campaign-tally', 'ui/campaign-ui', 'ui/setup-preview', 'ui/ui-shell', 'ui/abilities', 'ui/unit-card', 'ui/arsenal', 'ui/barracks', 'ui/wiring', 'ui/glb-lab', 'game/board', 'game/combat', 'game/gadgets', 'game/missions', 'game/turn', 'game/ai-escort', 'game/ai', 'game/tutorial', 'game/input', 'game/chars', 'game/demo', 'game/keyboard', 'game/quick',
     'core/storage', 'core/rng', 'core/time', 'core/geometry', 'audio/sound',
-    'render2d/tiles', 'render2d/board', 'render2d/sprites', 'render2d/fx', 'render3d/runtime',
-    'render3d/scene', 'render3d/gun', 'render3d/fallback-soldier', 'render3d/assets-real', 'render3d/assets-geo', 'render3d/assets-meshy', 'render3d/env', 'render3d/assets-weapons', 'render3d/gltf-loader', 'render3d/asset-cache', 'render3d/actor-glb', 'render3d/gun-pose', 'render3d/clips', 'render3d/retarget', 'render3d/soldiers', 'render3d/real-sprites', 'render3d/world-props', 'render3d/world', 'render3d/fx3d', 'render3d/camera3d', 'viewer/card-stage', 'viewer/troop-cards', 'viewer/inspector'
+    'render2d/tiles', 'render2d/board', 'render2d/sprites', 'render2d/fx', 'render3d/runtime', 'render3d/env', 'render3d/fx-arcade',
+    'render3d/scene', 'render3d/gun', 'render3d/fallback-soldier', 'render3d/assets-real', 'render3d/assets-geo', 'render3d/assets-meshy', 'render3d/assets-weapons', 'render3d/gltf-loader', 'render3d/asset-cache', 'render3d/actor-glb', 'render3d/gun-pose', 'render3d/clips', 'render3d/retarget', 'render3d/soldiers', 'render3d/real-sprites', 'render3d/world-props', 'render3d/world', 'render3d/fx3d', 'render3d/camera3d', 'viewer/body-loader', 'viewer/card-stage', 'viewer/troop-cards', 'viewer/inspector'
   ];
   for (const name of modules) {
     const src = fs.readFileSync(path.join(__dirname, '..', 'src', name + '.js'), 'utf8')
@@ -445,4 +445,21 @@ test('clip events fire once per crossing and reset when the clip rewinds', () =>
   api.dispatchClipEvents(un, ud, clip, 'fire2h', 0.6, 1040);
   fired = api.CLIP_EVENT_LOG.slice(before).filter(e => e.f === 'PlayWeaponFire');
   assert.equal(fired.length, 2);
+});
+
+test('el look arcade 3D usa paleta pop, exposición 1.12 y FX agrupados sin renderer extra', () => {
+  const read = f => fs.readFileSync(path.join(__dirname, '..', 'src', f), 'utf8');
+  const env = read('render3d/env.js');
+  const cam = read('render3d/camera3d.js');
+  const demo = read('game/demo.js');
+  const arcade = read('render3d/fx-arcade.js');
+  assert.match(env, /TEAM_A_HEX=0x00e5ff/);
+  assert.match(env, /TEAM_B_HEX=0xff3d71/);
+  assert.match(env, /SELECT_LIME_HEX=0xb8ff2c/);
+  assert.match(cam, /toneMappingExposure=1\.12/);
+  assert.match(demo, /toneMappingExposure=1\.12/);
+  assert.match(cam, /new THREE\.DirectionalLight\(0x9fe8ff,0\.85\)/);
+  assert.doesNotMatch(arcade, /new THREE\.WebGLRenderer/);
+  assert.match(arcade, /REDUCED_MOTION/);
+  assert.match(read('render3d/fx3d.js'), /tickArcadeFx\(w,h,FX\.t\)/);
 });

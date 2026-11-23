@@ -67,22 +67,33 @@ test('los controles tienen foco visible y tamaño cómodo', () => {
   assert.match(css, /nav\.tabs button:hover/);
 });
 
-test('el tema militar oscuro es la única fuente de color', () => {
+test('el tema arcade oscuro es la única fuente de color', () => {
   const theme = fs.readFileSync(path.join(root, 'styles', 'theme.css'), 'utf8');
   const cards = fs.readFileSync(path.join(root, 'styles', 'cards.css'), 'utf8');
   const viewer = fs.readFileSync(path.join(root, 'styles', 'viewer.css'), 'utf8');
+  const layout = fs.readFileSync(path.join(root, 'styles', 'layout.css'), 'utf8');
   for (const token of [
-    '--bg:#0c100b;', '--bg-elev:#131911;', '--surface:#182016;', '--surface-2:#202a1d;',
-    '--stage:radial-gradient(circle at 50% 38%, #283224 0%, #141a12 72%, #0d110b 100%);',
-    '--line:rgba(188,206,166,.14);', '--line-strong:rgba(188,206,166,.26);',
-    '--line-accent:rgba(240,178,52,.55);', '--amber:#f0b234;', '--amber-dark:#c98a14;'
+    '--bg:#0d1117;', '--bg-elev:#141a23;', '--surface:#19212c;', '--surface-2:#222d3b;',
+    '--stage:radial-gradient(circle at 50% 35%, #263447 0%, #141b25 68%, #0c1016 100%);',
+    '--ink-cyan:#00e5ff;', '--ink-coral:#ff3d71;', '--ink-lime:#b8ff2c;', '--ink-gold:#ffc933;', '--ink-violet:#9b6bff;',
+    '--ink:#f4f7fb;', '--muted:#9aa7b8;', '--faint:#677588;',
+    '--line:rgba(244,247,251,.12);', '--line-strong:rgba(244,247,251,.24);'
   ]) assert.ok(theme.includes(token), token);
   assert.doesNotMatch(css, /prefers-color-scheme:\s*light/);
+  assert.match(indexHtml, /name="color-scheme" content="dark"/);
+  assert.doesNotMatch(css, /#0c100b|#f0b234|#283224|#182016|#3ec5db|#f27446/);
   assert.equal((theme.match(/\.btn\{/g) || []).length, 1);
-  assert.ok(cards.includes('border:1px solid var(--line);border-radius:14px;background:var(--surface)'));
-  assert.ok(cards.includes('transform:translateY(-4px);border-color:var(--line-accent)'));
+  assert.doesNotMatch(cards, /\n\.btn\{/);
+  assert.doesNotMatch(viewer, /\n\.btn\{|\n\.troop-grid\{|\n\.troop-filters\{/);
+  assert.doesNotMatch(layout, /\n\.btn\{/);
+  assert.ok(cards.includes('border:2px solid var(--line);border-radius:12px;background:var(--surface)'));
+  assert.ok(cards.includes('transform:translateY(-5px) rotate(-0.3deg)'));
+  assert.ok(cards.includes('box-shadow:0 6px 0 rgba(0,0,0,.42)'));
+  assert.ok(theme.includes('color:#0d1117;box-shadow:0 4px 0 var(--amber-dark)'));
+  assert.ok(theme.includes('transform:translateY(3px);box-shadow:none'));
+  assert.ok(theme.includes('.tag,.kicker{transform:skewX(-6deg)'));
+  assert.ok(theme.includes('@media(prefers-reduced-motion:reduce)'));
   assert.doesNotMatch(cards, /#faf8f2|#1c211a|#626a5c/);
-  assert.doesNotMatch(viewer, /\.troop-filters\{/);
   assert.doesNotMatch(css, /min-height:\s*(?:[12]?\d|3\d)px/);
 });
 
@@ -186,4 +197,29 @@ test('las tarjetas de escuadra pueblan rol, arma y personaje', async () => {
   assert.equal(picked.charKey, 'original:Hipster Dave');
   assert.equal(picked.chars.length, 1);
   assert.match(html, /fillSquadSelects\(row,\{role:r,weapon,fixedDef/);
+});
+
+test('el HUD de batalla y el resultado usan tarjetas arcade reutilizables', async () => {
+  const { vitalsMarkup, resultMarkup } = await import('../src/ui/arcade-hud.js');
+  const ally = { role: 'Comando', weapon: 'M4A1', hp: 75, maxHp: 100, alive: true, team: 'A' };
+  const foe = { role: '<img>', weapon: 'RPG', hp: 0, maxHp: 90, alive: false, team: 'B' };
+  const cards = vitalsMarkup([ally, foe], 'A', ally, { Comando: '#00e5ff' });
+  assert.match(cards, /class="hud-vital A ready sel"/);
+  assert.match(cards, /data-hud-unit="0"/);
+  assert.match(cards, /width:75%/);
+  assert.match(cards, /class="hud-vital B dead"/);
+  assert.doesNotMatch(cards, /<img>/);
+  assert.match(cards, /&lt;img&gt;/);
+  const result = resultMarkup({ winner: 'A', round: 3, modeLabel: 'BALIZA', art: 'assets/ui/modo_baliza.png', title: '¡Victoria!', reason: 'Rival eliminado.', survivors: '4', buttons: '<button>ok</button>' });
+  assert.match(result, /class="result-card"/);
+  assert.match(result, /class="endBanner">VICTORIA/);
+  assert.match(result, /class="result-round">R3/);
+  assert.match(result, /class="result-actions"><button>ok<\/button>/);
+  for (const id of ['hudScoreA', 'hudScoreB', 'squadVitals', 'hudSquadTitle']) assert.match(indexHtml, new RegExp('id="' + id + '"'), id);
+  assert.match(indexHtml, /class="turn-banner hud-topbar"/);
+  assert.match(html, /vitalsMarkup\(G\.units,G\.turn,G\.selected,ROLES\)/);
+  assert.match(html, /resultMarkup\(\{winner:winner,round:G\.round/);
+  assert.match(css, /\.hud-topbar\{/);
+  assert.match(css, /\.hud-vital\{/);
+  assert.match(css, /\.result-card\{/);
 });

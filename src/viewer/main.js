@@ -6,6 +6,7 @@ import { openInspector } from './inspector.js';
 import { originalWeaponProfile, WEAPONS_ORIGINAL, weaponFileForRef, positionGunFlash } from '../render3d/assets-weapons.js';
 import { DEPLOYABLES } from '../data/deployables.js';
 import { auWeaponFile, auVoice } from '../core-and-audio.js';
+import { VIEWER_BODY_SKINS, VIEWER_ROLE_FALLBACK, VIEWER_BODY_FILE, VIEWER_BODY_OVERRIDE, VIEWER_BODY_ROLE, createBodyLoader } from './body-loader.js';
 (function(){ const stage=document.getElementById('viewerCanvas'); if(!stage||typeof THREE==='undefined')return;
   const status=document.getElementById('viewerStatus'); const zoomControl=document.getElementById('viewerZoom'); const texturePreview=document.getElementById('viewerTexture');
   const viewer={ renderer:null,scene:null,camera:null,spin:null,platform:null,meshyFill:null,meshyRim:null, baseDistance:3,drag:null,dragVel:0,lastFrame:0,selection:0,
@@ -13,28 +14,7 @@ import { auWeaponFile, auVoice } from '../core-and-audio.js';
     frameRequested:false,models:{roles:{},weapons:{},props:{}},textures:{},bodyGeo:{},bodyRig:{},cardModel:null,cardMode:false,inspectorOpen:false,inspectorAutoSpin:false }; try{window.__csnViewer={get state(){return viewer;},getRoster:()=>viewerCharacters,getWeaponFiles:()=>viewerWeaponFiles,getEntry:key=>viewerCharacters.find(item=>item.key===key)||null,activate:spec=>activateSpec(activeCard().box||document.querySelector('#inspectorStage'),spec),fire:null,unmount:()=>unmountStage(),getCardBox:()=>activeCard().box};}catch(e){}
   const cardStage=ensureCardStage(stage);
   if(cardStage){viewer.renderer=cardStage.renderer;viewer.scene=cardStage.scene;viewer.camera=cardStage.camera;viewer.spin=cardStage.spin;viewer.platform=cardStage.platform;viewer.meshyFill=cardStage.meshyFill;viewer.meshyRim=cardStage.meshyRim;}
-  const VIEWER_BODY_SKINS={ 'Soldier_SAS':['Soldier_SAS_d.png','Soldier_SAS_Decon_d.png','Soldier_SAS_Veteran_d.png'],
-    'Soldier_Spud':['Soldier_d.png','Soldier_Decon_d.png','Soldier_ForestCamo_d.png','Soldier_Veteran_d.png'],
-    'Soldier_Light':['Soldier_Light_d.png','Soldier_Light_Decon_d.png','Soldier_Light_DeltaForce_d.png','Soldier_Light_Halloween_d.png','Soldier_Light_Spetsnaz_d.png','Soldier_Light_Veteran_d.png'],
-    'Soldier_Light_Rambo':['Soldier_Light_Rambo_d.png','Soldier_Light_Rambo_Decon_d.png','Soldier_Light_Rambo_DeerHunter_d.png','Soldier_Light_Rambo_Veteran_d.png'],
-    'Soldier_Heavy':['Soldier_heavy_d.png','Soldier_heavy_GermanSpecialForces_d.png','Soldier_Heavy_Decon_d.png','Soldier_Heavy_Veteran_d.png'],
-    'Agent_Light':['Agent_light_d.png','Agent_light_Decon_d.png','Agent_light_JewelThief_d.png','Agent_light_Veteran_d.png'],
-    'Agent_Heavy':['Agent_Heavy_d.png','Agent_Heavy_Decon_d.png','Agent_Heavy_Skin1_d.png','Agent_Heavy_Veteran_d.png'],
-    'Medic':['Medic_d.png','Medic_Decon_d.png','Medic_Halloween_d.png','Medic_Rescue_d.png','Medic_Spetsnaz_d.png','Medic_Veteran_d.png'],
-    'Medic_therapist':['Medic_Therapist_d.png','Medic_Therapist_Decon_d.png','Medic_Therapist_Surgeon_d.png','Medic_Therapist_Veteran_d.png'],
-    'Engineer':['Engineer_d.png','Engineer_Decon_d.png','Engineer_Halloween_d.png','Engineer_Spetsnaz_d.png','Engineer_Veteran_d.png'],
-    'Engineer_Light':['Engineer_Light_d.png','Engineer_Light_Decon_d.png','Engineer_Light_Trinity_d.png','Engineer_Light_Veteran_d.png'],
-    'Engineer_Heavy':['Engineer_Heavy2_d.png','Engineer_Heavy_Decon_d.png','Engineer_Heavy_EOD_d.png','Engineer_Heavy_Veteran_d.png'],
-    'Engineer (RiotCop)':['Engineer_RiotCop_d.png','Engineer_RiotCop_Decon_d.png','Engineer_RiotCop_Skin1_d.png','Engineer_RiotCop_Veteran_d.png'],
-    'Commander':['Commander_d.png','Commander_African_d.png','Commander_Asian_d.png','Commander_Latino_d.png'],
-    'CommanderM':['Commander_d.png','Commander_African_d.png','Commander_Asian_d.png','Commander_Latino_d.png'],
-    'Commander_F':['Commander_F_d.png','Commander_F_African_d.png','Commander_F_Asian_d.png','Commander_F_Latino_d.png'] }; const VIEWER_ROLE_FALLBACK={
-    'Riot Medic':'Médico','Megan McNick':'Ingeniero','Carlito Grosso':'Ingeniero', 'Riot Engineer':'Ingeniero','Commander (F)':'Capitán' }; const VIEWER_CAST_TEXTURE=CAST_TEXTURE_FILE;
-  const VIEWER_BODY_FILE={ 'Soldier_SAS':'Soldier_SAS.obj', 'Soldier_Spud':'Soldier_Spud.obj', 'Soldier_Heavy':'Soldier_Heavy.obj', 'Soldier_Light_Rambo':'Soldier_Light_Rambo.obj',
-    'Agent_Light':'Agent_Light.obj', 'Medic_therapist':'Medic_therapist_1248v.obj', 'Engineer_Light':'Engineer_Light.obj', 'Engineer_Heavy':'Engineer_Heavy.obj',
-    'Engineer (RiotCop)':'Engineer_RiotCop.obj', 'CommanderM':'CommanderM.obj', 'Commander_F':'CommanderF.obj' };
-  const VIEWER_BODY_OVERRIDE={'Archie Fletcher':'Soldier_Light_Rambo','Commander (M)':'CommanderM'};
-  const VIEWER_BODY_ROLE={'Medic':'Médico','Engineer':'Ingeniero','Agent_Heavy':'Comando','Commander':'Capitán'};
+  const VIEWER_CAST_TEXTURE=CAST_TEXTURE_FILE;
   const VIEWER_MESHY_FRONT={Francotirador:1,Espia:1,Artillero:-1,Medico:1,Ingeniero:1};
   const viewerCharacters=[ ...ORIG_CAST.map((character,index)=>{ const role=character.role||VIEWER_ROLE_FALLBACK[character.name]||'';
       const body=VIEWER_BODY_OVERRIDE[character.name]||character.body; const bodyFile=VIEWER_BODY_FILE[body]||''; const bodyRole=VIEWER_BODY_ROLE[body]||''; return {
@@ -213,15 +193,7 @@ import { auWeaponFile, auVoice } from '../core-and-audio.js';
         flash.traverse(o=>{if(o.isMesh&&o.material)o.material.opacity=1;else if(o.isPointLight)o.intensity=1.4;});gun.userData._testFlash=1;}
     }
     st.ct=ct; };
-  async function loadViewerBody(file){ const path='assets/soldier/bodies/'+file; if(viewer.bodyGeo[path])return viewer.bodyGeo[path];
-    const rigPath=path.replace(/\.obj$/, '_rig.json'); const [response,rigResponse]=await Promise.all([fetch(path),fetch(rigPath)]);
-    if(!response.ok)throw new Error('No se pudo cargar el cuerpo '+file); const text=await response.text(); let count=0;
-    for(const line of text.split('\n')){if(line.startsWith('v '))count++;}; const rig=rigResponse.ok?await rigResponse.json():null;
-    const hasRig=!!(rig&&rig.bones&&rig.skinIndex&&rig.skinIndex.length===count*4&&rig.skinWeight&&rig.skinWeight.length===count*4);
-    const skin=hasRig?{skinIndex:rig.skinIndex,skinWeight:rig.skinWeight}:{skinIndex:new Array(count*4).fill(0),skinWeight:new Array(count*4).fill(0)};
-    const geo=parseOBJ3(text,skin); const pos=geo.attributes.position.array; const zs=[]; for(let i=2;i<pos.length;i+=3)zs.push(pos[i]); zs.sort((a,b)=>a-b);
-    const p95=zs[Math.floor(zs.length*0.95)]||1; const scale=1.14/p95; if(scale!==1)geo.scale(scale,scale,scale);
-    viewer.bodyGeo[path]=geo; if(hasRig)viewer.bodyRig[path]=rig; return geo; }
+  const loadViewerBody=createBodyLoader({cache:viewer.bodyGeo,rigCache:viewer.bodyRig,parse:parseOBJ3,three:THREE});
   async function makeRiggedViewerActor(geometry,data,texture,entry){ const started=Date.now();
     while(!CLIPLIB.ready&&Date.now()-started<5000)await wait(50);
     const baseData=sameRigBoneOrder(REAL.data&&REAL.data.bones,data.bones)?REAL.data:null;

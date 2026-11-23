@@ -13,6 +13,7 @@ import { MINE_COST, MINE_DMG, captureTurret, useSpecial } from '../game/missions
 import { tutorialCheck, tutorialEvent } from '../game/tutorial.js';
 import { ARTY_COST, ARTY_DMG, ARTY_RANGE, BEES_COST, BEES_DMG, BEES_RANGE, BEES_TURNS, COVER_COST, CRATE_COST, GAS_COST, GAS_DMG, GAS_TURNS, MOLOTOV_COST, MOLOTOV_DMG, MOLOTOV_TURNS, ORB_COST, ORB_DMG, ORB_RANGE, SHIELD_COST, SWEEP_COST, SWEEP_RANGE, TELE_COST, TELE_RANGE, TOOL_COST, TOOL_HEAL, TOOL_RANGE, TRANQ_COST, TRANQ_RANGE, WATER_COST, WATER_PUSH, WATER_RANGE, useShield, useToolkit } from '../game/gadgets.js';
 import { $, DOM_MAX_ROUNDS, DOM_TARGET, ESCORT_GUIDES_PER_ROUND, ESCORT_MAX_ROUNDS, domControl, domZones, effMode, escortExt, flagHTML, emblemHTML, rolePortraitURL, setStep, syncPlayingViewport, toast } from './ui-shell.js';
+import { vitalsMarkup } from './arcade-hud.js';
 import { ABILITY_IMPL } from './abilities.js';
 
 export function updateUI(){
@@ -22,6 +23,19 @@ export function updateUI(){
   pill.className='turn-pill '+G.turn;
   pill.textContent=G.over?'Partida terminada':'Turno: '+teamName(G.turn)+(G.aiBusy?' · la IA está jugando…':'');
   $('#roundLabel').textContent='Ronda '+G.round+(effMode(G)==='dominacion'?(' / '+DOM_MAX_ROUNDS):effMode(G)==='escolta'?(' / '+ESCORT_MAX_ROUNDS):'')+' · '+G.map.name+' · '+(effMode(G)==='eliminacion'?'Eliminación':effMode(G)==='dominacion'?'Dominación':effMode(G)==='escolta'?'Escolta del dron':G.mode==='guerra'?'Guerra de Naciones':G.mode==='tutorial'||G.isTutorial?('Instrucción de Dave'):G.mode==='campana'?('Campaña · Misión '+(G.campaignMission+1)+' · '+CAMPAIGN_MISSIONS[G.campaignMission].title):'Captura de baliza')+(G.opp==='ia'?(' · IA '+G.difficulty):'')+' · Quedan '+aliveCount('A')+' contra '+aliveCount('B');
+  $('#hudScoreA').textContent='J1 · '+aliveCount('A');
+  $('#hudScoreB').textContent='RIVAL · '+aliveCount('B');
+  const squadTitle=$('#hudSquadTitle');if(squadTitle)squadTitle.textContent=teamName(G.turn);
+  const vitals=$('#squadVitals');
+  if(vitals){
+    vitals.innerHTML=vitalsMarkup(G.units,G.turn,G.selected,ROLES);
+    vitals.onclick=e=>{
+      const btn=e.target&&e.target.closest?e.target.closest('[data-hud-unit]'):null;
+      if(!btn)return;
+      const u=G.units[+btn.dataset.hudUnit];
+      if(u&&u.alive&&u.team===G.turn&&!G.aiBusy){selectUnit(u);tutorialEvent('select',{unit:u});}
+    };
+  }
   setStep('battle',(G.over?'Partida terminada':'Ronda '+G.round+' · '+teamName(G.turn))+(G.aiBusy?' · IA pensando':''));
   const bm=$('#beaconMeter');
   if(effMode(G)!=='baliza'){bm.style.display='none';}

@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-<meta name="color-scheme" content="dark light"/>
+<meta name="color-scheme" content="dark"/>
 <link rel="icon" href="assets/ui/favicon.ico" sizes="any"/>
 <link rel="icon" type="image/png" href="assets/ui/icono_original.png"/>
 <link rel="apple-touch-icon" href="assets/ui/icono_original.png"/>
 <title>CSN — Chess Soldier Nation · Táctica por turnos</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <script src="assets/three.min.js"></script>
 <link rel="stylesheet" href="styles/layout.css">
 <link rel="stylesheet" href="styles/game.css">
@@ -62,190 +62,128 @@
 
   <!-- ============ MAIN / PLAY ============ -->
   <section class="screen" id="scr-play">
-    <div class="hero heroOrigen">
-      <div class="heroFondo" style="background-image:url('assets/ui/portada_arte.png')"></div>
+    <div class="hero heroOrigen arcade-hero">
+      <div class="heroFondo" style="background-image:url('assets/maps/skirmish03_top.jpg')"></div>
       <div class="heroVelo"></div>
-      <div class="heroContenido">
-      <img class="heroLogo" src="assets/ui/rad_logo.png" alt="RAD Soldiers, el original de 2012"/>
-      <h1>Ajedrez con <em>fusiles de verdad</em></h1>
-<p>Ajedrez por turnos con <b>fusiles de verdad</b>: dos escuadras, energía, cobertura direccional y armas reales. Elige nación, monta tu escuadra y a jugar.</p>
+      <div class="heroContenido arcade-hero-grid">
+        <div class="arcade-hero-copy">
+          <span class="kicker">Urban Tactical Arcade · Splatoon Pop</span>
+          <h1>Táctica de barrio, <em>color a tope</em></h1>
+          <p>Dos escuadras, cobertura direccional y armas reales sobre un tablero que se mueve. Entra en 3D al instante o sigue la operación.</p>
+          <div class="arcade-hero-chips"><span>13 tableros</span><span>6 misiones</span><span>40 clips IPA</span></div>
+        </div>
+        <article class="arcade-campaign-card" id="heroCampaignCard">
+          <img src="assets/maps/skirmish03_top.jpg" alt="Skirmish_03 · Londres"/>
+          <div class="arcade-campaign-body">
+            <span class="tag amber">Modo Historia · IPA</span>
+            <h2>Operación Londres</h2>
+            <p class="sub" id="campaignHubSummary"></p>
+            <div id="campaignProgress" class="statline"></div>
+            <div class="arcade-card-actions">
+              <button class="btn primary big" id="campaignContinue" type="button">▶ CONTINUAR CAMPAÑA</button>
+              <button class="btn ghost" id="campaignTutorial" type="button">MAPA DE MISIONES Y TUTORIAL</button>
+            </div>
+          </div>
+        </article>
       </div>
     </div>
 
     <div id="menuArea">
       <div class="menu-topline">
-        <div class="guide-note" id="modeGuide"><b>Paso 2 de 4.</b> Entra a partida rápida o elige un modo. El Cuartel y el Visor son opcionales y siempre tienen vuelta atrás.</div>
+        <div class="guide-note" id="modeGuide"><b>Paso 2 de 4.</b> Despliega al instante, abre la campaña o elige un formato. El Cuartel siempre tiene vuelta atrás.</div>
       </div>
-      <div class="panel menuOrigen" id="origMenu" style="margin-top:16px">
-        <div class="menu-heading"><span class="tag amber">Punto de mando</span><h2>Operaciones</h2><p class="sub">Acceso directo. El resto vive en secciones plegadas.</p></div>
-        <div class="menuCol">
-          <button class="btn primary" id="mnuQuick">⚡ Partida rápida<small class="sub">Partida rápida en el Almacén</small></button>
-          <button class="btn" id="mnuOnline">🌐 Jugar en local<small class="sub">Sin servidor: IA o dos jugadores en local</small></button>
-          <button class="btn" id="mnuChallenges">🏆 Desafíos<small class="sub">Operación Londres · 6 misiones</small></button>
-          <button class="btn" id="mnuExpansions">📦 Expansiones<small class="sub">Contenido futuro</small></button>
-          <button class="btn" id="mnuBarracks">🏰 Cuartel<small class="sub">Tropas, skins, arsenal y monedas</small></button>
-          <button class="btn" id="mnuViewer">🧊 Tropas<small class="sub">Personajes con visor 3D integrado</small></button>
-          <button class="btn" id="mnuArmory">🛠 Armería<small class="sub">Catálogo de armas y desplegables</small></button>
+
+      <section class="arcade-quick panel" aria-label="Despliegue inmediato">
+        <div class="quick-head"><span class="tag amber">Acceso directo</span><h2>Sal al tablero</h2></div>
+        <div class="arcade-quick-grid">
+          <button class="btn primary big quick-tile" id="mnuQuick" type="button"><b>▶ PARTIDA RÁPIDA 3D</b><small>Baliza 4 contra 4 en el Almacén</small></button>
+          <button class="btn big quick-tile" id="heroSkirmishBtn" type="button"><b>SKIRMISH LONDRES 3D</b><small>Calles de Skirmish_03 sin configurar</small></button>
+          <button class="btn big quick-tile" id="mnuBarracks" type="button"><b>CUARTEL</b><small>Tropas, skins, arsenal y monedas</small></button>
         </div>
-        <p class="sub" style="margin:10px 0 0"><span class="tag amber" id="coinsTag">🪙 0</span> +25 monedas por victoria contra la IA.</p>
+      </section>
+
+      <div id="origMenu" hidden>
+        <button id="mnuOnline" type="button">Jugar en local</button>
+        <button id="mnuChallenges" type="button">Desafíos · Operación Londres</button>
+        <button id="mnuExpansions" type="button">Expansiones</button>
+        <button id="mnuViewer" type="button">Personajes con visor 3D integrado</button>
+        <button id="mnuArmory" type="button">Catálogo de armas y desplegables</button>
+        <span id="coinsTag">🪙 0</span>
       </div>
-      
-      <div id="demoSlotPlay"></div>
+      <div id="demoSlotPlay" hidden></div>
+
       <details class="menu-section menu-dossier" id="menuModes" open>
-        <summary><span class="tag amber">Modos</span><b>Elige operación</b><small>6 formatos · campaña incluida</small></summary>
-        <div class="grid3 mode-grid">
+        <summary><span class="tag amber">Modos</span><b>Elige operación</b><small>4 formatos · campaña incluida</small></summary>
+        <div class="grid3 mode-grid skirmish-grid">
           <div class="mode-card" data-modecard="eliminacion">
-            <img class="mode-art" src="assets/ui/modo_eliminacion.png" alt="Dos escuadras de soldados frente a frente"/>
-            <span class="tag amber">Modo clásico</span>
-            <h3>Eliminación</h3>
-            <details class="info"><summary>ⓘ Más información</summary><div class="info-body"><p>Gana quien elimine a toda la escuadra enemiga. Sin baliza y sin atajos: el modo directo del original.</p></div></details>
+            <img class="mode-art" src="assets/ui/modo_eliminacion.png" alt="Dos escuadras frente a frente"/>
+            <span class="tag amber">Clásico</span><h3>Eliminación</h3>
+            <p>Gana quien derribe a toda la escuadra rival.</p>
             <button class="btn primary" data-start="eliminacion">Configurar partida</button>
           </div>
           <div class="mode-card" data-modecard="baliza">
-            <img class="mode-art" src="assets/ui/modo_baliza.png" alt="Una baliza de señal en el centro del tablero"/>
-            <span class="tag amber">Modo del original</span>
-            <h3>Captura de baliza</h3>
-            <details class="info"><summary>ⓘ Más información</summary><div class="info-body"><p>Aguanta <b>5 turnos</b> con tu escuadra dentro de la zona central y sin enemigos dentro, o elimina al rival. La zona del cohete de RAD Soldiers, reconstruida.</p></div></details>
+            <img class="mode-art" src="assets/ui/modo_baliza.png" alt="Baliza de señal central"/>
+            <span class="tag amber">Original</span><h3>Captura de baliza</h3>
+            <p>Aguanta 5 turnos la zona central o elimina al rival.</p>
             <button class="btn primary" data-start="baliza">Configurar partida</button>
           </div>
-          <div class="mode-card" id="guerraCard">
-            <span class="tag" id="guerraTag">Evento · Sáb y Dom</span>
-            <h3>Guerra de Naciones</h3>
-            <p id="guerraDesc">Captura de baliza por tu nación contra una nación rival controlada por la IA. Cada victoria suma un punto al marcador de tu nación en este dispositivo.</p>
-            <div id="guerraScore" class="statline"></div>
-            <div id="guerraLock" style="display:none">
-              <p class="sub" style="margin-bottom:4px">El evento abre el sábado a las 00:00. Tiempo restante:</p>
-              <div class="countdown" id="guerraCountdown">—</div>
-            </div>
-            <button class="btn olive" id="guerraBtn" data-start="guerra">Luchar por mi nación</button>
-          </div>
-        </div>
-        <div class="grid3 mode-grid" style="margin-top:14px">
           <div class="mode-card" data-modecard="dominacion">
-            <img class="mode-art" src="assets/ui/modo_dominacion.png" alt="Soldados tomando posiciones en varias zonas del tablero"/>
-            <span class="tag amber">Nuevo · Control de zonas</span>
-            <h3>Dominación</h3>
-            <details class="info"><summary>ⓘ Más información</summary><div class="info-body"><p>Tres zonas a la vez: <b>Depósito</b> (flanco oeste), <b>Centro</b> (la baliza) y <b>Muelle</b> (flanco este). Al iniciar tu turno desde la ronda 2, sumas 1 punto por cada zona que mantengas controlada (y 1 extra si dominas las tres). Gana quien llegue a <b>10 puntos</b> o elimine al rival. Ya no basta con aguantar un punto: hay que repartir la escuadra y decidir dónde pelear.</p></div></details>
+            <img class="mode-art" src="assets/ui/modo_dominacion.png" alt="Soldados en tres zonas"/>
+            <span class="tag amber">3 zonas</span><h3>Dominación</h3>
+            <p>Depósito, Centro y Muelle. Primero a 10 puntos.</p>
             <button class="btn primary" data-start="dominacion">Configurar partida</button>
           </div>
-          <div class="mode-card" data-modecard="campana" style="grid-column:span 2">
-            <span class="tag amber">Modo Historia · IPA</span>
-            <h3>Operación Londres</h3>
-            <p class="sub" style="margin:0">Seis misiones, radio de Dave, medallas y veterania guardada en este dispositivo.</p>
-            <div id="campaignProgress" class="statline" style="margin:4px 0"></div>
-            <button class="btn primary" id="campaignBtn" style="align-self:flex-start">Abrir campaña ▶</button>
+          <div class="mode-card" data-modecard="escolta">
+            <img class="mode-art" src="assets/ui/modo_escolta.png" alt="Escuadra escoltando un dron"/>
+            <span class="tag amber">Asimétrico</span><h3>Escolta del dron</h3>
+            <p>Guía el dron hasta la extracción antes de 15 rondas.</p>
+            <button class="btn primary" data-start="escolta">Configurar partida</button>
           </div>
         </div>
-        <div class="grid3 mode-grid" style="margin-top:14px">
-          <div class="mode-card" data-modecard="escolta" style="grid-column:span 3">
-            <img class="mode-art" src="assets/ui/modo_escolta.png" alt="Una escuadra escoltando a un dron averiado" style="max-width:340px"/>
-            <span class="tag amber">Nuevo · Escolta asimétrica</span>
-            <h3>Escolta del dron</h3>
-            <details class="info"><summary>ⓘ Más información</summary><div class="info-body"><p>Un <b>dron averiado</b> (240 PV, entra entero) espera en tu flanco oeste y la <b>extracción</b> está en el este, tras las líneas rivales. Pega a tus soldados a él (mientras tenga al menos un soldado aliado pegado recibe <b>−53 % de daño</b>) y <b>guíalo casilla a casilla</b> (máximo 2 guiados por ronda, 2 ⚡ del guía cada uno) mientras el rival intenta destruirlo: si el dron llega a la extracción, gana la escolta; si el dron cae, o si la defensa aguanta <b>15 rondas</b>, gana la defensa. Eliminar a la escuadra rival también vale, y tu Médico puede reparar el dron sobre la marcha. La IA rival juega el objetivo: intercepta al dron, le dispara primero a él y lo granadea en cuanto lo tiene a tiro.</p></div></details>
-            <button class="btn primary" data-start="escolta" style="align-self:flex-start">Configurar partida</button>
-          </div>
+        <div class="guerra-banner mode-card" id="guerraCard">
+          <div><span class="tag" id="guerraTag">Evento · Sáb y Dom</span><h3>Guerra de Naciones</h3><p id="guerraDesc">Captura de baliza por tu nación contra una nación rival controlada por la IA.</p><div id="guerraScore" class="statline"></div></div>
+          <div class="guerra-actions"><div id="guerraLock" style="display:none"><p class="sub">Abre el sábado a las 00:00</p><div class="countdown" id="guerraCountdown">—</div></div><button class="btn olive" id="guerraBtn" data-start="guerra">Luchar por mi nación</button></div>
         </div>
       </details>
-      <details class="menu-section menu-dossier" id="menuExtras">
-        <summary><span class="tag">Ficha técnica</span><b>Skins y mapas</b><small>Solo si quieres profundizar</small></summary>
+
+      <details class="menu-section menu-dossier" id="menuExtras" hidden>
+        <summary><span class="tag">Ficha técnica</span><b>Skins y mapas</b></summary>
         <div class="panel">
           <h2>Tus skins</h2>
-          <details class="info"><summary>ⓘ ¿Qué son las skins?</summary><div class="info-body"><p class="sub">Tienes <b>tres skins</b>, y las tres son <b>solo aspecto, sin pasivas</b>: Estándar (genérica), Clase (color del rol) y Nación (bandera, casco y emblema). La de Nación es una skin más, no la definitiva: más adelante llegarán otras skins, y esas sí darán pasivas pequeñas. Eliges la skin de tu escuadra al configurar cada partida.</p></div></details>
           <div class="skin-cards">
-            <div class="skin-card">
-              <span class="tag">Skin inicial · Sin pasiva</span>
-              <h3>Estándar</h3>
-              <div class="skin-swatch"><i style="background:#66704f"></i><i style="background:#59613f"></i><i style="background:#3e4630"></i></div>
-              <p class="sub" style="margin:0">El soldado genérico, como la skin estándar de Fortnite: uniforme verde oliva liso, sin colores de nación, sin emblema y sin nada especial.</p>
-            </div>
-            <div class="skin-card">
-              <span class="tag amber">Skin inicial · Sin pasiva</span>
-              <h3>Nación <span id="skinNationName"></span></h3>
-              <div class="skin-swatch" id="skinNationSwatch"></div>
-              <p class="sub" style="margin:0" id="skinNationDesc">Los colores de la bandera de tu nación en el uniforme y el casco, con el emblema de sus fuerzas armadas en el pecho.</p>
-            </div>
+            <div class="skin-card"><span class="tag">Sin pasiva</span><h3>Estándar</h3><div class="skin-swatch"><i style="background:#66704f"></i><i style="background:#59613f"></i><i style="background:#3e4630"></i></div><p class="sub">El soldado genérico, sin colores de nación.</p></div>
+            <div class="skin-card"><span class="tag amber">Sin pasiva</span><h3>Nación <span id="skinNationName"></span></h3><div class="skin-swatch" id="skinNationSwatch"></div><p class="sub" id="skinNationDesc">Los colores de tu bandera en el uniforme y el casco.</p></div>
           </div>
         </div>
         <div class="panel" style="margin-top:14px">
-          <h2>Los mapas: Almacén industrial, Patio de contenedores y los Skirmish de Londres</h2>
-          <details class="info"><summary>ⓘ ¿Cómo son los tableros?</summary><div class="info-body"><p class="sub" style="max-width:78ch">Los trece tableros jugables son de 12×12 casillas con simetría de 180°, para que ningún bando nazca con ventaja: estanterías y muros que no se rompen, cajas destructibles que dan cobertura, <b>barriles explosivos</b> (70 de daño en las casillas adyacentes si les disparas), dos <b>botiquines</b> de un solo uso (+50 de vida al pasar por encima) y una <b>torreta capturable</b> en el centro: el primer soldado que se plante en su casilla y gaste 2 de energía la pone a disparar para su bando al final de cada turno. En las rondas 3 y 6 cae una <b>caja de botín</b> cerca del centro con cura, energía o una granada extra para quien la recoja. La vista del tablero sigue la cámara del original como referencia de encuadre: inclinación de 50°, distancia de 8,5 casillas y campo de visión de 37,5°.</p></div></details>
-          <details class="more"><summary>Ver los 13 tableros</summary>
-            <ul class="reg-list" style="columns:2;column-gap:28px;margin-top:8px">
-              <li><b>Almacén industrial</b> — el tablero de siempre: estanterías, barriles y torreta central.</li>
-              <li><b>Patio de contenedores</b> — contenedores cruzados en pasillos.</li>
-              <li><b>Skirmish_03 · Londres</b> — calles londinenses.</li>
-              <li><b>Skirmish_04 · Londres</b> — el puente sobre el río.</li>
-              <li><b>Skirmish_05 · El depósito</b> — pilares de estación y contenedores.</li>
-              <li><b>Skirmish_06 · Los andenes</b> — bandas de contenedores.</li>
-              <li><b>Skirmish_07 · El mercado</b> — puestos en cruz (tablero propio en código).</li>
-              <li><b>Skirmish_08 · La terminal</b> — carga abierta.</li>
-              <li><b>Skirmish_01 · La plaza</b> — plaza cerrada sobre el centro (tablero propio en código).</li>
-              <li><b>Skirmish_02 · El embarcadero</b> — canal central abierto (tablero propio en código).</li>
-              <li><b>Skirmish_09 · La rotonda</b> — anillo de contenedores.</li>
-              <li><b>Skirmish_10 · El cruce</b> — cruce de avenidas.</li>
-              <li><b>Skirmish_11 · El astillero</b> — dique seco central.</li>
-            </ul>
-          </details>
+          <h2>Los 13 tableros</h2>
+          <ul class="reg-list" style="columns:2;column-gap:28px">
+            <li>Almacén industrial</li><li>Patio de contenedores</li><li>Skirmish_01 · La plaza</li><li>Skirmish_02 · El embarcadero</li><li>Skirmish_03 · Londres</li><li>Skirmish_04 · El puente</li><li>Skirmish_05 · El depósito</li><li>Skirmish_06 · Los andenes</li><li>Skirmish_07 · El mercado</li><li>Skirmish_08 · La terminal</li><li>Skirmish_09 · La rotonda</li><li>Skirmish_10 · El cruce</li><li>Skirmish_11 · El astillero</li>
+          </ul>
         </div>
       </details>
+
       <div class="campaign-hub" id="campaignHub" style="display:none">
         <div class="hub-head">
-          <div><span class="tag amber">Modo Historia · 6 misiones</span><h2>Operación Londres</h2><p class="sub" id="campaignHubSummary"></p></div>
+          <div><span class="tag amber">Modo Historia · 6 misiones</span><h2>Operación Londres</h2><p class="sub" id="campaignHubSummaryDetail"></p></div>
           <button class="btn ghost" id="campaignHubBack" type="button">← Volver a modos</button>
         </div>
         <div class="hub-actions">
-          <button class="btn primary big" id="campaignContinue" type="button">▶ Continuar campaña</button>
-          <button class="btn" id="campaignTutorial" type="button">🎓 Instrucción de Dave</button>
+          <div id="campaignTally" class="hub-tally"></div>
+          <button class="btn primary big" id="campaignNextBtn" type="button">SIGUIENTE MISIÓN ▶</button>
           <button class="btn ghost" id="campaignResetBtn" type="button">↺ Reiniciar progreso</button>
         </div>
         <div class="radio-strip"><div id="campaignRadio" style="flex:1"></div><button class="btn small" id="campaignRadioNext" type="button">📻 Siguiente línea</button></div>
+        <article class="dave-card" id="daveCard">
+          <img src="assets/ui/orig/Class_Commander_alpha.png" alt="Hipster Dave"/>
+          <div><span class="tag amber">Fase 0 · Entrenamiento</span><h3>Hipster Dave</h3><p class="sub" id="campaignDaveLine"></p><button class="btn small" id="tutorialBtn" type="button">🎓 Instrucción de Dave</button></div>
+        </article>
         <div class="campaign-list" id="campaignList"></div>
       </div>
-
-      <div class="panel" style="margin-top:14px">
-        <h2>Tus skins</h2>
-        <details class="info"><summary>ⓘ ¿Qué son las skins?</summary><div class="info-body"><p class="sub">Tienes <b>tres skins</b>, y las tres son <b>solo aspecto, sin pasivas</b>: Estándar (genérica), Clase (color del rol) y Nación (bandera, casco y emblema). La de Nación es una skin más, no la definitiva: más adelante llegarán otras skins, y esas sí darán pasivas pequeñas. Eliges la skin de tu escuadra al configurar cada partida.</p></div></details>
-        <div class="skin-cards">
-          <div class="skin-card">
-            <span class="tag">Skin inicial · Sin pasiva</span>
-            <h3>Estándar</h3>
-            <div class="skin-swatch"><i style="background:#66704f"></i><i style="background:#59613f"></i><i style="background:#3e4630"></i></div>
-            <p class="sub" style="margin:0">El soldado genérico, como la skin estándar de Fortnite: uniforme verde oliva liso, sin colores de nación, sin emblema y sin nada especial.</p>
-          </div>
-          <div class="skin-card">
-            <span class="tag amber">Skin inicial · Sin pasiva</span>
-            <h3>Nación <span id="skinNationName"></span></h3>
-            <div class="skin-swatch" id="skinNationSwatch"></div>
-            <p class="sub" style="margin:0" id="skinNationDesc">Los colores de la bandera de tu nación en el uniforme y el casco, con el emblema de sus fuerzas armadas en el pecho.</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="panel" style="margin-top:14px">
-        <h2>Los mapas: Almacén industrial, Patio de contenedores y los Skirmish de Londres</h2>
-        <details class="info"><summary>ⓘ ¿Cómo son los tableros?</summary><div class="info-body"><p class="sub" style="max-width:78ch">Los trece tableros jugables son de 12×12 casillas con simetría de 180°, para que ningún bando nazca con ventaja: estanterías y muros que no se rompen, cajas destructibles que dan cobertura, <b>barriles explosivos</b> (70 de daño en las casillas adyacentes si les disparas), dos <b>botiquines</b> de un solo uso (+50 de vida al pasar por encima) y una <b>torreta capturable</b> en el centro: el primer soldado que se plante en su casilla y gaste 2 de energía la pone a disparar para su bando al final de cada turno. En las rondas 3 y 6 cae una <b>caja de botín</b> cerca del centro con cura, energía o una granada extra para quien la recoja. La vista del tablero sigue la cámara del original como referencia de encuadre: inclinación de 50°, distancia de 8,5 casillas y campo de visión de 37,5°.</p></div></details>
-<details class="more"><summary>Ver los 13 tableros</summary>
-<ul class="reg-list" style="columns:2;column-gap:28px;margin-top:8px">
-  <li><b>Almacén industrial</b> — el tablero de siempre: estanterías, barriles y torreta central.</li>
-  <li><b>Patio de contenedores</b> — contenedores cruzados en pasillos.</li>
-  <li><b>Skirmish_03 · Londres</b> — calles londinenses.</li>
-  <li><b>Skirmish_04 · Londres</b> — el puente sobre el río.</li>
-  <li><b>Skirmish_05 · El depósito</b> — pilares de estación y contenedores.</li>
-  <li><b>Skirmish_06 · Los andenes</b> — bandas de contenedores.</li>
-  <li><b>Skirmish_07 · El mercado</b> — puestos en cruz (tablero propio en código).</li>
-  <li><b>Skirmish_08 · La terminal</b> — carga abierta.</li>
-  <li><b>Skirmish_01 · La plaza</b> — plaza cerrada sobre el centro (tablero propio en código).</li>
-  <li><b>Skirmish_02 · El embarcadero</b> — canal central abierto (tablero propio en código).</li>
-  <li><b>Skirmish_09 · La rotonda</b> — anillo de contenedores.</li>
-  <li><b>Skirmish_10 · El cruce</b> — cruce de avenidas.</li>
-  <li><b>Skirmish_11 · El astillero</b> — dique seco central.</li>
-</ul></details>
-      </div>
-
     </div>
 
     <!-- SETUP -->
-    <div id="setupArea" style="display:none;margin-top:18px">
+    <div id="setupArea" class="setupAreaCompact" style="display:none;margin-top:18px">
       <div class="panel">
         <div class="setupHead"><img id="setupArt" src="assets/ui/modo_eliminacion.png" alt=""/><div><h2 id="setupTitle">Configurar partida</h2><p class="sub" id="setupSub"></p></div></div>
         <div class="setup-map-preview" id="setupMapPreview"></div>
@@ -321,17 +259,22 @@
 
     <!-- GAME -->
     <div id="gameArea" style="display:none;margin-top:18px">
-      <div class="turn-banner">
-        <span class="turn-pill A" id="turnPill">Turno: Jugador 1</span>
-        <span class="sub" id="roundLabel">Ronda 1</span>
-        <span class="beacon-meter" id="beaconMeter" style="display:none"></span>
-        <span class="dom-meter" id="domMeter" style="display:none"></span>
-        <span class="dom-meter" id="escortMeter" style="display:none"></span>
-        <span style="flex:1"></span>
-        <button class="btn" id="undoBtn" disabled title="Deshacer último movimiento (Z)">↶ Deshacer [Z]</button>
-        <button class="btn" id="soundBtn">🔊 Sonido: sí</button>
-        <button class="btn" id="endTurnBtn">Terminar turno ⏭</button>
-        <button class="btn danger" id="quitBtn">Abandonar</button>
+      <div class="turn-banner hud-topbar">
+        <div class="hud-identity"><img src="assets/ui/logo_csn.png" alt=""/><div><span class="hud-kicker">Urban Tactical Arcade</span><span class="turn-pill A" id="turnPill">Turno: Jugador 1</span></div></div>
+        <div class="hud-center"><span class="sub hud-round" id="roundLabel">Ronda 1</span>
+          <div class="hud-scores"><span class="hud-team A" id="hudScoreA">J1 · 0</span><span class="hud-vs">VS</span><span class="hud-team B" id="hudScoreB">RIVAL · 0</span></div>
+          <div class="hud-meters">
+            <span class="beacon-meter" id="beaconMeter" style="display:none"></span>
+            <span class="dom-meter" id="domMeter" style="display:none"></span>
+            <span class="dom-meter" id="escortMeter" style="display:none"></span>
+          </div>
+        </div>
+        <div class="hud-actions">
+          <button class="btn hud-btn" id="undoBtn" disabled title="Deshacer último movimiento (Z)">↶ Deshacer <span class="kbd">Z</span></button>
+          <button class="btn hud-btn" id="soundBtn">🔊 Sonido: sí</button>
+          <button class="btn primary hud-btn end" id="endTurnBtn">Cerrar turno ⏭</button>
+          <button class="btn danger hud-btn" id="quitBtn">Abandonar</button>
+        </div>
       </div>
       <div class="game-layout">
         <div>
@@ -355,7 +298,11 @@
           <label class="f">Registro de combate</label>
           <div class="log" id="log"></div>
         </div>
-        <div class="side">
+        <aside class="side battle-side">
+          <div class="panel hud-squad" style="padding:12px">
+            <div class="hud-side-head"><span class="kicker">Escuadra</span><b id="hudSquadTitle">Jugador 1</b></div>
+            <div class="hud-vitals" id="squadVitals"></div>
+          </div>
           <div class="unit-card" id="unitCard"></div>
           <div class="panel" style="padding:14px">
             <h3 style="margin-bottom:8px">Escuadras</h3>
@@ -365,7 +312,7 @@
             <h3>Ficha del arma</h3>
             <div id="weaponInfo" class="sub">Selecciona un soldado para ver su arma, sus datos reales y su especial.</div>
           </div>
-        </div>
+        </aside>
       </div>
     </div>
   </section>
@@ -406,10 +353,10 @@
   </section>
 
   <section class="screen" id="scr-arsenal">
-    <div class="back-row"><button class="btn ghost" data-back>← Volver al menú</button></div>
+    <div class="back-row" hidden><button class="btn ghost" data-back>← Volver al menú</button></div>
     <div class="hero">
       <h1>Armería</h1>
-      <details class="info"><summary>ⓘ ¿Qué hay aquí?</summary><div class="info-body"><p>37 armas jugables con datos verificados de manuales militares y fichas del fabricante, más el equipo de granadas, torretas y botiquines de la sección siguiente. Aquí ves las armas de la v1 con sus datos reales y su traducción al juego: daño, alcance en casillas y coste de energía sobre cuerpos de 200, 250 o 300 PV según el tipo (ligero, medio o pesado).</p></div></details>
+      <p>Catálogo compacto: armas originales, CSN y desplegables.</p>
     </div>
     <div class="seg" id="arsSectionSeg"><button type="button" data-arssec="weapons" class="on">Armas</button><button type="button" data-arssec="deployables">Desplegables y objetos (10)</button><button type="button" data-arssec="abilities">Habilidades del original (52)</button></div>
     <div class="filters" id="arsFilters"></div>
@@ -417,18 +364,17 @@
     <div id="deployablePanel" style="display:none"><div id="deployableGrid" class="deployable-grid"></div></div>
     <div class="panel" id="abilityPanel" style="margin-top:14px;display:none">
       <h2>Catálogo del original · 52 habilidades</h2>
-      <details class="info"><summary>ⓘ ¿Qué es este catálogo?</summary><div class="info-body"><p class="sub" style="margin:0 0 8px">Iconos reales del IPA. Las marcadas «en juego» tienen equivalente en CSN; las demás son huecos a cubrir.</p></div></details>
       <div id="abilityCatalog" class="ab-catalog"></div>
     </div>
     <div class="panel" style="margin-top:16px">
       <h2>Granadas, torretas y equipo</h2>
       <div class="howto" style="margin-top:8px">
-        <div><b>M67 · Fragmentación</b><details class="info"><summary>ⓘ Detalles</summary><div class="info-body"><p>400 g, 180 g de Composition B, radio letal real de 5 m. En el juego: 75 de daño en la casilla y 35 en las adyacentes, lanzamiento a 3 casillas, coste 2. El Comando lleva una extra.</p></div></details></div>
-        <div><b>M18 · Humo</b><details class="info"><summary>ⓘ Detalles</summary><div class="info-body"><p>540 g, humo de 50–90 segundos en el mundo real. En el juego ya está dentro, como equipo del Espía: 2 granadas por partida, 2 ⚡, lanzamiento a 4 casillas, y la cortina tapa la casilla destino y las 4 adyacentes en cruz durante 2 rondas completas, bloqueando la visión a través de ella (disparos, fuego de respuesta, vigilancia y torretas) y la de quien está dentro de ella a más de 1 casilla, pero no el movimiento ni las granadas, que vuelan en arco por encima. Verificado camino a camino dentro de la partida (ver el registro de esta ronda). La regla completa va en el punto 19 de «Cómo se juega».</p></div></details></div>
-        <div><b>M84 · Aturdidora</b><details class="info"><summary>ⓘ Detalles</summary><div class="info-body"><p>170–180 dB y 6–8 millones de candelas. En el juego ya está dentro, como equipo del Comando: 2 por partida, 2 ⚡, lanzamiento a 4 casillas en arco, sin daño, y aturde a todo soldado en radio 1 de la casilla destino durante 1 turno (de los dos bandos; solo se salva quien la lanza): el aturdido no devuelve el fuego, pierde su vigilancia y en su turno empieza con −6 ⚡ y −25 de puntería. La regla completa va en el punto 23 de «Cómo se juega».</p></div></details></div>
-        <div><b>M2 Browning · Torreta</b><details class="info"><summary>ⓘ Detalles</summary><div class="info-body"><p>.50 BMG, 38 kg, en servicio desde 1933. En el juego es la torreta que despliega el Ingeniero (45 de daño) y la del emplazamiento central capturable (40 de daño), las dos con alcance 6 y fuego automático al final del turno de su bando.</p></div></details></div>
-        <div><b>Claymore M18A1 y C4</b><details class="info"><summary>ⓘ Detalles</summary><div class="info-body"><p>La Claymore proyecta unas 700 bolas de acero en abanico de 60°; el C4 detona a 8.092 m/s y solo con detonador. En el juego la Claymore ya está dentro, como equipo del Ingeniero: 2 por partida, 3 ⚡, colocada en una casilla adyacente y oculta para el enemigo, con 60 de daño a quien la pise. La regla completa va en el punto 21 de «Cómo se juega». El C4 sigue como diseño del arsenal completo.</p></div></details></div>
-        <div><b>IFAK · Botiquín de combate</b><details class="info"><summary>ⓘ Detalles</summary><div class="info-body"><p>Kit individual de trauma del CoTCCC: torniquete C-A-T, gasa hemostática, sellos torácicos. En el juego: el Médico cura 80 y el botiquín del mapa devuelve 50.</p></div></details></div>
+        <div><b>M67 · Fragmentación</b><p>75 de daño en la casilla y 35 en las adyacentes · 3 casillas · 2 ⚡.</p></div>
+        <div><b>M18 · Humo</b><p>Cortina de 2 rondas del Espía · 4 casillas · 2 ⚡.</p></div>
+        <div><b>M84 · Aturdidora</b><p>Aturdimiento en radio 1 del Comando · 4 casillas · 2 ⚡.</p></div>
+        <div><b>M2 Browning · Torreta</b><p>Alcance 6 · fuego automático al cerrar el turno.</p></div>
+        <div><b>Claymore M18A1 y C4</b><p>Mina oculta del Ingeniero · 60 de daño al pisarla.</p></div>
+        <div><b>IFAK · Botiquín de combate</b><p>Médico +80 PV · botiquín del mapa +50 PV.</p></div>
       </div>
     </div>
   </section>
@@ -462,19 +408,18 @@
       <details class="rule"><summary><b>22 · Sonido</b><span class="rule-info">ⓘ</span></summary><div class="info-body"><p>El juego suena con los <b>sonidos del original</b>: disparos por categoría de arma, clic de cada botón, voces de cada personaje, ambiente por mapa y música de partida. Donde el original no trae sonido, el sonido se genera con WebAudio en el momento: explosiones de granadas y barriles, el fogonazo de la M84, el armado de la mina, los disparos de torreta, el cambio de turno y el final de la partida. El sonido arranca con tu primer toque en la página (los navegadores no dejan sonar antes) y se apaga o se enciende con el botón «Sonido» de la barra de turno; tu preferencia se guarda en este dispositivo.</p></div></details>
       <details class="rule"><summary><b>23 · Granada aturdidora M84 del Comando</b><span class="rule-info">ⓘ</span></summary><div class="info-body"><p>El Comando lleva <b>2 granadas aturdidoras M84</b> por partida (botón «Aturdidora M84», 2 ⚡, lanzamiento a <b>4 casillas</b>). Se lanzan <b>en arco</b>, como la M67, así que ni los muros ni el humo las paran, y <b>no hacen daño</b>: lo que hacen es dejar <b>aturdido durante 1 turno</b> a todo soldado en <b>radio 1</b> de la casilla donde estallan (esa casilla y las 8 que la rodean), <b>de los dos bandos</b>, porque la luz y el estruendo no distinguen uniformes; el único que se salva es quien la lanza, que aparta la mirada. El dron de Escolta no se aturde, porque es una máquina, y el Espía invisible sí se aturde (es un fogonazo en área, no un disparo dirigido), aunque conserva su invisibilidad. Estar aturdido significa cuatro cosas: <b>no devuelves el fuego</b> si te disparan, <b>pierdes la vigilancia</b> que tuvieras puesta y no puedes ponerte en vigilancia, al empezar tu próximo turno pagas <b>−6 ⚡</b> de salida (se suma a la supresión si la llevas), y durante ese turno cada tiro tuyo pierde <b>−25 de puntería</b>. Al cerrar ese turno, el aturdimiento se pasa. No se apila: una segunda M84 sobre un soldado ya aturdido renueva su turno aturdido, no lo duplica. En el tablero el aturdido lleva el 💫 y el rótulo «ATURDIDO» en la vista clásica, y una estrella y un anillo amarillos en la 3D. La IA del Comando la usa antes de disparar: busca la casilla a su alcance que más enemigos ciegue descontando a los aliados propios dentro del radio, y la lanza sobre los grupos, porque un enemigo aturdido tampoco le devuelve el fuego. Para verlo en juego sin configurar nada: el botón <b>«Probar la aturdidora M84»</b> de la pantalla de inicio despliega el 4 contra 4 de siempre con tu Comando ya seleccionado.</p></div></details>
     </div>
-    <div class="panel" style="margin-top:14px">
+    <div class="panel" style="margin-top:14px" hidden>
       <h2>Los 7 roles</h2>
-      <details class="info"><summary>ⓘ ¿Por qué se distinguen los roles?</summary><div class="info-body"><p class="sub" style="margin:0">Cada rol tiene su propio cuerpo, como en el original: no es el mismo soldado con otra mochila. El Artillero es un armario, el Francotirador un flaco alto, el Espía un retaco oscuro, el Ingeniero un bajito rechoncho y el Capitán el más alto de la escuadra; el tocado, el color y el arma acaban de decir quién es quién. Y cada uno tiene ya su retrato propio, el mismo que verás en su ficha durante la partida: la capucha ghillie del Francotirador, el casco de comunicaciones del Artillero, la capucha oscura del Espía, el casco blanco con cruz del Médico, el casco amarillo del Ingeniero, la gorra táctica del Comando y la gorra de plato con galón dorado del Capitán.</p></div></details>
-      <div class="sprite-strip" id="spriteStrip"><p class="sub" style="grid-column:1/-1;margin:4px 0">Cargando los retratos de los roles…</p></div>
+      <div class="sprite-strip" id="spriteStrip"></div>
       <div id="rolesTable"></div>
     </div>
   </section>
 
   <section class="screen" id="scr-viewer">
-    <div class="back-row"><button class="btn ghost" data-back>← Volver al menú</button></div>
+    <div class="back-row" hidden><button class="btn ghost" data-back>← Volver al menú</button></div>
     <div class="hero">
       <h1>Tropas</h1>
-      <details class="info"><summary>ⓘ ¿Cómo se usa?</summary><div class="info-body"><p>Explora los modelos y texturas del juego sin iniciar una partida. Arrastra para girar, usa la rueda o el control para acercar y alejar.</p></div></details>
+      <p>Arrastra para girar · rueda para acercar.</p>
     </div>
     <div class="panel">
       <div class="troop-filters" id="troopFilters"></div>

@@ -6,6 +6,7 @@ export * from './camera3d.js';
 export * from './clips.js';
 export * from './env.js';
 export * from './fallback-soldier.js';
+export * from './fx-arcade.js';
 export * from './fx3d.js';
 export * from './actor-glb.js';
 export * from './asset-cache.js';

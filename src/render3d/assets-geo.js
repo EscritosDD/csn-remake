@@ -1,5 +1,6 @@
 import { SKIRMISH_GEO } from '../data/maps.js';
 import { toonGrad3, box3, makeContactShadow3 } from './scene.js';
+import { TEAM_A_HEX } from './env.js';
 
 export function skState(theme){return SKIRMISH_GEO[theme]||null;}
 
@@ -83,7 +84,7 @@ export function makeDrone3(){
   });
   const light=new THREE.Mesh(new THREE.SphereGeometry(0.05,10,10),new THREE.MeshBasicMaterial({color:0xffb03a,transparent:true,opacity:0.9}));
   light.position.set(-0.2,0.06,0);g.add(light);
-  const ring=new THREE.Mesh(new THREE.TorusGeometry(0.4,0.018,8,36),new THREE.MeshBasicMaterial({color:0x39c2d7}));
+  const ring=new THREE.Mesh(new THREE.TorusGeometry(0.4,0.018,8,36),new THREE.MeshBasicMaterial({color:TEAM_A_HEX}));
   ring.rotation.x=Math.PI/2;ring.position.y=-0.34;g.add(ring);
   g.userData={rotors:rotors,light:light};
   return g;

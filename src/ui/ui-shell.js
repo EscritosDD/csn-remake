@@ -1,8 +1,9 @@
 import { NATIONS, NATION_ART } from '../data/nations.js';
 import { ROLES, ROLE_NAMES, BODIES, DEFAULT_SQUADS, ROLE_PORTRAIT } from '../data/roles.js';
 import { WEAPONS } from '../data/weapons.js';
-import { CAMPAIGN_MISSIONS, CAMPAIGN_CHAPTERS, TUTORIAL_MISSION, SKIRMISH_GEO, MAP_DEFS, rosterKey } from '../data/maps.js';
-import { renderCampaignRadio, starMarkup, showMissionBriefing } from './campaign-ui.js';
+import { CAMPAIGN_MISSIONS, TUTORIAL_MISSION, SKIRMISH_GEO, MAP_DEFS, rosterKey } from '../data/maps.js';
+import { renderCampaignRadio, showMissionBriefing } from './campaign-ui.js';
+import { campaignProgressLabel, campaignTallyMarkup, campaignDaveLine, campaignMissionCardMarkup } from './campaign-tally.js';
 import { mapPreviewURL, squadCardMarkup, fillSquadSelects, updateSquadCard } from './setup-preview.js';
 import { charsForRole, characterKey } from '../game/chars.js';
 import { STEP_META, AUX_LABELS, AUX_HINTS } from '../data/ui-copy.js';
@@ -259,34 +260,21 @@ export function syncDiffSeg(){document.querySelectorAll('#diffSeg button').forEa
 
 export function renderCampaignPanel(){
   const c=loadCampaign();
-  const medals=CAMPAIGN_MISSIONS.map((m,i)=>m.title+' '+starMarkup(c.medals[i]||0)).join(' · ');
-  const summary=(c.tutorialDone?'Instrucción completada. ':'Pendiente: instrucción de Dave. ')+(c.done?'Operación completada.':(c.next+' de '+CAMPAIGN_MISSIONS.length+' misiones superadas.'))+' · '+medals;
-  const s=document.getElementById('campaignHubSummary');
-  if(s)s.textContent=summary;
-  const prog=document.getElementById('campaignProgress');
-  if(prog)prog.innerHTML=(c.tutorialDone?'Instrucción de Dave completada. ':'Pendiente: instrucción de Dave. ')+(c.done?'Operación completada.':('Progreso: <b>'+c.next+' de '+CAMPAIGN_MISSIONS.length+'</b> misiones superadas.'))+'<br>Medallas: '+medals+(c.vet&&c.vet.length?('<br>Veterania por posición: '+c.vet.map((v,i)=>'Pos. '+(i+1)+': +'+(v*25)+' PV').join(' · ')):'');
+  const summary=(c.tutorialDone?'Dave listo. ':'Pendiente: instrucción de Dave. ')+(c.done?'Operación completada.':(c.next+' de '+CAMPAIGN_MISSIONS.length+' misiones superadas.'));
+  const s=document.getElementById('campaignHubSummary');if(s)s.textContent=summary;
+  const detail=document.getElementById('campaignHubSummaryDetail');if(detail)detail.textContent=summary;
+  const prog=document.getElementById('campaignProgress');if(prog)prog.innerHTML=campaignProgressLabel(c,CAMPAIGN_MISSIONS);
+  const tally=document.getElementById('campaignTally');if(tally)tally.innerHTML=campaignTallyMarkup(c,CAMPAIGN_MISSIONS);
+  const dave=document.getElementById('campaignDaveLine');if(dave)dave.textContent=campaignDaveLine(c,CAMPAIGN_MISSIONS);
   const radioMission=CAMPAIGN_MISSIONS[Math.min(c.next,CAMPAIGN_MISSIONS.length-1)]||CAMPAIGN_MISSIONS[0];
   renderCampaignRadio('campaignRadio',radioMission);
   const list=document.getElementById('campaignList');if(!list)return;
-  list.className='chapter-grid';
-  list.innerHTML='';
-  CAMPAIGN_CHAPTERS.forEach(ch=>{
-    const total=ch.to-ch.from+1;
-    const doneN=CAMPAIGN_MISSIONS.slice(ch.from,ch.to+1).filter((m,i)=>c.done||(ch.from+i)<c.next).length;
-    const card=document.createElement('div');card.className='panel chapter-card';
-    const pct=total?Math.round(doneN/total*100):0;
-    card.innerHTML='<div class="ch-top"><img class="ch-ico" src="'+ch.icon+'" alt=""/><div style="flex:1"><b>'+ch.name+'</b><div class="ch-bar"><i style="width:'+pct+'%"></i></div></div><span class="mono" style="color:var(--muted);font-size:12px">'+doneN+'/'+total+'</span><button class="btn small" type="button" data-campaign-brief="'+ch.from+'">📻 Briefing</button></div>';
-    for(let i=ch.from;i<=ch.to;i++){
-      const m=CAMPAIGN_MISSIONS[i];
-      const state=c.done||i<c.next?'done':(i===c.next?'current':'locked');
-      const b=document.createElement('button');b.className='campaign-mission '+state;b.type='button';
-      b.innerHTML='<span class="mission-num">'+(state==='done'?'✓':(i+1))+'</span><span style="flex:1"><b>Misión '+(i+1)+' · '+m.title+(state==='done'?' · superada':state==='current'?' · siguiente':' · bloqueada')+'</b><p>'+m.brief+'</p><span class="mission-stars" title="Medallas">'+starMarkup(c.medals[i]||0)+'</span></span>'+(state==='locked'?'<span class="ch-lock" aria-hidden="true">🔒</span>':'');
-      b.disabled=state==='locked';
-      b.onclick=()=>{if(state!=='locked')showMissionBriefing(i);};
-      card.appendChild(b);
-    }
-    list.appendChild(card);
-  });
+  list.className='mission-grid';
+  list.innerHTML=CAMPAIGN_MISSIONS.map((m,i)=>{
+    const state=c.done||i<c.next?'done':(i===c.next?'current':'locked');
+    return campaignMissionCardMarkup(m,i,state,c.medals[i]||0,mapPreviewURL(m.map,MAP_DEFS,SKIRMISH_GEO));
+  }).join('');
+  list.querySelectorAll('[data-campaign-index]').forEach((b,i)=>{const state=c.done||i<c.next?'done':(i===c.next?'current':'locked');b.onclick=()=>{if(state!=='locked')showMissionBriefing(i);};});
 }
 
 function menuSiblings(){return Array.prototype.slice.call(document.querySelectorAll('#menuArea > .grid3, #menuArea > .panel, #menuArea > .menu-dossier, #origMenu, #demoSlotPlay'));}
