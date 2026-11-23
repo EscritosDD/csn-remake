@@ -1,8 +1,8 @@
 {
  "total": 40,
  "rootScale": 0.5122,
- "sourceCommit": "850b401759a426d283458efea57d4dd29a7df769",
- "sourcePath": "referencia_original/datos/animaciones_alineadas",
+ "sourceCommit": "98de230d719150ff4aa31a1b94309573b2cb5075",
+ "sourcePath": "assets/soldier_clips.json",
  "clips": [
   {
    "key": "commanderOrder",

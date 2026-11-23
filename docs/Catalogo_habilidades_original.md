@@ -9,7 +9,7 @@ Iconos extraídos en `assets/ui/ability/`.
 | 01 | Adrenaline | sí | — | pendiente |
 | 03 | AR Specialization | sí | — | pendiente |
 | 04 | Armour Piercing | sí | — | pendiente |
-| 05 | Backlash Aura | sí | Cobertura desplegable | implementada (equivalente) |
+| 05 | Backlash Aura | sí | Cobertura desplegable (ver #12) | pendiente (no implementada; su equivalente es la #12 Deployable Cover) |
 | 06 | Backstab | sí | — | pendiente |
 | 07 | Caltrops | sí | Minas/claymore | implementada |
 | 08 | Charm | sí | — | pendiente |
@@ -20,7 +20,7 @@ Iconos extraídos en `assets/ui/ability/`.
 | 13 | Detection Aura | sí | Barrido detector | implementada |
 | 14 | Frag Grenade | sí | Granada M67 | implementada |
 | 15 | Gas Grenade | sí | Granada de gas | implementada |
-| 16 | Gatling Turret | sí | Torreta Gatling | pendiente (la torreta desplegable de CSN es M2 Browning, no Gatling) |
+| 16 | Gatling Turret | sí | Torreta M2 | implementada (como Torreta M2; la torreta desplegable de CSN es M2 Browning, no Gatling) |
 | 17 | Ghost | sí | Invisibilidad del Espía | implementada |
 | 18 | Hack | sí | — | pendiente |
 | 19 | Headshot | sí | Tiro a la cabeza | pendiente (documentado en el acta de Sneaky Pete; sin mecánica de crítico garantizado) |
@@ -61,11 +61,11 @@ Iconos extraídos en `assets/ui/ability/`.
 ## Resumen
 
 - **Iconos**: 52 de 52 extraídos.
-- **Implementadas o con equivalente**: 21.
+- **Implementadas o con equivalente**: 22 (las 21 de la tabla + la 36 Revive, parcial).
 - **Parcial**: 1 (36 Revive: la reanimación de CSN es adyacente, no a distancia).
 - **Pendientes**: 30.
 
-El juego marca 21 como «en juego» (ABILITY_IMPL): las 21 de la tabla salvo la 05 Backlash Aura, más la 36 Revive. La 05 figura como equivalente en la tabla, pero el juego no la marca: el equivalente directo de la cobertura desplegable es la 12 Deployable Cover.
+El juego marca 22 como «en juego» (ABILITY_IMPL): las 21 de la tabla más la 36 Revive. La 05 Backlash Aura no está implementada: el equivalente directo de la cobertura desplegable es la 12 Deployable Cover.
 
 ## Nota
 

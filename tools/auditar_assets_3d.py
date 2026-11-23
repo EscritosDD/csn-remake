@@ -155,7 +155,7 @@ def main():
         "",
         "- `assets/soldier/` y `assets/soldier_rig.json` son la fuente IPA: rig Z-up, clips nativos y bounds reales.",
         "- `assets/personajes_propios/` son derivados Meshy con rig de caja generado por pipeline; no deben sobrescribir la fuente IPA ni recibir retarget.",
-        "- No existe `.glb/.gltf` original en disco; `server.js` y el visor necesitan soporte explícito antes de usarlos.",
+        "- El soporte `.glb` ya existe: `src/render3d/gltf-loader.js` (parser GLB 2.0), `src/render3d/actor-glb.js` (actor con AnimationMixer y socket de arma), `src/render3d/asset-cache.js` (caché LRU con liberación de VRAM), `src/ui/glb-lab.js` (Laboratorio `.glb`) y `tools/validate_competitive_glb.mjs` (validador CLI); `server.js` sirve `.glb` con MIME `model/gltf-binary`. Los `.glb` competitivos viven en `assets/competitive/` (manifiesto `catalog-competitive.js`).",
         "",
     ]
 

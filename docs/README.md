@@ -6,12 +6,12 @@
 ## Estado vigente (2026-11-23)
 
 - 79 módulos ESM en `src/`, 0 `<script>` inline, 2 tags module en `index.html`.
-- `npm test`: 131 pruebas en verde; `VERIFICAR.ps1`: **TODO OK 13/13**.
+- `npm test`: 136 pruebas en verde; `VERIFICAR.ps1`: **TODO OK 13/13**.
 - Módulos más largos: `src/viewer/card-stage.js` (449 líneas), `src/ui/ui-shell.js`
-  (433), `src/viewer/main.js` (420), `src/data/maps.js` (360).
+  (434), `src/viewer/main.js` (420), `src/data/maps.js` (360).
 - Rediseño **Urban Tactical Arcade · Splatoon Pop** cerrado en seis sprints;
   detalle en [REDISENO_ARCADE_2026-11-23.md](REDISENO_ARCADE_2026-11-23.md).
-- Modo Historia: `campaignBtn`/`mnuChallenges` → `#campaignHub` →
+- Modo Historia: `mnuChallenges` → `#campaignHub` →
   `showMissionBriefing()` → despliegue directo; tutorial de Dave con 6 pasos y
   radio/medallas/veterania persistidos.
 - Configuración: `#setupMapPreview` y tarjetas de `src/ui/setup-preview.js`;
@@ -36,7 +36,7 @@
 | [Arsenal_real.md](Arsenal_real.md) | Las 37 armas con sus datos reales y su traducción al juego |
 | [Estetica_original.md](Estetica_original.md) | Paletas y aspecto del original |
 | [Arte_visual.md](Arte_visual.md) | Material en uso (mallas, mapas, audio, UI) y referencia histórica |
-| [auditoria_global_3d.md](auditoria_global_3d.md) | Auditoría generada de todos los OBJ/rigs/texturas: 338 OBJ, 0 sin caras, 0 NaN, 13 rigs |
+| [auditoria_global_3d.md](auditoria_global_3d.md) | Auditoría generada de todos los OBJ/rigs/texturas: 338 OBJ, 0 sin caras, 0 NaN, 24 rigs |
 
 ## Histórico (`historico/`)
 
@@ -57,6 +57,21 @@ algunos describen estados que ya no existen. **No son la fuente de verdad**.
 | [Auditoria_profunda_v2.md](historico/Auditoria_profunda_v2.md) |Fallos de la tanda de corrección y cómo se arreglaron |
 | [Auditoria_visual_profunda_2026-11-19.md](historico/Auditoria_visual_profunda_2026-11-19.md) |Hallazgos visuales reproducibles e hipótesis separadas |
 | [Informe_CSN_vs_original.md](historico/Informe_CSN_vs_original.md) |Comparación lado a lado con RAD Soldiers |
+| [Auditoria_desarrollo_Gemini.md](historico/Auditoria_desarrollo_Gemini.md) |Auditoría del desarrollo con Gemini Studio (17/11/2026, 44 commits) |
+| [Auditoria_independiente_DeepSeek.md](historico/Auditoria_independiente_DeepSeek.md) |Auditoría independiente con harness (DeepSeek) |
+| [Desarrollo_continuo.md](historico/Desarrollo_continuo.md) |Prompt de trabajo autónomo y registro del desarrollo continuo |
+| [Equilibrio_medido.md](historico/Equilibrio_medido.md) |Balance medido con harness IA-vs-IA en un motor ya sustituido; cifras no reproducibles con el harness actual |
+| [Estetica_original.md](historico/Estetica_original.md) |Auditoría visual de la estética del RAD Soldiers original |
+| [Informe_cierre_objetivo.md](historico/Informe_cierre_objetivo.md) |Informe de cierre del objetivo (rondas 1–43) del plan director |
+| [Informe_sesion_y_plan_Muse.md](historico/Informe_sesion_y_plan_Muse.md) |Informe de sesión y plan de arte completo |
+| [Plan_de_operacion.md](historico/Plan_de_operacion.md) |Plan de operación del remake |
+| [Plan_director_original_base.md](historico/Plan_director_original_base.md) |Plan director: el original como base reconocible |
+| [Plan_seguimiento.md](historico/Plan_seguimiento.md) |Seguimiento del plan de trabajo (tabla de fases) |
+| [Plan_trabajo_pendiente.md](historico/Plan_trabajo_pendiente.md) |Plan de trabajo pendiente tras la auditoría de Gemini Studio |
+| [Prompt_Argon_sprites.md](historico/Prompt_Argon_sprites.md) |Prompts para Gemini Argon (arte SVG; herramienta retirada) |
+| [Referencia_original.md](historico/Referencia_original.md) |Referencia del original (la carpeta `referencia_original/` ya no existe) |
+| [Resumen_desarrollo_noche.md](historico/Resumen_desarrollo_noche.md) |Resumen del desarrollo nocturno (fases F0–F9) |
+| [Vacios_y_Argon.md](historico/Vacios_y_Argon.md) |Vacíos del original y qué se le pedía a Argon |
 
 `docs/capturas/` contiene capturas locales generadas por `_capture_all.mjs`;
 está ignorado por Git.

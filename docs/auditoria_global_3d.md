@@ -7,12 +7,12 @@ Generada por `tools/auditar_assets_3d.py`. Fuente: `assets/`.
 - OBJ: 338
 - OBJ sin caras: 0
 - OBJ con NaN/Inf: 0
-- Rigs: 13
+- Rigs: 24
 - Texturas PNG: 305
 - GLB/GLTF en `assets/`: 0
 - Clips IPA: 40
-- Origen clips: `referencia_original/datos/animaciones_alineadas`
-- Commit clips: `850b401759a426d283458efea57d4dd29a7df769`
+- Origen clips: `assets/soldier_clips.json`
+- Commit clips: `98de230d719150ff4aa31a1b94309573b2cb5075`
 
 ## Mallas OBJ
 
@@ -315,11 +315,11 @@ Generada por `tools/auditar_assets_3d.py`. Fuente: `assets/`.
 | `assets/props/SpiderMine.obj` | 195 | 195 | 134 | 0 | X[-0.27,0.27] Y[-0.29,0.17] Z[-0.00,0.27] | OK |
 | `assets/props/UAV.obj` | 872 | 872 | 549 | 0 | X[-0.42,0.42] Y[-0.35,0.47] Z[-0.48,0.70] | OK |
 | `assets/soldier.obj` | 1211 | 1211 | 1456 | 0 | X[-0.44,0.44] Y[-0.21,0.32] Z[0.00,1.14] | OK |
-| `assets/soldier/Artillero.obj` | 1970 | 1970 | 4000 | 0 | X[-0.29,0.30] Y[-0.32,0.33] Z[0.00,1.14] | OK |
+| `assets/soldier/Artillero.obj` | 1037 | 1037 | 1552 | 0 | X[-0.44,0.44] Y[-0.35,0.43] Z[0.01,1.14] | OK |
 | `assets/soldier/Capitan.obj` | 1218 | 1218 | 1490 | 0 | X[-0.29,0.29] Y[-0.17,0.23] Z[0.00,1.14] | OK |
 | `assets/soldier/Comando.obj` | 869 | 869 | 1200 | 0 | X[-0.31,0.31] Y[-0.20,0.21] Z[0.00,1.14] | OK |
-| `assets/soldier/Espia.obj` | 2003 | 2003 | 4000 | 0 | X[-0.24,0.25] Y[-0.20,0.21] Z[0.00,1.14] | OK |
-| `assets/soldier/Francotirador.obj` | 1988 | 1988 | 4000 | 0 | X[-0.49,0.49] Y[-0.16,0.17] Z[0.00,1.14] | OK |
+| `assets/soldier/Espia.obj` | 1271 | 1271 | 1534 | 0 | X[-0.27,0.27] Y[-0.19,0.13] Z[-0.00,1.14] | OK |
+| `assets/soldier/Francotirador.obj` | 1211 | 1211 | 1456 | 0 | X[-0.44,0.44] Y[-0.21,0.33] Z[0.00,1.14] | OK |
 | `assets/soldier/Ingeniero.obj` | 1321 | 1321 | 1842 | 0 | X[-0.46,0.46] Y[-0.31,0.31] Z[-0.00,1.13] | OK |
 | `assets/soldier/Medico.obj` | 1410 | 1410 | 1692 | 0 | X[-0.38,0.38] Y[-0.21,0.18] Z[-0.00,1.14] | OK |
 | `assets/soldier/bodies/Agent_Light.obj` | 1271 | 1271 | 1534 | 0 | X[-0.84,0.84] Y[-0.59,0.41] Z[-0.00,3.55] | OK |
@@ -333,29 +333,29 @@ Generada por `tools/auditar_assets_3d.py`. Fuente: `assets/`.
 | `assets/soldier/bodies/Soldier_Light_Rambo.obj` | 1023 | 1023 | 1382 | 0 | X[-0.44,0.44] Y[-0.18,0.32] Z[0.00,1.19] | OK |
 | `assets/soldier/bodies/Soldier_SAS.obj` | 1234 | 1234 | 1430 | 0 | X[-0.44,0.44] Y[-0.22,0.36] Z[0.00,1.13] | OK |
 | `assets/soldier/bodies/Soldier_Spud.obj` | 1065 | 1065 | 1492 | 0 | X[-0.44,0.44] Y[-0.27,0.42] Z[0.00,1.17] | OK |
-| `assets/weapons/AssaultRifle.obj` | 201 | 201 | 135 | 0 | X[-0.52,0.25] Y[-0.05,0.05] Z[-0.09,0.21] | OK |
-| `assets/weapons/BaseballBat_SOURCE.obj` | 179 | 179 | 101 | 0 | X[-0.06,0.06] Y[-0.05,0.05] Z[-0.21,0.75] | OK |
-| `assets/weapons/Chainsaw.obj` | 334 | 334 | 252 | 0 | X[-0.17,0.14] Y[-0.13,0.16] Z[-0.14,0.73] | OK |
-| `assets/weapons/Crossbow.obj` | 696 | 696 | 439 | 0 | X[-0.60,0.31] Y[-0.31,0.31] Z[-0.06,0.22] | OK |
-| `assets/weapons/FragGrenade.obj` | 123 | 123 | 75 | 0 | X[-0.06,0.08] Y[-0.06,0.06] Z[-0.08,0.12] | OK |
-| `assets/weapons/Katana.obj` | 142 | 142 | 84 | 0 | X[-0.19,0.13] Y[-0.12,0.12] Z[-0.58,1.81] | OK |
-| `assets/weapons/Knife.obj` | 114 | 114 | 65 | 0 | X[-0.07,0.05] Y[-0.02,0.02] Z[-0.10,0.40] | OK |
-| `assets/weapons/LightMachineGun.obj` | 246 | 246 | 167 | 0 | X[-0.64,0.28] Y[-0.11,0.17] Z[-0.19,0.26] | OK |
-| `assets/weapons/M95.obj` | 620 | 620 | 373 | 0 | X[-0.88,0.37] Y[-0.14,0.14] Z[-0.08,0.23] | OK |
-| `assets/weapons/MP5K.obj` | 204 | 204 | 112 | 0 | X[-0.34,0.06] Y[-0.04,0.04] Z[-0.09,0.18] | OK |
-| `assets/weapons/Minigun.obj` | 527 | 527 | 318 | 0 | X[-0.77,0.08] Y[-0.27,0.15] Z[-0.31,0.10] | OK |
-| `assets/weapons/Molotov.obj` | 51 | 51 | 27 | 0 | X[-0.18,0.07] Y[-0.12,0.07] Z[-0.09,0.34] | OK |
-| `assets/weapons/Pistol.obj` | 196 | 196 | 116 | 0 | X[-0.75,0.11] Y[-0.07,0.07] Z[-0.25,0.35] | OK |
-| `assets/weapons/RPG.obj` | 254 | 254 | 170 | 0 | X[-0.27,0.49] Y[-0.13,0.25] Z[-0.13,0.13] | OK |
-| `assets/weapons/Revolver.obj` | 137 | 137 | 99 | 0 | X[-0.96,0.12] Y[-0.14,0.14] Z[-0.26,0.42] | OK |
-| `assets/weapons/Rifle.obj` | 405 | 405 | 236 | 0 | X[-0.67,0.28] Y[-0.04,0.04] Z[-0.07,0.16] | OK |
-| `assets/weapons/RiotShotgun.obj` | 204 | 204 | 110 | 0 | X[-0.59,0.07] Y[-0.06,0.03] Z[-0.06,0.14] | OK |
-| `assets/weapons/Shotgun.obj` | 210 | 210 | 151 | 0 | X[-0.54,0.17] Y[-0.05,0.05] Z[-0.06,0.19] | OK |
-| `assets/weapons/SledgeHammer.obj` | 98 | 98 | 59 | 0 | X[-0.14,0.14] Y[-0.09,0.09] Z[-0.23,0.79] | OK |
-| `assets/weapons/SniperRifle_weapon.obj` | 583 | 583 | 359 | 0 | X[-0.84,0.29] Y[-0.09,0.09] Z[-0.08,0.21] | OK |
-| `assets/weapons/SpikedClub_weapon.obj` | 331 | 331 | 196 | 0 | X[-0.18,0.16] Y[-0.71,0.26] Z[-0.18,0.18] | OK |
-| `assets/weapons/Uzi.obj` | 195 | 195 | 114 | 0 | X[-0.30,0.17] Y[-0.03,0.03] Z[-0.18,0.20] | OK |
-| `assets/weapons/WoodAxe.obj` | 126 | 126 | 77 | 0 | X[-0.20,0.12] Y[-0.03,0.03] Z[-0.16,0.69] | OK |
+| `assets/weapons/AssaultRifle.obj` | 201 | 201 | 170 | 0 | X[-0.25,0.52] Y[-0.05,0.05] Z[-0.09,0.21] | OK |
+| `assets/weapons/BaseballBat_SOURCE.obj` | 179 | 179 | 98 | 0 | X[-0.06,0.06] Y[-0.05,0.05] Z[-0.21,0.75] | OK |
+| `assets/weapons/Chainsaw.obj` | 334 | 334 | 368 | 0 | X[-0.14,0.17] Y[-0.13,0.16] Z[-0.14,0.73] | OK |
+| `assets/weapons/Crossbow.obj` | 696 | 696 | 280 | 0 | X[-0.31,0.60] Y[-0.31,0.31] Z[-0.06,0.22] | OK |
+| `assets/weapons/FragGrenade.obj` | 123 | 123 | 68 | 0 | X[-0.08,0.06] Y[-0.06,0.06] Z[-0.08,0.12] | OK |
+| `assets/weapons/Katana.obj` | 142 | 142 | 94 | 0 | X[-0.13,0.19] Y[-0.12,0.12] Z[-0.58,1.81] | OK |
+| `assets/weapons/Knife.obj` | 114 | 114 | 74 | 0 | X[-0.05,0.07] Y[-0.02,0.02] Z[-0.10,0.40] | OK |
+| `assets/weapons/LightMachineGun.obj` | 246 | 246 | 208 | 0 | X[-0.28,0.64] Y[-0.11,0.17] Z[-0.19,0.26] | OK |
+| `assets/weapons/M95.obj` | 620 | 620 | 272 | 0 | X[-0.37,0.88] Y[-0.14,0.14] Z[-0.08,0.23] | OK |
+| `assets/weapons/MP5K.obj` | 204 | 204 | 128 | 0 | X[-0.06,0.34] Y[-0.04,0.04] Z[-0.09,0.18] | OK |
+| `assets/weapons/Minigun.obj` | 527 | 527 | 356 | 0 | X[-0.08,0.77] Y[-0.27,0.15] Z[-0.31,0.10] | OK |
+| `assets/weapons/Molotov.obj` | 51 | 51 | 44 | 0 | X[-0.07,0.18] Y[-0.12,0.07] Z[-0.09,0.34] | OK |
+| `assets/weapons/Pistol.obj` | 196 | 196 | 82 | 0 | X[-0.11,0.75] Y[-0.07,0.07] Z[-0.25,0.35] | OK |
+| `assets/weapons/RPG.obj` | 254 | 254 | 156 | 0 | X[-0.49,0.27] Y[-0.13,0.25] Z[-0.13,0.13] | OK |
+| `assets/weapons/Revolver.obj` | 137 | 137 | 116 | 0 | X[-0.12,0.96] Y[-0.14,0.14] Z[-0.26,0.42] | OK |
+| `assets/weapons/Rifle.obj` | 405 | 405 | 188 | 0 | X[-0.28,0.67] Y[-0.04,0.04] Z[-0.07,0.16] | OK |
+| `assets/weapons/RiotShotgun.obj` | 204 | 204 | 140 | 0 | X[-0.07,0.59] Y[-0.06,0.03] Z[-0.06,0.14] | OK |
+| `assets/weapons/Shotgun.obj` | 210 | 210 | 178 | 0 | X[-0.17,0.54] Y[-0.05,0.05] Z[-0.06,0.19] | OK |
+| `assets/weapons/SledgeHammer.obj` | 98 | 98 | 76 | 0 | X[-0.14,0.14] Y[-0.09,0.09] Z[-0.23,0.79] | OK |
+| `assets/weapons/SniperRifle_weapon.obj` | 583 | 583 | 238 | 0 | X[-0.29,0.84] Y[-0.09,0.09] Z[-0.08,0.21] | OK |
+| `assets/weapons/SpikedClub_weapon.obj` | 331 | 331 | 140 | 0 | X[-0.16,0.18] Y[-0.71,0.26] Z[-0.18,0.18] | OK |
+| `assets/weapons/Uzi.obj` | 195 | 195 | 104 | 0 | X[-0.17,0.30] Y[-0.03,0.03] Z[-0.18,0.20] | OK |
+| `assets/weapons/WoodAxe.obj` | 126 | 126 | 92 | 0 | X[-0.12,0.20] Y[-0.03,0.03] Z[-0.16,0.69] | OK |
 
 ## Rigs
 
@@ -366,17 +366,28 @@ Generada por `tools/auditar_assets_3d.py`. Fuente: `assets/`.
 | `assets/personajes_propios/Francotirador_rig.json` | 20 | Bip001 | sí | rig de caja generado por el pipeline zai; skinning por proximidad |
 | `assets/personajes_propios/Ingeniero_rig.json` | 20 | Bip001 | sí |  |
 | `assets/personajes_propios/Medico_rig.json` | 20 | Bip001 | sí |  |
-| `assets/soldier/Artillero_rig.json` | 20 | Bip001 | sí | rig y bind del IPA base; clips por indice; pies a y=0 |
+| `assets/soldier/Artillero_rig.json` | 20 | Bip001 | sí |  |
 | `assets/soldier/Capitan_rig.json` | 20 | Bip001 | sí |  |
 | `assets/soldier/Comando_rig.json` | 20 | Bip001 | sí |  |
-| `assets/soldier/Espia_rig.json` | 20 | Bip001 | sí | rig y bind del IPA base; clips por indice; pies a y=0 |
-| `assets/soldier/Francotirador_rig.json` | 20 | Bip001 | sí | rig y bind del IPA base; clips por indice; pies a y=0 |
+| `assets/soldier/Espia_rig.json` | 20 | Bip001 | sí |  |
+| `assets/soldier/Francotirador_rig.json` | 20 | Bip001 | sí |  |
 | `assets/soldier/Ingeniero_rig.json` | 20 | Bip001 | sí |  |
 | `assets/soldier/Medico_rig.json` | 20 | Bip001 | sí |  |
+| `assets/soldier/bodies/Agent_Light_rig.json` | 20 | Bip001 | sí |  |
+| `assets/soldier/bodies/CommanderF_rig.json` | 20 | Bip001 | sí |  |
+| `assets/soldier/bodies/CommanderM_rig.json` | 20 | Bip001 | sí |  |
+| `assets/soldier/bodies/Engineer_Heavy_rig.json` | 20 | Bip001 | sí |  |
+| `assets/soldier/bodies/Engineer_Light_rig.json` | 20 | Bip001 | sí |  |
+| `assets/soldier/bodies/Engineer_RiotCop_rig.json` | 20 | Bip001 | sí |  |
+| `assets/soldier/bodies/Medic_therapist_1248v_rig.json` | 20 | Bip001 | sí |  |
+| `assets/soldier/bodies/Soldier_Heavy_rig.json` | 20 | Bip001 | sí |  |
+| `assets/soldier/bodies/Soldier_Light_Rambo_rig.json` | 20 | Bip001 | sí |  |
+| `assets/soldier/bodies/Soldier_SAS_rig.json` | 20 | Bip001 | sí |  |
+| `assets/soldier/bodies/Soldier_Spud_rig.json` | 20 | Bip001 | sí |  |
 | `assets/soldier_rig.json` | 20 | Bip001 | sí |  |
 
 ## Notas de separación de fuentes
 
 - `assets/soldier/` y `assets/soldier_rig.json` son la fuente IPA: rig Z-up, clips nativos y bounds reales.
 - `assets/personajes_propios/` son derivados Meshy con rig de caja generado por pipeline; no deben sobrescribir la fuente IPA ni recibir retarget.
-- No existe `.glb/.gltf` original en disco; `server.js` y el visor necesitan soporte explícito antes de usarlos.
+- El soporte `.glb` ya existe: `src/render3d/gltf-loader.js` (parser GLB 2.0), `src/render3d/actor-glb.js` (actor con AnimationMixer y socket de arma), `src/render3d/asset-cache.js` (caché LRU con liberación de VRAM), `src/ui/glb-lab.js` (Laboratorio `.glb`) y `tools/validate_competitive_glb.mjs` (validador CLI); `server.js` sirve `.glb` con MIME `model/gltf-binary`. Los `.glb` competitivos viven en `assets/competitive/` (manifiesto `catalog-competitive.js`).

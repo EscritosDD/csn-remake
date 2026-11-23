@@ -18,7 +18,7 @@ Dos escuadras de soldados se enfrentan por turnos en una cuadrícula, cada solda
 - **Fuego de respuesta.** Disparar a un enemigo puede provocar que te devuelva el disparo, con daño reducido. En el original venía activado en todas las armas: disparar deja de ser gratis.
 - **Fuego de reacción (vigilancia).** Un soldado en vigilancia dispara automáticamente contra enemigos que se muevan a su alcance durante el turno rival, con un máximo de disparos por turno.
 - **Dirección de mira.** Cada soldado mira hacia un lado (norte, sur, este u oeste) y eso se guarda en cada turno. La dirección la fija el último movimiento o el último disparo.
-- **Cobertura direccional.** Cada borde de casilla tiene cobertura en tres niveles: sin cobertura, media y total. Solo la total bloquea la visión. La protección depende del lado desde el que disparan, no es igual en todas las direcciones.
+- **Cobertura direccional.** Cada borde de casilla tiene cobertura en cuatro niveles (0–3): sin cobertura, ligera, media y total. Solo la total bloquea la visión. La penalización de puntería por nivel es [0, 12, 25, 40] %. La protección depende del lado desde el que disparan, no es igual en todas las direcciones.
 - **Cajas de botín programadas.** En un turno determinado de la partida cae una caja en el mapa (salud, munición mejorada, analgésicos o espíritu de equipo). Dan un motivo para moverse a mitad de partida.
 - **Empujón.** Las armas pesadas y las explosiones pueden empujar al objetivo una casilla.
 
@@ -28,40 +28,40 @@ La vida y la energía van por tipo de cuerpo, como en el original: Ligero 200 de
 
 | Rol | Cuerpo | Vida | Energía | Armas principales | Especial |
 |---|---|---|---|---|---|
-| Francotirador | Ligero | 200 | 12 | M40, M24, M110, SVD, AW50, Barrett M82 | Tiro certero: un disparo con daño ×1,5 si el objetivo no se ha movido este turno |
-| Artillero | Pesado | 300 | 18 | M249 SAW, M240B, PKM, MG3, RPG-7, AT4, M72 LAW, Javelin | Fuego de supresión: el enemigo alcanzado pierde 2 de energía en su siguiente turno |
-| Espía | Ligero | 200 | 12 | MP7, MP5, P90, UMP45 | Invisibilidad: 1 turno sin poder ser objetivo de disparos, se rompe al disparar |
-| Médico | Medio | 250 | 14 | Fusil de asalto, pistola | Curar 125 de vida a un aliado adyacente (2 usos por partida); reanimación: un aliado caído vuelve con 60 de vida (1 uso) |
-| Ingeniero | Medio | 250 | 14 | Escopeta, M203, M320 | Desplegar torreta (M2, Mk 19, M134, DShK, KPV), Claymore, C4, mortero |
-| Comando | Medio | 250 | 14 | M4A1, AK-12, HK416, SCAR, M32 | Granada de fragmentación extra: lleva una M67 más que los demás |
-| Capitán | Medio | 250 | 14 | M4A1, Desert Eagle | Orden de mando: un aliado recupera 4 de energía en este turno (1 uso por turno) |
+| Francotirador | Ligero | 200 | 12 | M40, M24, M110, SVD, AW50, Barrett M82, Mk 14 EBR, PSG-1 | Tiro certero: un disparo con daño ×1,5 si el objetivo no se ha movido este turno |
+| Artillero | Pesado | 300 | 18 | M249 SAW, M240B, PKM, MG3, RPG-7, AT4, M72 LAW, Browning M2, Mk 19 | Fuego de supresión: el enemigo alcanzado pierde 2 de energía en su siguiente turno |
+| Espía | Ligero | 200 | 12 | MP7, MP5, P90, UMP45, KRISS Vector | Invisibilidad: 1 turno sin poder ser objetivo de disparos, se rompe al disparar |
+| Médico | Medio | 250 | 14 | M4A1, AK-12, HK416 | Curar 80 de vida a un aliado adyacente (2 usos); reanimar a un caído adyacente con 80 de vida (1 uso) |
+| Ingeniero | Medio | 250 | 14 | Remington 870, Benelli M4, M4A1, M203, Mossberg 500 | Torreta M2 (120 PV) y 2 minas Claymore M18A1 (60 de daño) |
+| Comando | Medio | 250 | 14 | M4A1, AK-12, HK416, FN SCAR-L, M32 MGL, G36C, FAMAS | Granada de fragmentación extra: lleva una M67 más que los demás |
+| Capitán | Medio | 250 | 14 | M4A1, FN SCAR-L, Desert Eagle | Orden de mando: un aliado recupera 3 de energía en este turno (1 uso por turno) |
 
-El Francotirador se mueve más que el Artillero y menos que el Espía, como recordaba Dani. El Artillero es el más lento y el que más daño hace en área. El Espía es el más rápido y el más frágil.
+El Francotirador y el Espía se mueven igual: ambos son Ligeros y llegan a 12 casillas por turno. El Artillero es el más lento y el que más daño hace en área.
 
 ## Arsenal
 
-La base completa está en [Arsenal_real.md](Arsenal_real.md): 51 entradas en 11 categorías, cada una con sus datos reales verificados y su traducción a estadísticas de juego. Resumen por categoría:
+La base completa está en [Arsenal_real.md](Arsenal_real.md): 57 entradas en 11 categorías, 37 armas del catálogo `WEAPONS` del código y 20 gadgets, desplegables y equipo táctico que no están en ese catálogo. Resumen por categoría (daños en la escala del código, ×0,4 respecto a la propuesta original):
 
-- **Fusiles de asalto y carabinas:** M4A1, AK-12, HK416, FN SCAR. Daño 70–95, alcance 6–7 casillas, coste 3–4 de energía.
-- **Subfusiles:** MP5, MP7, P90, UMP45. Daño 45–65, alcance 3–4 casillas, coste 2 de energía. Armas del Espía.
-- **Ametralladoras:** M249 SAW, M240B, PKM, MG3. Daño 60–75, alcance 6–7 casillas, coste 4 de energía, con supresión. Armas del Artillero.
-- **Francotiradores:** M40, AW50, M24, M110, SVD, Barrett M82. Daño 110–250, alcance 8–10 casillas, coste 3–5 de energía. Los de cerrojo disparan una vez por turno; los semiautomáticos, dos.
-- **Escopetas y pistolas:** Remington 870, Benelli M4, Saiga-12; M9, Glock 17, M1911, Desert Eagle. La pistola es el arma secundaria de todos: daño 55–100, coste 1–2 de energía.
-- **Lanzacohetes:** RPG-7 (recargable), AT4 y M72 LAW (un solo uso por partida), Javelin (guiado, ignora coberturas, exige un turno de fijación). Daño 140–300.
-- **Lanzagranadas:** M203, M320 (acoplados al fusil), M32 (tambor de 6), Mk 19 (emplazamiento). Daño 100–125 en área.
-- **Morteros:** M224 (60 mm) y M252 (81 mm). Fuego indirecto a cualquier casilla del mapa, con 1 turno de espera y marcador visible para el enemigo.
-- **Granadas de mano:** M67 de fragmentación, M18 de humo, M84 aturdidora, AN-M14 de termita, Mk3A2 de concusión. Consumibles, se lanzan a 2–3 casillas.
-- **Torretas:** M2 Browning, Mk 19, M134 Minigun, DShK, KPV. Las despliega el Ingeniero en 1 turno; tienen vida propia y el enemigo puede destruirlas.
-- **Equipo táctico:** mina Claymore M18, C4, dron RQ-11 Raven, botiquín IFAK, escudo balístico, mira térmica AN/PAS-13, silenciador.
+- **Fusiles de asalto y carabinas:** M4A1, AK-12, HK416, FN SCAR-L, G36C, FAMAS. Daño 27–30, alcance 6 casillas, coste 2–3 de energía.
+- **Subfusiles:** MP5, MP7, P90, UMP45, KRISS Vector. Daño 18–26, alcance 3–4 casillas, coste 1–2 de energía. Armas del Espía.
+- **Ametralladoras:** M249 SAW, M240B, PKM, MG3, Browning M2. Daño 24–38, alcance 6–7 casillas, coste 3–4 de energía, con supresión. Armas del Artillero.
+- **Francotiradores:** M40, AW50, M24, M110, SVD, Barrett M82, Mk 14 EBR, PSG-1. Daño 45–100, alcance 8–10 casillas, coste 3–5 de energía. Los de cerrojo disparan una vez por turno; los semiautomáticos, dos.
+- **Escopetas y pistolas:** Remington 870, Benelli M4, Mossberg 500; M9, Glock 17, M1911, Desert Eagle. La pistola es el arma secundaria de todos: daño 22–40, coste 1–2 de energía.
+- **Lanzacohetes:** RPG-7 (recargable), AT4 y M72 LAW (un solo uso por partida). Daño 55–85.
+- **Lanzagranadas:** M203 (acoplado al fusil), M32 (tambor de 6), Mk 19 (emplazamiento). Daño 40–85 en área.
+- **Morteros:** M224 (60 mm) y M252 (81 mm). No están en el código: fuego indirecto de diseño, a cualquier casilla del mapa, con 1 turno de espera y marcador visible para el enemigo.
+- **Granadas de mano:** M67 de fragmentación, M18 de humo, M84 aturdidora, AN-M14 de termita, Mk3A2 de concusión. Consumibles, no están en el catálogo `WEAPONS` del código; se lanzan a 2–3 casillas.
+- **Torretas:** solo la M2 Browning está en el juego (la despliega el Ingeniero; 120 PV). Mk 19, M134 Minigun, DShK y KPV son diseño, no están en el código.
+- **Equipo táctico:** mina Claymore M18 (en el código, 60 de daño), C4, dron RQ-11 Raven, botiquín IFAK, escudo balístico, mira térmica AN/PAS-13, silenciador. Gadgets, no están en el catálogo `WEAPONS` del código.
 
 ## Modos de juego
 
 - **Eliminación.** Gana quien elimine a toda la escuadra enemiga. El modo clásico.
 - **Captura de baliza.** Gana quien elimine al rival o aguante 5 turnos seguidos con la zona central sin enemigos dentro. El modo del original.
-- **Dominación.** Tres zonas en el mapa. Cada turno que un bando aguanta una zona suma 1 punto; gana quien llegue a 10 puntos o elimine al rival. (Después de la v1.)
-- **Escolta.** Un dron averiado debe llegar a la zona de extracción y quedarse 1 turno. El bando que lo escolta gana si lo logra; el otro, si destruye el dron o elimina a los escoltas. (Después de la v1.)
+- **Dominación.** Tres zonas en el mapa. Cada turno que un bando aguanta una zona suma 1 punto; gana quien llegue a 10 puntos o elimine al rival.
+- **Escolta.** Un dron averiado debe llegar a la zona de extracción y quedarse 1 turno. El bando que lo escolta gana si lo logra; el otro, si destruye el dron o elimina a los escoltas.
 
-La v1 trae Eliminación y Captura de baliza. Dominación y Escolta se añaden cuando la v1 esté equilibrada.
+La v1 trae Eliminación, Captura de baliza, Dominación y Escolta.
 
 ## Formatos de escuadra
 
@@ -69,13 +69,13 @@ La v1 trae Eliminación y Captura de baliza. Dominación y Escolta se añaden cu
 - **4 contra 4.** El formato principal del remake, más táctico que el 5 contra 5 del original y más manejable en una tablet.
 - **5 contra 5.** El formato del original, para quien quiera la escuadra completa.
 
-Cada jugador elige sus soldados y sus armas antes de la partida, con dos límites de puntos de escuadra separados, como en el original: uno para las unidades y otro para las habilidades. Los soldados y las armas potentes cuestan más puntos, así que una escuadra de élite es pequeña y una escuadra grande es modesta.
+Cada jugador elige sus soldados y sus armas antes de la partida. No hay puntos de escuadra (esa economía no existe en el código): la moneda del juego son las monedas.
 
 ## Mapas con elementos accionables
 
 El mapa ya no es solo un tablero con coberturas: tiene cosas que se pueden usar, romper o capturar.
 
-- **Coberturas:** muros bajos, sacos de arena, cajas y coches. Cada borde de casilla tiene cobertura en tres niveles (sin cobertura, media y total) y solo la total bloquea la visión; la protección depende del lado desde el que disparan. Los sacos y las cajas se pueden destruir; los muros, no.
+- **Coberturas:** muros bajos, sacos de arena, cajas y coches. Cada borde de casilla tiene cobertura en cuatro niveles (0–3) y solo la total bloquea la visión; la protección depende del lado desde el que disparan. Los sacos y las cajas se pueden destruir; los muros, no.
 - **Barriles explosivos:** al recibir un disparo explotan y hacen 100 de daño en las casillas adyacentes. Están colocados donde duelen.
 - **Torreta capturable:** en el centro de algunos mapas hay un emplazamiento vacío. El primer soldado que llega a su casilla y gasta 2 de energía lo captura para su bando, y dispara automáticamente al final de cada turno.
 - **Botiquines en el mapa:** un soldado que pasa por la casilla recupera 60 de vida. Un solo uso por partida.
@@ -83,17 +83,15 @@ El mapa ya no es solo un tablero con coberturas: tiene cosas que se pueden usar,
 - **Puertas y portones:** algunas casillas se abren o se cierran con 1 de energía y bloquean la visión y el paso mientras están cerradas.
 - **Minas y C4:** los pone el Ingeniero y el Espía, y quedan en el mapa hasta que detonan o alguien las desactiva.
 
-### Tres mapas de la v1
+### Mapas
 
-- **Almacén industrial.** 12 × 12, simétrico, con estanterías como cobertura, barriles en los pasillos y una torreta capturable en el centro. El mapa de aprender.
-- **Plaza urbana.** 12 × 12, con coches, muros bajos y una baliza en la fuente central. Más abierto, para francotiradores.
-- **Base desértica.** 14 × 12, con trincheras, sacos y dos botiquines. Más grande, para partidas de 5 contra 5.
+El juego tiene 19 entradas en `MAP_DEFS` (`src/data/maps.js`): los 8 Skirmish reales del IPA (`skirmish03`–`06` y `08`–`11`, con geometría `.bin` 1:1), los mapas propios `almacen` y `patio`, los mapas de campaña `skirmish01`, `skirmish02` y `skirmish07`, y las 6 misiones de `campana01`–`campana06`. No hay «Plaza urbana» ni «Base desértica»: esos nombres eran de un diseño anterior y no existen en el código.
 
 ## Progresión y personalización
 
 - **Desbloqueos por jugar.** Las armas, los trajes y los accesorios se desbloquean jugando partidas, no pagando. El arsenal potente cuesta más partidas.
 - **Skins iniciales.** Al empezar, cada jugador tiene dos: la Estándar, el soldado genérico sin nada especial, como la estándar de Fortnite, y la de su Nación, con los colores de su bandera y su escudo militar. Las dos son solo aspecto, sin pasivas.
-- **Skins con pasivas.** Las skins que lleguen después no serán solo aspecto: cada una dará una pasiva pequeña (por ejemplo, +1 casilla de movimiento en el primer turno, o recargar un turno antes). La skin de nación y la estándar no dan pasivas.
+- **Skins sin pasivas.** Todas las skins son solo aspecto, sin pasivas: la estándar, la de nación y las que lleguen después no dan ninguna ventaja (`src/data/nations.js`: «Sin pasiva»).
 - **Perfiles de soldado.** Cada soldado tiene nombre, rol, arma, accesorio y traje. Se pueden guardar varias escuadras y elegir una antes de cada partida.
 
 ## Naciones y Guerra de Naciones (evento de fin de semana)
@@ -107,24 +105,24 @@ El mapa ya no es solo un tablero con coberturas: tiene cosas que se pueden usar,
 
 ## Tecnología
 
-- **Juego web en 2D.** HTML5 y Canvas, sin modelado 3D: vista cenital con sprites dibujados, como el original. Se juega desde el navegador, en el ordenador y en la tablet, con ratón o con el dedo.
+- **Juego web en 3D.** HTML5 y Three.js: tablero 3D con volumen, soldados con mallas y rigs del original y cámara táctica. Se juega desde el navegador, en el ordenador y en la tablet, con ratón o con el dedo. Hay una vista 2D alternativa (Canvas) por si el 3D falla o para móviles.
 - **Sin servidor.** La v1 funciona sin conexión: partidas contra la máquina y a dos jugadores en el mismo dispositivo, pasándose el turno. El multijugador en línea queda fuera de la v1.
 - **IA enemiga.** La máquina juega con una lógica sencilla: avanza hacia la baliza o hacia el enemigo más cercano, dispara cuando tiene tiro y usa su especial cuando le conviene. Suficiente para aprender y para partidas rápidas.
 
 ## Alcance de la v1 (prototipo jugable)
 
-- 1 mapa (Almacén industrial), 2 modos (Eliminación y Captura de baliza), formatos 2v2, 4v4 y 5v5.
+- 19 mapas en `MAP_DEFS`, 4 modos (Eliminación, Captura de baliza, Dominación y Escolta), formatos 2v2, 4v4 y 5v5.
 - Los 7 roles con sus armas básicas del arsenal y sus especiales, con vida y energía por tipo de cuerpo (Ligero 200/12, Medio 250/14, Pesado 300/18) y coste de movimiento por casilla según el cuerpo.
-- Azar con semilla (puntería, crítico, dispersión y caída de daño con la distancia), fuego de respuesta, vigilancia, dirección de mira y cobertura direccional en tres niveles.
+- Azar con semilla (puntería, crítico, dispersión y caída de daño con la distancia), fuego de respuesta, vigilancia, dirección de mira y cobertura direccional en cuatro niveles (0–3).
 - Barriles explosivos, coberturas destructibles, botiquín en el mapa, cajas de botín programadas y torreta capturable.
 - Partida contra la IA y a dos jugadores en el mismo dispositivo.
 - Selección de escuadra antes de la partida y pantalla de victoria con el resumen.
 - Elección de nación permanente al entrar por primera vez entre los 12 países importantes, skins iniciales Estándar y Nación, y modo Guerra de Naciones disponible sábado y domingo.
 
-Después de la v1, por orden: Dominación y Escolta, los otros dos mapas, el resto del arsenal y los desbloqueos, y el equilibrio fino con las partidas de prueba de Dani.
+Después de la v1, por orden: el resto del arsenal y los desbloqueos, y el equilibrio fino con las partidas de prueba de Dani.
 
 ## Decisiones abiertas para Dani
 
 - **Roles.** ¿Se quedan los 7 o sobra alguno? ¿Falta alguno, como un piloto de dron o un francotirador de apoyo?
-- **Modos.** ¿Dominación y Escolta en ese orden, o prefiere otro modo antes?
-- **Mapas.** ¿Los tres temas propuestos o alguno distinto, como un puerto, una selva o una ciudad en ruinas?
+- **Modos.** Dominación y Escolta ya están implementadas. ¿Se pulen los cuatro modos que hay o prefiere otro modo nuevo antes?
+- **Mapas.** Los 19 de `MAP_DEFS` ya están. ¿Alguno distinto, como un puerto, una selva o una ciudad en ruinas?

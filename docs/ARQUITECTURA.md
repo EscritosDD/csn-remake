@@ -19,7 +19,7 @@ declara los módulos ES. `assets/three.min.js` se carga como script clásico.
 | `src/render3d/` | Escena, assets, clips, retarget, soldados, armas, FX, paleta `env.js`, FX arcade con pool, cámara, runtime, carga GLTF, actor GLB, caché de assets y fachada `index.js`. |
 | `src/ui/` | Shell, campaña, previsualización de escuadra, HUD arcade, unit card, arsenal, habilidades, cuartel, laboratorio GLB, wiring y fachada `index.js`. |
 | `src/bridge.js` | `installEarlyBridge` e `installFullBridge`; expone estado de `main.js` a capturas, visor y tests. |
-| `src/viewer/` | `main.js` (visor/galería), `card-stage.js` (único renderer), `inspector.js` y `troop-cards.js`. |
+| `src/viewer/` | `main.js` (visor/galería), `card-stage.js` (renderer del visor y las tarjetas), `body-loader.js`, `inspector.js` y `troop-cards.js`. |
 | `assets/competitive/` | `manifest.json` y contenedores `chars/`, `weapons/`, `anims/` para modelos `.glb`. |
 | `bench/` | Tests y verificaciones; no se sirve por HTTP. |
 
@@ -39,7 +39,7 @@ repite `VERIFICAR.ps1` antes de investigar.
 
 ## Flujo de una partida
 
-1. Desde `Jugar`, `campaignBtn` y `mnuChallenges` abren `#campaignHub`
+1. Desde `Jugar`, `mnuChallenges` abre `#campaignHub`
    (`showCampaignView`), no más cajas encadenadas en el menú.
 2. La misión seleccionada pasa por `showMissionBriefing(index)`: radio, roster
    fijo y un único botón de despliegue enlazado tras `showModal()`.
@@ -56,21 +56,27 @@ repite `VERIFICAR.ps1` antes de investigar.
 8. `endGame` decide ganador, premios y pantalla de resultados.
 
 `src/main.js` conserva el marcador `/* ================= INIT ================= */`
-antes del IIFE de INIT. El bridge se instala en dos fases:
-`installEarlyBridge` antes del marcador y `installFullBridge` después.
+antes del IIFE de INIT (línea 328). El bridge se instala en dos fases:
+`installEarlyBridge` antes del marcador y `installFullBridge` después; en
+concreto, `installFullBridge` se llama dos veces: en la línea 297 (antes del
+marcador) y en la 354 (después).
 
 ## Escena 3D y visor
 
 - Modo Historia usa el IPA en `assets/soldier/`; Modo Competitivo usa `.glb` en
   `assets/competitive/`. No se mezclan fuentes.
-- `src/viewer/card-stage.js` es el único `WebGLRenderer`. El visor y el
-  Inspector reutilizan ese renderer mediante `getCardStage()`.
+- Hay **4 `WebGLRenderer` en `src/`**: `src/viewer/card-stage.js:72` (visor y
+  tarjetas 3D, reutilizado mediante `getCardStage()`), `src/render3d/camera3d.js:40`
+  (renderer principal del juego 3D), `src/game/demo.js:19` (demo) y
+  `src/render3d/real-sprites.js:26` (sprites 2D con captura). `getCardStage()`
+  es solo para visor y tarjetas; el juego usa el renderer de `camera3d.js`.
 - Los modelos de clase del IPA viven en `assets/soldier/<Clase>.obj` con su
   `_rig.json` y `_tex.png`; escalas en `assets/soldier_scales.json`.
 - Las armas comparten holder con cañón `+X` y empuñadura `(0,0,0)`; se acoplan
   con `fitGunToHand3()` y sockets reales de `assets/weapons/weapon_sockets.json`.
-- Los cinco personajes Meshy siguen aislados: no reciben pose, clips,
-  retarget ni acople de arma.
+- Los cinco personajes Meshy siguen aislados: no reciben pose, clips ni
+  retarget; el arma sí se acopla en partida vía `fitLiveGun3`
+  (`src/render3d/runtime.js:113`, que solo exige `userData.real`).
 - `mount()` reengancha el modelo sin saltos y alinea la plataforma antes de
   medir bounds.
 - Depuración: `?debugGrid=1` muestra rejillas 2D/3D; `?debugWeapons=1` marca el
@@ -80,7 +86,8 @@ antes del IIFE de INIT. El bridge se instala en dos fases:
 
 1. No reintroducir `<script>` inline en `index.html`.
 2. No añadir `"type":"module"` a `package.json` raíz.
-3. No crear otro `WebGLRenderer`; usar `getCardStage()`.
+3. No crear un quinto `WebGLRenderer`; para visor y tarjetas usar
+   `getCardStage()` (el juego 3D usa el renderer de `camera3d.js`).
 4. No mezclar IPA/Modo Historia con `.glb`/Modo Competitivo.
 5. Conservar alias históricos usados por tests y capturas (`MESHY_LOADING`,
    `DOM_MAX_ROUNDS`, `ESCORT_DRONE_*`, `LS_WINS`, `FLASH_RANGE`, etc.).
@@ -88,7 +95,7 @@ antes del IIFE de INIT. El bridge se instala en dos fases:
    `__build3D`, `__render3D`, `__renderDemo`, `quickStart`, `quickSmoke`,
    `quickFlash`.
 7. Comprobar unicidad de anclas antes de reemplazar; hay fragmentos repetidos.
-8. Cada módulo en `src/` debe mantenerse por debajo de 450 líneas; ahora hay 79 módulos y `src/ui/ui-shell.js` está en 433.
+8. Cada módulo en `src/` debe mantenerse por debajo de 450 líneas; ahora hay 79 módulos y `src/ui/ui-shell.js` está en 434.
 9. La campaña usa `#campaignHub` y `showMissionBriefing()`; los botones del modal se enlazan después de `showModal()`, sin `onclick` inline.
 10. Tras cualquier cambio: `npm run lint`, `npm test` y `VERIFICAR.ps1`.
 

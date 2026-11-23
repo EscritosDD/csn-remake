@@ -20,7 +20,7 @@
 - No añadir `"type":"module"` a `package.json` raíz; `src/package.json` ya declara módulos ES.
 - `assets/three.min.js` se carga como script clásico, no como módulo.
 - Modo Historia usa el IPA en `assets/soldier/`; Modo Competitivo usa `.glb` en `assets/competitive/`. No mezclar fuentes.
-- `src/viewer/card-stage.js` es el único `WebGLRenderer`; reutilizar `getCardStage()` en lugar de crear otro.
+- Hay **4 `WebGLRenderer` en `src/`**, no uno: `src/viewer/card-stage.js:72` (visor y tarjetas 3D; el único para el visor, reutilizar `getCardStage()` en lugar de crear otro), `src/render3d/camera3d.js:40` (renderer principal del juego 3D), `src/game/demo.js:19` (demo) y `src/render3d/real-sprites.js:26` (sprites 2D con captura). Los cuatro son intencionales; no crear un quinto.
 - Todos los módulos nuevos deben añadirse a los arrays `modules` de:
   - `bench/rules.test.js`
   - `bench/harness.js`
@@ -36,10 +36,10 @@
 - `src/core-and-audio.js`: agregador de core/audio.
 - `src/game/`: reglas, IA, input, turnos, misiones, personajes, demo, teclado y quick actions.
 - `src/render2d/`: tablero, tiles, sprites, FX y fachada `index.js`.
-- `src/render3d/`: escena, assets, clips, retarget, soldados, armas, FX, cámara, runtime, carga GLTF, actor GLB, caché de assets y fachada `index.js`.
-- `src/ui/`: shell, campaña, previsualización de escuadra, unit card, arsenal, habilidades, cuartel, laboratorio GLB, wiring y fachada `index.js`.
+- `src/render3d/`: escena, assets, clips, retarget, soldados, armas, FX, FX arcade (`fx-arcade.js`, pool de trazadoras/impactos/flotantes), cámara, runtime, carga GLTF, actor GLB, caché de assets y fachada `index.js`.
+- `src/ui/`: shell, campaña, recuento de campaña (`campaign-tally.js`), HUD arcade (`arcade-hud.js`), previsualización de escuadra, unit card, arsenal, habilidades, cuartel, laboratorio GLB, wiring y fachada `index.js`.
 - `src/bridge.js`: `installEarlyBridge`/`installFullBridge`; exporta las variables de `main.js` a `window` para capturas, visor y tests.
-- `src/viewer/`: `main.js` (visor/galería), `card-stage.js` (único renderer), `inspector.js` y `troop-cards.js`.
+- `src/viewer/`: `main.js` (visor/galería), `card-stage.js` (renderer del visor y las tarjetas), `body-loader.js` (carga y escalado de cuerpos con rig), `inspector.js` y `troop-cards.js`.
 - `assets/competitive/`: `manifest.json` y contenedores `chars/`, `weapons/`, `anims/` para el Modo Competitivo.
 
 ## Alias y compatibilidad
@@ -49,7 +49,7 @@
 
 ## Tamaño y estilo
 - Objetivo: cada módulo en `src/` por debajo de 450 líneas.
-- Estado actual: `src/main.js` 352 líneas; `src/viewer/main.js` 448 líneas; `src/viewer/card-stage.js` 449 líneas; módulo más grande `src/ui/ui-shell.js` 445 líneas; 75 módulos en `src/`.
+- Estado actual: `src/main.js` 354 líneas; `src/viewer/main.js` 420 líneas; `src/viewer/card-stage.js` 449 líneas; módulo más grande `src/ui/ui-shell.js` 434 líneas; 79 módulos en `src/`.
 - Preferir extraer bloques completos a módulos con `ctx` antes que duplicar estado.
 - Si se compactan líneas, validar siempre con `npm run lint` y la suite headless.
 - No añadir comentarios nuevos salvo marcadores funcionales exigidos por tests.

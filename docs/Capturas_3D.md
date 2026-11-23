@@ -71,7 +71,7 @@ reanudar partida y guarda `<prefijo>_ui.png`; los mapas y las misiones guardan
 DOM del visor (`#viewerCharacterSelect`, `#viewerWeaponSelect`,
 `#viewerKinds`, `#viewerList`) porque `viewer` y `selectModel` no son globales.
 El cierre actual generó `FIX_visor_*_ui.png`, `FIX_setup_selector_ui_ui.png` y
-`FIX_skirmish11_3d.png`.
+`FIX_skirmish11_3d.png` (ficheros locales en `docs/capturas/`, ignorados por Git; no están en el repo).
 `viewer:audit-all` recorre personajes, armas, props y piezas y guarda la
 auditoria en el JSON de resultado (`viewer`, `viewerAudit`) además del PNG.
 `move:`, `combat:` y `mobile:` capturan muestras de marcha, eventos de clip y
@@ -107,6 +107,6 @@ Y `G.units` da las posiciones: `G.units.map(u => [u.team, u.role, u.x, u.y])`.
 `powershell -ExecutionPolicy Bypass -File bench\VERIFICAR.ps1` comprueba
 sintaxis, tableros, reglas, datos, winding, rejillas IPA, capturas `debugGrid`,
 humo 3D, auditoría del visor, clips, movimiento, combate y móvil/SwiftShader.
-Último cierre: **TODO OK 13/13**, **77/77 tests**, con `viewer:audit-all
-ok=True` (4 modelos) y capturas reales de visor/setup/skirmish generadas.
+Último cierre: **TODO OK 13/13**, **136 tests**, con `viewer:audit-all
+ok=True` (55 modelos) y capturas reales de visor/setup/skirmish generadas.
 Es la forma rápida de saber si algo se ha roto sin mirar imágenes.

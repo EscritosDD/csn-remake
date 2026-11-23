@@ -9,14 +9,14 @@ en runtime y manteniendo separados Modo Historia (IPA) y Modo Competitivo
 ## Resumen final
 
 - `npm run lint`: limpio.
-- `npm test`: **131/131**.
+- `npm test`: **136/136**.
 - `bench/VERIFICAR.ps1`: **TODO OK 13/13**.
 - `src/`: **79 módulos ESM**, 0 `<script>` inline en `index.html`, 2 tags module.
 - `index.html`: 2 module tags (`src/main.js`, `src/viewer/main.js`).
 - 19 tableros, 40 clips IPA, 5 modelos Meshy heredados sin pose/clips/retarget.
 - 1 `WebGLRenderer` en el visor (`src/viewer/card-stage.js`); 4 en `src/`.
 - 0 errores de sintaxis y 0 ciclos ESM nuevos.
-- Módulos más largos: `card-stage.js` 449, `ui-shell.js` 433, `viewer/main.js`
+- Módulos más largos: `card-stage.js` 449, `ui-shell.js` 434, `viewer/main.js`
   420, `data/maps.js` 360. Ninguno supera 450.
 
 ## Sprint 1 — Carga y pose fiable del visor
@@ -105,7 +105,8 @@ en runtime y manteniendo separados Modo Historia (IPA) y Modo Competitivo
 - Añadido este informe y enlazado desde el índice de documentación.
 - Registro de los módulos nuevos en las dos listas `modules`
   (`bench/harness.js`, `bench/rules.test.js`): `render3d/env`,
-  `render3d/fx-arcade`, `ui/arcade-hud`.
+  `render3d/fx-arcade`, `ui/arcade-hud`, `viewer/body-loader`,
+  `ui/campaign-tally`.
 - Gate final ejecutado desde cero:
 
 ```
@@ -114,9 +115,9 @@ npm test
 powershell -ExecutionPolicy Bypass -File bench/VERIFICAR.ps1
 ```
 
-Resultado: `TODO OK 13/13`. Incluye 19 tableros, 40 clips, 193 muestras de
+Resultado: `TODO OK 13/13`. Incluye 19 tableros, 40 clips, 194 muestras de
 movimiento, 157 muestras de combate, visor `ok=True` con 55 modelos y
-móvil/SwiftShader a 390×844, ~16–17 fps.
+móvil/SwiftShader a 390×844, 8,6 fps.
 
 ## Invariantes preservadas
 
@@ -144,5 +145,4 @@ node _capture_all.mjs viewer:audit-all VIEWS4 9000
 powershell -ExecutionPolicy Bypass -File bench/VERIFICAR.ps1
 ```
 
-Las capturas viven en `docs/capturas/` y están ignoradas por Git. Todos los
-cambios de esta entrega quedan sin commitear en el árbol de trabajo.
+Las capturas viven en `docs/capturas/` y están ignoradas por Git.
