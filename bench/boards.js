@@ -18,7 +18,8 @@ const vm = require('vm');
 // --- 1. Cargar MAP_DEFS del juego (datos reales, no una copia) ---
 const sb = {};
 vm.createContext(sb);
-vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'src', 'data', 'maps.js'), 'utf8').replace(/^export\s+/gm, '') + '\n;globalThis.MAP_DEFS=MAP_DEFS;', sb);
+vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'src', 'data', 'campaign.js'), 'utf8').replace(/^export\s+/gm, ''), sb);
+vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'src', 'data', 'maps.js'), 'utf8').replace(/^\s*import\s+[^;]+;\s*$/gm, '').replace(/^export\s+/gm, '') + '\n;globalThis.MAP_DEFS=MAP_DEFS;', sb);
 const MAP_DEFS = sb.MAP_DEFS;
 if (!MAP_DEFS) { console.error('FALLO: no se pudo cargar MAP_DEFS de src/data/maps.js'); process.exit(1); }
 

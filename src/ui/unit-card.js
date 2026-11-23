@@ -10,16 +10,18 @@ import { WEAPON_MESH_FILE, WEAPON_COVER_BY_FILE, WEAPONS_ORIGINAL } from '../ren
 import { inBeacon, obAt } from '../game/board.js';
 import { aliveCount, canHealSpecial, canReviveSpecial, canSnipeSpecial, selectUnit, setOverwatch, teamName, unitHasAction } from '../game/combat.js';
 import { MINE_COST, MINE_DMG, captureTurret, useSpecial } from '../game/missions.js';
+import { tutorialCheck, tutorialEvent } from '../game/tutorial.js';
 import { ARTY_COST, ARTY_DMG, ARTY_RANGE, BEES_COST, BEES_DMG, BEES_RANGE, BEES_TURNS, COVER_COST, CRATE_COST, GAS_COST, GAS_DMG, GAS_TURNS, MOLOTOV_COST, MOLOTOV_DMG, MOLOTOV_TURNS, ORB_COST, ORB_DMG, ORB_RANGE, SHIELD_COST, SWEEP_COST, SWEEP_RANGE, TELE_COST, TELE_RANGE, TOOL_COST, TOOL_HEAL, TOOL_RANGE, TRANQ_COST, TRANQ_RANGE, WATER_COST, WATER_PUSH, WATER_RANGE, useShield, useToolkit } from '../game/gadgets.js';
 import { $, DOM_MAX_ROUNDS, DOM_TARGET, ESCORT_GUIDES_PER_ROUND, ESCORT_MAX_ROUNDS, domControl, domZones, effMode, escortExt, flagHTML, emblemHTML, rolePortraitURL, setStep, syncPlayingViewport, toast } from './ui-shell.js';
 import { ABILITY_IMPL } from './abilities.js';
 
 export function updateUI(){
   if(!G)return;
+  tutorialCheck(G);
   const pill=$('#turnPill');
   pill.className='turn-pill '+G.turn;
   pill.textContent=G.over?'Partida terminada':'Turno: '+teamName(G.turn)+(G.aiBusy?' · la IA está jugando…':'');
-  $('#roundLabel').textContent='Ronda '+G.round+(effMode(G)==='dominacion'?(' / '+DOM_MAX_ROUNDS):effMode(G)==='escolta'?(' / '+ESCORT_MAX_ROUNDS):'')+' · '+G.map.name+' · '+(effMode(G)==='eliminacion'?'Eliminación':effMode(G)==='dominacion'?'Dominación':effMode(G)==='escolta'?'Escolta del dron':G.mode==='guerra'?'Guerra de Naciones':G.mode==='campana'?('Campaña · Misión '+(G.campaignMission+1)+' · '+CAMPAIGN_MISSIONS[G.campaignMission].title):'Captura de baliza')+(G.opp==='ia'?(' · IA '+G.difficulty):'')+' · Quedan '+aliveCount('A')+' contra '+aliveCount('B');
+  $('#roundLabel').textContent='Ronda '+G.round+(effMode(G)==='dominacion'?(' / '+DOM_MAX_ROUNDS):effMode(G)==='escolta'?(' / '+ESCORT_MAX_ROUNDS):'')+' · '+G.map.name+' · '+(effMode(G)==='eliminacion'?'Eliminación':effMode(G)==='dominacion'?'Dominación':effMode(G)==='escolta'?'Escolta del dron':G.mode==='guerra'?'Guerra de Naciones':G.mode==='tutorial'||G.isTutorial?('Instrucción de Dave'):G.mode==='campana'?('Campaña · Misión '+(G.campaignMission+1)+' · '+CAMPAIGN_MISSIONS[G.campaignMission].title):'Captura de baliza')+(G.opp==='ia'?(' · IA '+G.difficulty):'')+' · Quedan '+aliveCount('A')+' contra '+aliveCount('B');
   setStep('battle',(G.over?'Partida terminada':'Ronda '+G.round+' · '+teamName(G.turn))+(G.aiBusy?' · IA pensando':''));
   const bm=$('#beaconMeter');
   if(effMode(G)!=='baliza'){bm.style.display='none';}
@@ -36,7 +38,7 @@ export function updateUI(){
     const b=document.createElement('button');
     b.className=(G.selected===u?'sel':'')+(u.alive?'':' dead');
     b.innerHTML=(rolePortraitURL(u.role,u)?'<img class="roster-portrait" src="'+rolePortraitURL(u.role,u)+'" alt=""/>':'')+'<span class="role-dot" style="background:'+ROLES[u.role].color+'"></span><span style="flex:none"><b>'+u.role+'</b>'+(u.name&&u.name!==u.role?'<br><small style="color:var(--muted)">'+u.name+'</small>':'')+((u.alive?[u.stunned?'💫':(u.invisible?'👻':''),u.overwatch?'👁':'',u.suppressed?'⚡':'',((u.beesT||0)>0)?'🐝':'',((u.shieldT||0)>0)?'🛡':'',(u.hp<=u.maxHp*0.35?'🩹':'')]:[]).filter(Boolean).length?'<br><small title="estados">'+[u.stunned?'💫':(u.invisible?'👻':''),u.overwatch?'👁':'',u.suppressed?'⚡':'',((u.beesT||0)>0)?'🐝':'',((u.shieldT||0)>0)?'🛡':'',(u.hp<=u.maxHp*0.35?'🩹':'')].filter(Boolean).join('')+'</small>':'')+(u.vetLevel?'<span class="vet-badge">Vet. '+u.vetLevel+'</span>':'')+' <span style="color:'+(u.team==='A'?'var(--teamA)':'var(--teamB)')+'">●'+u.team+'</span><br><small style="color:var(--muted)">'+u.weapon+' · ⚡'+(u.alive?u.energy:0)+'</small></span><span class="mini-hp"><i style="width:'+Math.round(u.hp/u.maxHp*100)+'%"></i></span><b class="mono" style="font-size:13px">'+(u.alive?u.hp+' PV':'K.O.')+'</b>';
-    b.onclick=()=>{if(u.alive&&u.team===G.turn&&!G.aiBusy)selectUnit(u);};
+    b.onclick=()=>{if(u.alive&&u.team===G.turn&&!G.aiBusy){selectUnit(u);tutorialEvent('select',{unit:u});}};
     r.appendChild(b);
   });
   /* unit card */
@@ -115,7 +117,7 @@ export function updateUI(){
     const act=b.dataset.act;
     if(act==='shoot'){G.actionMode='shoot';toast('Toca a un enemigo en alcance para disparar con '+u.weapon+'. Pasa el cursor sobre él para ver la puntería.');}
     if(act==='pistol'){G.actionMode='pistol';toast('Toca a un enemigo a 3 casillas o menos para disparar la M9.');}
-    if(act==='grenade'){G.actionMode='grenade';toast('Toca la casilla destino de la M67 (máx. 3 casillas).');}
+    if(act==='grenade'){G.actionMode='grenade';tutorialEvent('grenade',{armed:true});toast('Toca la casilla destino de la M67 (máx. 3 casillas).');}
     if(act==='smoke'){G.actionMode='smoke';toast('Toca la casilla centro de la cortina M18 (máx. 4 casillas): tapará esa casilla y las 4 adyacentes durante 2 rondas.');}
     if(act==='mine'){G.actionMode='mine';toast('Toca una casilla adyacente libre para colocar la Claymore: el enemigo no la verá hasta pisarla.');}
     if(act==='flash'){G.actionMode='flash';toast('Toca la casilla donde estallará la M84 (máx. 4 casillas): aturdirá a todo soldado en radio 1, también a los tuyos; solo se salva quien la lanza, que aparta la mirada.');}

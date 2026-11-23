@@ -16,11 +16,27 @@ import { _keysHeld, wireKeyboard } from './game/keyboard.js';
 import { DEMO, setDEMO, setDemoNation, buildDemo, rebuildDemo, demoStatus, renderDemoFrame } from './game/demo.js';
 import { build3DFrame, render3DFrame } from './render3d/runtime.js';
 import { installEarlyBridge, installFullBridge } from './bridge.js';
+import { TUTORIAL_MISSION, TUTORIAL_STEPS, radioLines, campaignStars, missionById, rosterKey } from './data/maps.js';
+import { activeOriginalMission } from './ui/ui-shell.js';
+import { wireCampaignUI, renderTutorialStep, hideTutorialStep, tutorialHint, renderCampaignRadio } from './ui/campaign-ui.js';
+import { configureTutorial, startTutorial, skipTutorial, replayTutorial, tutorialAdvance, tutorialEvent, tutorialCheck, isTutorialActive, tutorialStep, LS_TUTORIAL } from './game/tutorial.js';
 "use strict";
 let flowStep='nation';
 let myNation=null, pickedNation=null;
 let setup={mode:'baliza',fmt:4,opp:'ia',rivalNation:null,skinA:'nacion',skinB:'nacion',map:'almacen',difficulty:'normal',campaignMission:0,squadChars:{A:{},B:{}}};
 let G=null;
+function markTutorialDone(){
+  const c=loadCampaign();saveCampaign(Object.assign({},c,{tutorialDone:true}));renderCampaignPanel();
+}
+configureTutorial({
+  getGame:()=>G,
+  show:(step,index,total)=>{renderTutorialStep(step,index,total);toast(step.text);try{auVoice({name:'Hipster Dave',role:'Comando'},'select',0.45);}catch(e){}},
+  advance:(step,index,total)=>{renderTutorialStep(step,index,total);try{auVoice({name:'Hipster Dave',role:'Comando'},'confirm',0.45);}catch(e){}},
+  hint:(step)=>{if(step)tutorialHint(step.text);},
+  hide:hideTutorialStep,
+  complete:()=>{markTutorialDone();toast('Instrucción completada: ya puedes jugar la Operación Londres.');},
+  skip:()=>{markTutorialDone();hideTutorialStep();toast('Instrucción omitida. Puedes repetirla cuando quieras.');}
+});
 document.querySelectorAll('#mainTabs button').forEach(b=>b.onclick=()=>{showScreen('scr-'+b.dataset.tab);if(b.dataset.tab==='arsenal')armTab('armas');});
 document.querySelectorAll('[data-back]').forEach(b=>b.onclick=()=>showScreen('scr-play'));
 setInterval(()=>{if(!isWeekend())$('#guerraCountdown').textContent=fmtCountdown(msToNextSaturday());else if($('#scr-play').classList.contains('on'))refreshGuerra();},1000);
@@ -31,7 +47,18 @@ document.querySelectorAll('#mapSeg button').forEach(b=>b.onclick=()=>{setup.map=
 document.querySelectorAll('#oppSeg button').forEach(b=>b.onclick=()=>{setup.opp=b.dataset.opp;document.querySelectorAll('#oppSeg button').forEach(x=>x.classList.toggle('on',x===b));buildSquads();});
 wireSkinSeg('skinSegA','skinA');wireSkinSeg('skinSegB','skinB');
 $('#cancelSetup').onclick=()=>{$('#setupArea').style.display='none';$('#menuArea').style.display='block';document.body.dataset.state='menu';syncPlayingViewport();setStep('mode');refreshGuerra();};
-$('#launchBtn').onclick=()=>startGame(readSquad('A'),readSquad('B'));
+function launchConfigured(){
+  const mission=activeOriginalMission();
+  const squadA=readSquad('A'),squadB=readSquad('B');
+  startGame(squadA,squadB);
+  if(!mission)return;
+  G.campaignName=mission.id;G.campaignTitle=mission.title;G.campaignTurnLimit=mission.turnLimit;
+  const lines=radioLines(mission.id);
+  if(lines[0]){toast('📻 '+lines[0]);log('📻 '+lines[0]);}
+  if(setup.mode==='tutorial')startTutorial();
+}
+function beginTutorial(){openSetup('tutorial');launchConfigured();}
+$('#launchBtn').onclick=launchConfigured;
 function advanceUnitYaw(un,t){
   const target=facingYaw(un);
   if(un._dispYaw==null||REDUCED_MOTION){un._dispYaw=target;un._turnTo=target;un._turnFrom=null;un._turning=false;un._turnProg=0;un._turnDelta=0;return un._dispYaw;}
@@ -64,7 +91,7 @@ preloadNativeGrids();
 let uid=0;
 try{document.addEventListener('click',function(e){try{if(e.target&&e.target.closest&&e.target.closest('button'))auClick();}catch(err){}});}catch(e){}
 $('#quitBtn').onclick=()=>{showModal('<h2>¿Abandonar la partida?</h2><p>Se perderá el progreso de esta partida. Tu nación y tu marcador de Guerra de Naciones no se tocan.</p><div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px"><button class="btn danger big" onclick="closeModal();backToMenu()">Sí, abandonar</button><button class="btn big" onclick="closeModal()">Seguir jugando</button></div>');};
-$('#endTurnBtn').onclick=endTurn;
+$('#endTurnBtn').onclick=()=>{tutorialEvent('endTurn');endTurn();};
 $('#soundBtn').onclick=()=>{soundOn=!soundOn;try{lsSet(LS_SOUND,soundOn?'1':'0');}catch(e){}renderSoundBtn();if(soundOn)sfx('turn');try{if(!soundOn){auMusicStop();auStopAmbient();}else if(G&&G.units&&G.units.length){auMusicStart();auAmbient(G.map.theme);}}catch(e){}toast(soundOn?'Sonido activado: disparos, ambiente y música del original.':'Sonido desactivado.');};
 renderSoundBtn();
 const canvas=$('#board'),ctx=canvas.getContext('2d');
@@ -114,7 +141,7 @@ get DOM_ZONES(){return DOM_ZONES;},get DRAW_MOVE_MS_PER_TILE(){return DRAW_MOVE_
 get ESCORT_EXT(){return ESCORT_EXT;},get ESCORT_MAX_ROUNDS(){return ESCORT_MAX_ROUNDS;},get ESCORT_START(){return ESCORT_START;},
 get FLASH_COST(){return FLASH_COST;},get FX(){return FX;},get G(){return G;},
 set G(v){G=v;},get GRID_CACHE(){return GRID_CACHE;},get GUN_MESH_CACHE(){return GUN_MESH_CACHE;},
-get HAS_THREE(){return HAS_THREE;},get LEAF_SVG(){return LEAF_SVG;},get LS_CAMPAIGN(){return LS_CAMPAIGN;},
+get HAS_THREE(){return HAS_THREE;},get LEAF_SVG(){return LEAF_SVG;},get LS_CAMPAIGN(){return LS_CAMPAIGN;},get LS_TUTORIAL(){return LS_TUTORIAL;},
 get LS_CHARS(){return LS_CHARS;},get LS_NATION(){return LS_NATION;},get LS_SOUND(){return LS_SOUND;},
 get MAP_DEFS(){return MAP_DEFS;},get MAPS_ORIGINAL(){return MAPS_ORIGINAL;},get MAP_PIECES(){return MAP_PIECES;},
 get MEM_STORE(){return MEM_STORE;},get MESHY_CAST(){return MESHY_CAST;},get MESHY_MODELS(){return MESHY_MODELS;},
@@ -130,7 +157,7 @@ get ROLE_SCALES(){return ROLE_SCALES;},get ROLE_SVG_ID(){return ROLE_SVG_ID;},ge
 get SKINS(){return SKINS;},get SKIN_TONES(){return SKIN_TONES;},get SKIRMISH_GEO(){return SKIRMISH_GEO;},
 get SMOKE_TURNS(){return SMOKE_TURNS;},get SPAWNS_A(){return SPAWNS_A;},get SPAWNS_B(){return SPAWNS_B;},
 get SPRITE_AIM_CT(){return SPRITE_AIM_CT;},get SPRITE_CACHE(){return SPRITE_CACHE;},get STEP_META(){return STEP_META;},
-get T3(){return T3;},get TEX3(){return TEX3;},get TRANQ_COST(){return TRANQ_COST;},
+get T3(){return T3;},get TEX3(){return TEX3;},get TUTORIAL_MISSION(){return TUTORIAL_MISSION;},get TUTORIAL_STEPS(){return TUTORIAL_STEPS;},get TRANQ_COST(){return TRANQ_COST;},
 get TURRET_POS(){return TURRET_POS;},set TURRET_POS(v){TURRET_POS=v;},get TUT_TEXTS(){return TUT_TEXTS;},
 get VIEW_MODE(){return VIEW_MODE;},get VOICE_FILES(){return VOICE_FILES;},get W(){return W;},
 set W(v){W=v;},get H(){return H;},set H(v){H=v;},
@@ -238,7 +265,7 @@ get teleportUnit(){return teleportUnit;},get texMat3(){return texMat3;},get thro
 get throwFlash(){return throwFlash;},get throwGas(){return throwGas;},get throwGrenade(){return throwGrenade;},
 get throwMolotov(){return throwMolotov;},get throwSmoke(){return throwSmoke;},get throwTranq(){return throwTranq;},
 get tickFx3D(){return tickFx3D;},get tileFromEvent(){return tileFromEvent;},get tileWorldY(){return tileWorldY;},
-get toast(){return toast;},get tone(){return tone;},get toonGrad3(){return toonGrad3;},
+get toast(){return toast;},get tone(){return tone;},get toonGrad3(){return toonGrad3;},get activeOriginalMission(){return activeOriginalMission;},get campaignStars(){return campaignStars;},get isTutorialActive(){return isTutorialActive;},get missionById(){return missionById;},get radioLines(){return radioLines;},get renderTutorialStep(){return renderTutorialStep;},get replayTutorial(){return replayTutorial;},get rosterKey(){return rosterKey;},get skipTutorial(){return skipTutorial;},get startTutorial(){return startTutorial;},get tutorialAdvance(){return tutorialAdvance;},get tutorialCheck(){return tutorialCheck;},get tutorialEvent(){return tutorialEvent;},get tutorialIndex(){return tutorialIndex;},get tutorialStep(){return tutorialStep;},
 get tryShoot(){return tryShoot;},get turretFire(){return turretFire;},get tutHide(){return tutHide;},
 get tutShow(){return tutShow;},get uid(){return uid;},set uid(v){uid=v;},
 get undoLastMove(){return undoLastMove;},get unitAt(){return unitAt;},get unitHasAction(){return unitHasAction;},
@@ -283,6 +310,7 @@ window.quickFlash=function(){ quickFlash({myNation,setup,get G(){return G;}}); }
 wireUI({get G(){return G;},TUT_TEXTS,tutShow,tutHide});
 /* ================= INIT ================= */
 buildNationGrid();buildArsenal();
+wireCampaignUI({getMission:()=>activeOriginalMission()||TUTORIAL_MISSION,getProgress:loadCampaign,showModal,audio:auVoice,toast,startTutorial:beginTutorial,skipTutorial,replayTutorial:beginTutorial,tutorialAdvance});
 loadSkirmishTop('skirmish03');loadSkirmishTop('skirmish04');
 (function(){
   setCHAR_PREFS(loadChars());

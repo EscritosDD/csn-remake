@@ -1,11 +1,15 @@
-export const CAMPAIGN_MISSIONS=[
- {title:'Primer contacto',map:'campana01',objective:'eliminacion',fmt:4,difficulty:'normal',brief:'Almacén industrial · Eliminación · 4 contra 4 · IA Normal. Aprende el tablero y elimina a la escuadra rival. Los supervivientes ganan su primera veterania.'},
- {title:'Señal en el patio',map:'campana02',objective:'baliza',fmt:4,difficulty:'normal',brief:'Patio de contenedores · Captura de baliza · 4 contra 4 · IA Normal. Aguanta la zona central 5 turnos sin enemigos dentro.'},
- {title:'Londres, tres frentes',map:'campana03',objective:'dominacion',fmt:4,difficulty:'veterano',brief:'Skirmish_03 · Londres · Dominación · 4 contra 4 · IA Veterano. Reparte la escuadra entre Depósito, Centro y Muelle y llega a 10 puntos.'},
- {title:'El puente no cae',map:'campana04',objective:'baliza',fmt:4,difficulty:'veterano',brief:'Skirmish_04 · Londres · Captura de baliza · 4 contra 4 · IA Veterano. El puente sobre el río, con la baliza en el centro del tablero.'},
- {title:'Última guardia',map:'campana05',objective:'eliminacion',fmt:5,difficulty:'elite',brief:'Almacén industrial · Eliminación · 5 contra 5 · IA Élite. La escuadra rival llega con +2 ⚡, +25 PV y +15% de daño. Tu veterania acumulada es tu ventaja.'},
- {title:'El convoy',map:'campana06',objective:'escolta',fmt:5,difficulty:'veterano',brief:'Skirmish_10 · El cruce · Escolta · 5 contra 5 · IA Veterano. Guía el dron hasta la salida este con la escolta pegada; el rival intentará pararlo.'}
-];
+import { CAMPAIGN_DATA_MISSIONS, TUTORIAL_DATA_MISSION, TUTORIAL_DATA_STEPS, CAMPAIGN_DATA_CHAPTERS, RADIO_DATA_LINES, missionByIdData, rosterKeyData, campaignStarsData, radioLinesData } from './campaign.js';
+
+export const CAMPAIGN_MISSIONS=CAMPAIGN_DATA_MISSIONS;
+export const TUTORIAL_MISSION=TUTORIAL_DATA_MISSION;
+export const TUTORIAL_STEPS=TUTORIAL_DATA_STEPS;
+export const CAMPAIGN_CHAPTERS=CAMPAIGN_DATA_CHAPTERS;
+export const RADIO_LINES=RADIO_DATA_LINES;
+export const missionById=missionByIdData;
+export const rosterKey=rosterKeyData;
+export const campaignStars=campaignStarsData;
+export const radioLines=radioLinesData;
+
 
 export const SKIRMISH_GEO={
  skirmish03:{bin:'assets/maps/skirmish03.bin',atlas:['assets/maps/skirmish03_atlas0.jpg','assets/maps/skirmish03_atlas1.jpg'],top:'assets/maps/skirmish03_top.jpg'},

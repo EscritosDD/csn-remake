@@ -1,6 +1,8 @@
 import { NATIONS, NATION_ART } from '../data/nations.js';
 import { ROLES, ROLE_NAMES, DEFAULT_SQUADS, ROLE_PORTRAIT } from '../data/roles.js';
-import { CAMPAIGN_MISSIONS } from '../data/maps.js';
+import { CAMPAIGN_MISSIONS, CAMPAIGN_CHAPTERS, TUTORIAL_MISSION, rosterKey } from '../data/maps.js';
+import { renderCampaignRadio, starMarkup } from './campaign-ui.js';
+import { charsForRole, characterKey } from '../game/chars.js';
 import { STEP_META, AUX_LABELS, AUX_HINTS } from '../data/ui-copy.js';
 import { lsGet, lsSet } from '../core/storage.js';
 import { REAL } from '../render3d/assets-real.js';
@@ -112,17 +114,35 @@ export function escortExt(){
   return [{x:W-2,y},{x:W-1,y},{x:W-2,y:y+1},{x:W-1,y:y+1}].filter(t=>t.x<W&&t.y<H);
 }
 
-export function loadCampaign(){try{const raw=lsGet(LS_CAMPAIGN);if(raw){const p=JSON.parse(raw);if(p&&typeof p.next==='number')return {next:Math.max(0,Math.min(CAMPAIGN_MISSIONS.length,p.next)),vet:Array.isArray(p.vet)?p.vet:[],done:!!p.done};}}catch(e){}return {next:0,vet:[],done:false};}
+function normalizeCampaign(p){
+  const base=p&&typeof p==='object'?p:{};
+  return {
+    next:Math.max(0,Math.min(CAMPAIGN_MISSIONS.length,Number(base.next)||0)),
+    vet:Array.isArray(base.vet)?base.vet:[],
+    done:!!base.done,tutorialDone:!!base.tutorialDone,
+    medals:CAMPAIGN_MISSIONS.map((m,i)=>Math.max(0,Math.min(3,Number(base.medals&&base.medals[i])||0)))
+  };
+}
 
-export function saveCampaign(c){try{lsSet(LS_CAMPAIGN,JSON.stringify(c));}catch(e){}}
+export function loadCampaign(){try{const raw=lsGet(LS_CAMPAIGN);if(raw){const p=JSON.parse(raw);if(p&&typeof p.next==='number')return normalizeCampaign(p);}}catch(e){}return normalizeCampaign(null);}
+
+export function saveCampaign(c){try{lsSet(LS_CAMPAIGN,JSON.stringify(normalizeCampaign(c)));}catch(e){}}
+
+export function activeOriginalMission(){
+  if(!setup)return null;
+  if(setup.mode==='tutorial'||setup.isTutorial)return TUTORIAL_MISSION;
+  if(setup.mode==='campana')return CAMPAIGN_MISSIONS[setup.campaignMission||0]||null;
+  return null;
+}
 
 export function effSetupMode(){
   if(!setup)return 'eliminacion';
-  if(setup.mode==='campana'){const m=CAMPAIGN_MISSIONS[setup.campaignMission||0];return m?m.objective:'eliminacion';}
+  const m=activeOriginalMission();
+  if(m)return m.objective;
   return setup.mode;
 }
 
-export function effMode(g){if(!g)return 'eliminacion';if(g.mode==='campana')return g.campaignObjective||'eliminacion';if(g.mode==='guerra')return 'baliza';return g.mode;}
+export function effMode(g){if(!g)return 'eliminacion';if(g.mode==='tutorial'||g.isTutorial||g.mode==='campana')return g.campaignObjective||'eliminacion';if(g.mode==='guerra')return 'baliza';return g.mode;}
 
 export function inDomZone(x,y,zone){return zone.tiles.some(t=>t.x===x&&t.y===y);}
 
@@ -235,15 +255,12 @@ export function syncDiffSeg(){document.querySelectorAll('#diffSeg button').forEa
 export function renderCampaignPanel(){
   const c=loadCampaign();
   const prog=document.getElementById('campaignProgress');
-  if(prog)prog.innerHTML=c.done?'Operación completada. Puedes reiniciarla o repetir misiones.':('Progreso: <b>'+c.next+' de '+CAMPAIGN_MISSIONS.length+'</b> misiones superadas'+(c.vet&&c.vet.length?(' · Veterania por posición: '+c.vet.map((v,i)=>'Pos. '+(i+1)+': +'+(v*25)+' PV').join(' · ')):' · Sin veterania todavía.'));
+  const medals=CAMPAIGN_MISSIONS.map((m,i)=>m.title+' '+starMarkup(c.medals[i]||0)).join(' · ');
+  if(prog)prog.innerHTML=(c.tutorialDone?'Instrucción de Dave completada. ':'Pendiente: instrucción de Dave. ')+(c.done?'Operación completada.':('Progreso: <b>'+c.next+' de '+CAMPAIGN_MISSIONS.length+'</b> misiones superadas.'))+'<br>Medallas: '+medals+(c.vet&&c.vet.length?('<br>Veterania por posición: '+c.vet.map((v,i)=>'Pos. '+(i+1)+': +'+(v*25)+' PV').join(' · ')):'');
+  const radioMission=CAMPAIGN_MISSIONS[Math.min(c.next,CAMPAIGN_MISSIONS.length-1)]||CAMPAIGN_MISSIONS[0];
+  renderCampaignRadio('campaignRadio',radioMission);
   const list=document.getElementById('campaignList');if(!list)return;
-  /* Selección de capítulos: tres tarjetas con arte, progreso y sus
-     misiones dentro, como el original. */
-  const CHAPTERS=[
-    {name:'Capítulo 1 · Primer contacto',icon:'assets/ui/modo_eliminacion.png',from:0,to:1},
-    {name:'Capítulo 2 · Londres en llamas',icon:'assets/ui/modo_dominacion.png',from:2,to:3},
-    {name:'Capítulo 3 · La última guardia',icon:'assets/ui/modo_eliminacion.png',from:4,to:5}
-  ];
+  const CHAPTERS=CAMPAIGN_CHAPTERS;
   list.className='chapter-grid';
   list.innerHTML='';
   CHAPTERS.forEach(ch=>{
@@ -251,12 +268,12 @@ export function renderCampaignPanel(){
     const doneN=CAMPAIGN_MISSIONS.slice(ch.from,ch.to+1).filter((m,i)=>c.done||(ch.from+i)<c.next).length;
     const card=document.createElement('div');card.className='panel chapter-card';
     const pct=total?Math.round(doneN/total*100):0;
-    card.innerHTML='<div class="ch-top"><img class="ch-ico" src="'+ch.icon+'" alt=""/><div style="flex:1"><b>'+ch.name+'</b><div class="ch-bar"><i style="width:'+pct+'%"></i></div></div><span class="mono" style="color:var(--muted);font-size:12px">'+doneN+'/'+total+'</span></div>';
+    card.innerHTML='<div class="ch-top"><img class="ch-ico" src="'+ch.icon+'" alt=""/><div style="flex:1"><b>'+ch.name+'</b><div class="ch-bar"><i style="width:'+pct+'%"></i></div></div><span class="mono" style="color:var(--muted);font-size:12px">'+doneN+'/'+total+'</span><button class="btn small" type="button" data-campaign-brief="'+ch.from+'">📻 Briefing</button></div>';
     for(let i=ch.from;i<=ch.to;i++){
       const m=CAMPAIGN_MISSIONS[i];
       const state=c.done||i<c.next?'done':(i===c.next?'current':'locked');
       const b=document.createElement('button');b.className='campaign-mission '+state;b.type='button';
-      b.innerHTML='<span class="mission-num">'+(state==='done'?'✓':(i+1))+'</span><span style="flex:1"><b>Misión '+(i+1)+' · '+m.title+(state==='done'?' · superada':state==='current'?' · siguiente':' · bloqueada')+'</b><p>'+m.brief+'</p></span>'+(state==='locked'?'<span class="ch-lock" aria-hidden="true">🔒</span>':'');
+      b.innerHTML='<span class="mission-num">'+(state==='done'?'✓':(i+1))+'</span><span style="flex:1"><b>Misión '+(i+1)+' · '+m.title+(state==='done'?' · superada':state==='current'?' · siguiente':' · bloqueada')+'</b><p>'+m.brief+'</p><span class="mission-stars" title="Medallas">'+starMarkup(c.medals[i]||0)+'</span></span>'+(state==='locked'?'<span class="ch-lock" aria-hidden="true">🔒</span>':'');
       b.disabled=state==='locked';
       b.onclick=()=>{if(state!=='locked')openSetup('campana',i);};
       card.appendChild(b);
@@ -268,6 +285,8 @@ export function renderCampaignPanel(){
 export function openSetup(mode,missionIdx){
   if(mode==='guerra'&&!isWeekend()){toast('Guerra de Naciones solo se juega sábado y domingo.');return;}
   setup.mode=mode;
+  setup.campaignId=null;
+  setup.isTutorial=mode==='tutorial';
   const banner=$('#campaignBanner');
   if(mode==='campana'){
     const c=loadCampaign();
@@ -275,29 +294,34 @@ export function openSetup(mode,missionIdx){
     const m=CAMPAIGN_MISSIONS[setup.campaignMission];
     setup.map=m.map;setup.fmt=m.fmt;setup.opp='ia';setup.difficulty=m.difficulty;setup.skinA='nacion';setup.rivalNation=null;
     if(banner){banner.style.display='block';banner.innerHTML='<b style="font-family:\'Barlow Condensed\';text-transform:uppercase;font-size:19px">Campaña · Misión '+(setup.campaignMission+1)+' de '+CAMPAIGN_MISSIONS.length+' · '
-+m.title+'</b><br><span class="sub">'+m.brief+'</span>'+(c.vet&&c.vet[setup.campaignMission]!==undefined?'':'')+((c.vet&&c.vet.some(v=>v>0))?'<br><span class="sub">Veterania que entra en esta misión, por posición de escuadra: '+c.vet.map((v,i)=>v>0?('Pos. '+(i+1)+': +'+(v*25)+' PV y +'+v+' ⚡'):null).filter(Boolean).join(' · ')+'</span>':'');}
-  } else {if(banner)banner.style.display='none';}
+ +m.title+'</b><br><span class="sub">'+m.brief+'</span>'+(c.vet&&c.vet[setup.campaignMission]!==undefined?'':'')+((c.vet&&c.vet.some(v=>v>0))?'<br><span class="sub">Veterania que entra en esta misión, por posición de escuadra: '+c.vet.map((v,i)=>v>0?('Pos. '+(i+1)+': +'+(v*25)+' PV y +'+v+' ⚡'):null).filter(Boolean).join(' · ')+'</span>':'');}
+  } else if(mode==='tutorial'){
+    const m=TUTORIAL_MISSION;
+    setup.campaignMission=0;setup.map=m.map;setup.fmt=m.fmt;setup.opp='ia';setup.difficulty=m.difficulty;setup.skinA='nacion';setup.rivalNation=null;
+    if(banner){banner.style.display='block';banner.innerHTML='<b style="font-family:\'Barlow Condensed\';text-transform:uppercase;font-size:19px">Instrucción de Dave · 6 pasos</b><br><span class="sub">'+m.brief+'</span>';}
+  } else {setup.campaignMission=0;if(banner)banner.style.display='none';}
   if(mode==='guerra'){setup.fmt=4;setup.opp='ia';setup.skinA='nacion';const others=NATIONS.filter(n=>n.id!==myNation.id);setup.rivalNation=others[Math.floor(Math.random()*others.length)];}
-  else if(mode!=='campana') setup.rivalNation=null;
+  else if(mode!=='campana'&&mode!=='tutorial') setup.rivalNation=null;
   if(mode==='dominacion'){/* mapa y formato libres, objetivo fijo */}
   $('#menuArea').style.display='none';$('#gameArea').style.display='none';$('#setupArea').style.display='block';
   document.body.dataset.state='setup';
-  const titles={eliminacion:'Eliminación',baliza:'Captura de baliza',guerra:'Guerra de Naciones',dominacion:'Dominación',campana:'Campaña · Operación Londres',escolta:'Escolta del dron'};
+  const titles={eliminacion:'Eliminación',baliza:'Captura de baliza',guerra:'Guerra de Naciones',dominacion:'Dominación',campana:'Campaña · Operación Londres',tutorial:'Instrucción de Dave',escolta:'Escolta del dron'};
   $('#setupTitle').textContent='Configurar partida · '+(titles[mode]||mode);
-  try{const art=$('#setupArt');if(art){const files={eliminacion:'modo_eliminacion',baliza:'modo_baliza',guerra:'modo_baliza',dominacion:'modo_dominacion',escolta:'modo_escolta',campana:'modo_eliminacion'};art.src='assets/ui/'+(files[mode]||'modo_eliminacion')+'.png';}}catch(e){}
+  try{const art=$('#setupArt');if(art){const files={eliminacion:'modo_eliminacion',baliza:'modo_baliza',guerra:'modo_baliza',dominacion:'modo_dominacion',escolta:'modo_escolta',campana:'modo_eliminacion',tutorial:'modo_eliminacion'};art.src='assets/ui/'+(files[mode]||'modo_eliminacion')+'.png';}}catch(e){}
   $('#setupSub').textContent=mode==='guerra'
     ? 'Evento de fin de semana: '+myNation.name+' contra '+setup.rivalNation.name+' (IA). 4 contra 4, captura de baliza.'
     : mode==='dominacion' ? 'Dominación: tres zonas (Depósito, Centro y Muelle), primero a 10 puntos.'
     : mode==='escolta' ? 'Escolta: lleva el dron al este con la escolta pegada; el rival intenta pararlo.'
     : mode==='campana' ? 'Misión '+(setup.campaignMission+1)+' · '+CAMPAIGN_MISSIONS[setup.campaignMission].title+' — mapa, formato y dificultad fijos.'
+    : mode==='tutorial' ? TUTORIAL_MISSION.brief
     : 'Formato, rival y composición de cada escuadra.';
-  $('#setupSub').title=mode==='campana'?CAMPAIGN_MISSIONS[setup.campaignMission].brief:'';
+  $('#setupSub').title=mode==='campana'?CAMPAIGN_MISSIONS[setup.campaignMission].brief:(mode==='tutorial'?TUTORIAL_MISSION.brief:'');
   setStep('squad',(titles[mode]||mode)+' · revisa tu escuadra');
-  const locked=(mode==='guerra'||mode==='campana');
+  const locked=(mode==='guerra'||mode==='campana'||mode==='tutorial');
   document.querySelectorAll('#fmtSeg button').forEach(x=>{x.classList.toggle('on',+x.dataset.fmt===setup.fmt);x.disabled=locked;});
   document.querySelectorAll('#oppSeg button').forEach(x=>{x.classList.toggle('on',x.dataset.opp===setup.opp);x.disabled=locked;});
-  document.querySelectorAll('#mapSeg button').forEach(x=>{x.disabled=(mode==='campana');});
-  document.querySelectorAll('#diffSeg button').forEach(x=>{x.disabled=(mode==='campana'||setup.opp==='local');});
+  document.querySelectorAll('#mapSeg button').forEach(x=>{x.disabled=(mode==='campana'||mode==='tutorial');});
+  document.querySelectorAll('#diffSeg button').forEach(x=>{x.disabled=(mode==='campana'||mode==='tutorial'||setup.opp==='local');});
   syncDiffSeg();
   syncMapSeg();
   syncSkinSegs();
@@ -320,30 +344,36 @@ export function syncSkinSegs(){
 export function squadRows(containerId,team){
   const el=$('#'+containerId);el.innerHTML='';
   const def=DEFAULT_SQUADS[setup.fmt];
+  const mission=activeOriginalMission();
+  const origOnly=!!mission;
+  const fixed=mission?(team==='A'?mission.playerRoster:mission.enemyRoster):null;
   for(let i=0;i<setup.fmt;i++){
     const row=document.createElement('div');row.className='squad-row';
-    const role=def[i];
+    const fixedDef=fixed&&fixed[i];
+    const role=fixedDef?fixedDef.role:def[i];
     row.innerHTML='<div class="slot-num">'+(i+1)+'</div>'+
-      '<img class="sq-ico" src="'+(rolePortraitURL(role)||'assets/ui/retrato_capitan.png')+'" alt=""/>'+
-      '<select data-team="'+team+'" data-slot="'+i+'" data-kind="role">'+ROLE_NAMES.map(r=>'<option '+(r===role?'selected':'')+'>'+r+'</option>').join('')+'</select>'+
-      '<select data-team="'+team+'" data-slot="'+i+'" data-kind="weapon"></select><select data-team="'+team+'" data-slot="'+i+'" data-kind="char" aria-label="Personaje"></select>';
+      '<img class="sq-ico" src="'+(rolePortraitURL(role,fixedDef)||'assets/ui/retrato_capitan.png')+'" alt=""/>'+
+      '<select data-team="'+team+'" data-slot="'+i+'" data-kind="role" '+(fixedDef?'disabled':'')+'>'+ROLE_NAMES.map(r=>'<option '+(r===role?'selected':'')+'>'+r+'</option>').join('')+'</select>'+
+      '<select data-team="'+team+'" data-slot="'+i+'" data-kind="weapon" '+(fixedDef?'disabled':'')+'></select><select data-team="'+team+'" data-slot="'+i+'" data-kind="char" aria-label="Personaje" '+(fixedDef?'disabled':'')+'></select>';
     el.appendChild(row);
+    const rsel=row.querySelector('[data-kind="role"]');
     const wsel=row.querySelector('[data-kind="weapon"]');
     const csel=row.querySelector('[data-kind="char"]');
     const fill=()=>{
-      const r=row.querySelector('[data-kind="role"]').value;
-      wsel.innerHTML=ROLES[r].weapons.map(w=>'<option>'+w+'</option>').join('');
-      const opts=charsForRole(r);
+      const r=rsel.value;
+      const weapons=fixedDef?[fixedDef.weapon]:ROLES[r].weapons;
+      wsel.innerHTML=weapons.map(w=>'<option '+(w===fixedDef.weapon?'selected':'')+'>'+w+'</option>').join('');
+      const opts=charsForRole(r,origOnly);
       csel.innerHTML=opts.map(c=>'<option value="'+characterKey(c)+'">'+c.name+'</option>').join('');
-      const chosen=(setup.squadChars[team]&&setup.squadChars[team][i])||characterKey(opts[0]);
+      const chosen=fixedDef?rosterKey(fixedDef.charName):(setup.squadChars[team]&&setup.squadChars[team][i])||characterKey(opts[0]);
       csel.value=opts.some(c=>characterKey(c)===chosen)?chosen:characterKey(opts[0]);
       if(!setup.squadChars[team])setup.squadChars[team]={};
       setup.squadChars[team][i]=csel.value;
       const ch=opts.find(c=>characterKey(c)===csel.value)||opts[0];
-      const ico=row.querySelector('.sq-ico');if(ico)ico.src=(rolePortraitURL(r,ch)||'assets/ui/retrato_capitan.png');
+      const ico=row.querySelector('.sq-ico');if(ico)ico.src=(rolePortraitURL(r,ch||fixedDef)||'assets/ui/retrato_capitan.png');
     };
     csel.onchange=()=>{if(!setup.squadChars[team])setup.squadChars[team]={};setup.squadChars[team][i]=csel.value;};
-    row.querySelector('[data-kind="role"]').onchange=fill;fill();
+    rsel.onchange=fill;fill();
   }
 }
 

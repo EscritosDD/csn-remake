@@ -147,7 +147,12 @@
       </div>
       <div class="panel" id="campaignPanel" style="margin-top:14px;display:none">
         <h2>Operación Londres · Las 6 misiones</h2>
-        <details class="info"><summary>ⓘ ¿Cómo funciona la campaña?</summary><div class="info-body"><p class="sub">Juega las misiones en orden. Puedes repetir la configuración de escuadra antes de cada una, pero el mapa, el objetivo y la dificultad de la IA los fija la misión. Si pierdes, repites esa misión sin perder la veterania ya ganada.</p></div></details>
+        <div class="tutorial-entry">
+          <div><span class="tag amber">Paso previo · 6 pasos</span><b>Instrucción de Hipster Dave</b><p class="sub">Selecciona, muévete a cobertura, dispara, lanza una granada, cierra el turno y remata. Se guarda en este dispositivo.</p></div>
+          <button class="btn primary" id="tutorialBtn">Empezar/repetir instrucción ▶</button>
+        </div>
+        <div class="radio-strip"><div id="campaignRadio" style="flex:1"></div><button class="btn small" id="campaignRadioNext" type="button">📻 Siguiente línea</button></div>
+        <details class="info"><summary>ⓘ ¿Cómo funciona la campaña?</summary><div class="info-body"><p class="sub">Juega las misiones en orden. Puedes repetir la configuración de escuadra antes de cada una, pero el mapa, el objetivo y la dificultad de la IA los fija la misión. Si pierdes, repites esa misión sin perder la veterania ya ganada. Cada capítulo tiene un briefing con la radio de Dave y el Central.</p></div></details>
         <div class="campaign-list" id="campaignList"></div>
       </div>
 
@@ -317,6 +322,18 @@
       </div>
     </div>
   </section>
+
+  <div id="tutorialPanel" class="tutorial-panel" style="display:none">
+    <div class="panel">
+      <div class="tutorial-head"><b id="tutorialTitle">1/6 · Instrucción de Dave</b><span class="mono" id="tutorialCount">1 / 6</span></div>
+      <p class="sub" id="tutorialText" style="margin:6px 0 10px">Toca a Hipster Dave.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn primary small" id="tutorialDoneBtn" type="button">Siguiente paso ▶</button>
+        <button class="btn small" id="tutorialSkip" type="button">Saltar instrucción</button>
+        <button class="btn small" id="tutorialRepeat" type="button">Repetir desde el paso 1</button>
+      </div>
+    </div>
+  </div>
 
   <div id="tutBubble" style="display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:60;max-width:600px;width:calc(100% - 32px)">
     <div class="panel">

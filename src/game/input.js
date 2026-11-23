@@ -8,6 +8,7 @@ import { barrelAt, blocked, deployedAt, droneAt, drawMovePath, hasLOS, hitChance
 import { canHealSpecial, canSnipeSpecial, checkOverwatch, explodeBarrel, log, pickupLoot, playOnce, selectUnit, spendEnergy, throwGrenade, tryShoot } from './combat.js';
 import { checkMines, deployTurret, guideDrone, mineAt, throwFlash, useSpecial } from './missions.js';
 import { fireArtillery, fireOrbital, placeCover, placeHealthCrate, sweepDetect, teleportUnit, throwBees, throwGas, throwMolotov, throwSmoke, throwTranq, waterCannon } from './gadgets.js';
+import { tutorialEvent } from './tutorial.js';
 
 export let hoverTile=null;
 export function setHoverTile(v){hoverTile=v;}
@@ -27,10 +28,10 @@ export function boardTileClick(t){
   const clickedUnit=unitAt(t.x,t.y);
   const clickedDeployed=deployedAt(t.x,t.y);
   if(G.actionMode==='deploy'&&u){deployTurret(u,t.x,t.y);return;}
-  if(G.actionMode==='grenade'&&u){throwGrenade(u,t.x,t.y);return;}
+  if(G.actionMode==='grenade'&&u){if(u.grenades>0&&u.energy>=2&&cheb(u,t)<=3)tutorialEvent('grenade',{cover:0});throwGrenade(u,t.x,t.y);return;}
   if(G.actionMode==='smoke'&&u){throwSmoke(u,t.x,t.y);return;}
   if(G.actionMode==='mine'&&u){placeMine(u,t.x,t.y);return;}
-  if(G.actionMode==='flash'&&u){throwFlash(u,t.x,t.y);return;}
+  if(G.actionMode==='flash'&&u){if((u.flashes||0)>0&&u.energy>=2&&cheb(u,t)<=4)tutorialEvent('grenade',{cover:0});throwFlash(u,t.x,t.y);return;}
   if(G.actionMode==='cover'&&u){placeCover(u,t.x,t.y);return;}
   if(G.actionMode==='gas'&&u){throwGas(u,t.x,t.y);return;}
   if(G.actionMode==='sweep'&&u){sweepDetect(u,t.x,t.y);return;}
@@ -51,12 +52,12 @@ export function boardTileClick(t){
   if(clickedUnit){
     if(clickedUnit.team===G.turn){
       if(G.actionMode==='special'&&u&&(canHealSpecial(u)||u.role==='Capitán')){useSpecial(u,clickedUnit);G.actionMode='move';updateUI();draw();return;}
-      selectUnit(clickedUnit);return;
-    } else {
-      if(!u||u.team!==G.turn){toast('Selecciona primero a uno de tus soldados.');return;}
-      if(G.actionMode==='special'&&canSnipeSpecial(u)){useSpecial(u,clickedUnit);return;}
-      if(G.actionMode==='pistol'){tryShoot(u,clickedUnit,PISTOL,null);return;}
-      tryShoot(u,clickedUnit,u.weapon,null);return;
+       selectUnit(clickedUnit);tutorialEvent('select',{unit:clickedUnit});return;
+     } else {
+       if(!u||u.team!==G.turn){toast('Selecciona primero a uno de tus soldados.');return;}
+       if(G.actionMode==='special'&&canSnipeSpecial(u)){useSpecial(u,clickedUnit);tutorialEvent('shoot',{ok:true,target:clickedUnit});return;}
+       if(G.actionMode==='pistol'){const ok=tryShoot(u,clickedUnit,PISTOL,null);tutorialEvent('shoot',{ok:ok!==false,target:clickedUnit});return;}
+       const ok=tryShoot(u,clickedUnit,u.weapon,null);tutorialEvent('shoot',{ok:ok!==false,target:clickedUnit});return;
     }
   }
   if(clickedDeployed&&u){
@@ -122,6 +123,8 @@ export function boardTileClick(t){
       if(mk&&u.alive){mk.used=true;u.hp=Math.min(u.maxHp,u.hp+50);playOnce(u,'pickup');fxFloat(t.x,t.y,'+50 PV','#8df09a');log('✚ '+u.role+' recoge el botiquín del mapa: +50 PV (ahora '+u.hp+').');}
       if(effMode(G)!=='dominacion'&&t.x===TURRET_POS.x&&t.y===TURRET_POS.y&&G.map.turret.owner!==u.team)toast('Estás sobre la torreta central: pulsa «Capturar torreta» (2 ⚡).');
       G.lastMoveUndo=(!hadMine&&!hadWatcher&&!hadLoot&&!hadMedkit&&u.alive&&!G.over)?snap:null;
+      let tileCov=0;[[1,0],[-1,0],[0,1],[0,-1]].forEach(dd=>{const o=obAt(t.x+dd[0],t.y+dd[1]);if(!o)return;const lv=o.type==='wall'||o.type==='shelf'?3:(o.type==='crate'?(o.hp>o.maxHp/2?2:1):0);if(lv>tileCov)tileCov=lv;});
+      tutorialEvent('move',{cover:tileCov,tile:t});
       updateUI();draw();return;
     }
     if(obAt(t.x,t.y)){toast('Casilla bloqueada por cobertura. Las cajas se destruyen con «Disparar» y tocando la caja, o con un barril cercano.');return;}

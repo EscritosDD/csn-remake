@@ -512,6 +512,24 @@ body[data-state="setup"] #scr-play .hero{display:none}
 
 .chapter-card .campaign-mission{width:100%}
 
+.tutorial-entry{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--panel2);border:1.5px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:12px}
+.tutorial-entry b{display:block;font-family:'Barlow Condensed';font-size:20px;text-transform:uppercase;margin-top:4px}
+.radio-strip{display:flex;gap:10px;align-items:flex-start;background:var(--panel2);border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:12px}
+.radio-head{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted)}
+.radio-head b{color:var(--ink)}
+.radio-head .sub{margin-left:auto;font-size:11px}
+.radio-dot{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 0 3px rgba(72,187,120,.18)}
+.radio-line{margin:6px 0 0;color:var(--ink);font-size:14px;line-height:1.45}
+.mission-stars{display:block;margin-top:4px;color:var(--amber);font-size:16px;letter-spacing:2px}
+.brief-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:12px}
+.brief-grid ul{margin:6px 0 0;padding-left:18px;color:var(--muted);font-size:13px;line-height:1.55}
+.tutorial-panel{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:61;width:min(720px,calc(100% - 32px))}
+.tutorial-panel .panel{border-color:var(--amber);box-shadow:0 8px 32px rgba(0,0,0,.5)}
+.tutorial-head{display:flex;gap:10px;align-items:center;justify-content:space-between}
+.tutorial-head b{font-family:'Barlow Condensed';font-size:19px;text-transform:uppercase;color:var(--amber)}
+@media(max-width:640px){.tutorial-panel{bottom:8px;width:calc(100% - 16px)}.radio-strip{flex-direction:column}.radio-head .sub{margin-left:0}}
+
+
 .wcoverWrap{height:104px;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 55%,#2b3128,#171a15);border-radius:9px;margin-bottom:8px;overflow:hidden}
 
 .wcover{max-width:92%;max-height:96px;object-fit:contain;mix-blend-mode:screen;filter:drop-shadow(0 4px 8px rgba(0,0,0,.5))}

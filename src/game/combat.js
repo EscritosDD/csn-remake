@@ -2,7 +2,7 @@ import { NATIONS } from '../data/nations.js';
 import { ROLES, BODIES } from '../data/roles.js';
 import { WEAPONS, PISTOL } from '../data/weapons.js';
 import { CHARACTERS, CHARACTER_ABILITIES, CHAR_ABILITY_ACTIONS } from '../data/cast.js';
-import { MAP_DEFS, CAMPAIGN_MISSIONS } from '../data/maps.js';
+import { MAP_DEFS, CAMPAIGN_MISSIONS, TUTORIAL_MISSION } from '../data/maps.js';
 import { cheb, shortestArc } from '../core/geometry.js';
 import { sfx, auVoice } from '../core-and-audio.js';
 import { CLIPLIB } from '../render3d/clips.js';
@@ -58,13 +58,15 @@ export function canReviveSpecial(u){return !!(u&&((u.role==='Médico'&&!(u.charA
 export function canSnipeSpecial(u){return !!(u&&(u.role==='Francotirador'||hasCharIcon(u,'CharAbility_42_Sniper_Rifle_Specialization_alpha')));}
 
 export function charForKey(role,key){
-  const opts=charsForRole(role);
+  const origOnly=setup.mode==='campana'||setup.mode==='tutorial'||!!setup.isTutorial;
+  const opts=charsForRole(role,origOnly);
   return opts.find(c=>characterKey(c)===key)||opts[0]||null;
 }
 
 export function makeUnit(team,def,i,nation,skin){
   const list=spawnsFor(team);const sp=list[i%list.length]||(team==='A'?SPAWNS_A[0]:SPAWNS_B[0]);
-  const ch=(def&&def.charKey?charForKey(def.role,def.charKey):null)||characterForRole(def.role,i);
+  const origOnly=setup.mode==='campana'||setup.mode==='tutorial'||!!setup.isTutorial;
+  const ch=(def&&def.charKey?charForKey(def.role,def.charKey):null)||characterForRole(def.role,i,origOnly);
   const role=ROLES[def.role];
   const body=BODIES[role.body]||BODIES.medio;
   let hp=body.hp,maxHp=body.hp,energy=body.energy,maxEnergy=body.energy,vetLevel=0;
@@ -85,10 +87,10 @@ export function startGame(squadA,squadB){
   resetCam3D();
   uid=0;
   const rivalNation=setup.mode==='guerra'?setup.rivalNation:(setup.opp==='local'?myNation:NATIONS[Math.floor(Math.random()*NATIONS.length)]);
-  const campMission=setup.mode==='campana'?CAMPAIGN_MISSIONS[setup.campaignMission]:null;
+  const campMission=setup.mode==='tutorial'?TUTORIAL_MISSION:(setup.mode==='campana'?CAMPAIGN_MISSIONS[setup.campaignMission]:null);
   const matchSeed=((Math.random()*0x7fffffff)>>>0)||1;
   G={mode:setup.mode,opp:setup.opp,turn:'A',round:1,matchSeed,units:[],map:buildMap(setup.map),deployed:[],lootBoxes:[],lootDropped:{},
-     beacon:{A:0,B:0},dom:{A:0,B:0},stats:{A:{dmg:0,kills:0},B:{dmg:0,kills:0}},smoke:[],mines:[],drone:effSetupMode()==='escolta'?{isDrone:true,role:'Dron averiado',team:'A',x:escortStart().x,y:escortStart().y,dx:escortStart().x,dy:escortStart().y,hp:ESCORT_DRONE_HP,maxHp:ESCORT_DRONE_MAXHP,alive:true,invisible:false,weapon:null,facing:0,movesLeft:ESCORT_GUIDES_PER_ROUND,movedThisTurn:false,delivered:false}:null,difficulty:setup.opp==='ia'?setup.difficulty:'normal',campaignMission:setup.mode==='campana'?setup.campaignMission:null,campaignObjective:campMission?campMission.objective:null,
+     beacon:{A:0,B:0},dom:{A:0,B:0},stats:{A:{dmg:0,kills:0},B:{dmg:0,kills:0}},smoke:[],mines:[],drone:effSetupMode()==='escolta'?{isDrone:true,role:'Dron averiado',team:'A',x:escortStart().x,y:escortStart().y,dx:escortStart().x,dy:escortStart().y,hp:ESCORT_DRONE_HP,maxHp:ESCORT_DRONE_MAXHP,alive:true,invisible:false,weapon:null,facing:0,movesLeft:ESCORT_GUIDES_PER_ROUND,movedThisTurn:false,delivered:false}:null,difficulty:setup.opp==='ia'?setup.difficulty:'normal',isTutorial:setup.mode==='tutorial',campaignMission:setup.mode==='campana'?setup.campaignMission:(setup.mode==='tutorial'?0:null),campaignName:campMission?campMission.id:null,campaignTitle:campMission?campMission.title:null,campaignTurnLimit:campMission?campMission.turnLimit:null,campaignObjective:campMission?campMission.objective:null,
      selected:null,actionMode:'move',over:false,aiBusy:false,lastMoveUndo:null,rivalNation,
      names:{A:myNation.name+' (J1)',B:setup.mode==='guerra'?rivalNation.name+' (IA)':(setup.opp==='ia'?'Escuadra IA':'Jugador 2')}};
   document.body.dataset.state='playing';
@@ -105,7 +107,7 @@ export function startGame(squadA,squadB){
   if(setup.mode==='guerra'){lsSet(LS_GAMES,+(lsGet(LS_GAMES)||0)+1);}
   $('#setupArea').style.display='none';$('#menuArea').style.display='none';$('#gameArea').style.display='block';
   $('#log').innerHTML='';
-  log('Despliegue en el mapa '+G.map.name+'. Modo: '+(effMode(G)==='eliminacion'?'Eliminación':effMode(G)==='dominacion'?'Dominación':effMode(G)==='escolta'?'Escolta del dron':G.mode==='guerra'?'Guerra de Naciones · Captura de baliza':'Captura de baliza')+(G.mode==='campana'?(' · Campaña Misión '+(G.campaignMission+1)+' · '+CAMPAIGN_MISSIONS[G.campaignMission].title):'')+' · Dificultad IA: '+G.difficulty+' · '+setup.fmt+' contra '+setup.fmt+'.');
+  log('Despliegue en el mapa '+G.map.name+'. Modo: '+(effMode(G)==='eliminacion'?'Eliminación':effMode(G)==='dominacion'?'Dominación':effMode(G)==='escolta'?'Escolta del dron':G.mode==='guerra'?'Guerra de Naciones · Captura de baliza':'Captura de baliza')+(G.mode==='campana'?(' · Campaña Misión '+(G.campaignMission+1)+' · '+CAMPAIGN_MISSIONS[G.campaignMission].title):'')+(G.mode==='tutorial'?(' · '+TUTORIAL_MISSION.title):'')+' · Dificultad IA: '+G.difficulty+' · '+setup.fmt+' contra '+setup.fmt+'.');
   if(effMode(G)==='dominacion')log('⬢ Dominación: mantén las zonas (Depósito, Centro, Muelle) hasta el inicio de tu siguiente turno (desde la ronda 2): +1 punto por zona y +1 extra si dominas las tres. Gana quien llegue a '+DOM_TARGET+' puntos.');
   if(effMode(G)==='escolta')log('🤖 Escolta: el dron averiado ('+ESCORT_DRONE_HP+'/'+ESCORT_DRONE_MAXHP+' PV) espera en (2,6). Pega un soldado a él (daño reducido a ~la mitad mientras tenga escolta pegado), pulsa «Guiar dron» (2 ⚡) y toca la casilla destino: máximo '+ESCORT_GUIDES_PER_ROUND+' guiados por ronda. Si pisa la extracción del este (columnas 11–12, filas 6–7), gana la escolta; si el dron cae o pasan '+ESCORT_MAX_ROUNDS+' rondas, gana la defensa.');
   G.units.filter(u=>u.team==='A'&&u.vetLevel>0).forEach(u=>log('★ '+u.role+' entra con veterania nivel '+u.vetLevel+': +'+(u.vetLevel*25)+' PV y +'+u.vetLevel+' ⚡ por las misiones que ya sobrevivió.'));
