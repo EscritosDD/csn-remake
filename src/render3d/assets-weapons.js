@@ -13,7 +13,7 @@ export const WEAPON_MESH_FILE={
 };
 
 export const WEAPON_LEN={'Fusiles de asalto':0.54,'Subfusiles':0.36,'Ametralladoras':0.64,'Francotirador':0.72,
-  'Escopetas':0.50,'Lanzacohetes':0.74,'Lanzagranadas':0.52,'Pistolas':0.21};
+  'Escopetas':0.50,'Lanzacohetes':0.74,'Lanzagranadas':0.52,'Pistolas':0.21,'Cuerpo a cuerpo':0.32};
 
 export const WEAPON_COVER_BY_FILE={
   'AssaultRifle':'item_weapon_14_Semi_Auto_Rifle_alpha','Rifle':'item_weapon_14_Semi_Auto_Rifle_alpha',
@@ -112,7 +112,7 @@ export function positionGunFlash(gunGroup,holder,cat){
   }else if(holder&&THREE.Box3){
     const box=new THREE.Box3().setFromObject(holder),size=new THREE.Vector3();box.getSize(size);
     flash.position.set(Math.max(box.max.x,size.x*0.9),0.01,0);
-  }else flash.position.set(weaponTargetLength(cat)*0.96,0.01,0);
+  }else flash.position.set(weaponTargetLength(cat,hud.file)*0.96,0.01,0);
   flash.visible=gunGroup.userData.hasMuzzleFlash!==false;
   return flash;
 }
@@ -219,7 +219,11 @@ export function weaponCategoryForFile(file){
   return String(cat).split(' / ')[0];
 }
 
-export function weaponTargetLength(cat){return WEAPON_LEN[cat]||0.6;}
+export function weaponTargetLength(cat,file){
+  const cal=file&&weaponCalibration(file);
+  if(cal&&Number.isFinite(cal.targetLength)&&cal.targetLength>0)return cal.targetLength;
+  return WEAPON_LEN[cat]||0.6;
+}
 
 export function gunRotationFor(file,bb,cat){
   const ax=Math.abs(bb.min.x),mx=Math.abs(bb.max.x);
@@ -234,12 +238,34 @@ export function gunRotationFor(file,bb,cat){
   return {x:0,y:0,z:ax>mx?Math.PI:0};
 }
 
-export function gunRotatedBounds(geo,rot){
-  const bb=geo.boundingBox,out=new THREE.Box3();
+export function gunRotatedBoundsOf(bb,rot){
+  const out=new THREE.Box3();
   const m=new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler(rot.x||0,rot.y||0,rot.z||0));
   for(const x of [bb.min.x,bb.max.x])for(const y of [bb.min.y,bb.max.y])for(const z of [bb.min.z,bb.max.z])
     out.expandByPoint(new THREE.Vector3(x,y,z).applyMatrix4(m));
   return out;
+}
+export function gunRotatedBounds(geo,rot){return gunRotatedBoundsOf(geo.boundingBox,rot);}
+
+export function gripPointForGun(file,offset){
+  const cal=weaponCalibration(file);
+  if(!cal||!Array.isArray(offset)||offset.length!==3||!offset.every(Number.isFinite))return {x:0,y:0,z:0};
+  const cat=weaponCategoryForFile(file);
+  const bb={min:new THREE.Vector3().fromArray(cal.sourceBounds.min),max:new THREE.Vector3().fromArray(cal.sourceBounds.max)};
+  const rot=gunRotationFor(file,bb,cat),rb=gunRotatedBoundsOf(bb,rot);
+  const pivot=[(rb.min.x>0||rb.max.x<0)?-(rb.min.x+rb.max.x)/2:0,
+    (rb.min.y>0||rb.max.y<0)?-(rb.min.y+rb.max.y)/2:0,
+    (rb.min.z>0||rb.max.z<0)?-(rb.min.z+rb.max.z)/2:0];
+  const p=new THREE.Vector3().fromArray(offset).applyEuler(new THREE.Euler(rot.x||0,rot.y||0,rot.z||0));
+  p.x+=pivot[0];p.y+=pivot[1];p.z+=pivot[2];
+  p.applyEuler(new THREE.Euler(-Math.PI/2,0,0)).multiplyScalar(cal.scale||1);
+  return {x:p.x,y:p.y,z:p.z};
+}
+export function weaponGrips(file){
+  const cal=weaponCalibration(file);
+  const grip=gripPointForGun(file,cal&&cal.gripOffset);
+  const support=cal&&Array.isArray(cal.supportOffset)?gripPointForGun(file,cal.supportOffset):null;
+  return {grip:{x:grip.x,y:grip.y,scale:1},support:support};
 }
 
 export function makeRealGun3(ref){
@@ -252,7 +278,7 @@ export function makeRealGun3(ref){
     const size=new THREE.Vector3();geo.boundingBox.getSize(size);
     const long=Math.max(size.x,size.y,size.z,0.001);
     const cat=weaponCategoryForFile(file);
-    const target=weaponTargetLength(cat);
+    const target=weaponTargetLength(cat,file);
     const k=target/long;
     const meta=weaponMeta(file);
     const cal=weaponCalibration(file)||{scale:k,gripOffset:[0,0,0]};
@@ -273,7 +299,8 @@ export function makeRealGun3(ref){
     holder.add(mesh);
     holder.scale.setScalar(cal.scale||k);
     holder.rotation.x=-Math.PI/2;
-    holder.userData={file:file,meta:meta||null,calibration:cal,pivot:pivot,rot:rot,grip:{x:0,y:0,scale:1},texReady:texReady};
+    const grips=weaponGrips(file);
+    holder.userData={file:file,meta:meta||null,calibration:cal,pivot:pivot,rot:rot,grip:grips.grip,support:grips.support,texReady:texReady};
     GUN_MESH_CACHE[file]=holder;
     if(gunSwapWaiters[file]){gunSwapWaiters[file].forEach(fn=>{try{fn(holder);}catch(e){}});gunSwapWaiters[file]=[];}
   }).catch(()=>{delete GUN_MESH_CACHE[file];});
@@ -289,7 +316,7 @@ export function attachRealGun(un,gun){
     try{
       gun.children.forEach(ch=>{if(ch!==gun.userData.flash&&!(ch.userData&&ch.userData.isFlash))ch.visible=false;});
       const g2=holder.clone(true);
-      g2.userData={isRealGun:true,file:holder.userData.file,meta:holder.userData.meta,calibration:holder.userData.calibration};
+      g2.userData={isRealGun:true,file:holder.userData.file,meta:holder.userData.meta,calibration:holder.userData.calibration,grip:holder.userData.grip,support:holder.userData.support};
       g2.visible=true;
       gun.add(g2);
       gun.scale.setScalar(1);
@@ -297,7 +324,9 @@ export function attachRealGun(un,gun){
       gun.userData.scale=1;
       gun.userData.file=g2.userData.file;
       gun.userData.meta=g2.userData.meta;
-      gun.userData.grip={x:0,y:0,scale:1};
+      const grips=weaponGrips(file);
+      gun.userData.grip=grips.grip;
+      gun.userData.support=grips.support;
       if(gun.userData.flash){
         const cat=(WEAPONS[un.weapon]||{}).cat||(file&&String((WEAPONS_ORIGINAL[file]||{}).cat||'').split(' / ')[0])||'Fusiles de asalto';
         positionGunFlash(gun,holder,cat);
@@ -326,7 +355,7 @@ export function makeGunAnchor(un){
     plane.userData.isFlash=true;plane.renderOrder=3;flash.add(plane);
   });
   const flashLight=new THREE.PointLight(0xffb84a,0,2.2);flashLight.userData.isFlashLight=true;flash.add(flashLight);
-  flash.position.set(weaponTargetLength(cat)*0.96,0.01,0);
+  flash.position.set(weaponTargetLength(cat,file)*0.96,0.01,0);
   flash.userData.isFlash=true;
   flash.userData.flashLight=flashLight;
   flash.visible=hasFlash;
@@ -335,7 +364,9 @@ export function makeGunAnchor(un){
   gun.userData.flashLight=flashLight;
   gun.userData.hasMuzzleFlash=hasFlash;
   gun.userData.cat=cat;
-  gun.userData.grip={x:0,y:0,scale:1};
+  const grips=weaponGrips(file);
+  gun.userData.grip=grips.grip;
+  gun.userData.support=grips.support;
   gun.userData.scale=1;
   gun.scale.setScalar(1);
   return gun;

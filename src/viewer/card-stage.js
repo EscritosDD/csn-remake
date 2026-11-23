@@ -1,4 +1,4 @@
-let stage=null,builder=null,onActivate=null,onInspect=null,onZoom=null,activeBox=null,activeSpec=null;
+let stage=null,builder=null,onActivate=null,onInspect=null,onZoom=null,activeBox=null,activeSpec=null,presentation=null;
 let zoom=1,paused=false,rendering=false,restPose=null,retryAt=0,pumping=false,observer=null;
 const cards=new Map(),bound=new Set(),queue=[];
 const thumbs=new Map();
@@ -48,6 +48,7 @@ export function setCardStageCallbacks(callbacks){
 }
 
 export function setCardRestPose(fn){restPose=typeof fn==='function'?fn:null;}
+export function setCardPresentation(fn){presentation=typeof fn==='function'?fn:null;}
 export function isCardStagePaused(){return paused;}
 export function isCardStageRendering(){return rendering;}
 export function setCardStagePaused(value){
@@ -81,7 +82,7 @@ export function ensureCardStage(stageEl){
     const meshyRim=new THREE.DirectionalLight(0xffd9a8,2.2);meshyRim.position.set(3,4,-4);meshyRim.intensity=0;scene.add(meshyRim);
     const spin=new THREE.Group();scene.add(spin);
     const platform=new THREE.Mesh(new THREE.CircleGeometry(1,48),new THREE.MeshStandardMaterial({color:0x30382a,roughness:0.9,metalness:0}));platform.rotation.x=-Math.PI/2;scene.add(platform);
-    stage={renderer,scene,camera:new THREE.PerspectiveCamera(36,1,0.01,80),spin,platform,meshyFill,meshyRim,baseDistance:3,stageEl:stageEl||null};
+    stage={renderer,scene,camera:new THREE.PerspectiveCamera(36,1,0.01,80),spin,platform,meshyFill,meshyRim,baseLights:scene.children.slice(0,3),baseDistance:3,stageEl:stageEl||null};
     updateCamera();
     return stage;
   }catch(error){
@@ -131,10 +132,7 @@ function isGunChild(object,root){
 }
 
 export function computeAccurateBounds(model){
-  const bounds=new THREE.Box3();
-  const points=[];
-  const world=new THREE.Vector3(),base=new THREE.Vector3(),tmp=new THREE.Vector3();
-  const boneMatrix=new THREE.Matrix4(),inverse=new THREE.Matrix4();
+  const bounds=new THREE.Box3(),points=[],world=new THREE.Vector3(),base=new THREE.Vector3(),tmp=new THREE.Vector3(),boneMatrix=new THREE.Matrix4(),inverse=new THREE.Matrix4();
   model.updateMatrixWorld(true);
   model.traverse(object=>{
     if(!object.visible||!object.isMesh||!object.geometry||!object.geometry.attributes.position)return;
@@ -218,16 +216,17 @@ export function renderThumbnail(spec,model){
   const saved=stage.spin.children.slice();
   const savedRotation=stage.spin.rotation.clone();
   const platformVisible=stage.platform.visible;
-  const savedFill=stage.meshyFill.intensity;
-  const savedRim=stage.meshyRim.intensity;
+  const savedFill=stage.meshyFill.intensity,savedRim=stage.meshyRim.intensity;
   const savedCamera={fov:stage.camera.fov,aspect:stage.camera.aspect,baseDistance:stage.baseDistance,position:stage.camera.position.clone()};
-  let centered=null,fallbackScale=null;
+  const savedBase=stage.baseLights?stage.baseLights.map(light=>light.intensity):null;
+  let centered=null,fallbackScale=null,tune=presentation&&spec?presentation(spec)||null:null;
   try{
     while(stage.spin.children.length){const child=stage.spin.children[0];stage.spin.remove(child);releaseTree(child);}
     if(!spec||!thumbnailTexturesReady(model))return null;
     stage.platform.visible=false;
     stage.meshyFill.intensity=model.userData&&model.userData.meshy?1.8:0;
     stage.meshyRim.intensity=model.userData&&model.userData.meshy?2.2:0;
+    if(tune&&stage.baseLights){tune.lights.forEach((value,index)=>{stage.baseLights[index].intensity=value;});stage.meshyRim.intensity=tune.rim||0;}
     stage.spin.rotation.set(0,0,0);
     stage.renderer.clear(true,true,true);
     if(typeof restPose==='function')restPose(model);
@@ -249,7 +248,7 @@ export function renderThumbnail(spec,model){
     centered.position.set(-center.x,-center.y,-center.z);
     centered.add(model);
     stage.spin.add(centered);
-    stage.spin.rotation.set(spec.kind==='weapons'?0.25:0,-0.55,0);
+    stage.spin.rotation.set(tune&&tune.spinX!=null?tune.spinX:(spec.kind==='weapons'?0.25:0),tune&&tune.spinY!=null?tune.spinY:-0.55,0);
     centered.updateMatrixWorld(true);
     const troop=spec.kind==='roles';
     const width=troop?320:360,height=troop?260:240;
@@ -261,7 +260,7 @@ export function renderThumbnail(spec,model){
     const dist=Math.min(4,Math.max(1.1,(Math.max(size.y,size.x/stage.camera.aspect)*0.57)/Math.tan(fovRad/2)));
     let viewDist=dist*2.2;
     const target=new THREE.Vector3(),forward=new THREE.Vector3(),right=new THREE.Vector3(),up=new THREE.Vector3();
-    stage.camera.position.set(0,viewDist*0.12,viewDist);
+    stage.camera.position.set(0,viewDist*(tune&&tune.elevation!=null?tune.elevation:0.12),viewDist);
     stage.camera.lookAt(target);
     for(let pass=0;pass<4;pass++){
       stage.renderer.clear(true,true,true);
@@ -274,7 +273,7 @@ export function renderThumbnail(spec,model){
       up.setFromMatrixColumn(stage.camera.matrixWorld,1);
       const offset=right.multiplyScalar((bbox.x*2-1)*halfWidth).add(up.multiplyScalar((bbox.y*2-1)*halfHeight));
       target.add(offset);
-      viewDist*=Math.max(wideFallback?1:0.45,Math.min(2.5,Math.max(bbox.width/0.74,bbox.height/0.74)));
+      const fill=tune&&tune.fillRatio||0.74;viewDist*=Math.max(wideFallback?1:0.45,Math.min(2.5,Math.max(bbox.width/fill,bbox.height/fill)));
       stage.camera.position.copy(target).addScaledVector(forward,-viewDist);
       stage.camera.lookAt(target);
     }
@@ -294,6 +293,7 @@ export function renderThumbnail(spec,model){
     stage.spin.rotation.copy(savedRotation);
     stage.platform.visible=platformVisible;
     stage.meshyFill.intensity=savedFill;stage.meshyRim.intensity=savedRim;
+    if(tune&&savedBase)tune.lights.forEach((value,index)=>{stage.baseLights[index].intensity=savedBase[index];});
     stage.camera.fov=savedCamera.fov;stage.camera.aspect=savedCamera.aspect;
     stage.camera.position.copy(savedCamera.position);stage.camera.updateProjectionMatrix();
     stage.baseDistance=savedCamera.baseDistance;

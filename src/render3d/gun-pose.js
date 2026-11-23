@@ -9,6 +9,8 @@ export const _gpUp=HAS_THREE?new THREE.Vector3(0,1,0):null,_gpZ=HAS_THREE?new TH
 export const _gpOrigin=HAS_THREE?new THREE.Vector3():null,_gpQuat=HAS_THREE?new THREE.Quaternion():null,_gpRecoil=HAS_THREE?new THREE.Quaternion():null,_gpMat=HAS_THREE?new THREE.Matrix4():null,_gpSocketQ=HAS_THREE?new THREE.Quaternion():null,_gpParentQ=HAS_THREE?new THREE.Quaternion():null;
 
 export const _gpRPalm=HAS_THREE?new THREE.Vector3():null,_gpLPalm=HAS_THREE?new THREE.Vector3():null,_gpFA=HAS_THREE?new THREE.Vector3():null;
+export const _gpSup=HAS_THREE?new THREE.Vector3():null,_gpLocal=HAS_THREE?new THREE.Vector3():null,_gpTarget=HAS_THREE?new THREE.Vector3():null;
+export const _gpAlignQ=HAS_THREE?new THREE.Quaternion():null,_gpDesiredQ=HAS_THREE?new THREE.Quaternion():null;
 
 export const _gpRS=HAS_THREE?new THREE.Vector3():null,_gpLS=HAS_THREE?new THREE.Vector3():null;
 
@@ -62,6 +64,18 @@ export function gunPoseFromHand(rPalm,fa,grip,lPalm,opts){
   if(isMini)_gpOrigin.addScaledVector(_gpDir,0.085).addScaledVector(_gpZ,-0.055);
   _gpMat.makeBasis(_gpDir,_gpY,_gpZ);
   _gpQuat.setFromRotationMatrix(_gpMat);
+  if(!is1h&&!isMini&&lPalm&&opts&&opts.support&&w2h>0.01&&_gpQuat.slerp&&_gpAlignQ.setFromUnitVectors){
+    _gpSup.set(opts.support.x||0,opts.support.y||0,opts.support.z||0).sub(_gpLocal.set(g.x*gs,g.y*gs,0)).applyQuaternion(_gpQuat);
+    _gpTarget.copy(lPalm).sub(rPalm);
+    if(_gpSup.lengthSq()>1e-6&&_gpTarget.lengthSq()>1e-6){
+      _gpAlignQ.setFromUnitVectors(_gpSup.normalize(),_gpTarget.normalize());
+      _gpDesiredQ.copy(_gpAlignQ).multiply(_gpQuat);
+      _gpQuat.slerp(_gpDesiredQ,w2h);
+      _gpOrigin.copy(rPalm).sub(_gpLocal.set(g.x*gs,g.y*gs,0).applyQuaternion(_gpQuat));
+      _gpDir.set(1,0,0).applyQuaternion(_gpQuat);
+      _gpY.set(0,1,0).applyQuaternion(_gpQuat);
+    }
+  }
   return {origin:_gpOrigin,dir:_gpDir,quat:_gpQuat,w2h};
 }
 
@@ -111,7 +125,8 @@ export function fitGunToHand3(un,grp,isLive){
     force1h:force1h,
     roleH:lk.s[1],
     rigSpan:rigSpan,
-    w2hPrev:ud._viewW2H||0
+    w2hPrev:ud._viewW2H||0,
+    support:gunData.support||null
   });
   if(!pose)return;
   ud._viewW2H=force1h||is1h?0:pose.w2h;

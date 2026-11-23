@@ -1,4 +1,4 @@
-import { ensureCardStage, activeCard, resizeStage, renderStage, snapshotStage, computeAccurateBounds, setCardModelBuilder, setCardStageCallbacks, setCardRestPose, setStageBaseDistance, setStageZoom, stageZoom, mountStageInto, unmountStage, scanCardBoxes, isCardStageRendering } from './card-stage.js';
+import { ensureCardStage, activeCard, resizeStage, renderStage, snapshotStage, computeAccurateBounds, setCardModelBuilder, setCardStageCallbacks, setCardRestPose, setCardPresentation, setStageBaseDistance, setStageZoom, stageZoom, mountStageInto, unmountStage, scanCardBoxes, isCardStageRendering } from './card-stage.js';
 import { loadGlbActor, updateGlbActor, playOnce, disposeGlbActor } from '../render3d/actor-glb.js';
 import { setGlbLabActor } from '../ui/glb-lab.js';
 import { renderTroopCards } from './troop-cards.js';
@@ -6,7 +6,7 @@ import { openInspector } from './inspector.js';
 import { originalWeaponProfile, WEAPONS_ORIGINAL, weaponFileForRef, positionGunFlash } from '../render3d/assets-weapons.js';
 import { DEPLOYABLES } from '../data/deployables.js';
 import { auWeaponFile, auVoice } from '../core-and-audio.js';
-import { VIEWER_BODY_SKINS, VIEWER_ROLE_FALLBACK, VIEWER_BODY_FILE, VIEWER_BODY_OVERRIDE, VIEWER_BODY_ROLE, createBodyLoader } from './body-loader.js';
+import { VIEWER_BODY_SKINS, VIEWER_ROLE_FALLBACK, VIEWER_BODY_FILE, VIEWER_BODY_OVERRIDE, VIEWER_BODY_ROLE, VIEWER_CARD_PRESENTATION, createBodyLoader } from './body-loader.js';
 (function(){ const stage=document.getElementById('viewerCanvas'); if(!stage||typeof THREE==='undefined')return;
   const status=document.getElementById('viewerStatus'); const zoomControl=document.getElementById('viewerZoom'); const texturePreview=document.getElementById('viewerTexture');
   const viewer={ renderer:null,scene:null,camera:null,spin:null,platform:null,meshyFill:null,meshyRim:null, baseDistance:3,drag:null,dragVel:0,lastFrame:0,selection:0,
@@ -230,7 +230,7 @@ import { VIEWER_BODY_SKINS, VIEWER_ROLE_FALLBACK, VIEWER_BODY_FILE, VIEWER_BODY_
     const sourceGun=GUN_MESH_CACHE[meshFile]; if(sourceGun.userData&&sourceGun.userData.texReady)await sourceGun.userData.texReady; if(token!==viewer.selection)return;
     if(model.userData&&model.userData._viewerClip)model.userData._viewerBlend={clip:model.userData._viewerClip,ct:model.userData._viewerCt||0,t0:performance.now()};
     if(!model.userData||!model.userData.grip)return; const holder=sourceGun.clone(true); holder.userData.texReady=sourceGun.userData.texReady; const gunMeta=holder.userData.meta||weaponMeta(meshFile);
-    const gunGroup=makeGunAnchor({role:entry.role,weapon:wanted}); gunGroup.userData.isViewerGun=true; gunGroup.add(holder); positionGunFlash(gunGroup,holder,gunGroup.userData.cat);
+    const gunGroup=makeGunAnchor({role:entry.role,weapon:wanted}); gunGroup.userData.isViewerGun=true; gunGroup.add(holder); gunGroup.userData.grip=holder.userData.grip||gunGroup.userData.grip; gunGroup.userData.support=holder.userData.support||null; positionGunFlash(gunGroup,holder,gunGroup.userData.cat);
     gunGroup.userData.file=meshFile; gunGroup.userData.meta=gunMeta; if(DEBUG_WEAPONS){
       const marker=new THREE.Mesh(new THREE.SphereGeometry(0.045,12,8),new THREE.MeshBasicMaterial({color:0xff3300,depthTest:false})); marker.userData.isViewerGun=true;
       gunGroup.add(marker); console.info('[debugWeapons]',meshFile,gunMeta&&gunMeta.attachmentJoint,holder.userData.calibration); }; model.add(gunGroup);
@@ -374,6 +374,7 @@ import { VIEWER_BODY_SKINS, VIEWER_ROLE_FALLBACK, VIEWER_BODY_FILE, VIEWER_BODY_
   }};
   try{window.__csnCardEngine=cardEngine;window.__csnViewer.fire=fireSpec;}catch(error){}
   setCardModelBuilder(buildCardModel);
+  setCardPresentation(spec=>{const entry=spec&&entryFor(spec);return entry?VIEWER_CARD_PRESENTATION[entry.name]||null:null;});
   setCardRestPose(model=>{
     if(!model||model.userData&&model.userData.meshy)return;
     poseViewerRest(model,model.userData&&model.userData.idleClipKey||'idle2h',0);

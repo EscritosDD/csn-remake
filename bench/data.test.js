@@ -124,6 +124,48 @@ test('las 23 armas tienen calibracion por bounds reales', () => {
   }
 });
 
+test('los cuerpos con rig tienen la malla a escala del esqueleto', () => {
+  const dir = path.join(ROOT, 'assets', 'soldier', 'bodies');
+  function rigTop(bones) {
+    const world = [], matrices = [];
+    const build = i => {
+      if (matrices[i]) return matrices[i];
+      const b = bones[i], q = b.quat || [0, 0, 0, 1], s = b.scale || [1, 1, 1], p = b.pos || [0, 0, 0];
+      const n = Math.hypot(...q) || 1, x = q[0] / n, y = q[1] / n, z = q[2] / n, w = q[3] / n;
+      const xx = x * x, yy = y * y, zz = z * z, xy = x * y, xz = x * z, yz = y * z, wx = w * x, wy = w * y, wz = w * z;
+      const local = [(1 - 2 * (yy + zz)) * s[0], 2 * (xy - wz) * s[1], 2 * (xz + wy) * s[2], p[0],
+        2 * (xy + wz) * s[0], (1 - 2 * (xx + zz)) * s[1], 2 * (yz - wx) * s[2], p[1],
+        2 * (xz - wy) * s[0], 2 * (yz + wx) * s[1], (1 - 2 * (xx + yy)) * s[2], p[2], 0, 0, 0, 1];
+      let m = local;
+      if (b.parent >= 0) {
+        const pm = build(b.parent); m = new Array(16);
+        for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) {
+          let acc = 0; for (let k = 0; k < 4; k++) acc += pm[r * 4 + k] * local[k * 4 + c]; m[r * 4 + c] = acc;
+        }
+      }
+      world[i] = [m[3], m[7], m[11]];
+      return (matrices[i] = m);
+    };
+    bones.forEach((b, i) => build(i));
+    return Math.max(...world.map(p => p[2]));
+  }
+  let checked = 0;
+  for (const rigFile of fs.readdirSync(dir).filter(f => f.endsWith('_rig.json'))) {
+    const objFile = rigFile.replace('_rig.json', '.obj');
+    const text = fs.readFileSync(path.join(dir, objFile), 'utf8');
+    const zs = [];
+    for (const line of text.split(/\r?\n/)) if (line.startsWith('v ')) zs.push(Number(line.trim().split(/\s+/)[3]));
+    zs.sort((a, b) => a - b);
+    const p95 = zs[Math.floor(zs.length * 0.95)];
+    const rig = JSON.parse(fs.readFileSync(path.join(dir, rigFile), 'utf8'));
+    const top = rigTop(rig.bones);
+    assert.ok(p95 > 0.95 && p95 < 1.3, objFile + ' fuera de escala: p95=' + p95);
+    assert.ok(p95 / top >= 1 && p95 / top <= 1.6, objFile + ' malla/rig descuadrado: ' + (p95 / top));
+    checked++;
+  }
+  assert.ok(checked >= 10);
+});
+
 test('los sockets de mano y las bocas del IPA estan extraidos', () => {
   const sockets = JSON.parse(fs.readFileSync(path.join(ROOT, 'assets', 'weapons', 'weapon_sockets.json'), 'utf8'));
   assert.ok(sockets.handRight && sockets.handRight.pos.length === 3 && sockets.handRight.pos.every(Number.isFinite));

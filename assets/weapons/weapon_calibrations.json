@@ -8,9 +8,14 @@
       0.0
     ],
     "gripOffset": [
+      0.05,
       0.0,
+      -0.02
+    ],
+    "supportOffset": [
+      0.2,
       0.0,
-      0.0
+      0.02
     ],
     "sourceBounds": {
       "min": [
@@ -55,9 +60,14 @@
       0.0
     ],
     "gripOffset": [
+      0.06,
       0.0,
+      -0.02
+    ],
+    "supportOffset": [
+      0.22,
       0.0,
-      0.0
+      0.02
     ],
     "sourceBounds": {
       "min": [
@@ -102,9 +112,9 @@
       0.0
     ],
     "gripOffset": [
+      0.05,
       0.0,
-      0.0,
-      0.0
+      -0.1
     ],
     "sourceBounds": {
       "min": [
@@ -149,9 +159,14 @@
       0.0
     ],
     "gripOffset": [
+      0.05,
       0.0,
+      -0.02
+    ],
+    "supportOffset": [
+      0.22,
       0.0,
-      0.0
+      0.05
     ],
     "sourceBounds": {
       "min": [
@@ -196,9 +211,14 @@
       0.0
     ],
     "gripOffset": [
+      0.03,
       0.0,
+      -0.02
+    ],
+    "supportOffset": [
+      0.14,
       0.0,
-      0.0
+      0.03
     ],
     "sourceBounds": {
       "min": [
@@ -244,6 +264,11 @@
     ],
     "gripOffset": [
       0.0,
+      -0.08,
+      0.0
+    ],
+    "supportOffset": [
+      0.1,
       0.0,
       0.0
     ],
@@ -290,9 +315,14 @@
       0.0
     ],
     "gripOffset": [
+      -0.05,
       0.0,
+      -0.02
+    ],
+    "supportOffset": [
+      0.15,
       0.0,
-      0.0
+      0.02
     ],
     "sourceBounds": {
       "min": [
@@ -339,7 +369,12 @@
     "gripOffset": [
       0.0,
       0.0,
-      0.0
+      -0.08
+    ],
+    "supportOffset": [
+      0.0,
+      0.0,
+      0.3
     ],
     "sourceBounds": {
       "min": [
@@ -386,7 +421,7 @@
     "gripOffset": [
       0.0,
       0.0,
-      0.0
+      -0.06
     ],
     "sourceBounds": {
       "min": [
@@ -431,9 +466,9 @@
       0.0
     ],
     "gripOffset": [
+      0.08,
       0.0,
-      0.0,
-      0.0
+      -0.1
     ],
     "sourceBounds": {
       "min": [
@@ -478,9 +513,14 @@
       0.0
     ],
     "gripOffset": [
+      0.01,
       0.0,
+      -0.02
+    ],
+    "supportOffset": [
+      0.14,
       0.0,
-      0.0
+      0.03
     ],
     "sourceBounds": {
       "min": [
@@ -525,9 +565,14 @@
       0.0
     ],
     "gripOffset": [
+      0.04,
       0.0,
+      -0.02
+    ],
+    "supportOffset": [
+      0.3,
       0.0,
-      0.0
+      0.02
     ],
     "sourceBounds": {
       "min": [
@@ -572,9 +617,14 @@
       0.0
     ],
     "gripOffset": [
+      0.12,
       0.0,
+      -0.06
+    ],
+    "supportOffset": [
+      0.28,
       0.0,
-      0.0
+      0.06
     ],
     "sourceBounds": {
       "min": [
@@ -621,7 +671,7 @@
     "gripOffset": [
       0.0,
       0.0,
-      0.0
+      0.12
     ],
     "sourceBounds": {
       "min": [
@@ -658,8 +708,8 @@
     "muzzleSource": "bounds"
   },
   "Knife": {
-    "scale": 1.20705888,
-    "targetLength": 0.6,
+    "scale": 0.60352944,
+    "targetLength": 0.3,
     "meshPivot": [
       0.0,
       0.0,
@@ -668,7 +718,7 @@
     "gripOffset": [
       0.0,
       0.0,
-      0.0
+      -0.02
     ],
     "sourceBounds": {
       "min": [
@@ -715,7 +765,7 @@
     "gripOffset": [
       0.0,
       0.0,
-      0.0
+      -0.28
     ],
     "sourceBounds": {
       "min": [
@@ -762,7 +812,7 @@
     "gripOffset": [
       0.0,
       0.0,
-      0.0
+      0.1
     ],
     "sourceBounds": {
       "min": [
@@ -807,9 +857,14 @@
       0.0
     ],
     "gripOffset": [
+      0.15,
       0.0,
+      -0.03
+    ],
+    "supportOffset": [
+      0.21,
       0.0,
-      0.0
+      0.03
     ],
     "sourceBounds": {
       "min": [
@@ -858,6 +913,11 @@
       0.0,
       0.0
     ],
+    "supportOffset": [
+      0.0,
+      0.0,
+      0.25
+    ],
     "sourceBounds": {
       "min": [
         -0.139498,
@@ -893,17 +953,22 @@
     "muzzleSource": "bounds"
   },
   "Minigun": {
-    "scale": 0.895679290,
-    "targetLength": 0.76,
+    "scale": 0.80139726,
+    "targetLength": 0.68,
     "meshPivot": [
       0.0,
       0.0,
       0.0
     ],
     "gripOffset": [
+      0.25,
       0.0,
+      -0.22
+    ],
+    "supportOffset": [
+      0.42,
       0.0,
-      0.0
+      -0.22
     ],
     "sourceBounds": {
       "min": [
@@ -950,7 +1015,7 @@
     "gripOffset": [
       0.0,
       0.0,
-      0.0
+      -0.1
     ],
     "sourceBounds": {
       "min": [
@@ -996,7 +1061,7 @@
     ],
     "gripOffset": [
       0.0,
-      0.0,
+      0.1,
       0.0
     ],
     "sourceBounds": {
@@ -1044,7 +1109,7 @@
     "gripOffset": [
       0.0,
       0.0,
-      0.0
+      0.02
     ],
     "sourceBounds": {
       "min": [

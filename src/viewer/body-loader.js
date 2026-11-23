@@ -22,6 +22,7 @@ export const VIEWER_BODY_FILE={ 'Soldier_SAS':'Soldier_SAS.obj', 'Soldier_Spud':
   'Engineer (RiotCop)':'Engineer_RiotCop.obj', 'CommanderM':'CommanderM.obj', 'Commander_F':'CommanderF.obj' };
 export const VIEWER_BODY_OVERRIDE={'Archie Fletcher':'Soldier_Light_Rambo','Commander (M)':'CommanderM'};
 export const VIEWER_BODY_ROLE={'Medic':'Médico','Engineer':'Ingeniero','Agent_Heavy':'Comando','Commander':'Capitán'};
+export const VIEWER_CARD_PRESENTATION={'Ivan Tkilya':{spinX:0.06,spinY:-2.24,elevation:0.16,fillRatio:0.82,lights:[2.35,2.95,1.65],rim:1.5}};
 
 export function blMul(a,b){
   const o=new Array(16);
