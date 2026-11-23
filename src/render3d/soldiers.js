@@ -4,7 +4,7 @@ import { sculptedWeaponUnit } from '../data/cast.js';
 import { mat3, box3, makeContactShadow3, nationTintColor, camoTexture, emblemTexture, soldierColors3, toonGrad3 } from './scene.js';
 import { TEAM_A_HEX, TEAM_B_HEX, TEAM_B, SELECT_LIME_HEX } from './env.js';
 import { makeGunAnchor, attachRealGun } from './assets-weapons.js';
-import { REAL } from './assets-real.js';
+import { REAL, bodySpecForUnit } from './assets-real.js';
 import { MESHY_MODELS, validatedRigBoneInverses, sameRigBoneOrder } from './assets-meshy.js';
 import { worldRotationsFromLocal } from './clips.js';
 
@@ -70,12 +70,16 @@ export function makeRealSoldier3(un){
   const tilt=new THREE.Group();spin.add(tilt);
   /* Prefer the authored Meshy or role model when available. */
   const meshy=(!window.__forceBaseModel&&un.charMesh&&MESHY_MODELS[un.charMesh])||null;
+  const bodySpec=!meshy&&!window.__forceBaseModel?bodySpecForUnit(un):null;
+  const bodyRec=bodySpec&&REAL.byBody[bodySpec.key]?REAL.byBody[bodySpec.key]:null;
   tilt.rotation.x=(meshy&&!meshy.zUp)?0:-Math.PI/2;
   const castTex=(un.charTexture&&REAL.castTex)?REAL.castTex[un.charTexture]:null;
-  const RD=meshy||((!window.__forceBaseModel&&REAL.byRole&&REAL.byRole[un.role])||REAL);
-  const presentation=gameplayModelPresentation(un.role,!!meshy||RD!==REAL);
+  const RD=meshy||bodyRec||((!window.__forceBaseModel&&REAL.byRole&&REAL.byRole[un.role])||REAL);
+  const authored=!!meshy||!!bodyRec||RD!==REAL;
+  const presentation=gameplayModelPresentation(un.role,authored);
   spin.scale.set(presentation.scale[0],presentation.scale[1],presentation.scale[2]);
-  const roleTex=castTex||(meshy&&meshy.tex)||RD.tex||(REAL.texByRole&&REAL.texByRole[un.role])||REAL.tex;
+  const exactTex=(meshy||bodyRec)&&castTex?castTex:null;
+  const roleTex=exactTex||(meshy&&meshy.tex)||RD.tex||(REAL.texByRole&&REAL.texByRole[un.role])||REAL.tex;
   const data=RD.data;
   const bones=data.bones.map(b=>{
     const bone=new THREE.Bone();bone.name=b.name;
@@ -97,8 +101,8 @@ export function makeRealSoldier3(un){
   const gradTex=toonGrad3();
   const materialSide=presentation.twoSided?THREE.DoubleSide:THREE.FrontSide;
   const mat=presentation.preserveTexture
-    ?new THREE.MeshStandardMaterial({map:roleTex,roughness:0.85,metalness:0.02,side:materialSide})
-    :(gradTex?new THREE.MeshToonMaterial({map:roleTex,gradientMap:gradTex,side:materialSide}):new THREE.MeshStandardMaterial({map:roleTex,roughness:0.85,metalness:0.02,side:materialSide}));
+    ?new THREE.MeshStandardMaterial({map:roleTex,roughness:0.82,metalness:0.02,side:materialSide})
+    :(gradTex?new THREE.MeshToonMaterial({map:roleTex,gradientMap:gradTex,side:materialSide}):new THREE.MeshStandardMaterial({map:roleTex,roughness:0.82,metalness:0.02,side:materialSide}));
   /* Keep authored character textures intact; tint only the generic fallback. */
   if(un.skin==='nacion'&&un.nation&&un.nation.colors&&!presentation.preserveTexture){
     mat.color.copy(new THREE.Color(nationTintColor(un.nation))).lerp(new THREE.Color('#ffffff'),0.42);
@@ -281,6 +285,6 @@ export function makeRealSoldier3(un){
     }
   }
   }
-  g.userData={real:true,meshy:!!meshy,animatable:!meshy,body:null,segs:segs,selRing:selRing,baseMesh:base,contactSh:contactSh,baseChev:chev,bones:bones,mesh3:mesh,gun:gun,bindLocal:bindLocal,baseRestQ:baseRestQ,baseRestWorldQ:baseRestWorldQ,isClassRig:!!baseRestQ,bindWorldQ:bindWorldQ,parents:parents,sourceParents:sourceParents,sourcePoseQ:data.bones.map(()=>new THREE.Quaternion()),sourceWorldQ:data.bones.map(()=>new THREE.Quaternion()),targetWorldQ:data.bones.map(()=>new THREE.Quaternion()),targetLocalQ:data.bones.map(()=>new THREE.Quaternion()),byName:byName,curQ:bindLocal.map(q=>q.clone()),curRootP:new THREE.Vector3(),walkPh:Math.random()*6.28,bindPos:data.bones.map(b=>new THREE.Vector3(b.pos[0],b.pos[1],b.pos[2])),curDelta:new THREE.Vector3(),clipPhase:Math.random()*10,hitColor:mat.color.clone()};
+  g.userData={real:true,meshy:!!meshy,animatable:!meshy,body:bodyRec?(bodySpec&&bodySpec.key):null,segs:segs,selRing:selRing,baseMesh:base,contactSh:contactSh,baseChev:chev,bones:bones,mesh3:mesh,gun:gun,bindLocal:bindLocal,baseRestQ:baseRestQ,baseRestWorldQ:baseRestWorldQ,isClassRig:!!baseRestQ,bindWorldQ:bindWorldQ,parents:parents,sourceParents:sourceParents,sourcePoseQ:data.bones.map(()=>new THREE.Quaternion()),sourceWorldQ:data.bones.map(()=>new THREE.Quaternion()),targetWorldQ:data.bones.map(()=>new THREE.Quaternion()),targetLocalQ:data.bones.map(()=>new THREE.Quaternion()),byName:byName,curQ:bindLocal.map(q=>q.clone()),curRootP:new THREE.Vector3(),walkPh:Math.random()*6.28,bindPos:data.bones.map(b=>new THREE.Vector3(b.pos[0],b.pos[1],b.pos[2])),curDelta:new THREE.Vector3(),clipPhase:Math.random()*10,hitColor:mat.color.clone()};
   return g;
 }

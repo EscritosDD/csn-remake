@@ -70,8 +70,11 @@ export function spawnsFor(team){
 
 export function boardCenter(){return {x:(W-1)/2,y:(H-1)/2};}
 
+let gridsReady=null;
+
 export function preloadNativeGrids(){
-  return Promise.all(Object.values(NATIVE_MAP_IDS).map(id=>fetch('assets/maps/'+id+'_grid.json').then(r=>r.ok?r.json():null).then(j=>{if(j)GRID_CACHE[id]=j;}).catch(()=>{})));
+  if(!gridsReady)gridsReady=Promise.all(Object.values(NATIVE_MAP_IDS).map(id=>fetch('assets/maps/'+id+'_grid.json').then(r=>r.ok?r.json():null).then(j=>{if(j)GRID_CACHE[id]=j;}).catch(()=>{})));
+  return gridsReady;
 }
 
 export function buildMap(mapId){

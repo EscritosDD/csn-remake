@@ -2,9 +2,11 @@ import { ROLES, DEFAULT_SQUADS } from '../data/roles.js';
 import { MAP_DEFS } from '../data/maps.js';
 import { VIEW_MODE, setViewMode3 } from '../render3d/index.js';
 import { toast } from '../ui/index.js';
+import { preloadNativeGrids } from './board.js';
 import { startGame, selectUnit } from './index.js';
 
-export function quickStart(mapId,ctx){
+export async function quickStart(mapId,ctx){
+  await preloadNativeGrids();
   const {myNation,setup}=ctx;
   if(!myNation){toast('Primero elige una nación aquí abajo y confírmala: en cuanto entres, este mismo botón te despliega en 3D.');return;}
   setup.mode='baliza';setup.campaignMission=0;setup.isTutorial=false;setup.campaignId=null;setup.fmt=4;setup.opp='ia';setup.map=mapId;setup.skinA='nacion';setup.rivalNation=null;setup.difficulty='normal';
@@ -15,7 +17,8 @@ export function quickStart(mapId,ctx){
   startGame(squad,DEFAULT_SQUADS[4].map(mk));
   if(VIEW_MODE!=='3d')toast('La vista 3D no ha arrancado en este dispositivo: juegas en la vista clásica, con la misma partida.');
 }
-export function quickSmoke(ctx){
+export async function quickSmoke(ctx){
+  await preloadNativeGrids();
   const {myNation,setup}=ctx;
   if(!myNation){toast('Primero elige una nación aquí abajo y confírmala: en cuanto entres, este mismo botón te despliega con tu Espía listo.');return;}
   setup.mode='baliza';setup.campaignMission=0;setup.isTutorial=false;setup.campaignId=null;setup.fmt=5;setup.opp='ia';setup.map='almacen';setup.skinA='nacion';setup.rivalNation=null;setup.difficulty='normal';
@@ -28,7 +31,8 @@ export function quickSmoke(ctx){
   toast('Tu Espía va seleccionado y lleva 2 granadas M18: acércalo al centro, pulsa «Humo M18» y tapa la línea entre los dos bandos. A través de la cortina, el indicador dirá «Sin tiro · humo M18».');
   if(VIEW_MODE!=='3d')toast('La vista 3D no ha arrancado en este dispositivo: la prueba del humo se juega igual en la vista clásica.');
 }
-export function quickFlash(ctx){
+export async function quickFlash(ctx){
+  await preloadNativeGrids();
   const {myNation,setup}=ctx;
   if(!myNation){toast('Primero elige una nación aquí abajo y confírmala: en cuanto entres, este mismo botón te despliega con tu Comando listo.');return;}
   setup.mode='baliza';setup.campaignMission=0;setup.isTutorial=false;setup.campaignId=null;setup.fmt=4;setup.opp='ia';setup.map='almacen';setup.skinA='nacion';setup.rivalNation=null;setup.difficulty='normal';

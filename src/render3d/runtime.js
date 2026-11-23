@@ -1,4 +1,4 @@
-import { VIEW_MODE, T3, w2cx, init3D, setViewMode, build3DWorld, rebuildDyn3, rebuildHighlights3, updateHover3D, tickFx3D, updateUnitHuds3D, driveClipSoldier, driveRealSoldier, fitLiveGun3, updateGlbActor, crossFadeTo, CLIPLIB, CLIP_EVENT_LOG, skState, arcadeFxStats, TEAM_A_HEX, TEAM_B_HEX } from './index.js';
+import { VIEW_MODE, T3, w2cx, w2cz, init3D, setViewMode, build3DWorld, rebuildDyn3, rebuildHighlights3, updateHover3D, tickFx3D, updateUnitHuds3D, driveClipSoldier, driveRealSoldier, fitLiveGun3, updateGlbActor, crossFadeTo, CLIPLIB, CLIP_EVENT_LOG, skState, arcadeFxStats, TEAM_A_HEX, TEAM_B_HEX } from './index.js';
 import { REDUCED_MOTION, FX } from '../render2d/index.js';
 import { domControl } from '../ui/index.js';
 import { tileWorldY } from '../game/index.js';
@@ -24,16 +24,17 @@ const {G,hoverTile,advanceUnitYaw,TURRET_POS}=ctx;
   if(w!==T3.lastW||h!==T3.lastH){T3.lastW=w;T3.lastH=h;T3.renderer.setSize(w,h,false);T3.camera.aspect=w/h;T3.camera.updateProjectionMatrix();}
   /* cámara táctica interactiva con amortiguación exponencial + sacudida */
   const c=T3.cam;
-  const panSp=5.5*dt;
-  if(ctx.keysHeld['w']||ctx.keysHeld['arrowup']){c.panZ=Math.max(-5.5,c.panZ-Math.cos(c.yaw)*panSp);c.panX=Math.max(-5.5,c.panX-Math.sin(c.yaw)*panSp);}
-  if(ctx.keysHeld['s']||ctx.keysHeld['arrowdown']){c.panZ=Math.min(5.5,c.panZ+Math.cos(c.yaw)*panSp);c.panX=Math.min(5.5,c.panX+Math.sin(c.yaw)*panSp);}
-  if(ctx.keysHeld['a']||ctx.keysHeld['arrowleft']){c.panX=Math.max(-5.5,c.panX-Math.cos(c.yaw)*panSp);c.panZ=Math.min(5.5,c.panZ+Math.sin(c.yaw)*panSp);}
-  if(ctx.keysHeld['d']||ctx.keysHeld['arrowright']){c.panX=Math.min(5.5,c.panX+Math.cos(c.yaw)*panSp);c.panZ=Math.max(-5.5,c.panZ-Math.sin(c.yaw)*panSp);}
+  const panXMax=Math.max(5.5,W*0.55),panZMax=Math.max(5.5,H*0.55);
+  const panSp=(panXMax+panZMax)*0.5*dt;
+  if(ctx.keysHeld['w']||ctx.keysHeld['arrowup']){c.panZ=Math.max(-panZMax,c.panZ-Math.cos(c.yaw)*panSp);c.panX=Math.max(-panXMax,c.panX-Math.sin(c.yaw)*panSp);}
+  if(ctx.keysHeld['s']||ctx.keysHeld['arrowdown']){c.panZ=Math.min(panZMax,c.panZ+Math.cos(c.yaw)*panSp);c.panX=Math.min(panXMax,c.panX+Math.sin(c.yaw)*panSp);}
+  if(ctx.keysHeld['a']||ctx.keysHeld['arrowleft']){c.panX=Math.max(-panXMax,c.panX-Math.cos(c.yaw)*panSp);c.panZ=Math.min(panZMax,c.panZ+Math.sin(c.yaw)*panSp);}
+  if(ctx.keysHeld['d']||ctx.keysHeld['arrowright']){c.panX=Math.min(panXMax,c.panX+Math.cos(c.yaw)*panSp);c.panZ=Math.max(-panZMax,c.panZ-Math.sin(c.yaw)*panSp);}
   /* La camara acompaña el disparo: se desliza hacia donde ocurre la accion
      (tambien en turnos de la IA) y vuelve a quedarse quieta despues. */
   if(G&&G._camFocus&&Date.now()<G._camFocus.until){
-    const fx=Math.max(-5.5,Math.min(5.5,w2cx(G._camFocus.x)));
-    const fz=Math.max(-5.5,Math.min(5.5,w2cx(G._camFocus.y)));
+    const fx=Math.max(-panXMax,Math.min(panXMax,w2cx(G._camFocus.x)));
+    const fz=Math.max(-panZMax,Math.min(panZMax,w2cz(G._camFocus.y)));
     const k=Math.min(1,dt*1.7);
     c.panX+=(fx-c.panX)*k;
     c.panZ+=(fz-c.panZ)*k;
@@ -55,7 +56,7 @@ const {G,hoverTile,advanceUnitYaw,TURRET_POS}=ctx;
   if(T3.extMats)T3.extMats.forEach(m=>{m.opacity=REDUCED_MOTION?0.2:(0.16+0.07*Math.sin(t/520));});
   if(T3.droneMesh&&G.drone){
     const d=G.drone,m=T3.droneMesh,rx=d.dx!=null?d.dx:d.x,ry=d.dy!=null?d.dy:d.y;
-    m.position.x=w2cx(rx);m.position.z=w2cx(ry);
+    m.position.x=w2cx(rx);m.position.z=w2cz(ry);
     m.rotation.y=-advanceUnitYaw(d,t);
     if(d.alive){
       m.position.y=0.42+tileWorldY(rx,ry)+(REDUCED_MOTION?0:Math.sin(t/480)*0.03);m.rotation.z=0;
@@ -84,7 +85,7 @@ const {G,hoverTile,advanceUnitYaw,TURRET_POS}=ctx;
   const hlSig=[sel?sel.id:'-',sel?sel.energy:0,G.actionMode,G.turn,G.round,G.aiBusy?1:0,G.units.map(u=>u.x+','+u.y+','+(u.alive?1:0)+','+(u.invisible?1:0)).join(';'),(G.smoke||[]).length,G.drone?(G.drone.x+','+G.drone.y+','+G.drone.hp):''].join('#');
   if(hlSig!==T3.hlSig){T3.hlSig=hlSig;rebuildHighlights3();}
   if(T3.hoverRing){
-    if(hoverTile){T3.hoverRing.visible=true;T3.hoverRing.position.x=w2cx(hoverTile.x);T3.hoverRing.position.z=w2cx(hoverTile.y);}
+    if(hoverTile){T3.hoverRing.visible=true;T3.hoverRing.position.x=w2cx(hoverTile.x);T3.hoverRing.position.z=w2cz(hoverTile.y);T3.hoverRing.position.y=tileWorldY(hoverTile.x,hoverTile.y)+0.06;}
     else T3.hoverRing.visible=false;
   }
   updateHover3D(w,h);
@@ -93,7 +94,7 @@ const {G,hoverTile,advanceUnitYaw,TURRET_POS}=ctx;
   G.units.forEach(un=>{
     const mesh=T3.units.get(un.id);if(!mesh)return;
     const rx=un.dx!=null?un.dx:un.x, ry=un.dy!=null?un.dy:un.y;
-    mesh.position.x=w2cx(rx);mesh.position.z=w2cx(ry);
+    mesh.position.x=w2cx(rx);mesh.position.z=w2cz(ry);
     if(mesh.userData.hpArc){const f=Math.max(0,Math.min(1,un.hp/un.maxHp));mesh.userData.hpArc.geometry.setDrawRange(0,Math.floor(64*6*f));mesh.userData.hpArc.visible=un.alive;}
     const ud=mesh.userData;
     const moving=Math.abs(un.x-rx)>0.03||Math.abs(un.y-ry)>0.03||!!un._drawPath;

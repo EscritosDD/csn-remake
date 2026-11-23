@@ -13,7 +13,7 @@ function loadEngine() {
   const idx = code.indexOf(mark);
   assert.ok(idx > 0, 'INIT marker must exist');
   code = code.slice(0, idx);
-  code += '\n;globalThis.__api={startGame,endTurn,checkWin,coverLevel,isFlanked,hasLOS,smokeBlocksLOS,throwSmoke,placeMine,checkMines,throwFlash,damage,tryShoot,guideDrone,scoreDominationFor,domControl,screenStateFor,classicBoardMetrics,classicTileFromPoint,fitViewerDistance,viewerCenterOffset,gameplayModelPresentation,rootBonePositionForClip,validatedRigBoneInverses,sampleClipQuat,clipTrackAt,resetCamState,resetCam3D,ROLES,WEAPONS,NATIONS,DOM_ZONES,DOM_TARGET,ESCORT_EXT,ESCORT_DRONE_HP,ESCORT_DRONE_MAXHP,get G(){return G;},get T3(){return T3;},set T3(v){setT3(v);},setBuild3D(fn){window.__build3D=fn;},dispatchClipEvents,get CLIP_EVENT_LOG(){return CLIP_EVENT_LOG;},fireClipFor,setTHREE(v){globalThis.THREE=v;},get setup(){return setup;},set myNation(v){myNation=v;},mkSquad(n){return DEFAULT_SQUADS[n].map(r=>({role:r,weapon:ROLES[r].weapons[0]}));}};';
+  code += '\n;globalThis.__api={startGame,endTurn,checkWin,coverLevel,isFlanked,hasLOS,smokeBlocksLOS,throwSmoke,placeMine,checkMines,throwFlash,damage,tryShoot,guideDrone,scoreDominationFor,domControl,screenStateFor,classicBoardMetrics,classicTileFromPoint,fitViewerDistance,viewerCenterOffset,gameplayModelPresentation,rootBonePositionForClip,validatedRigBoneInverses,sampleClipQuat,clipTrackAt,resetCamState,resetCam3D,setBoardSize,preloadNativeGrids,boardCenter,w2cx,w2cz,tileFromWorldPoint,camPanBounds,camDefaultDist,bodySpecForUnit,ensureSquadBodies,REAL,ROLES,WEAPONS,NATIONS,DOM_ZONES,DOM_TARGET,ESCORT_EXT,ESCORT_DRONE_HP,ESCORT_DRONE_MAXHP,get G(){return G;},get T3(){return T3;},set T3(v){setT3(v);},setBuild3D(fn){window.__build3D=fn;},dispatchClipEvents,get CLIP_EVENT_LOG(){return CLIP_EVENT_LOG;},fireClipFor,setTHREE(v){globalThis.THREE=v;},get setup(){return setup;},set myNation(v){myNation=v;},mkSquad(n){return DEFAULT_SQUADS[n].map(r=>({role:r,weapon:ROLES[r].weapons[0]}));}};';
 
   const magic = () => {
     const f = () => {};
@@ -462,4 +462,52 @@ test('el look arcade 3D usa paleta pop, exposición 1.12 y FX agrupados sin rend
   assert.doesNotMatch(arcade, /new THREE\.WebGLRenderer/);
   assert.match(arcade, /REDUCED_MOTION/);
   assert.match(read('render3d/fx3d.js'), /tickArcadeFx\(w,h,FX\.t\)/);
+});
+
+test('la conversion 3D separa X y Z y el raycast respeta mapas no cuadrados', () => {
+  const api = loadEngine();
+  api.setBoardSize(23, 17);
+  assert.deepStrictEqual({ ...api.boardCenter() }, { x: 11, y: 8 });
+  assert.equal(api.w2cx(0), -11);
+  assert.equal(api.w2cz(0), -8);
+  for (const [x, y] of [[0, 0], [11, 8], [22, 16], [3, 15]]) {
+    assert.deepStrictEqual({ ...api.tileFromWorldPoint(api.w2cx(x), api.w2cz(y)) }, { x, y });
+  }
+  assert.equal(api.tileFromWorldPoint(api.w2cx(-1), api.w2cz(0)), null);
+  assert.equal(api.tileFromWorldPoint(api.w2cx(23), api.w2cz(16)), null);
+  assert.deepStrictEqual({ ...api.camPanBounds() }, { x: 23 * 0.55, z: 17 * 0.55 });
+  api.setBoardSize(11, 24);
+  assert.deepStrictEqual({ ...api.boardCenter() }, { x: 5, y: 11.5 });
+  assert.equal(api.w2cx(10), 5);
+  assert.equal(api.w2cz(23), 11.5);
+  assert.deepStrictEqual({ ...api.tileFromWorldPoint(api.w2cx(10), api.w2cz(23)) }, { x: 10, y: 23 });
+  api.setBoardSize(12, 12);
+});
+
+test('el reparto resuelve cuerpo exacto, textura de cast y rechaza cuerpos sin malla propia', () => {
+  const api = loadEngine();
+  const rambo = api.bodySpecForUnit({ charName: 'Archie Fletcher', role: 'Artillero', name: 'Archie Fletcher' });
+  assert.equal(rambo.file, 'Soldier_Light_Rambo.obj');
+  assert.match(rambo.prefix, /bodies\/$/);
+  assert.equal(rambo.texture, 'Soldier_Light_Rambo_DeerHunter_d.png');
+  const commander = api.bodySpecForUnit({ charName: 'Commander (M)', role: 'Capitán' });
+  assert.equal(commander.file, 'CommanderM.obj');
+  const medic = api.bodySpecForUnit({ charName: 'Sister Florence', role: 'Médico' });
+  assert.equal(medic.file, 'Medico.obj');
+  assert.equal(api.bodySpecForUnit({ charName: 'Hipster Dave', role: 'Comando' }), null);
+  assert.ok(api.REAL.byBody);
+  assert.ok(api.REAL.bodyLoading);
+});
+
+test('baliza y torreta se dibujan solo en sus modos y las rejillas se precargan antes de desplegar', () => {
+  const read = f => fs.readFileSync(path.join(__dirname, '..', 'src', f), 'utf8');
+  const world = read('render3d/world.js');
+  assert.match(world, /const drawBeacon3=mode3==='baliza'\|\|mode3==='dominacion'/);
+  assert.match(world, /if\(mode3!=='dominacion'\)\{/);
+  assert.match(world, /w2cz\(/);
+  assert.doesNotMatch(world, /w2cx\([^)]*\.y\)/);
+  assert.match(read('game/board.js'), /if\(!gridsReady\)gridsReady=Promise\.all/);
+  assert.match(read('game/quick.js'), /await preloadNativeGrids\(\)/);
+  assert.match(read('main.js'), /async function deployMissionData/);
+  assert.match(read('main.js'), /async function launchConfigured/);
 });

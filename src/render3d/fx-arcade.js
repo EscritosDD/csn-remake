@@ -1,4 +1,5 @@
-import { T3, VIEW_MODE, w2cx } from './scene.js';
+import { tileWorldY } from '../game/board.js';
+import { T3, VIEW_MODE, w2cx, w2cz } from './scene.js';
 import { TEAM_A_HEX, TEAM_B_HEX, SELECT_LIME_HEX, SELECT_GOLD, SELECT_GOLD_HEX } from './env.js';
 
 const CAPS={tracer:12,hit:16,boom:8,float:10};
@@ -72,8 +73,8 @@ function ready(now,REDUCED_MOTION){
 export function arcadeTracer(from,to,cat,team,now,REDUCED_MOTION){
   if(!ready(now,REDUCED_MOTION)||!from||!to||from.x==null||to.x==null)return;
   const node=take('tracer');if(!node)return;
-  const p0=new THREE.Vector3(w2cx(from.x),0.72,w2cx(from.y));
-  const p1=new THREE.Vector3(w2cx(to.x),0.64,w2cx(to.y));
+  const p0=new THREE.Vector3(w2cx(from.x),tileWorldY(from.x,from.y)+0.72,w2cz(from.y));
+  const p1=new THREE.Vector3(w2cx(to.x),tileWorldY(to.x,to.y)+0.64,w2cz(to.y));
   const len=Math.max(0.2,p1.clone().sub(p0).length());
   const col=team==='B'?TEAM_B_HEX:TEAM_A_HEX;
   node.material.color.setHex(cat==='Francotirador'?SELECT_LIME_HEX:(cat==='Lanzacohetes'||cat==='Lanzagranadas'?SELECT_GOLD_HEX:col));
@@ -87,10 +88,10 @@ export function arcadeTracer(from,to,cat,team,now,REDUCED_MOTION){
 export function arcadeHit(x,y,n,col,now,REDUCED_MOTION){
   if(!ready(now,REDUCED_MOTION))return;
   const node=take('hit');if(!node)return;
-  const cx=w2cx(x),cz=w2cx(y),crit=(Number(n)||0)>=60;
+  const cx=w2cx(x),cz=w2cz(y),crit=(Number(n)||0)>=60;
   const color=crit?SELECT_GOLD_HEX:(col||SELECT_LIME_HEX);
   const {ring,spark}=node.userData;
-  node.position.set(cx,0.1,cz);
+  node.position.set(cx,tileWorldY(x,y)+0.1,cz);
   ring.material.color.set(color);spark.material.color.set(color);
   push('hit',node,now,280,(it,k)=>{
     ring.scale.setScalar(1+k*2.2);
@@ -105,10 +106,10 @@ export function arcadeHit(x,y,n,col,now,REDUCED_MOTION){
 export function arcadeExplosion(x,y,kind,now,REDUCED_MOTION){
   if(!ready(now,REDUCED_MOTION))return;
   const node=take('boom');if(!node)return;
-  const cx=w2cx(x),cz=w2cx(y);
+  const cx=w2cx(x),cz=w2cz(y);
   const col=kind==='heal'?SELECT_LIME_HEX:(kind==='smoke'?0xd6dbe0:(kind==='flash'?SELECT_GOLD_HEX:0xff7b29));
   const {outer,inner,core}=node.userData;
-  node.position.set(cx,0.08,cz);
+  node.position.set(cx,tileWorldY(x,y)+0.08,cz);
   outer.material.color.setHex(col);inner.material.color.setHex(kind==='heal'?SELECT_LIME_HEX:SELECT_GOLD_HEX);core.material.color.setHex(col);
   push('boom',node,now,480,(it,k)=>{
     outer.scale.setScalar(1+k*3.4);
@@ -134,14 +135,14 @@ export function arcadeFloat(x,y,txt,col,now,REDUCED_MOTION){
   const el=takeFloat();if(!el)return;
   el.textContent=String(txt==null?'':txt);
   el.style.color=col||SELECT_GOLD;
-  el.dataset.wx=String(w2cx(x));el.dataset.wz=String(w2cx(y));el.dataset.born=String(now);
+  el.dataset.wx=String(w2cx(x));el.dataset.wz=String(w2cz(y));el.dataset.wy=String(tileWorldY(x,y));el.dataset.born=String(now);
   push('float',el,now,950,null);
 }
 
 function projectFloat(el,k,w,h){
   if(!el||!T3.camera||typeof THREE==='undefined')return;
   const v=T3._arcV||(T3._arcV=new THREE.Vector3());
-  v.set(+el.dataset.wx,1.58+k*0.85,+el.dataset.wz).project(T3.camera);
+  v.set(+el.dataset.wx,(+el.dataset.wy||0)+1.58+k*0.85,+el.dataset.wz).project(T3.camera);
   if(v.z<-1||v.z>1){el.style.opacity='0';return;}
   el.style.left=((v.x*0.5+0.5)*w).toFixed(1)+'px';
   el.style.top=((-v.y*0.5+0.5)*h).toFixed(1)+'px';

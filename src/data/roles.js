@@ -36,7 +36,7 @@ export function gameplayModelPresentation(role,authoredModel){
     addRoleGear:!authoredModel,
     preserveTexture:authoredModel,
     twoSided:authoredModel,
-    emissiveIntensity:authoredModel?0.18:0
+    emissiveIntensity:authoredModel?0.16:0
   };
 }
 

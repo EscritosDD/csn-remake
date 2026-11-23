@@ -35,7 +35,7 @@ export function loadSkirmishGeo(theme){
     st.uv=new Float32Array(buf,off,nv*2);off+=nv*2*4;
     const nidx=header.groups.reduce((a,g)=>a+g.count,0);
     st.idx=new Uint32Array(buf,off,nidx);
-    st.groups=header.groups;st.scale=header.scale||st.scale;
+    st.groups=header.groups;st.scale=header.scale||st.scale;st.header=header;
     st.tex=[t1,t2];st.ready=true;st.loading=false;
     if(G&&T3&&VIEW_MODE==='3d'&&G.map.theme===theme)build3DWorld();
   }).catch(()=>{st.loading=false;});
@@ -55,14 +55,11 @@ export function buildSkirmishGeo3(theme){
   }
   const mats=st.tex.map(t=>{const gt=toonGrad3();if(gt&&THREE.MeshToonMaterial)return new THREE.MeshToonMaterial({color:0xffffff,map:t,gradientMap:gt});return new THREE.MeshStandardMaterial({color:0xffffff,map:t,roughness:0.95,metalness:0.02});});
   const mesh=new THREE.Mesh(st.geo,mats);
-  if(NATIVE_GRID&&st.bounds){
-    const sx=W/(st.bounds.max[0]-st.bounds.min[0]),sz=H/(st.bounds.max[2]-st.bounds.min[2]);
-    mesh.scale.set(sx,(sx+sz)/2,sz);
-    mesh.position.set(-(st.bounds.min[0]+st.bounds.max[0])*sx/2,0.02,-(st.bounds.min[2]+st.bounds.max[2])*sz/2);
-  } else {
-    mesh.scale.setScalar(st.scale);
-    mesh.position.y=0.02;
-  }
+  /* El .bin ya esta en unidades de celda (1) y centrado en floor.cx/cz.
+     Escalarlo a W×H meteria los edificios exteriores dentro del tablero. */
+  const fl=st.header&&st.header.floor;
+  mesh.scale.setScalar(1);
+  mesh.position.set(-(fl&&fl.cx||0),0.02,-(fl&&fl.cz||0));
   mesh.receiveShadow=true;
   return mesh;
 }

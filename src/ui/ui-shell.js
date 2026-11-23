@@ -203,7 +203,8 @@ export function screenStateFor(id,game=G){
 export function syncPlayingViewport(){
   const root=document.documentElement;
   root.classList.toggle('is-playing',document.body.dataset.state==='playing');
-  const header=document.querySelector('.topbar');
+  const playing=document.body.dataset.state==='playing';
+  const header=document.querySelector(playing?'.hud-topbar':'.topbar');
   const bar=document.getElementById('actionBar');
   const headerHeight=header?header.getBoundingClientRect().height:68;
   const footerHeight=bar&&document.body.dataset.state==='playing'?bar.getBoundingClientRect().height:0;

@@ -13,6 +13,8 @@ export function setT3(v){T3=v;}
 
 export function w2cx(x){return x-boardCenter().x;}
 
+export function w2cz(y){return y-boardCenter().y;}
+
 export function isSoftwareGL3(renderer){
   try{
     const gl=renderer&&renderer.getContext?renderer.getContext():null;

@@ -115,7 +115,7 @@ d('turretFire',()=>r.turretFire);d('tutHide',()=>r.tutHide);d('tutShow',()=>r.tu
 d('undoLastMove',()=>r.undoLastMove);d('unitAt',()=>r.unitAt);d('unitHasAction',()=>r.unitHasAction);d('updateHover3D',()=>r.updateHover3D);
 d('updateUI',()=>r.updateUI);d('updateUnitDrawPosition',()=>r.updateUnitDrawPosition);d('updateUnitHuds3D',()=>r.updateUnitHuds3D);d('useShield',()=>r.useShield);
 d('useSpecial',()=>r.useSpecial);d('useToolkit',()=>r.useToolkit);d('validatedRigBoneInverses',()=>r.validatedRigBoneInverses);d('viewerCenterOffset',()=>r.viewerCenterOffset);
-d('viewerTeam',()=>r.viewerTeam);d('w2cx',()=>r.w2cx);d('waterCannon',()=>r.waterCannon);d('weaponCalibration',()=>r.weaponCalibration);
+d('viewerTeam',()=>r.viewerTeam);d('w2cx',()=>r.w2cx);d('w2cz',()=>r.w2cz);d('waterCannon',()=>r.waterCannon);d('weaponCalibration',()=>r.weaponCalibration);
 d('weaponCategoryForFile',()=>r.weaponCategoryForFile);d('weaponCoverURL',()=>r.weaponCoverURL);d('weaponFileForRef',()=>r.weaponFileForRef);d('weaponMeta',()=>r.weaponMeta);
 d('weaponTargetLength',()=>r.weaponTargetLength);d('wireSkinSeg',()=>r.wireSkinSeg);d('worldRotationsFromLocal',()=>r.worldRotationsFromLocal);
 }

@@ -73,7 +73,10 @@ test('el motor usa rejilla nativa, aristas, barriles y cobertura direccional', (
   assert.match(html, /return e\?Math\.max\(e\[2\],e\[3\]\):0/);
   assert.match(html, /function tileWorldY\(x,y\)\{/);
   assert.ok(html.includes("typeof location!=='undefined'&&/(?:^|[?&])debugGrid"));
-  assert.match(html, /const sx=W\/\(st\.bounds\.max\[0\]-st\.bounds\.min\[0\]\),sz=H\/\(st\.bounds\.max\[2\]-st\.bounds\.min\[2\]\)/);
+  const geo = fs.readFileSync(path.join(root, 'src', 'render3d', 'assets-geo.js'), 'utf8');
+  assert.ok(geo.includes('mesh.scale.setScalar(1)'));
+  assert.ok(geo.includes('mesh.position.set(-(fl&&fl.cx||0),0.02,-(fl&&fl.cz||0))'));
+  assert.doesNotMatch(geo, /const sx=W\/\(st\.bounds/);
   assert.match(html, /dbg\.name='debugGrid3D'/);
   assert.match(html, /nativeSolidEdge\(x,y,e\[0\],e\[1\]\)/);
   assert.match(html, /if\(!geoShown\)\{try\{buildThemedProps3\(world,G\.map\.theme\);\}catch\(e\)\{\}\}/);

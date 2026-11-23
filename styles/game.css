@@ -247,3 +247,30 @@ body[data-state="playing"] #gameArea{height:max(180px,calc(100dvh - var(--csn-pl
 .actionBar>p{width:100%}
 
 .actions button{padding:11px 10px}
+
+html.is-playing .topbar,html.is-playing #mainTabs,html.is-playing .step-chip,html.is-playing .stepbar{display:none!important}
+html[data-view="3d"] .legend{display:none!important}
+.hud-vitals{max-height:250px}
+.hud-vital{grid-template-columns:30px minmax(0,1fr) 58px;grid-template-rows:auto auto 8px;gap:2px 7px;padding:5px 8px}
+.hud-vital-ico{grid-column:1;grid-row:1/4}
+.hud-vital-name{grid-column:2;grid-row:1}
+.hud-vital-meta{grid-column:2;grid-row:2;display:flex;align-items:center;gap:8px;font-size:10px;line-height:1.1;white-space:nowrap;overflow:hidden}
+.hud-vital-meta em{font-style:normal;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.04em;overflow:hidden;text-overflow:ellipsis}
+.hud-vital-meta i{font-style:normal;font-family:'JetBrains Mono',monospace;color:var(--muted);flex:none}
+.hud-vital-bar{grid-column:2;grid-row:3;height:7px}
+.hud-vital-hp{grid-column:3;grid-row:1/4}
+.log-drawer{border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);margin-top:10px;overflow:hidden}
+.log-drawer>summary{cursor:pointer;padding:8px 12px;font-weight:700;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-gold);list-style:none;user-select:none}
+.log-drawer>summary::-webkit-details-marker{display:none}
+.log-drawer>summary::before{content:"▸ ";color:var(--amber)}
+.log-drawer[open]>summary::before{content:"▾ ";color:var(--amber)}
+.log-drawer .log{height:130px;border:0;border-radius:0;padding:8px 12px;font-size:12px}
+.unit-card{padding:10px}
+.unit-card h3{font-size:17px}
+.unit-card .hpbar{margin:6px 0 3px}
+.gl-controls{position:absolute;top:10px;right:10px;z-index:4;display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;max-width:calc(100% - 20px);margin:0;pointer-events:auto}
+.gl-controls button{min-height:44px;padding:3px 8px;background:rgba(10,12,8,.88);backdrop-filter:blur(4px)}
+.actionBar{align-items:center;padding:8px 14px;background:linear-gradient(180deg,var(--bg-elev),var(--panel))}
+.actionBar .actions button{display:flex;flex-direction:column;justify-content:center;gap:2px;min-height:52px;font-size:13px;line-height:1.15}
+.actionBar .actions button small{white-space:normal;max-height:2.6em;font-size:10.5px}
+@media(max-width:640px){.gl-controls{top:6px;right:6px;gap:3px}.gl-controls button{min-height:44px;padding:2px 6px;font-size:11px}.gl-badge{left:6px;bottom:6px;font-size:10px}}

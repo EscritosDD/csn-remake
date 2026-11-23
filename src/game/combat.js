@@ -6,6 +6,7 @@ import { MAP_DEFS, CAMPAIGN_MISSIONS, TUTORIAL_MISSION } from '../data/maps.js';
 import { cheb, shortestArc } from '../core/geometry.js';
 import { sfx, auVoice } from '../core-and-audio.js';
 import { CLIPLIB } from '../render3d/clips.js';
+import { REAL, ensureSquadBodies } from '../render3d/assets-real.js';
 
 export const SPAWNS_A=[{x:0,y:3},{x:0,y:5},{x:1,y:6},{x:0,y:7},{x:0,y:6}];
 
@@ -102,6 +103,7 @@ export function startGame(squadA,squadB){
   setTurnSeed(1,'A');
   squadA.forEach((d,i)=>G.units.push(makeUnit('A',d,i,myNation,setup.skinA)));
   squadB.forEach((d,i)=>G.units.push(makeUnit('B',d,i,rivalNation,setup.opp==='local'?setup.skinB:'nacion')));
+  if(typeof THREE!=='undefined'&&REAL.ready)ensureSquadBodies(G.units).then(()=>{if(window.__build3D)window.__build3D();});
   const startTheme=(MAP_DEFS[setup.map]||{}).theme;
   if(startTheme&&skState(startTheme)){loadSkirmishTop(startTheme);loadSkirmishGeo(startTheme);}
   if(setup.mode==='guerra'){lsSet(LS_GAMES,+(lsGet(LS_GAMES)||0)+1);}

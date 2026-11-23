@@ -201,15 +201,20 @@ test('las tarjetas de escuadra pueblan rol, arma y personaje', async () => {
 
 test('el HUD de batalla y el resultado usan tarjetas arcade reutilizables', async () => {
   const { vitalsMarkup, resultMarkup } = await import('../src/ui/arcade-hud.js');
-  const ally = { role: 'Comando', weapon: 'M4A1', hp: 75, maxHp: 100, alive: true, team: 'A' };
+  const ally = { role: 'Comando', weapon: 'M4A1', hp: 75, maxHp: 100, alive: true, team: 'A', stunned: true, energy: 2, maxEnergy: 5 };
   const foe = { role: '<img>', weapon: 'RPG', hp: 0, maxHp: 90, alive: false, team: 'B' };
   const cards = vitalsMarkup([ally, foe], 'A', ally, { Comando: '#00e5ff' });
   assert.match(cards, /class="hud-vital A ready sel"/);
   assert.match(cards, /data-hud-unit="0"/);
   assert.match(cards, /width:75%/);
   assert.match(cards, /class="hud-vital B dead"/);
+  assert.match(cards, /Aturdido/);
+  assert.match(cards, /2 \/ 5 ⚡/);
   assert.doesNotMatch(cards, /<img>/);
   assert.match(cards, /&lt;img&gt;/);
+  const escaped = resultMarkup({ winner: 'A', round: 3, title: '<b>x</b>', reason: '<img>', survivors: '4' });
+  assert.match(escaped, /&lt;b&gt;x&lt;\/b&gt;/);
+  assert.match(escaped, /&lt;img&gt;/);
   const result = resultMarkup({ winner: 'A', round: 3, modeLabel: 'BALIZA', art: 'assets/ui/modo_baliza.png', title: '¡Victoria!', reason: 'Rival eliminado.', survivors: '4', buttons: '<button>ok</button>' });
   assert.match(result, /class="result-card"/);
   assert.match(result, /class="endBanner">VICTORIA/);
@@ -222,4 +227,13 @@ test('el HUD de batalla y el resultado usan tarjetas arcade reutilizables', asyn
   assert.match(css, /\.hud-topbar\{/);
   assert.match(css, /\.hud-vital\{/);
   assert.match(css, /\.result-card\{/);
+  assert.match(css, /html\.is-playing \.topbar/);
+  assert.match(css, /html\[data-view="3d"\] \.legend/);
+  assert.match(css, /\.gl-controls\{position:absolute/);
+  assert.match(css, /\.game-layout\{display:grid;grid-template-columns:minmax\(0,1fr\) 320px/);
+  assert.match(indexHtml, /id="logDrawer"/);
+  assert.match(indexHtml, /<div class="gl-controls"><button/);
+  assert.doesNotMatch(indexHtml, /class="legend"/);
+  assert.doesNotMatch(indexHtml, /id="roster"/);
+  assert.equal((indexHtml.match(/class="turn-banner hud-topbar"/g) || []).length, 1);
 });

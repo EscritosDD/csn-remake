@@ -1,6 +1,7 @@
+import { tileWorldY } from '../game/board.js';
 import { cheb } from '../core-and-audio.js';
 import { WEAPONS, PISTOL } from '../data/weapons.js';
-import { VIEW_MODE, T3, w2cx } from './scene.js';
+import { VIEW_MODE, T3, w2cx, w2cz } from './scene.js';
 import { TEAM_A, TEAM_B } from './env.js';
 import { arcadeTracer, arcadeHit, arcadeExplosion, arcadeFloat, tickArcadeFx } from './fx-arcade.js';
 
@@ -18,8 +19,8 @@ export function fx3Shot(from,to,cat){
 
 export function fx3Proj(from,to,kind){
   if(!T3||VIEW_MODE!=='3d'||REDUCED_MOTION||!from||!to)return;
-  const p0=new THREE.Vector3(w2cx(from.x),0.75,w2cx(from.y));
-  const p1=new THREE.Vector3(w2cx(to.x),0.2,w2cx(to.y));
+  const p0=new THREE.Vector3(w2cx(from.x),0.75,w2cz(from.y));
+  const p1=new THREE.Vector3(w2cx(to.x),0.2,w2cz(to.y));
   const col=kind==='smoke'?0xdde2e6:(kind==='flash'?0xfff199:0x577043);
   const orb=new THREE.Mesh(new THREE.SphereGeometry(0.11,10,8),new THREE.MeshBasicMaterial({color:col}));
   orb.position.copy(p0);
@@ -69,15 +70,15 @@ export function updateHover3D(w,h){
       if(G.actionMode==='grenade'&&cheb(sel,hoverTile)<=3&&cheb(sel,hoverTile)>0){
         for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const tx=hx+dx,ty=hy+dy;if(tx<0||ty<0||tx>=W||ty>=H)continue;
           const p=new THREE.Mesh(new THREE.PlaneGeometry(0.92,0.92),new THREE.MeshBasicMaterial({color:0xff6458,transparent:true,opacity:0.38,depthWrite:false,alphaMap:(T3.tileMasks&&T3.tileMasks['aoe'])||null}));
-          p.rotation.x=-Math.PI/2;p.position.set(w2cx(tx),0.072,w2cx(ty));T3.aimGroup.add(p);}
+          p.rotation.x=-Math.PI/2;p.position.set(w2cx(tx),tileWorldY(tx,ty)+0.072,w2cz(ty));T3.aimGroup.add(p);}
       } else if(G.actionMode==='smoke'&&cheb(sel,hoverTile)<=4&&cheb(sel,hoverTile)>0){
         [[0,0],[1,0],[-1,0],[0,1],[0,-1]].forEach(dd=>{const tx=hx+dd[0],ty=hy+dd[1];if(tx<0||ty<0||tx>=W||ty>=H)return;
           const p=new THREE.Mesh(new THREE.PlaneGeometry(0.92,0.92),new THREE.MeshBasicMaterial({color:0xe8ecf0,transparent:true,opacity:0.42,depthWrite:false,alphaMap:(T3.tileMasks&&T3.tileMasks['aoe'])||null}));
-          p.rotation.x=-Math.PI/2;p.position.set(w2cx(tx),0.072,w2cx(ty));T3.aimGroup.add(p);});
+          p.rotation.x=-Math.PI/2;p.position.set(w2cx(tx),tileWorldY(tx,ty)+0.072,w2cz(ty));T3.aimGroup.add(p);});
       } else if(G.actionMode==='flash'&&cheb(sel,hoverTile)<=4){
         for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const tx=hx+dx,ty=hy+dy;if(tx<0||ty<0||tx>=W||ty>=H)continue;
           const p=new THREE.Mesh(new THREE.PlaneGeometry(0.92,0.92),new THREE.MeshBasicMaterial({color:0xffe26a,transparent:true,opacity:0.36,depthWrite:false,alphaMap:(T3.tileMasks&&T3.tileMasks['aoe'])||null}));
-          p.rotation.x=-Math.PI/2;p.position.set(w2cx(tx),0.072,w2cx(ty));T3.aimGroup.add(p);}
+          p.rotation.x=-Math.PI/2;p.position.set(w2cx(tx),tileWorldY(tx,ty)+0.072,w2cz(ty));T3.aimGroup.add(p);}
       } else if(G.actionMode==='move'){
         const reach=reachable(sel,sel.energy);
         if(reach.has(hx+','+hy)){
@@ -85,7 +86,7 @@ export function updateHover3D(w,h){
             const ob=obAt(hx+dd[0],hy+dd[1]);
             if(ob){
               const sh=new THREE.Mesh(new THREE.BoxGeometry(0.07,0.22,0.46),new THREE.MeshBasicMaterial({color:0x57c46a,transparent:true,opacity:0.88}));
-              sh.position.set(w2cx(hx)+dd[2],0.2,w2cx(hy)+dd[3]);sh.rotation.y=dd[4];T3.aimGroup.add(sh);
+              sh.position.set(w2cx(hx)+dd[2],tileWorldY(hx,hy)+0.2,w2cz(hy)+dd[3]);sh.rotation.y=dd[4];T3.aimGroup.add(sh);
             }
           });
         }
@@ -96,12 +97,12 @@ export function updateHover3D(w,h){
       if(isAimTarget){
         const w2=G.actionMode==='pistol'?WEAPONS[PISTOL]:WEAPONS[sel.weapon];
         const okLOS=foe?hitChance(sel,foe,w2)>0:(cheb(sel,hoverTile)<=w2.rng&&hasLOS(sel,hoverTile)&&!smokeBlocksLOS(sel,hoverTile));
-        const pts=[new THREE.Vector3(w2cx(sel.x),0.72,w2cx(sel.y)),new THREE.Vector3(w2cx(hx),0.64,w2cx(hy))];
+        const pts=[new THREE.Vector3(w2cx(sel.x),tileWorldY(sel.x,sel.y)+0.72,w2cz(sel.y)),new THREE.Vector3(w2cx(hx),tileWorldY(hx,hy)+0.64,w2cz(hy))];
         const lg=new THREE.BufferGeometry().setFromPoints(pts);
         const lm=new THREE.Line(lg,new THREE.LineBasicMaterial({color:okLOS?0xf2b234:0xe5484d,transparent:true,opacity:0.85}));
         T3.aimGroup.add(lm);
         const tr=new THREE.Mesh(new THREE.RingGeometry(0.36,0.48,28),new THREE.MeshBasicMaterial({color:okLOS?0xff3d3d:0x883838,side:THREE.DoubleSide}));
-        tr.rotation.x=-Math.PI/2;tr.position.set(w2cx(hx),0.075,w2cx(hy));T3.aimGroup.add(tr);
+        tr.rotation.x=-Math.PI/2;tr.position.set(w2cx(hx),tileWorldY(hx,hy)+0.075,w2cz(hy));T3.aimGroup.add(tr);
       }
     }
   }
@@ -111,7 +112,7 @@ export function updateHover3D(w,h){
     const hx=hoverTile.x,hy=hoverTile.y;
     const foe=unitAt(hx,hy)||(effMode(G)==='escolta'&&sel.team==='B'?droneAt(hx,hy):null);
     const bar=barrelAt(hx,hy),ob=obAt(hx,hy);
-    wx=w2cx(hx);wz=w2cx(hy);
+    wx=w2cx(hx);wz=w2cz(hy);wy+=tileWorldY(hx,hy);
     if(foe&&foe.team!==sel.team&&(G.actionMode==='shoot'||G.actionMode==='pistol'||G.actionMode==='move'||G.actionMode==='special')){
       const w2=G.actionMode==='pistol'?WEAPONS[PISTOL]:WEAPONS[sel.weapon];
       const p=hitChance(sel,foe,w2);
@@ -169,7 +170,7 @@ export function updateUnitHuds3D(w,h){
       rec={el:el,dot:el.querySelector('.gl-hp-dot'),fill:el.querySelector('.gl-hp-fill'),num:el.querySelector('.gl-hp-num'),tagEl:el.querySelector('.gl-unit-tag'),lastSig:''};
       T3.hudPool.set(key,rec);
     }
-    v.set(w2cx(rx),1.55,w2cx(ry)).project(T3.camera);
+    v.set(w2cx(rx),tileWorldY(rx,ry)+1.55,w2cz(ry)).project(T3.camera);
     if(v.z<-1||v.z>1){rec.el.style.display='none';return;}
     const sx=(v.x*0.5+0.5)*w,sy=(-v.y*0.5+0.5)*h;
     if(sx<-40||sx>w+40||sy<0||sy>h+40){rec.el.style.display='none';return;}

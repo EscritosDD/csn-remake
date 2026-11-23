@@ -1,8 +1,19 @@
 import { VIEW_MODE, setViewMode3, T3, setT3, isSoftwareGL3, isMobileGL3 } from './scene.js';
 import { build3DWorld } from './world.js';
+import { boardCenter } from '../game/board.js';
+
+export function camPanBounds(){return {x:Math.max(5.5,W*0.55),z:Math.max(5.5,H*0.55)};}
+
+export function camDefaultDist(){return Math.max(8.5,Math.max(W,H)*0.55);}
+
+export function tileFromWorldPoint(x,z){
+  const bc=boardCenter();
+  const tx=Math.floor(x+bc.x+0.5),ty=Math.floor(z+bc.y+0.5);
+  return (tx>=0&&ty>=0&&tx<W&&ty<H)?{x:tx,y:ty}:null;
+}
 
 export function resetCamState(cam){
-  cam.yaw=-0.4363;cam.dist=8.5;cam.panX=0;cam.panZ=0.35;
+  cam.yaw=-0.4363;cam.dist=camDefaultDist();cam.panX=0;cam.panZ=0.35;
 }
 
 export function resetCam3D(){
@@ -51,7 +62,7 @@ export function init3D(){
   scene.add(sun);
   const fill=new THREE.DirectionalLight(0xa6cfff,0.55);fill.position.set(7,5,-6);scene.add(fill); /* fría del original (0,65, 0,81, 1,0) */
   const rim=new THREE.DirectionalLight(0x9fe8ff,0.85);rim.position.set(5,8,-9);scene.add(rim);
-  const camState={yaw:-0.4363,curYaw:-0.4363,dist:8.5,curDist:8.5,panX:0,curPanX:0,panZ:0.35,curPanZ:0.35}; /* cámara del original: yaw 335°, distancia 8,5 (zoom 0,5), FOV 37,5° */
+  const camState={yaw:-0.4363,curYaw:-0.4363,dist:camDefaultDist(),curDist:camDefaultDist(),panX:0,curPanX:0,panZ:0.35,curPanZ:0.35}; /* cámara del original: yaw 335°, distancia 8,5 (zoom 0,5), FOV 37,5° */
   setT3({renderer:renderer,scene:scene,camera:camera,isSw:isSw,rim:rim,cam:camState,units:new Map(),hudPool:new Map(),fxItems:[],dynSig:'__none__',hlSig:'__none__',hoverSig:'__none__',ray:new THREE.Raycaster(),lastW:0,lastH:0,lastFrame:0,lastRender:0});
   /* Máscaras de casilla del original (floortile_*, 256×256, blancas sobre negro: el color lo pone el material, como alphaMap). */
   T3.tileMasks={};
@@ -65,8 +76,7 @@ export function init3D(){
     const plane=new THREE.Plane(new THREE.Vector3(0,1,0),-0.05);
     const pt=new THREE.Vector3();
     if(!T3.ray.ray.intersectPlane(plane,pt))return null;
-    const tx=Math.floor(pt.x+6), ty=Math.floor(pt.z+6);
-    return (tx>=0&&ty>=0&&tx<W&&ty<H)?{x:tx,y:ty}:null;
+    return tileFromWorldPoint(pt.x,pt.z);
   };
   let drag={active:false,mode:null,sx:0,sy:0,moved:0,syaw:0,spx:0,spz:0};
   const cvEl=renderer.domElement;
@@ -83,8 +93,9 @@ export function init3D(){
     if(drag.mode==='orbit'&&drag.moved>4){camState.yaw=drag.syaw-dx*0.008;}
     else if(drag.mode==='pan'&&drag.moved>4){
       const cs=Math.cos(camState.yaw),sn=Math.sin(camState.yaw),sc=camState.dist*0.0014;
-      camState.panX=Math.max(-5.5,Math.min(5.5,drag.spx-(dx*cs+dy*sn)*sc));
-      camState.panZ=Math.max(-5.5,Math.min(5.5,drag.spz-(dy*cs-dx*sn)*sc));
+      const pb=camPanBounds();
+      camState.panX=Math.max(-pb.x,Math.min(pb.x,drag.spx-(dx*cs+dy*sn)*sc));
+      camState.panZ=Math.max(-pb.z,Math.min(pb.z,drag.spz-(dy*cs-dx*sn)*sc));
     }
   });
   window.addEventListener('pointerup',e=>{
@@ -97,7 +108,7 @@ export function init3D(){
   cvEl.addEventListener('mouseleave',()=>{hoverTile=null;});
   cvEl.addEventListener('wheel',e=>{
     e.preventDefault();
-    camState.dist=Math.max(6,Math.min(11,camState.dist+e.deltaY*0.01));
+    camState.dist=Math.max(6,Math.min(camDefaultDist()+2.5,camState.dist+e.deltaY*0.01));
   },{passive:false});
   document.querySelectorAll('.gl-controls button[data-cam]').forEach(btn=>{
     btn.onclick=()=>{
@@ -105,7 +116,7 @@ export function init3D(){
       if(act==='rotL')camState.yaw-=0.38;
       else if(act==='rotR')camState.yaw+=0.38;
       else if(act==='zoomIn')camState.dist=Math.max(6,camState.dist-1.8);
-      else if(act==='zoomOut')camState.dist=Math.min(11,camState.dist+1.8);
+      else if(act==='zoomOut')camState.dist=Math.min(camDefaultDist()+2.5,camState.dist+1.8);
       else if(act==='reset')resetCam3D();
       btn.blur();
     };
@@ -121,6 +132,7 @@ export function setViewMode(m){
     if(fail){fail.style.display='block';fail.innerHTML='<b>La vista 3D no ha podido arrancar en este dispositivo</b> y por eso ves el tablero clásico de siempre. La partida es la misma y se juega igual; el aviso queda aquí para que sepas que no es que falte el 3D, es que aquí no ha arrancado.';}
   } else {setViewMode3(m);if(fail)fail.style.display='none';}
   const is3=VIEW_MODE==='3d';
+  document.documentElement.dataset.view=VIEW_MODE;
   document.getElementById('glWrap').style.display=is3?'block':'none';
   document.getElementById('board').style.display=is3?'none':'block';
   document.querySelectorAll('#viewSeg button').forEach(b=>b.classList.toggle('on',b.dataset.view===VIEW_MODE));

@@ -1,9 +1,10 @@
 import { CLIPLIB } from './clips.js';
-import { CAST_TEXTURE_FILE, MESHY_CAST } from '../data/cast.js';
+import { CAST_TEXTURE_FILE, MESHY_CAST, ORIG_CAST } from '../data/cast.js';
 import { buildSpriteStrip } from '../render2d/sprites.js';
 import { loadMeshyModel } from './assets-meshy.js';
+import { VIEWER_BODY_FILE, VIEWER_BODY_OVERRIDE, VIEWER_BODY_ROLE, scaleRigForGeometry } from '../viewer/body-loader.js';
 
-export const REAL={ready:false,data:null,geo:null,tex:null,castTex:{}};
+export const REAL={ready:false,data:null,geo:null,tex:null,castTex:{},byBody:{},bodyLoading:{}};
 
 export function parseOBJ3(txt,skin){
   const P=[],UV=[],idxMap={};
@@ -49,10 +50,57 @@ export const ROLE_MODEL_FILES={'Francotirador':'Francotirador','Artillero':'Arti
 
 export const ROLE_OUTFIT_FILES={'Francotirador':'veteran','Artillero':'deerhunter','Espía':'spetsnaz','Médico':'decon','Ingeniero':'rambo','Comando':'deltaforce','Capitán':'base'};
 
+export function bodySpecForUnit(un){
+  if(!un)return null;
+  const ch=ORIG_CAST.find(c=>c.name===(un.charName||un.name));
+  if(!ch)return null;
+  const body=VIEWER_BODY_OVERRIDE[ch.name]||ch.body||'';
+  const bodyFile=VIEWER_BODY_FILE[body];
+  const bodyRole=VIEWER_BODY_ROLE[body];
+  if(!bodyFile&&!bodyRole)return null;
+  const file=bodyFile||ROLE_MODEL_FILES[bodyRole]+'.obj';
+  return {key:body||ch.name,file,prefix:bodyFile?'assets/soldier/bodies/':'assets/soldier/',charName:ch.name,texture:CAST_TEXTURE_FILE[ch.name]||''};
+}
+
+async function loadBodyRecord(spec){
+  const base=spec.prefix+spec.file;
+  const [objRes,rigRes]=await Promise.all([fetch(base),fetch(base.replace(/\.obj$/,'_rig.json'))]);
+  if(!objRes.ok||!rigRes.ok)return null;
+  const text=await objRes.text();
+  const rig=await rigRes.json();
+  let count=0;
+  for(const line of text.split('\n'))if(line.startsWith('v '))count++;
+  const valid=!!(rig.bones&&rig.skinIndex&&rig.skinIndex.length===count*4&&rig.skinWeight&&rig.skinWeight.length===count*4);
+  const skin=valid?{skinIndex:rig.skinIndex,skinWeight:rig.skinWeight}:{skinIndex:new Array(count*4).fill(0),skinWeight:new Array(count*4).fill(0)};
+  const geo=parseOBJ3(text,skin);
+  const pos=geo.attributes.position.array,zs=[];
+  for(let i=2;i<pos.length;i+=3)zs.push(pos[i]);
+  zs.sort((a,b)=>a-b);
+  const p95=zs[Math.floor(zs.length*0.95)]||1,scale=1.14/p95;
+  if(scale!==1)geo.scale(scale,scale,scale);
+  const data=valid&&scale!==1?scaleRigForGeometry(rig,scale,THREE).rig:(valid?rig:null);
+  if(!data)return null;
+  const rec={data,geo,tex:(spec.texture&&REAL.castTex[spec.texture])||null,charName:spec.charName};
+  REAL.byBody[spec.key]=rec;
+  return rec;
+}
+
+export function ensureSquadBodies(units){
+  if(typeof THREE==='undefined')return Promise.resolve();
+  const specs=(units||[]).map(bodySpecForUnit).filter(Boolean);
+  const todo=[];
+  for(const spec of specs){
+    if(REAL.byBody[spec.key]||REAL.bodyLoading[spec.key])continue;
+    REAL.bodyLoading[spec.key]=loadBodyRecord(spec).catch(()=>null).then(rec=>{delete REAL.bodyLoading[spec.key];return rec;});
+    todo.push(REAL.bodyLoading[spec.key]);
+  }
+  return Promise.all(todo);
+}
+
 export function loadRealSoldier(ctx={}){
   if(typeof THREE==='undefined')return;
   const {draw=()=>{},updateUI=()=>{},build3DWorld=()=>{},rebuildDemo=()=>{},PORTRAIT_CACHE,REAL_SPRITES}=ctx;
-  REAL.texByRole={};REAL.byRole={};REAL.castTex={};
+  REAL.texByRole={};REAL.byRole={};REAL.castTex={};REAL.byBody={};REAL.bodyLoading={};
   fetch('assets/soldier_scales.json').then(r=>r.json()).then(sc=>{ROLE_SCALES=sc||{};}).catch(err=>console.error('[loadRealSoldier:escalas]',err));
   fetch('assets/soldier_clips.json').then(r=>{if(!r.ok)throw new Error('clips');return r.json();}).then(pack=>{CLIPLIB.pack=pack;CLIPLIB.ready=true;}).catch(err=>console.error('[loadRealSoldier:clips]',err));
   const texLoad=(path)=>new Promise(res=>{new THREE.TextureLoader().load(path,t=>{
@@ -90,7 +138,7 @@ export function loadRealSoldier(ctx={}){
     ]).then(([casts])=>{
       (casts||[]).forEach(([file,t])=>{if(t)REAL.castTex[file]=t;});
     });
-  }).then(()=>{
+  }).then(()=>ensureSquadBodies(ctx.G&&ctx.G.units)).then(()=>{
     if(PORTRAIT_CACHE)Object.keys(PORTRAIT_CACHE).forEach(k=>delete PORTRAIT_CACHE[k]);
     if(REAL_SPRITES){REAL_SPRITES.cache={};REAL_SPRITES.failed=false;}
     buildSpriteStrip();
