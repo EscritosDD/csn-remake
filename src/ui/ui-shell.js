@@ -289,7 +289,7 @@ export function renderCampaignPanel(){
   });
 }
 
-function menuSiblings(){return Array.prototype.slice.call(document.querySelectorAll('#menuArea > .grid3, #menuArea > .panel, #origMenu, #demoSlotPlay'));}
+function menuSiblings(){return Array.prototype.slice.call(document.querySelectorAll('#menuArea > .grid3, #menuArea > .panel, #menuArea > .menu-dossier, #origMenu, #demoSlotPlay'));}
 
 export function showCampaignView(){
   const hub=document.getElementById('campaignHub');if(!hub)return;

@@ -67,9 +67,38 @@ test('los controles tienen foco visible y tamaño cómodo', () => {
   assert.match(css, /nav\.tabs button:hover/);
 });
 
+test('el tema militar oscuro es la única fuente de color', () => {
+  const theme = fs.readFileSync(path.join(root, 'styles', 'theme.css'), 'utf8');
+  const cards = fs.readFileSync(path.join(root, 'styles', 'cards.css'), 'utf8');
+  const viewer = fs.readFileSync(path.join(root, 'styles', 'viewer.css'), 'utf8');
+  for (const token of [
+    '--bg:#0c100b;', '--bg-elev:#131911;', '--surface:#182016;', '--surface-2:#202a1d;',
+    '--stage:radial-gradient(circle at 50% 38%, #283224 0%, #141a12 72%, #0d110b 100%);',
+    '--line:rgba(188,206,166,.14);', '--line-strong:rgba(188,206,166,.26);',
+    '--line-accent:rgba(240,178,52,.55);', '--amber:#f0b234;', '--amber-dark:#c98a14;'
+  ]) assert.ok(theme.includes(token), token);
+  assert.doesNotMatch(css, /prefers-color-scheme:\s*light/);
+  assert.equal((theme.match(/\.btn\{/g) || []).length, 1);
+  assert.ok(cards.includes('border:1px solid var(--line);border-radius:14px;background:var(--surface)'));
+  assert.ok(cards.includes('transform:translateY(-4px);border-color:var(--line-accent)'));
+  assert.doesNotMatch(cards, /#faf8f2|#1c211a|#626a5c/);
+  assert.doesNotMatch(viewer, /\.troop-filters\{/);
+  assert.doesNotMatch(css, /min-height:\s*(?:[12]?\d|3\d)px/);
+});
+
+test('la portada prioriza el arte y pliega la ficha técnica', () => {
+  for (const id of ['menuModes', 'menuExtras']) assert.match(indexHtml, new RegExp('id="' + id + '"'), id);
+  assert.match(indexHtml, /class="menu-section menu-dossier" id="menuModes" open/);
+  assert.match(css, /\.heroOrigen\{[^}]*background:var\(--stage\)/);
+  assert.match(html, /#menuArea > \.menu-dossier/);
+  for (const screen of ['menu: ', 'campanhub: ', 'setup: ', 'troops: ', 'armory: ']) assert.match(capture, new RegExp(screen.replace(' ', '\\s*')));
+});
+
 test('las capturas permiten monitoreo móvil y de reglas', () => {
   assert.match(capture, /CSN_WINDOW/);
   assert.match(capture, /how: /);
+  assert.match(capture, /const mobileUiMode = !!\(mobileMode && mobileMode !== 'game'\)/);
+  assert.match(capture, /const sceneOk = uiMode \|\| mobileUiMode \? true : !!\(parsed && parsed\.units > 0\)/);
 });
 
 test('la navegación principal usa los cuatro nombres del usuario', async () => {
@@ -121,6 +150,9 @@ test('la campaña tiene vista propia y el briefing no usa handlers inline', () =
   assert.match(html,/mnuChallenges'\);if\(ch\)ch\.onclick=openView/);
   assert.match(capture,/campanhub: "showScreen\('scr-play'\);showCampaignView\(\)"/);
   assert.match(capture,/brief: "showScreen\('scr-play'\);showMissionBriefing\(0\)"/);
+  const bridgeSource=fs.readFileSync(path.join(root,'src','bridge.js'),'utf8');
+  assert.match(bridgeSource,/d\('showCampaignView',\(\)=>r\.showCampaignView\)/);
+  assert.match(bridgeSource,/d\('hideCampaignView',\(\)=>r\.hideCampaignView\)/);
 });
 
 test('Configurar partida muestra mapa y tarjetas visuales sin otro renderer', async () => {

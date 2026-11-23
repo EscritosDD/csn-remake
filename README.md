@@ -36,7 +36,7 @@ npm run lint && npm test
 powershell -ExecutionPolicy Bypass -File bench/VERIFICAR.ps1
 ```
 
-La suite `npm test` cubre 125 pruebas; `src/` tiene 75 módulos ESM y todos
+La suite `npm test` cubre 127 pruebas; `src/` tiene 75 módulos ESM y todos
 quedan por debajo de 450 líneas.
 
 `VERIFICAR.ps1` hace 13 comprobaciones: sintaxis, 19 tableros, reglas, datos,

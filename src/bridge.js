@@ -92,7 +92,7 @@ d('pathDist',()=>r.pathDist);d('pickupLoot',()=>r.pickupLoot);d('placeCover',()=
 d('placeMine',()=>r.placeMine);d('playOnce',()=>r.playOnce);d('poseSpriteAim',()=>r.poseSpriteAim);d('poseSpriteClip',()=>r.poseSpriteClip);
 d('preloadNativeGrids',()=>r.preloadNativeGrids);d('procTex3',()=>r.procTex3);d('reachable',()=>r.reachable);d('readSquad',()=>r.readSquad);
 d('realSpriteKey',()=>r.realSpriteKey);d('realSpriteUnit',()=>r.realSpriteUnit);d('rebuildDemo',()=>r.rebuildDemo);d('rebuildDyn3',()=>r.rebuildDyn3);
-d('rebuildHighlights3',()=>r.rebuildHighlights3);d('refreshGuerra',()=>r.refreshGuerra);d('renderAbilityCatalog',()=>r.renderAbilityCatalog);d('renderBarracks',()=>r.renderBarracks);
+d('rebuildHighlights3',()=>r.rebuildHighlights3);d('refreshGuerra',()=>r.refreshGuerra);d('refreshSetupPreview',()=>r.refreshSetupPreview);d('renderAbilityCatalog',()=>r.renderAbilityCatalog);d('renderBarracks',()=>r.renderBarracks);
 d('renderCampaignPanel',()=>r.renderCampaignPanel);d('renderNationChip',()=>r.renderNationChip);d('renderRealSprite',()=>r.renderRealSprite);d('renderSoundBtn',()=>r.renderSoundBtn);
 d('renderWeaponThumb',()=>r.renderWeaponThumb);d('resetCam3D',()=>r.resetCam3D);d('resetCamState',()=>r.resetCamState);d('retargetPoseToRig',()=>r.retargetPoseToRig);
 d('rg',()=>r.rg);d('rng',()=>r.rng);d('rngState',()=>r.rngState);d('roleLook',()=>r.roleLook);
@@ -102,7 +102,7 @@ d('saveChars',()=>r.saveChars);d('scoreDominationFor',()=>r.scoreDominationFor);
 d('segRing',()=>r.segRing);d('selectUnit',()=>r.selectUnit);d('setBoardSize',()=>r.setBoardSize);d('setOverwatch',()=>r.setOverwatch);
 d('setStep',()=>r.setStep);d('setTurnSeed',()=>r.setTurnSeed);d('setViewMode',()=>r.setViewMode);d('setup',()=>r.setup,v=>{r.setup=v;});
 d('sfx',()=>r.sfx);d('shade',()=>r.shade);d('shadeHex',()=>r.shadeHex);d('shortestArc',()=>r.shortestArc);
-d('showModal',()=>r.showModal);d('showScreen',()=>r.showScreen);d('skState',()=>r.skState);d('skyTheme3',()=>r.skyTheme3);
+d('showModal',()=>r.showModal);d('showScreen',()=>r.showScreen);d('showCampaignView',()=>r.showCampaignView);d('hideCampaignView',()=>r.hideCampaignView);d('skState',()=>r.skState);d('skyTheme3',()=>r.skyTheme3);
 d('smokeAt',()=>r.smokeAt);d('smokeBlocksLOS',()=>r.smokeBlocksLOS);d('smoothDrawStep',()=>r.smoothDrawStep);d('soldierColors3',()=>r.soldierColors3);
 d('spawnsFor',()=>r.spawnsFor);d('spendEnergy',()=>r.spendEnergy);d('spriteDataURI',()=>r.spriteDataURI);d('squadRows',()=>r.squadRows);
 d('startDrawMove',()=>r.startDrawMove);d('startGame',()=>r.startGame);d('startTutorial',()=>r.startTutorial);d('startTutorialFlow',()=>r.startTutorialFlow);d('tutorialIndex',()=>r.tutorialIndex);d('sweepDetect',()=>r.sweepDetect);d('syncDiffSeg',()=>r.syncDiffSeg);

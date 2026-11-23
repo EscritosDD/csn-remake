@@ -369,7 +369,8 @@ try {
     try { result.tex = JSON.parse(rawTex); } catch { result.tex = rawTex; }
   }
 
-  const sceneOk = uiMode ? true : !!(parsed && parsed.units > 0);
+  const mobileUiMode = !!(mobileMode && mobileMode !== 'game');
+  const sceneOk = uiMode || mobileUiMode ? true : !!(parsed && parsed.units > 0);
   const pngOk = uiMode ? result.pngUi > 0 : mobileMode ? result.pngMobile > 0 : result.png3d > 0;
   const moveOk = !moveMode || !!(result.move && result.move.samples && result.move.samples.length > 10);
   const combatOk = !combatMode || !!(result.combat && result.combat.ok && result.combat.samples && result.combat.samples.length > 10 && result.combat.events && result.combat.events.length > 0);

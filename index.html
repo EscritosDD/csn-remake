@@ -73,10 +73,12 @@
     </div>
 
     <div id="menuArea">
-      <div class="guide-note" id="modeGuide"><b>Paso 2 de 4.</b> Entra a partida rápida o elige un modo. El Cuartel y el Visor son opcionales y siempre tienen vuelta atrás.</div>
+      <div class="menu-topline">
+        <div class="guide-note" id="modeGuide"><b>Paso 2 de 4.</b> Entra a partida rápida o elige un modo. El Cuartel y el Visor son opcionales y siempre tienen vuelta atrás.</div>
+      </div>
       <div class="panel menuOrigen" id="origMenu" style="margin-top:16px">
-        <h2>Menú</h2>
-        <div class="menuCol" style="margin-top:8px">
+        <div class="menu-heading"><span class="tag amber">Punto de mando</span><h2>Operaciones</h2><p class="sub">Acceso directo. El resto vive en secciones plegadas.</p></div>
+        <div class="menuCol">
           <button class="btn primary" id="mnuQuick">⚡ Partida rápida<small class="sub">Partida rápida en el Almacén</small></button>
           <button class="btn" id="mnuOnline">🌐 Jugar en local<small class="sub">Sin servidor: IA o dos jugadores en local</small></button>
           <button class="btn" id="mnuChallenges">🏆 Desafíos<small class="sub">Operación Londres · 6 misiones</small></button>
@@ -89,59 +91,103 @@
       </div>
       
       <div id="demoSlotPlay"></div>
-      <div class="grid3" style="margin-top:18px">
-        <div class="mode-card" data-modecard="eliminacion">
-          <img class="mode-art" src="assets/ui/modo_eliminacion.png" alt="Dos escuadras de soldados frente a frente"/>
-          <span class="tag amber">Modo clásico</span>
-          <h3>Eliminación</h3>
-          <details class="info"><summary>ⓘ Más información</summary><div class="info-body"><p>Gana quien elimine a toda la escuadra enemiga. Sin baliza y sin atajos: el modo directo del original.</p></div></details>
-          <button class="btn primary" data-start="eliminacion">Configurar partida</button>
-        </div>
-        <div class="mode-card" data-modecard="baliza">
-          <img class="mode-art" src="assets/ui/modo_baliza.png" alt="Una baliza de señal en el centro del tablero"/>
-          <span class="tag amber">Modo del original</span>
-          <h3>Captura de baliza</h3>
-          <details class="info"><summary>ⓘ Más información</summary><div class="info-body"><p>Aguanta <b>5 turnos</b> con tu escuadra dentro de la zona central y sin enemigos dentro, o elimina al rival. La zona del cohete de RAD Soldiers, reconstruida.</p></div></details>
-          <button class="btn primary" data-start="baliza">Configurar partida</button>
-        </div>
-        <div class="mode-card" id="guerraCard">
-          <span class="tag" id="guerraTag">Evento · Sáb y Dom</span>
-          <h3>Guerra de Naciones</h3>
-          <p id="guerraDesc">Captura de baliza por tu nación contra una nación rival controlada por la IA. Cada victoria suma un punto al marcador de tu nación en este dispositivo.</p>
-          <div id="guerraScore" class="statline"></div>
-          <div id="guerraLock" style="display:none">
-            <p class="sub" style="margin-bottom:4px">El evento abre el sábado a las 00:00. Tiempo restante:</p>
-            <div class="countdown" id="guerraCountdown">—</div>
+      <details class="menu-section menu-dossier" id="menuModes" open>
+        <summary><span class="tag amber">Modos</span><b>Elige operación</b><small>6 formatos · campaña incluida</small></summary>
+        <div class="grid3 mode-grid">
+          <div class="mode-card" data-modecard="eliminacion">
+            <img class="mode-art" src="assets/ui/modo_eliminacion.png" alt="Dos escuadras de soldados frente a frente"/>
+            <span class="tag amber">Modo clásico</span>
+            <h3>Eliminación</h3>
+            <details class="info"><summary>ⓘ Más información</summary><div class="info-body"><p>Gana quien elimine a toda la escuadra enemiga. Sin baliza y sin atajos: el modo directo del original.</p></div></details>
+            <button class="btn primary" data-start="eliminacion">Configurar partida</button>
           </div>
-          <button class="btn olive" id="guerraBtn" data-start="guerra">Luchar por mi nación</button>
+          <div class="mode-card" data-modecard="baliza">
+            <img class="mode-art" src="assets/ui/modo_baliza.png" alt="Una baliza de señal en el centro del tablero"/>
+            <span class="tag amber">Modo del original</span>
+            <h3>Captura de baliza</h3>
+            <details class="info"><summary>ⓘ Más información</summary><div class="info-body"><p>Aguanta <b>5 turnos</b> con tu escuadra dentro de la zona central y sin enemigos dentro, o elimina al rival. La zona del cohete de RAD Soldiers, reconstruida.</p></div></details>
+            <button class="btn primary" data-start="baliza">Configurar partida</button>
+          </div>
+          <div class="mode-card" id="guerraCard">
+            <span class="tag" id="guerraTag">Evento · Sáb y Dom</span>
+            <h3>Guerra de Naciones</h3>
+            <p id="guerraDesc">Captura de baliza por tu nación contra una nación rival controlada por la IA. Cada victoria suma un punto al marcador de tu nación en este dispositivo.</p>
+            <div id="guerraScore" class="statline"></div>
+            <div id="guerraLock" style="display:none">
+              <p class="sub" style="margin-bottom:4px">El evento abre el sábado a las 00:00. Tiempo restante:</p>
+              <div class="countdown" id="guerraCountdown">—</div>
+            </div>
+            <button class="btn olive" id="guerraBtn" data-start="guerra">Luchar por mi nación</button>
+          </div>
         </div>
-      </div>
-
-      <div class="grid3" style="margin-top:14px">
-        <div class="mode-card" data-modecard="dominacion">
-          <img class="mode-art" src="assets/ui/modo_dominacion.png" alt="Soldados tomando posiciones en varias zonas del tablero"/>
-          <span class="tag amber">Nuevo · Control de zonas</span>
-          <h3>Dominación</h3>
-          <details class="info"><summary>ⓘ Más información</summary><div class="info-body"><p>Tres zonas a la vez: <b>Depósito</b> (flanco oeste), <b>Centro</b> (la baliza) y <b>Muelle</b> (flanco este). Al iniciar tu turno desde la ronda 2, sumas 1 punto por cada zona que mantengas controlada (y 1 extra si dominas las tres). Gana quien llegue a <b>10 puntos</b> o elimine al rival. Ya no basta con aguantar un punto: hay que repartir la escuadra y decidir dónde pelear.</p></div></details>
-          <button class="btn primary" data-start="dominacion">Configurar partida</button>
+        <div class="grid3 mode-grid" style="margin-top:14px">
+          <div class="mode-card" data-modecard="dominacion">
+            <img class="mode-art" src="assets/ui/modo_dominacion.png" alt="Soldados tomando posiciones en varias zonas del tablero"/>
+            <span class="tag amber">Nuevo · Control de zonas</span>
+            <h3>Dominación</h3>
+            <details class="info"><summary>ⓘ Más información</summary><div class="info-body"><p>Tres zonas a la vez: <b>Depósito</b> (flanco oeste), <b>Centro</b> (la baliza) y <b>Muelle</b> (flanco este). Al iniciar tu turno desde la ronda 2, sumas 1 punto por cada zona que mantengas controlada (y 1 extra si dominas las tres). Gana quien llegue a <b>10 puntos</b> o elimine al rival. Ya no basta con aguantar un punto: hay que repartir la escuadra y decidir dónde pelear.</p></div></details>
+            <button class="btn primary" data-start="dominacion">Configurar partida</button>
+          </div>
+          <div class="mode-card" data-modecard="campana" style="grid-column:span 2">
+            <span class="tag amber">Modo Historia · IPA</span>
+            <h3>Operación Londres</h3>
+            <p class="sub" style="margin:0">Seis misiones, radio de Dave, medallas y veterania guardada en este dispositivo.</p>
+            <div id="campaignProgress" class="statline" style="margin:4px 0"></div>
+            <button class="btn primary" id="campaignBtn" style="align-self:flex-start">Abrir campaña ▶</button>
+          </div>
         </div>
-        <div class="mode-card" data-modecard="campana" style="grid-column:span 2">
-          <span class="tag amber">Modo Historia · IPA</span>
-          <h3>Operación Londres</h3>
-          <p class="sub" style="margin:0">Seis misiones, radio de Dave, medallas y veterania guardada en este dispositivo.</p>
-          <div id="campaignProgress" class="statline" style="margin:4px 0"></div>
-          <button class="btn primary" id="campaignBtn" style="align-self:flex-start">Abrir campaña ▶</button>
+        <div class="grid3 mode-grid" style="margin-top:14px">
+          <div class="mode-card" data-modecard="escolta" style="grid-column:span 3">
+            <img class="mode-art" src="assets/ui/modo_escolta.png" alt="Una escuadra escoltando a un dron averiado" style="max-width:340px"/>
+            <span class="tag amber">Nuevo · Escolta asimétrica</span>
+            <h3>Escolta del dron</h3>
+            <details class="info"><summary>ⓘ Más información</summary><div class="info-body"><p>Un <b>dron averiado</b> (240 PV, entra entero) espera en tu flanco oeste y la <b>extracción</b> está en el este, tras las líneas rivales. Pega a tus soldados a él (mientras tenga al menos un soldado aliado pegado recibe <b>−53 % de daño</b>) y <b>guíalo casilla a casilla</b> (máximo 2 guiados por ronda, 2 ⚡ del guía cada uno) mientras el rival intenta destruirlo: si el dron llega a la extracción, gana la escolta; si el dron cae, o si la defensa aguanta <b>15 rondas</b>, gana la defensa. Eliminar a la escuadra rival también vale, y tu Médico puede reparar el dron sobre la marcha. La IA rival juega el objetivo: intercepta al dron, le dispara primero a él y lo granadea en cuanto lo tiene a tiro.</p></div></details>
+            <button class="btn primary" data-start="escolta" style="align-self:flex-start">Configurar partida</button>
+          </div>
         </div>
-      </div>
-      <div class="grid3" style="margin-top:14px">
-        <div class="mode-card" data-modecard="escolta" style="grid-column:span 3">
-          <img class="mode-art" src="assets/ui/modo_escolta.png" alt="Una escuadra escoltando a un dron averiado" style="max-width:340px"/>
-          <span class="tag amber">Nuevo · Escolta asimétrica</span>
-          <h3>Escolta del dron</h3>
-          <details class="info"><summary>ⓘ Más información</summary><div class="info-body"><p>Un <b>dron averiado</b> (240 PV, entra entero) espera en tu flanco oeste y la <b>extracción</b> está en el este, tras las líneas rivales. Pega a tus soldados a él (mientras tenga al menos un soldado aliado pegado recibe <b>−53 % de daño</b>) y <b>guíalo casilla a casilla</b> (máximo 2 guiados por ronda, 2 ⚡ del guía cada uno) mientras el rival intenta destruirlo: si el dron llega a la extracción, gana la escolta; si el dron cae, o si la defensa aguanta <b>15 rondas</b>, gana la defensa. Eliminar a la escuadra rival también vale, y tu Médico puede reparar el dron sobre la marcha. La IA rival juega el objetivo: intercepta al dron, le dispara primero a él y lo granadea en cuanto lo tiene a tiro.</p></div></details>
-          <button class="btn primary" data-start="escolta" style="align-self:flex-start">Configurar partida</button>
+      </details>
+      <details class="menu-section menu-dossier" id="menuExtras">
+        <summary><span class="tag">Ficha técnica</span><b>Skins y mapas</b><small>Solo si quieres profundizar</small></summary>
+        <div class="panel">
+          <h2>Tus skins</h2>
+          <details class="info"><summary>ⓘ ¿Qué son las skins?</summary><div class="info-body"><p class="sub">Tienes <b>tres skins</b>, y las tres son <b>solo aspecto, sin pasivas</b>: Estándar (genérica), Clase (color del rol) y Nación (bandera, casco y emblema). La de Nación es una skin más, no la definitiva: más adelante llegarán otras skins, y esas sí darán pasivas pequeñas. Eliges la skin de tu escuadra al configurar cada partida.</p></div></details>
+          <div class="skin-cards">
+            <div class="skin-card">
+              <span class="tag">Skin inicial · Sin pasiva</span>
+              <h3>Estándar</h3>
+              <div class="skin-swatch"><i style="background:#66704f"></i><i style="background:#59613f"></i><i style="background:#3e4630"></i></div>
+              <p class="sub" style="margin:0">El soldado genérico, como la skin estándar de Fortnite: uniforme verde oliva liso, sin colores de nación, sin emblema y sin nada especial.</p>
+            </div>
+            <div class="skin-card">
+              <span class="tag amber">Skin inicial · Sin pasiva</span>
+              <h3>Nación <span id="skinNationName"></span></h3>
+              <div class="skin-swatch" id="skinNationSwatch"></div>
+              <p class="sub" style="margin:0" id="skinNationDesc">Los colores de la bandera de tu nación en el uniforme y el casco, con el emblema de sus fuerzas armadas en el pecho.</p>
+            </div>
+          </div>
         </div>
-      </div>
+        <div class="panel" style="margin-top:14px">
+          <h2>Los mapas: Almacén industrial, Patio de contenedores y los Skirmish de Londres</h2>
+          <details class="info"><summary>ⓘ ¿Cómo son los tableros?</summary><div class="info-body"><p class="sub" style="max-width:78ch">Los trece tableros jugables son de 12×12 casillas con simetría de 180°, para que ningún bando nazca con ventaja: estanterías y muros que no se rompen, cajas destructibles que dan cobertura, <b>barriles explosivos</b> (70 de daño en las casillas adyacentes si les disparas), dos <b>botiquines</b> de un solo uso (+50 de vida al pasar por encima) y una <b>torreta capturable</b> en el centro: el primer soldado que se plante en su casilla y gaste 2 de energía la pone a disparar para su bando al final de cada turno. En las rondas 3 y 6 cae una <b>caja de botín</b> cerca del centro con cura, energía o una granada extra para quien la recoja. La vista del tablero sigue la cámara del original como referencia de encuadre: inclinación de 50°, distancia de 8,5 casillas y campo de visión de 37,5°.</p></div></details>
+          <details class="more"><summary>Ver los 13 tableros</summary>
+            <ul class="reg-list" style="columns:2;column-gap:28px;margin-top:8px">
+              <li><b>Almacén industrial</b> — el tablero de siempre: estanterías, barriles y torreta central.</li>
+              <li><b>Patio de contenedores</b> — contenedores cruzados en pasillos.</li>
+              <li><b>Skirmish_03 · Londres</b> — calles londinenses.</li>
+              <li><b>Skirmish_04 · Londres</b> — el puente sobre el río.</li>
+              <li><b>Skirmish_05 · El depósito</b> — pilares de estación y contenedores.</li>
+              <li><b>Skirmish_06 · Los andenes</b> — bandas de contenedores.</li>
+              <li><b>Skirmish_07 · El mercado</b> — puestos en cruz (tablero propio en código).</li>
+              <li><b>Skirmish_08 · La terminal</b> — carga abierta.</li>
+              <li><b>Skirmish_01 · La plaza</b> — plaza cerrada sobre el centro (tablero propio en código).</li>
+              <li><b>Skirmish_02 · El embarcadero</b> — canal central abierto (tablero propio en código).</li>
+              <li><b>Skirmish_09 · La rotonda</b> — anillo de contenedores.</li>
+              <li><b>Skirmish_10 · El cruce</b> — cruce de avenidas.</li>
+              <li><b>Skirmish_11 · El astillero</b> — dique seco central.</li>
+            </ul>
+          </details>
+        </div>
+      </details>
       <div class="campaign-hub" id="campaignHub" style="display:none">
         <div class="hub-head">
           <div><span class="tag amber">Modo Historia · 6 misiones</span><h2>Operación Londres</h2><p class="sub" id="campaignHubSummary"></p></div>

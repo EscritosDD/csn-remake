@@ -72,9 +72,9 @@ test('Tropas muestra tarjetas limpias y abre el inspector ampliado', async () =>
   assert.match(troops, /Sin pose, clips ni retarget\./);
   assert.match(troops, /getWeaponFiles:\(\)=>tcWeaponFiles/);
   assert.match(cardsCss, /minmax\(260px,1fr\)/);
-  assert.match(cardsCss, /gap:20px/);
-  assert.match(cardsCss, /transform 220ms cubic-bezier\(0\.22,1,0\.36,1\), box-shadow 220ms ease, border-color 220ms ease/);
-  assert.match(cardsCss, /radial-gradient\(circle at 50% 38%,#283124 0%,#161b14 72%,#10140e 100%\)/);
+  assert.match(cardsCss, /gap:14px/);
+  assert.match(cardsCss, /transform 220ms cubic-bezier\(0\.22,1,0\.36,1\),box-shadow 220ms ease,border-color 220ms ease/);
+  assert.match(cardsCss, /background:var\(--stage\)/);
 });
 
 test('las miniaturas esperan a la textura del arma y no crean otro renderer', () => {
@@ -119,7 +119,7 @@ test('el inspector ampliado reúne skins, 23 armas, sonido y desplegables', asyn
   assert.match(cardsCss, /min-height:620px/);
   assert.match(cardsCss, /blur\(8px\)/);
   assert.match(cardsCss, /grid-template-columns:62% 38%/);
-  assert.match(cardsCss, /grid-template-columns:36px minmax\(0,1fr\) 36px/);
+  assert.match(cardsCss, /grid-template-columns:44px minmax\(0,1fr\) 44px/);
 });
 
 test('onInspect(box, spec) entrega el spec al inspector y nunca el nodo DOM', () => {

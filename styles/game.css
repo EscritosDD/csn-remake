@@ -64,9 +64,7 @@ html.is-playing{overflow-y:hidden}
 
 .roster .mini-hp i{display:block;height:100%;background:var(--good)}
 
-.log{background:#0b0e08;color:#cfe0b8;border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px;font-size:13.5px;height:190px;overflow-y:auto;font-family:'JetBrains Mono',monospace}
-
-@media(prefers-color-scheme:light){.log{background:#20261a;color:#d8e6c4}}
+.log{background:var(--bg-elev);color:var(--ink);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px;font-size:13.5px;height:190px;overflow-y:auto;font-family:'JetBrains Mono',monospace}
 
 .log div{margin-bottom:4px}
 
@@ -141,7 +139,7 @@ canvas#board{border-radius:10px;box-shadow:0 0 0 2px rgba(0,0,0,.45), inset 0 0 
 
 .gl-controls{position:static;display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;flex:1 0 100%;margin-top:4px;pointer-events:auto}
 
-.gl-controls button{min-height:32px;padding:4px 9px;border-radius:8px;border:1.5px solid rgba(242,178,52,.6);background:rgba(16,20,16,.86);color:#eef2e4;font-weight:700;font-size:12px;font-family:'JetBrains Mono',monospace;box-shadow:0 2px 0 rgba(0,0,0,.4)}
+.gl-controls button{min-height:44px;padding:4px 9px;border-radius:8px;border:1.5px solid var(--line-accent);background:rgba(16,20,16,.86);color:var(--ink);font-weight:700;font-size:12px;font-family:'JetBrains Mono',monospace;box-shadow:0 2px 0 rgba(0,0,0,.4)}
 
 .gl-controls button:hover{border-color:#f2b234;color:#f2b234}
 
@@ -177,7 +175,7 @@ canvas#board{border-radius:10px;box-shadow:0 0 0 2px rgba(0,0,0,.45), inset 0 0 
 
 @media(max-width:640px){.gl-controls{justify-content:flex-start}}
 
-@media(max-width:640px){.gl-controls button{min-height:28px;padding:2px 7px;font-size:11px}}
+@media(max-width:640px){.gl-controls button{min-height:44px;padding:2px 7px;font-size:11px}}
 
 /* Escenario 3D en vivo en la primera pantalla */
 #demoWrap{width:100%;aspect-ratio:16/8;min-height:240px;border-radius:10px;overflow:hidden;background:#1d2522;box-shadow:0 0 0 2px rgba(0,0,0,.45);position:relative;margin-top:10px}
