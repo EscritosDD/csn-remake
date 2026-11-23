@@ -16,7 +16,7 @@
 - Si el humo headless falla de forma aislada con `visor: exit -1073740791`, repetir `VERIFICAR.ps1` antes de investigar.
 
 ## Reglas de modificación
-- Refactor puro: no cambiar reglas de combate, balance, visuales, controles ni textos.
+- Conservar intactas las reglas tácticas base y compatibilidad de tests; separar estrictamente Modo Historia (IPA) y Modo Competitivo (`.glb`).
 - No añadir `"type":"module"` a `package.json` raíz; `src/package.json` ya declara módulos ES.
 - `assets/three.min.js` se carga como script clásico, no como módulo.
 - Modo Historia usa el IPA en `assets/soldier/`; Modo Competitivo usa `.glb` en `assets/competitive/`. No mezclar fuentes.
@@ -26,6 +26,7 @@
   - `bench/harness.js`
 - `bench/rules.test.js` exige el marcador literal `/* ================= INIT ================= */` en `src/main.js`; conservarlo antes del IIFE de INIT.
 - `src/main.js` debe seguir importando/refreshando el bridge en dos fases: `installEarlyBridge` antes del marcador INIT y `installFullBridge` después.
+- La vista de campaña vive en `#campaignHub` y el despliegue se decide en `showMissionBriefing()`; enlazar los botones del modal después de `showModal()`, sin `onclick` inline.
 
 ## Arquitectura actual
 - `styles/`: `theme.css`, `layout.css`, `game.css`, `viewer.css`, `cards.css`.
@@ -36,7 +37,7 @@
 - `src/game/`: reglas, IA, input, turnos, misiones, personajes, demo, teclado y quick actions.
 - `src/render2d/`: tablero, tiles, sprites, FX y fachada `index.js`.
 - `src/render3d/`: escena, assets, clips, retarget, soldados, armas, FX, cámara, runtime, carga GLTF, actor GLB, caché de assets y fachada `index.js`.
-- `src/ui/`: shell, unit card, arsenal, habilidades, cuartel, laboratorio GLB, wiring y fachada `index.js`.
+- `src/ui/`: shell, campaña, previsualización de escuadra, unit card, arsenal, habilidades, cuartel, laboratorio GLB, wiring y fachada `index.js`.
 - `src/bridge.js`: `installEarlyBridge`/`installFullBridge`; exporta las variables de `main.js` a `window` para capturas, visor y tests.
 - `src/viewer/`: `main.js` (visor/galería), `card-stage.js` (único renderer), `inspector.js` y `troop-cards.js`.
 - `assets/competitive/`: `manifest.json` y contenedores `chars/`, `weapons/`, `anims/` para el Modo Competitivo.
@@ -48,7 +49,7 @@
 
 ## Tamaño y estilo
 - Objetivo: cada módulo en `src/` por debajo de 450 líneas.
-- Estado actual: `src/main.js` 302 líneas; `src/viewer/main.js` 449 líneas; `src/viewer/card-stage.js` 449 líneas; módulo más grande `src/ui/ui-shell.js` 377 líneas.
+- Estado actual: `src/main.js` 338 líneas; `src/viewer/main.js` 449 líneas; `src/viewer/card-stage.js` 449 líneas; módulo más grande `src/ui/ui-shell.js` 448 líneas; 75 módulos en `src/`.
 - Preferir extraer bloques completos a módulos con `ctx` antes que duplicar estado.
 - Si se compactan líneas, validar siempre con `npm run lint` y la suite headless.
 - No añadir comentarios nuevos salvo marcadores funcionales exigidos por tests.

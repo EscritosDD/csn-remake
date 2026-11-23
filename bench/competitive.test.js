@@ -39,6 +39,21 @@ function bufferFromGLB(buffer){
   return copy.buffer;
 }
 
+function srcFiles(dir){
+  return fs.readdirSync(dir,{withFileTypes:true}).flatMap(entry=>{
+    const full=path.join(dir,entry.name);
+    return entry.isDirectory()?srcFiles(full):(entry.name.endsWith('.js')?[full]:[]);
+  });
+}
+
+test('ningún módulo de src deja un if/for/while con cuerpo vacío',()=>{
+  const phantom=/\b(?:if|for|while)\s*\([^)]*\)\s*;[ \t]*(?:\r?\n|$)/;
+  for(const file of srcFiles(path.join(root,'src'))){
+    const source=fs.readFileSync(file,'utf8');
+    assert.equal(phantom.test(source),false,file+' contiene un cuerpo vacío fantasma');
+  }
+});
+
 test('parseGLB lee mallas, skin, material, animación y estadísticas del fixture',()=>{
   const ctx=loadCompetitive();
   const loaded=ctx.parseGLB(bufferFromGLB(makeTestGLB()),{skipTextures:true});

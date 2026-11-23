@@ -196,6 +196,8 @@ try {
     const screens = {
       nation: "localStorage.removeItem('radsoldiers_nation');location.reload();",
       menu: "showScreen('scr-play')",
+      campanhub: "showScreen('scr-play');showCampaignView()",
+      brief: "showScreen('scr-play');showMissionBriefing(0)",
       setup: "openSetup('eliminacion')",
       barracks: "document.getElementById('mnuBarracks').click()",
       viewer: "document.querySelector('#mainTabs [data-tab=\"viewer\"]').click()",

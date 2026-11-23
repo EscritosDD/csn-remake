@@ -126,14 +126,11 @@
           <button class="btn primary" data-start="dominacion">Configurar partida</button>
         </div>
         <div class="mode-card" data-modecard="campana" style="grid-column:span 2">
-          <span class="tag amber">Nuevo · 6 misiones encadenadas</span>
-          <h3>Campaña · Operación Londres</h3>
-          <details class="info"><summary>ⓘ Más información</summary><div class="info-body"><p id="campaignDesc">Seis misiones seguidas sobre los tableros del juego, cada una con un objetivo distinto: eliminación, baliza, dominación, defensa del puente y asalto final 5 contra 5 contra la IA en Élite. Tu escuadra <b>arrastra la veterania</b>: cada soldado que sobrevive a una misión empieza la siguiente con <b>+25 PV y +1 ⚡</b> por misión superada, y los caídos vuelven, pero sin veterania. El progreso se guarda en este dispositivo.</p></div></details>
+          <span class="tag amber">Modo Historia · IPA</span>
+          <h3>Operación Londres</h3>
+          <p class="sub" style="margin:0">Seis misiones, radio de Dave, medallas y veterania guardada en este dispositivo.</p>
           <div id="campaignProgress" class="statline" style="margin:4px 0"></div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button class="btn primary" id="campaignBtn">Ver la campaña y jugar la siguiente misión</button>
-            <button class="btn ghost" id="campaignResetBtn">Reiniciar campaña</button>
-          </div>
+          <button class="btn primary" id="campaignBtn" style="align-self:flex-start">Abrir campaña ▶</button>
         </div>
       </div>
       <div class="grid3" style="margin-top:14px">
@@ -145,14 +142,17 @@
           <button class="btn primary" data-start="escolta" style="align-self:flex-start">Configurar partida</button>
         </div>
       </div>
-      <div class="panel" id="campaignPanel" style="margin-top:14px;display:none">
-        <h2>Operación Londres · Las 6 misiones</h2>
-        <div class="tutorial-entry">
-          <div><span class="tag amber">Paso previo · 6 pasos</span><b>Instrucción de Hipster Dave</b><p class="sub">Selecciona, muévete a cobertura, dispara, lanza una granada, cierra el turno y remata. Se guarda en este dispositivo.</p></div>
-          <button class="btn primary" id="tutorialBtn">Empezar/repetir instrucción ▶</button>
+      <div class="campaign-hub" id="campaignHub" style="display:none">
+        <div class="hub-head">
+          <div><span class="tag amber">Modo Historia · 6 misiones</span><h2>Operación Londres</h2><p class="sub" id="campaignHubSummary"></p></div>
+          <button class="btn ghost" id="campaignHubBack" type="button">← Volver a modos</button>
+        </div>
+        <div class="hub-actions">
+          <button class="btn primary big" id="campaignContinue" type="button">▶ Continuar campaña</button>
+          <button class="btn" id="campaignTutorial" type="button">🎓 Instrucción de Dave</button>
+          <button class="btn ghost" id="campaignResetBtn" type="button">↺ Reiniciar progreso</button>
         </div>
         <div class="radio-strip"><div id="campaignRadio" style="flex:1"></div><button class="btn small" id="campaignRadioNext" type="button">📻 Siguiente línea</button></div>
-        <details class="info"><summary>ⓘ ¿Cómo funciona la campaña?</summary><div class="info-body"><p class="sub">Juega las misiones en orden. Puedes repetir la configuración de escuadra antes de cada una, pero el mapa, el objetivo y la dificultad de la IA los fija la misión. Si pierdes, repites esa misión sin perder la veterania ya ganada. Cada capítulo tiene un briefing con la radio de Dave y el Central.</p></div></details>
         <div class="campaign-list" id="campaignList"></div>
       </div>
 
@@ -202,6 +202,7 @@
     <div id="setupArea" style="display:none;margin-top:18px">
       <div class="panel">
         <div class="setupHead"><img id="setupArt" src="assets/ui/modo_eliminacion.png" alt=""/><div><h2 id="setupTitle">Configurar partida</h2><p class="sub" id="setupSub"></p></div></div>
+        <div class="setup-map-preview" id="setupMapPreview"></div>
         <div class="guide-note"><b>Paso 3 de 4.</b> Revisa mapa, rival y escuadra. Cuando estés listo, pulsa «Desplegar y jugar».</div>
         <label class="f">Mapa</label>
         <div class="seg mapGrid" id="mapSeg">

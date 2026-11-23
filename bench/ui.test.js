@@ -102,3 +102,34 @@ test('Armería y Tropas tienen los contenedores de la nueva navegación', () => 
   for (const id of ['viewerKinds','viewerCharacterControls','viewerCanvas','viewerStatus','viewerList','viewerWeaponSelect','viewerFireBtn']) assert.match(indexHtml,new RegExp('id="'+id+'"'),id);
   for (const selector of ['\\.troop-filters','\\.troop-grid','\\.deployable-grid','\\.viewer-legacy\\[hidden\\]\\{display:none!important\\}']) assert.match(css,new RegExp(selector));
 });
+
+test('la campaña tiene vista propia y el briefing no usa handlers inline', () => {
+  for (const id of ['campaignHub','campaignHubSummary','campaignHubBack','campaignContinue','campaignTutorial','campaignRadio','campaignList']) {
+    assert.match(indexHtml, new RegExp('id="' + id + '"'), id);
+  }
+  assert.equal((indexHtml.match(/id="campaignPanel"/g)||[]).length,0);
+  const campaignUiSource=fs.readFileSync(path.join(root,'src','ui','campaign-ui.js'),'utf8');
+  assert.doesNotMatch(campaignUiSource,/onclick="/);
+  assert.match(html,/function showMissionBriefing\(index\)\{[\s\S]*?id="briefDeploy"[\s\S]*?getElementById\('briefDeploy'\)/);
+  assert.match(html,/deployMission\(idx\)/);
+  assert.match(html,/function deployCampaignMission\(idx\)\{openSetup\('campana',idx\);launchConfigured\(\);\}/);
+  assert.match(html,/b\.onclick=\(\)=>\{if\(state!=='locked'\)showMissionBriefing\(i\);\}/);
+  assert.match(html,/campaignBtn'\);if\(cb\)cb\.onclick=openView/);
+  assert.match(html,/mnuChallenges'\);if\(ch\)ch\.onclick=openView/);
+  assert.match(capture,/campanhub: "showScreen\('scr-play'\);showCampaignView\(\)"/);
+  assert.match(capture,/brief: "showScreen\('scr-play'\);showMissionBriefing\(0\)"/);
+});
+
+test('Configurar partida muestra mapa y tarjetas visuales sin otro renderer', async () => {
+  const { mapPreviewURL, squadCardMarkup } = await import('../src/ui/setup-preview.js');
+  const { MAP_DEFS, SKIRMISH_GEO } = await import('../src/data/maps.js');
+  assert.match(indexHtml,/id="setupMapPreview"/);
+  assert.equal(mapPreviewURL('skirmish04',MAP_DEFS,SKIRMISH_GEO),SKIRMISH_GEO.skirmish04.top);
+  assert.equal(mapPreviewURL('inexistente',MAP_DEFS,SKIRMISH_GEO),'assets/ui/modo_eliminacion.png');
+  const card=squadCardMarkup({team:'A',i:0,role:'Comando',weapon:'M4A1',ROLES:{Comando:{weapons:['M4A1']}},BODIES:{},WEAPONS:{M4A1:{cost:3,dmg:28,rng:6}},ROLE_NAMES:['Comando'],portraitURL:()=> 'assets/ui/portrait.png',weaponURL:()=> 'assets/weapons/covers/m4a1.png'});
+  for (const token of ['class="squad-card"','class="sq-ico"','class="sq-weapon-cover"','sq-bar-hp','data-kind="role"','data-kind="weapon"','data-kind="char"','⚡ 3 · 💥 28 · 🎯 6']) assert.match(card,new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')),token);
+  assert.match(html,/updateSquadCard\(row,\{/);
+  assert.match(css,/\.setup-map-preview/);
+  assert.match(css,/\.squad-card/);
+  assert.match(css,/\.sq-weapon-cover/);
+});

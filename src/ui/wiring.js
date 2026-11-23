@@ -2,11 +2,10 @@ import { audioCtx, lsSet } from '../core-and-audio.js';
 import { REAL } from '../render3d/index.js';
 import { undoLastMove } from '../game/index.js';
 import { CHAR_PREFS, charsForRole, loadChars, saveChars, setCHAR_PREFS } from '../game/chars.js';
-import { armTab, buildSquads, coinsGet, coinsSet, openBarracks, renderAbilityCatalog, renderCampaignPanel, rolePortraitURL, saveCampaign, showScreen, syncPlayingViewport, toast, updateUI } from './index.js';
+import { armTab, buildSquads, coinsGet, coinsSet, openBarracks, renderAbilityCatalog, rolePortraitURL, showScreen, syncPlayingViewport, toast, updateUI } from './index.js';
 
 export function wireUI(ctx){
 const {TUT_TEXTS,tutShow,tutHide}=ctx;
-(function(){const cb=document.getElementById('campaignBtn');if(cb)cb.onclick=()=>{const p=document.getElementById('campaignPanel');if(p){p.style.display='block';renderCampaignPanel();p.scrollIntoView({behavior:'smooth',block:'start'});}};const rb=document.getElementById('campaignResetBtn');if(rb)rb.onclick=()=>{saveCampaign({next:0,vet:[],done:false});renderCampaignPanel();toast('Campaña reiniciada: vuelves a la Misión 1, sin veterania.');};})();
 document.addEventListener('pointerdown',()=>{audioCtx();});
 document.getElementById('undoBtn')?.addEventListener('click',undoLastMove);
 document.getElementById('quickStartBtn').onclick=()=>window.quickStart('almacen');
@@ -32,12 +31,6 @@ document.addEventListener('mouseover',e=>{
 (function wireOrigMenu(){
   const q=document.getElementById('mnuQuick');if(q)q.onclick=()=>window.quickStart('almacen');
   const o=document.getElementById('mnuOnline');if(o)o.onclick=()=>toast('Sin servidor de partidas: el online del original no está disponible. Juega contra la IA o a dos jugadores en local.');
-  /* Challenges abre la seleccion de capitulos; desde ahi se elige mision. */
-  const c=document.getElementById('mnuChallenges');if(c)c.onclick=()=>{
-    const p=document.getElementById('campaignPanel');
-    if(p){p.style.display='block';renderCampaignPanel();p.scrollIntoView({behavior:'smooth',block:'center'});}
-    else{const b=document.querySelector('[data-start="campana"]');if(b)b.click();}
-  };
   const e=document.getElementById('mnuExpansions');if(e)e.onclick=()=>toast('Expansiones: aún no hay contenido descargable. El arte propio y las skins llegan por fases.');
   const bk=document.getElementById('mnuBarracks');if(bk)bk.onclick=openBarracks;
   document.addEventListener('change',(e)=>{const t=e.target;if(t&&t.dataset&&t.dataset.charrole){const role=t.dataset.charrole;setCHAR_PREFS(loadChars());CHAR_PREFS[role]=t.value;saveChars(CHAR_PREFS);const opts=charsForRole(role),cur=opts.find(o=>o.name===t.value)||opts[0],card=t.closest('.barrack-card'),img=card&&card.querySelector('.barrack-portrait');if(img)img.src=rolePortraitURL(role,cur)||'assets/ui/retrato_capitan.png';if(ctx.G)updateUI();else if(typeof buildSquads==='function')buildSquads();toast('Personaje de '+role+': '+t.value+'.');}});

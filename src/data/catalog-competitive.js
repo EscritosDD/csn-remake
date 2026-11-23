@@ -15,7 +15,7 @@ export function validateManifest(manifest){
       if(!entry||typeof entry!=='object'||Array.isArray(entry)){errors.push(where+' debe ser un objeto.');return;}
       if(typeof entry.id!=='string'||!entry.id.trim())errors.push(where+'.id es obligatorio.');
       if(typeof entry.file!=='string'||!/\.glb$/i.test(entry.file))errors.push(where+'.file debe terminar en .glb.');
-      if(!entry.file||!/^assets\/competitive\/(chars|weapons)\//.test(entry.file))errors.push(where+'.file debe estar bajo assets/competitive/.');
+      if(!entry.file||!/^assets\/competitive\/(chars|weapons)\//.test(entry.file)){errors.push(where+'.file debe estar bajo assets/competitive/.');}
       const key=kind+':'+(entry.id||index);
       if(seen.has(key))errors.push(where+'.id duplicado.');
       seen.add(key);

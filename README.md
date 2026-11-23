@@ -23,12 +23,21 @@ No vale abrirlo como archivo (`file://`): el juego carga assets por HTTP.
 Navegación principal: **Jugar · Armería · Tropas · Cómo se juega**. El Cuartel
 sigue accesible desde el menú de inicio.
 
+En **Jugar**, «Operación Londres» abre una vista propia de campaña: resumen de
+progreso, radio, las 6 misiones por capítulos y la instrucción de Dave. Cada
+misión muestra un briefing con roster fijo y despliega directamente; la pantalla
+de «Configurar partida» añade una vista previa del mapa y tarjetas visuales de
+escuadra con retrato, arma y estadísticas, sin crear otro renderer 3D.
+
 ## Verificar que todo está sano
 
 ```
 npm run lint && npm test
 powershell -ExecutionPolicy Bypass -File bench/VERIFICAR.ps1
 ```
+
+La suite `npm test` cubre 121 pruebas; `src/` tiene 75 módulos ESM y todos
+quedan por debajo de 450 líneas.
 
 `VERIFICAR.ps1` hace 13 comprobaciones: sintaxis, 19 tableros, reglas, datos,
 winding, suite npm, rejillas IPA, capturas `debugGrid`, clips, humo 3D,
@@ -64,8 +73,9 @@ Depuración en el navegador: `?debugGrid=1` muestra rejillas 2D/3D y
   `docs/Equilibrio_medido.md` (muestras de n≥30).
 - **Capturas**: `node _capture_all.mjs <mapa|campana:N> <prefijo> [ms]`.
   Captura en 3D y solo baja a 2D si la 3D no arranca. También están los modos
-  `ui:hipster`, `ui:soap`, `ui:sneaky`, `ui:meshy09`, `ui:mp5k`, `ui:minigun`
-  y `ui:setup` para revisar armas, diseños propios y selector de personaje.
+  `ui:hipster`, `ui:soap`, `ui:sneaky`, `ui:meshy09`, `ui:mp5k`, `ui:minigun`,
+  `ui:setup`, `ui:campanhub` y `ui:brief` para revisar armas, diseños propios,
+  selector de personaje, vista de campaña y briefing.
 
 ## Documentos clave
 

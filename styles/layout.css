@@ -620,3 +620,56 @@ nav.tabs button{padding:9px 16px}
 @media(max-width:640px){.step-chip{padding:4px 9px;gap:5px;font-size:11px}}
 
 @media(max-width:640px){.step-dots i{width:10px}}
+
+.campaign-hub{max-width:1180px;margin:10px auto 24px}
+.hub-head{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-bottom:14px}
+.hub-head h2{font-size:34px;line-height:1;margin:6px 0 4px;letter-spacing:-.02em}
+.hub-head .sub{margin:0;max-width:72ch}
+.hub-actions{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}
+.campaign-hub .radio-strip{max-width:900px}
+.campaign-hub .chapter-grid{gap:14px}
+.campaign-hub .campaign-mission{text-align:left}
+
+.setup-map-preview{display:flex;align-items:center;gap:14px;border:1px solid var(--line);border-left:4px solid var(--amber);border-radius:10px;background:var(--panel2);padding:8px 12px;margin:12px 0}
+.setup-map-preview img{width:132px;height:78px;object-fit:cover;border-radius:7px;border:1px solid var(--line);background:#171a15;flex:none}
+.setup-map-preview b{display:block;font-family:'Barlow Condensed';font-size:20px;text-transform:uppercase;color:var(--ink)}
+.setup-map-preview span{display:block;color:var(--muted);font-size:13px;line-height:1.4;max-width:90ch;margin-top:3px}
+
+.squad-row{display:block;padding:0;border:0;background:transparent}
+.squad-row+.squad-row{margin-top:10px}
+.squad-card{border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,color-mix(in srgb,var(--panel2) 94%,#fff),var(--panel2));padding:11px 12px;box-shadow:0 2px 10px rgba(0,0,0,.12)}
+.sq-card-head{display:flex;align-items:center;gap:11px;min-width:0}
+.sq-card-head .slot-num{width:30px;height:30px;border-radius:50%;border:2px solid var(--amber);color:var(--amber);display:grid;place-items:center;font:700 15px 'JetBrains Mono',monospace;flex:none}
+.sq-ico{width:52px;height:52px;object-fit:cover;object-position:top;border-radius:9px;border:1px solid var(--line);background:#171a15;flex:none}
+.sq-id{min-width:0;flex:1}
+.sq-role{display:block;font:700 18px 'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em}
+.sq-char{display:block;color:var(--amber);font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sq-body{display:block;color:var(--muted);font-size:12px}
+.sq-weapon{display:flex;align-items:center;gap:10px;margin:9px 0 8px;padding:7px 9px;border-radius:9px;background:rgba(0,0,0,.16)}
+.sq-weapon-cover{width:62px;height:38px;object-fit:contain;filter:drop-shadow(0 2px 5px rgba(0,0,0,.5));flex:none}
+.sq-weapon-name{display:block;font:700 16px 'Barlow Condensed',sans-serif;letter-spacing:.03em}
+.sq-weapon-stats{display:block;color:var(--muted);font-size:12.5px}
+.sq-bars{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.sq-bars>div{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)}
+.sq-bar{display:block;height:6px;border-radius:99px;background:var(--panel);border:1px solid var(--line);overflow:hidden;flex:1}
+.sq-bar b{display:block;height:100%;background:var(--good)}
+.sq-bar-en b{background:#68a6d9}
+.sq-bar-mv b{background:var(--amber)}
+.sq-bars em{font-style:normal;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink);min-width:32px;text-align:right}
+.sq-picks{display:grid;grid-template-columns:1fr 1.25fr 1.5fr;gap:8px;margin-top:9px}
+.sq-picks label{display:flex;flex-direction:column;gap:3px;color:var(--muted);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.sq-picks select{width:100%;min-width:0;padding:6px 8px;font-size:12.5px;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:7px}
+.sq-picks select:disabled{opacity:.72;cursor:default}
+.brief-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+
+@media(max-width:640px){
+  .hub-head h2{font-size:27px}
+  .hub-actions .btn{width:100%}
+  .setup-map-preview{align-items:flex-start}
+  .setup-map-preview img{width:92px;height:60px}
+  .sq-card{padding:9px}
+  .sq-ico{width:44px;height:44px}
+  .sq-bars{grid-template-columns:1fr;gap:4px}
+  .sq-picks{grid-template-columns:1fr}
+  .sq-weapon-cover{width:48px}
+}

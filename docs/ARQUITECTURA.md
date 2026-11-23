@@ -17,7 +17,7 @@ declara los módulos ES. `assets/three.min.js` se carga como script clásico.
 | `src/game/` | Reglas, IA, input, turnos, misiones, personajes, demo, teclado y quick actions. |
 | `src/render2d/` | Tablero, tiles, sprites, FX y fachada `index.js`. |
 | `src/render3d/` | Escena, assets, clips, retarget, soldados, armas, FX, cámara, runtime, carga GLTF, actor GLB, caché de assets y fachada `index.js`. |
-| `src/ui/` | Shell, unit card, arsenal, habilidades, cuartel, laboratorio GLB, wiring y fachada `index.js`. |
+| `src/ui/` | Shell, campaña, previsualización de escuadra, unit card, arsenal, habilidades, cuartel, laboratorio GLB, wiring y fachada `index.js`. |
 | `src/bridge.js` | `installEarlyBridge` e `installFullBridge`; expone estado de `main.js` a capturas, visor y tests. |
 | `src/viewer/` | `main.js` (visor/galería), `card-stage.js` (único renderer), `inspector.js` y `troop-cards.js`. |
 | `assets/competitive/` | `manifest.json` y contenedores `chars/`, `weapons/`, `anims/` para modelos `.glb`. |
@@ -39,15 +39,21 @@ repite `VERIFICAR.ps1` antes de investigar.
 
 ## Flujo de una partida
 
-1. `openSetup(mode)` prepara `setup` y pinta la configuración.
-2. Las filas de escuadra construyen huecos con rol + arma.
-3. `startGame(squadA, squadB)` crea `G` (unidades, mapa, zonas, estadísticas) y
+1. Desde `Jugar`, `campaignBtn` y `mnuChallenges` abren `#campaignHub`
+   (`showCampaignView`), no más cajas encadenadas en el menú.
+2. La misión seleccionada pasa por `showMissionBriefing(index)`: radio, roster
+   fijo y un único botón de despliegue enlazado tras `showModal()`.
+3. `openSetup(mode)` prepara `setup`; para Modo Historia fija mapa, formato e IA
+   y muestra `#setupMapPreview` con la miniatura del tablero.
+4. `squadRows()` genera tarjetas con retrato, cobertura de arma, estadísticas y
+   selects funcionales; `readSquad(team)` sigue leyendo esos selects.
+5. `startGame(squadA, squadB)` crea `G` (unidades, mapa, zonas, estadísticas) y
    arranca ambiente y música del original.
-4. `updateUI` pinta HUD y tarjeta; en 3D, `build3DWorld` y `__render3D`
+6. `updateUI` pinta HUD y tarjeta; en 3D, `build3DWorld` y `__render3D`
    construyen y animan la escena. La vista 2D es alternativa.
-5. `tryShoot` / `damage` resuelven combate con `hitChance`, `coverLevel`,
+7. `tryShoot` / `damage` resuelven combate con `hitChance`, `coverLevel`,
    `hasLOS` e `isFlanked`; `endTurn` dispara torretas y pasa a la IA.
-6. `endGame` decide ganador, premios y pantalla de resultados.
+8. `endGame` decide ganador, premios y pantalla de resultados.
 
 `src/main.js` conserva el marcador `/* ================= INIT ================= */`
 antes del IIFE de INIT. El bridge se instala en dos fases:
@@ -82,8 +88,9 @@ antes del IIFE de INIT. El bridge se instala en dos fases:
    `__build3D`, `__render3D`, `__renderDemo`, `quickStart`, `quickSmoke`,
    `quickFlash`.
 7. Comprobar unicidad de anclas antes de reemplazar; hay fragmentos repetidos.
-8. Cada módulo en `src/` debe mantenerse por debajo de 450 líneas.
-9. Tras cualquier cambio: `npm run lint`, `npm test` y `VERIFICAR.ps1`.
+8. Cada módulo en `src/` debe mantenerse por debajo de 450 líneas; ahora hay 75 módulos y `src/ui/ui-shell.js` está en 448.
+9. La campaña usa `#campaignHub` y `showMissionBriefing()`; los botones del modal se enlazan después de `showModal()`, sin `onclick` inline.
+10. Tras cualquier cambio: `npm run lint`, `npm test` y `VERIFICAR.ps1`.
 
 ## Documentación
 

@@ -3,6 +3,19 @@
 Índice único de documentación. Fuentes de verdad: `AGENTS.md`, `README.md`,
 `docs/ARQUITECTURA.md` y este archivo. El resto es referencia o histórico.
 
+## Estado vigente (2026-11-23)
+
+- 75 módulos ESM en `src/`, 0 `<script>` inline, 2 tags module en `index.html`.
+- `npm test`: 121 pruebas en verde; `VERIFICAR.ps1`: **TODO OK 13/13**.
+- Módulos más largos: `src/viewer/main.js` y `src/viewer/card-stage.js` (449
+  líneas), `src/ui/ui-shell.js` (448), `src/data/maps.js` (360).
+- Modo Historia: `campaignBtn`/`mnuChallenges` → `#campaignHub` →
+  `showMissionBriefing()` → despliegue directo; tutorial de Dave con 6 pasos y
+  radio/medallas/veterania persistidos.
+- Configuración: `#setupMapPreview` y tarjetas de `src/ui/setup-preview.js`;
+  `readSquad(team)` sigue leyendo los selects funcionales de cada tarjeta.
+- Modo Competitivo: catálogo `.glb` en `assets/competitive/`, separado del IPA.
+
 ## Para seguir desarrollando
 
 | Documento | Para qué |
