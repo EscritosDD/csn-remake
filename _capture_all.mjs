@@ -387,8 +387,8 @@ try {
     const catalog = result.catalogAudit && typeof result.catalogAudit === 'object' ? result.catalogAudit : {};
     const arsenalAudit = result.arsenalAudit && typeof result.arsenalAudit === 'object' ? result.arsenalAudit : {};
     const inspectorAudit = result.inspectorAudit && typeof result.inspectorAudit === 'object' ? result.inspectorAudit : {};
-    const catalogOk = catalog.troops === 22 && catalog.orig === 17 && catalog.csn === 5 && catalog.weapons === 23 && catalog.opens === 22 && catalog.cardEngine === true;
-    const arsenalOk = arsenalAudit.original === 23 && arsenalAudit.csn === 37 && arsenalAudit.deployables === 10;
+    const catalogOk = catalog.troops === 24 && catalog.orig === 19 && catalog.csn === 5 && catalog.weapons === 23 && catalog.opens === 24 && catalog.cardEngine === true;
+    const arsenalOk = arsenalAudit.original === 23 && arsenalAudit.csn === 39 && arsenalAudit.deployables === 10;
     const inspectorOk = inspectorAudit.ok === true && inspectorAudit.open === true && inspectorAudit.stage === true && inspectorAudit.paused === true && inspectorAudit.weaponOptions >= 24 && /Elige/.test(inspectorAudit.startFireLabel || '') && inspectorAudit.startFireDisabled === true && /Probar/.test(inspectorAudit.fireLabel || '') && inspectorAudit.fireDisabled === false && inspectorAudit.dragBound === true && inspectorAudit.autoButton === true && inspectorAudit.autoPressedAfter === 'true' && inspectorAudit.autoState === true && inspectorAudit.closed === true;
     viewerOk = viewerOk && catalogOk && arsenalOk && inspectorOk;
     const probes = Array.isArray(result.viewerProbe) ? result.viewerProbe : [];

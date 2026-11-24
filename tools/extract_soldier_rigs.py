@@ -8,6 +8,7 @@ from UnityPy.helpers.MeshHelper import MeshHandler
 RAW = r'D:\Juegos\CSN-repo\_original\ipa\Payload\radtactics.app\Data\Raw'
 OBJ_BODIES = r'D:\Juegos\CSN-repo\assets\soldier\bodies'
 BODIES = os.environ.get('CSN_RIG_OUT', OBJ_BODIES)
+ONLY = set(filter(None, os.environ.get('CSN_RIG_ONLY', '').split(',')))
 ORDER = ['Bip001','Bip001 Pelvis','Bip001 Spine','Bip001 Spine1','Bip001 Neck','Bip001 Head',
          'Bip001 L Clavicle','Bip001 L UpperArm','Bip001 L Forearm','Bip001 L Hand',
          'Bip001 R Clavicle','Bip001 R UpperArm','Bip001 R Forearm','Bip001 R Hand',
@@ -24,8 +25,15 @@ SPEC = [
  ('Engineer_Heavy','CarlitoGrossoOutfits.assetbundle',155),
  ('Engineer_RiotCop','RiotEngineerOutfits.assetbundle',258),
  ('CommanderM','CommanderMaleOutfits.assetbundle',263),
- ('CommanderF','CommanderFemaleOutfits.assetbundle',263)
+ ('CommanderF','CommanderFemaleOutfits.assetbundle',263),
+ ('Agent','SneakyPeteOutfits.assetbundle',206),
+ ('Agent_Heavy','RiotAgentOutfits.assetbundle',257),
+ ('Engineer','BigTimeTaschmannOutfits.assetbundle',206),
+ ('Medic','SisterFlorenceOutfits.assetbundle',206),
+ ('Medic_therapist_959v','RiotMedicOutfits.assetbundle',257),
+ ('Soldier_Light','HipsterDaveOutfits.assetbundle',190)
 ]
+GUN_ALIAS = {'gunBone_L':'Bip001 L Hand','gunBone_R':'Bip001 R Hand'}
 
 def inv(a):
     m = [row[:] for row in a]
@@ -51,6 +59,16 @@ def mm(a, b):
 
 def mat_of(m):
     return [[float(getattr(m, 'e%d%d' % (r, c))) for c in range(4)] for r in range(4)]
+
+def local_trs(tr):
+    q, p, s = tr.m_LocalRotation, tr.m_LocalPosition, tr.m_LocalScale
+    x, y, z, w = q.x, q.y, q.z, q.w
+    cols = [[1.0 - 2.0 * (y * y + z * z), 2.0 * (x * y + z * w), 2.0 * (x * z - y * w)],
+            [2.0 * (x * y - z * w), 1.0 - 2.0 * (x * x + z * z), 2.0 * (y * z + x * w)],
+            [2.0 * (x * z + y * w), 2.0 * (y * z - x * w), 1.0 - 2.0 * (x * x + y * y)]]
+    scale = (s.x, s.y, s.z)
+    pos = (p.x, p.y, p.z)
+    return [[cols[c][r] * scale[c] for c in range(3)] + [pos[r]] for r in range(3)] + [[0.0, 0.0, 0.0, 1.0]]
 
 def unit_quat(q):
     length = math.sqrt(sum(value * value for value in q))
@@ -80,14 +98,26 @@ def rotation_of(m):
                 out[r][c] /= length
     return out
 
-def obj_z_scale(path):
+def bind_world(m, zscale):
+    bind = inv(mat_of(m))
+    scales = [math.sqrt(sum(bind[r][c] * bind[r][c] for r in range(3))) for c in range(3)]
+    scale = sum(scales) / 3.0 or 1.0
+    out = rotation_of(bind)
+    for r in range(3):
+        out[r][3] = out[r][3] / scale * zscale
+    return out
+
+def mesh_p95(path):
     zs = []
     with open(path, encoding='latin1') as handle:
         for line in handle:
             if line.startswith('v '):
                 zs.append(float(line.split()[3]))
     zs.sort()
-    return 1.14 / (zs[int(len(zs) * 0.95)] or 1.0)
+    return zs[int(len(zs) * 0.95)] or 1.0
+
+def obj_z_scale(path):
+    return 1.14 / mesh_p95(path)
 
 def normalize_weights(weights):
     out = [max(0.0, float(w)) for w in weights]
@@ -98,6 +128,9 @@ def normalize_weights(weights):
     return [w / total for w in out]
 
 for body, bundle, smr_pid in SPEC:
+    if ONLY and body not in ONLY:
+        continue
+    zscale = obj_z_scale(os.path.join(OBJ_BODIES, body + '.obj'))
     env = UnityPy.load(os.path.join(RAW, bundle))
     objects = {o.path_id: o for o in env.objects}
     names, transforms = {}, {}
@@ -120,19 +153,37 @@ for body, bundle, smr_pid in SPEC:
     for ptr in smr.m_Bones:
         tr = transforms.get(ptr.m_PathID)
         bone_names.append(names.get(tr.m_GameObject.m_PathID) if tr and tr.m_GameObject else None)
-    if any(name not in ORDER for name in bone_names):
+    if any(name not in ORDER and name not in GUN_ALIAS for name in bone_names):
         raise RuntimeError(body + ': hueso no reconocido ' + repr(bone_names))
-    remap = [ORDER.index(name) for name in bone_names]
+    remap = [ORDER.index(GUN_ALIAS.get(name, name)) for name in bone_names]
     world = {}
     for slot, name in enumerate(bone_names):
-        matrix = rotation_of(inv(mat_of(mesh_obj.m_BindPose[slot])))
-        for r in range(3):
-            matrix[r][3] *= obj_z_scale(os.path.join(OBJ_BODIES, body + '.obj'))
-        world[name] = matrix
+        world[name] = bind_world(mesh_obj.m_BindPose[slot], zscale)
+    for side in ('L', 'R'):
+        clavicle = 'Bip001 %s Clavicle' % side
+        upper_name = 'Bip001 %s UpperArm' % side
+        if clavicle in world:
+            continue
+        slot = next(i for i, name in enumerate(bone_names) if name == upper_name)
+        upper_tr = transforms[smr.m_Bones[slot].m_PathID]
+        father = upper_tr.m_Father
+        father_tr = transforms.get(father.m_PathID) if father else None
+        if not father_tr or not father_tr.m_GameObject or names.get(father_tr.m_GameObject.m_PathID) != clavicle:
+            raise RuntimeError(body + ': no se pudo localizar ' + clavicle)
+        local = local_trs(upper_tr)
+        local[2][3] *= zscale
+        world[clavicle] = mm(world[upper_name], inv(local))
     world['Bip001'] = [[1.0 if r == c else 0.0 for c in range(4)] for r in range(4)]
     world['Bip001 Neck'] = world['Bip001 Spine1']
     if abs(world['Bip001 Pelvis'][0][3]) > 0.3:
         world['Bip001 Pelvis'][0][3] = 0.0
+    top = max(world[name][2][3] for name in ORDER)
+    p95 = mesh_p95(os.path.join(OBJ_BODIES, body + '.obj'))
+    if top > p95:
+        factor = p95 / top
+        for name in world:
+            for r in range(3):
+                world[name][r][3] *= factor
     bones = []
     inverses = []
     for i, name in enumerate(ORDER):
