@@ -481,6 +481,17 @@ body[data-state="setup"] #scr-play .hero{display:none}
 
 .barrack-info h3{margin:0 0 2px;font-size:15px}
 
+.barrack-hero{margin-top:12px;padding:18px 16px 16px;text-align:center;background:var(--stage);border:1px solid var(--line);border-radius:14px}
+.barrack-hero-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.barrack-hero-coins{font-family:'JetBrains Mono',monospace;color:var(--ink-gold);font-weight:700}
+.barrack-hero-portrait{width:min(220px,60vw);height:min(220px,60vw);border-radius:14px;background:#1d221c;object-fit:cover;border:2px solid var(--line-accent)}
+.barrack-hero-name{margin:10px 0 2px;font-family:'Barlow Condensed','Barlow',sans-serif;font-size:30px;text-transform:uppercase;letter-spacing:.04em}
+.barrack-hero-role{margin:0}
+.barrack-hero-special{margin:6px 0 0}
+.barrack-hero-btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+.barrack-hero-btn{width:44px;height:44px;border-radius:50%;border:1.5px solid var(--line);background:var(--surface-2);color:var(--ink-caqui);font-family:'Barlow Condensed','Barlow',sans-serif;font-weight:800;font-size:18px;cursor:pointer}
+.barrack-hero-btn.on{border-color:var(--ink-vino-bright);background:var(--ink-vino);color:var(--ink)}
+
 .barrack-sel{width:100%;margin-top:6px;font-size:12px}
 
 .barrack-info .tiny{font-size:11px;margin:4px 0 0;color:var(--muted)}

@@ -29,8 +29,18 @@ export function renderBarracks(){
   const catOrder=[];const byCat={};
   Object.entries(WEAPONS).forEach(([name,w])=>{if(!byCat[w.cat]){byCat[w.cat]=[];catOrder.push(w.cat);}byCat[w.cat].push(name+' ('+w.dmg+'/'+w.rng+')');});
   setCHAR_PREFS(loadChars());
-  /* Tropas: la pantalla principal del Cuartel, visual, con el retrato del
-     modelo real de cada rol y su selector de personaje. */
+  /* Héroe: un solo personaje grande y centrado (el del rol elegido),
+     como el Barracks del original. Los botones circulares cambian el rol;
+     la rejilla de abajo es el selector compacto. */
+  const heroRole=(window.__csnBarracksHero&&roles.includes(window.__csnBarracksHero))?window.__csnBarracksHero:roles[0];
+  const heroBody=BODIES[ROLES[heroRole].body];
+  const heroOpts=charsForRole(heroRole);
+  const heroCur=(CHAR_PREFS[heroRole]||(heroOpts[0]&&heroOpts[0].name)||'');
+  const hero=heroOpts.find(o=>o.name===heroCur)||heroOpts[0];
+  const heroWeapon=hero&&hero.defaultWeapon?hero.defaultWeapon:'';
+  const heroBtns=roles.map(r=>'<button type="button" class="barrack-hero-btn'+(r===heroRole?' on':'')+'" data-herorole="'+r+'" aria-label="'+r+'" title="'+r+'">'+r.slice(0,1)+'</button>').join('');
+  const heroHTML=hero?('<section class="panel barrack-hero"><div class="barrack-hero-top"><span class="tag">Cuartel</span><span class="barrack-hero-coins">🪙 '+coinsGet()+'</span></div><img class="barrack-hero-portrait" src="'+(rolePortraitURL(heroRole,hero)||'assets/ui/retrato_capitan.png')+'" alt="Retrato de '+hero.name+'"/><h2 class="barrack-hero-name">'+hero.name+'</h2><p class="sub barrack-hero-role">'+heroRole+' · '+heroBody.name+' · '+(heroWeapon||'sin arma')+'</p><p class="sub tiny barrack-hero-special">'+ROLES[heroRole].special+'</p><div class="barrack-hero-btns" role="group" aria-label="Elegir rol">'+heroBtns+'</div></section>'):'';
+  /* Tropas: selector compacto por rol (rejilla de tarjetas). */
   const troops=roles.map(r=>{
     const body=BODIES[ROLES[r].body];
     const opts=charsForRole(r);
@@ -47,12 +57,14 @@ export function renderBarracks(){
       '</div>';
   }).join('');
   el.innerHTML=
+    heroHTML+
     '<div class="panel" style="margin-top:12px"><h2>Tus tropas</h2><p class="sub" style="margin:0 0 6px">Un personaje por rol. El retrato es el modelo del juego con su uniforme.</p><div class="barrack-grid">'+troops+'</div></div>'+
     '<details class="more" style="margin-top:12px"><summary>Reparto completo · '+(OWN_CAST.length+ORIG_CAST.length)+' personajes</summary>'+cast+'</details>'+
     '<details class="more" style="margin-top:12px"><summary>Arsenal · '+Object.keys(WEAPONS).length+' armas por categoría</summary>'+
       catOrder.map(c=>'<p class="sub" style="margin:6px 0 0"><b>'+c+'</b>: '+byCat[c].join(' · ')+'</p>').join('')+
     '</details>'+
     '<details class="more" style="margin-top:12px"><summary>Desbloqueos</summary><p class="sub" style="margin:6px 0 0">Skins: <b>Estándar</b>, <b>Camuflaje</b>, <b>Clase</b> y <b>Nación</b> (ninguna tiene pasivas). Monedas: <b>🪙 '+coinsGet()+'</b> (25 por victoria contra la IA). Armas: todas disponibles al configurar la partida.</p></details>';
+  el.querySelectorAll('[data-herorole]').forEach(btn=>btn.addEventListener('click',()=>{window.__csnBarracksHero=btn.getAttribute('data-herorole');renderBarracks();}));
 }
 
 export function openBarracks(){renderBarracks();showScreen('scr-barracks');}
