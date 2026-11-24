@@ -19,7 +19,7 @@ export const CHARACTER_ABILITIES={
   {icon:'CharAbility_49_crossbow_alpha',n:'Ballesta explosiva',d:'Ballesta con daño en área.',obj:null}],
  'Soap':[
   {icon:'CharAbility_43_Support_Fire_alpha',n:'Fuego de apoyo',d:'Dispara contra el enemigo que se mueve para proteger a los compañeros.',obj:null},
-  {icon:'CharAbility_35_Remote_Charge_alpha',n:'Carga remota',d:'Carga C4 oculta por control remoto.',obj:'charge'}],
+  {icon:'CharAbility_14_Frag_Grenade_alpha',n:'Granada de fragmentación',d:'Granada con daño en área.',obj:null}],
  'Spud':[
   {icon:'CharAbility_43_Support_Fire_alpha',n:'Fuego de apoyo',d:'Dispara contra el enemigo que se mueve para proteger a los compañeros.',obj:null},
   {icon:'CharAbility_48_bazooka_alpha',n:'Lanzacohetes',d:'Cohete con daño en área de radio amplio.',obj:null}],
@@ -28,16 +28,16 @@ export const CHARACTER_ABILITIES={
   {icon:'CharAbility_09_Concussion_Grenade_alpha',n:'Granada de concusión',d:'Reduce la energía de enemigos y desplegables.',obj:null}],
  'Tree Mendez':[
   {icon:'CharAbility_43_Support_Fire_alpha',n:'Fuego de apoyo',d:'Dispara contra el enemigo que se mueve para proteger a los compañeros.',obj:null},
-  {icon:'CharAbility_31_Melee_Specialization_alpha',n:'Trunkquilizer',d:'91 de daño a todas las unidades en una línea recta de 5 casillas.',obj:null}],
+  {icon:'CharAbility_47_Vampire_alpha',n:'Aura vampírica',d:'Drena energía de los rivales cercanos.',obj:null}],
  'Mme La Hacque':[
   {icon:'CharAbility_17_Ghost_alpha',n:'Fantasma',d:'Invisible durante 3 turnos.',obj:null},
-  {icon:'CharAbility_46_UAV_alpha',n:'UAV',d:'Dron explorador por control remoto que explota.',obj:'uav'}],
+  {icon:'CharAbility_17_Ghost_alpha',n:'Fantasma',d:'Invisible durante 3 turnos.',obj:null}],
  'Sneaky Pete':[
   {icon:'CharAbility_17_Ghost_alpha',n:'Fantasma',d:'Invisible durante 3 turnos.',obj:null},
-  {icon:'CharAbility_19_Headshot_alpha',n:'Tiro a la cabeza',d:'Crítico garantizado.',obj:null}],
+  {icon:'Rank_07_Gunnery_Sergeant_alpha',n:'Sargento de artillería',d:'Mejora los disparos con armas pesadas.',obj:null}],
  'Tito Tesla':[
   {icon:'CharAbility_17_Ghost_alpha',n:'Fantasma',d:'Invisible durante 3 turnos.',obj:null},
-  {icon:'CharAbility_38_Rush_Aura_alpha',n:'Teletransporte',d:'Salto propio a 4 casillas. La Granada del original devolvía al enemigo a su zona de despliegue.',obj:null}],
+  {icon:'CharAbility_06_Teleport_Grenade_alpha',n:'Granada de teletransporte',d:'Devuelve al rival a su zona de despliegue.',obj:null}],
  'Sister Florence':[
   {icon:'CharAbility_30_Medkit_alpha',n:'Botiquín',d:'Cura a un compañero.',obj:null},
   {icon:'CharAbility_20_Healing_Aura_alpha',n:'Aura curativa',d:'Cura a varios compañeros en un área.',obj:null}],
@@ -48,22 +48,24 @@ export const CHARACTER_ABILITIES={
   {icon:'CharAbility_30_Medkit_alpha',n:'Botiquín',d:'Cura a un compañero.',obj:null},
   {icon:'CharAbility_15_Gas_Grenade_alpha',n:'Granada de gas',d:'Envenena a los enemigos.',obj:null}],
  'Big Time Taschmann':[
-  {icon:'CharAbility_16_Gatling_Turret_alpha',n:'Torreta Gatling',d:'Torreta desplegable.',obj:'gatling'},
-  {icon:'CharAbility_45_Toolkit_alpha',n:'Reparar',d:'Repara los desplegables aliados.',obj:null}],
+  {icon:'CharAbility_45_Toolkit_alpha',n:'Reparar',d:'Repara los desplegables aliados.',obj:null},
+  {icon:'CharAbility_09_Concussion_Grenade_alpha',n:'Granada de concusión',d:'Reduce la energía de enemigos y desplegables.',obj:null}],
  'Megan McNick':[
-  {icon:'CharAbility_27_Landmines_alpha',n:'Minas',d:'Minas ocultas desplegables.',obj:'mine'},
-  {icon:'CharAbility_45_Toolkit_alpha',n:'Reparar',d:'Repara los desplegables aliados.',obj:null}],
+  {icon:'CharAbility_45_Toolkit_alpha',n:'Reparar',d:'Repara los desplegables aliados.',obj:null},
+  {icon:'CharAbility_13_Detection_Aura_alpha',n:'Detección',d:'Revela rivales y desplegables cercanos.',obj:null}],
  'Carlito Grosso':[
-  {icon:'CharAbility_37_Rocket_Turret_alpha',n:'Torreta de cohetes',d:'Torreta de cohetes desplegable.',obj:'rocket'},
-  {icon:'CharAbility_45_Toolkit_alpha',n:'Reparar',d:'Repara los desplegables aliados.',obj:null}],
+  {icon:'CharAbility_45_Toolkit_alpha',n:'Reparar',d:'Repara los desplegables aliados.',obj:null},
+  {icon:'CharAbility_15_Gas_Grenade_alpha',n:'Granada de gas',d:'Envenena a los enemigos.',obj:null}],
  'Riot Agent':[
   {icon:'CharAbility_17_Ghost_alpha',n:'Fantasma',d:'Invisible durante 3 turnos.',obj:null},
-  {icon:'CharAbility_50_Molotov_alpha',n:"Flamin' Nora",d:'Granada incendiaria: daña a todos los enemigos en un radio de 3 casillas. Sin icono propio extraído; usa el de Molotov, el incendiario más cercano.',obj:null}],
+  {icon:'CharAbility_50_Molotov_alpha',n:"Flamin' Nora",d:'Granada incendiaria: daña a todos los enemigos en un radio de 3 casillas.',obj:null}],
  'Riot Engineer':[
-  {icon:'CharAbility_51_RiotShield_alpha',n:'Shield-O-Bot',d:'Robot escudo por control remoto. Sin icono propio extraído; usa el de Escudo antidisturbios, el desplegable de escudo más cercano.',obj:'shieldbot'},
-  {icon:'CharAbility_45_Toolkit_alpha',n:'Reparar',d:'Repara los desplegables aliados.',obj:null}],
- 'Commander (M)':[],
- 'Commander (F)':[]
+  {icon:'CharAbility_45_Toolkit_alpha',n:'Reparar',d:'Repara los desplegables aliados.',obj:null},
+  {icon:'CharAbility_51_RiotShield_alpha',n:'Shield-O-Bot',d:'Robot escudo por control remoto.',obj:'shieldbot'}],
+ 'Commander (M)':[
+  {icon:'CharAbility_13_Detection_Aura_alpha',n:'Detección',d:'Revela rivales y desplegables cercanos.',obj:null}],
+ 'Commander (F)':[
+  {icon:'CharAbility_13_Detection_Aura_alpha',n:'Detección',d:'Revela rivales y desplegables cercanos.',obj:null}]
 };
 
 export const ABILITY_OBJECTS={
@@ -84,10 +86,10 @@ export const CAST_TEXTURE_FILE={
   'Soap':'Soldier_SAS_d.png',
   'Spud':'Soldier_d.png',
  'Ivan Tkilya':'Soldier_heavy_GermanSpecialForces_d.png',
- 'Tree Mendez':'Soldier_Veteran_d.png',
+ 'Tree Mendez':'Soldier_Heavy_Lumberjack_d.png',
  'Mme La Hacque':'Agent_light_JewelThief_d.png',
  'Sneaky Pete':'Agent_d.png',
- 'Tito Tesla':'Engineer_Heavy_Veteran_d.png',
+ 'Tito Tesla':'Agent_light_Tesla_d.png',
  'Sister Florence':'Medic_Rescue_d.png',
  'Riot Medic':'Medic_Heavy_d.png',
  'Textbook Kate':'Medic_Therapist_d.png',
@@ -125,6 +127,7 @@ export const CHAR_ABILITY_ACTIONS={
  'CharAbility_27_Landmines_alpha':'mine',
  'CharAbility_37_Rocket_Turret_alpha':'deployRocket',
  'CharAbility_38_Rush_Aura_alpha':'teleport',
+  'CharAbility_06_Teleport_Grenade_alpha':'teleport',
  'CharAbility_44_Swarm_Aura_alpha':'bees',
  'CharAbility_16_Gatling_Turret_alpha':'deploy'
 };
@@ -166,10 +169,10 @@ export const ORIG_CAST=[
    {name:'Soap',body:'Soldier_SAS',outfit:'Soldier_SAS',role:'Artillero',defaultWeapon:'M240B',bio:'El nombre que todos recuerdan y nadie explica.',play:true},
    {name:'Spud',body:'Soldier_Spud',outfit:'Soldier_ForestCamo',role:'Artillero',defaultWeapon:'RPG-7',bio:'Patata de nombre, roca de aguante.',play:true},
   {name:'Ivan Tkilya',body:'Soldier_Heavy',outfit:'Soldier_heavy / GermanSpecialForces',role:'Artillero',defaultWeapon:'M249 SAW',bio:'Pesado de manual: donde se planta, hay que rodearlo.',play:true},
-  {name:'Tree Mendez',body:'Soldier_Spud',outfit:'Soldier_Veteran_d.png',role:'Artillero',defaultWeapon:'Lumber Numberer',bio:'Pega con árboles. Literalmente.',play:true},
+  {name:'Tree Mendez',body:'Soldier_Heavy',outfit:'Soldier_Heavy_Lumberjack_d.png',role:'Artillero',defaultWeapon:'Lumber Numberer',bio:'Pega con árboles. Literalmente.',play:true},
    {name:'Mme La Hacque',body:'Agent_Light',outfit:'Agent_light / JewelThief',role:'Espía',defaultWeapon:'MP7',bio:'Elegancia francesa con un cuchillo en la bota.',play:true},
   {name:'Sneaky Pete',body:'Agent',outfit:'Agent',role:'Francotirador',defaultWeapon:'M40',bio:'Nadie le vio llegar; nadie le vio irse.',play:true},
-  {name:'Tito Tesla',body:'Engineer_Heavy',outfit:'Engineer_Heavy_Veteran_d.png',role:'Francotirador',defaultWeapon:'Electri-Fryer',bio:'El maestro del teletransporte: devuelve al enemigo a su zona de despliegue.',play:true},
+  {name:'Tito Tesla',body:'Agent_Light',outfit:'Agent_light_Tesla_d.png',role:'Francotirador',defaultWeapon:'Electri-Fryer',bio:'El maestro del teletransporte: devuelve al enemigo a su zona de despliegue.',play:true},
   {name:'Sister Florence',body:'Medic',outfit:'Medic / Medic_Rescue',role:'Médico',defaultWeapon:'M4A1',bio:'Reza por ti y luego te cose la herida.',play:true,rigPose:true},
    {name:'Riot Medic',body:'Medic_therapist_959v',outfit:'Medic_Heavy',role:'Médico',defaultWeapon:'M4A1',bio:'Casco antidisturbios y camilla blindada.',play:true},
    {name:'Textbook Kate',body:'Medic_therapist',outfit:'Medic_therapist',role:'Médico',defaultWeapon:'M4A1',bio:'Se sabe el manual de memoria; por eso cura mejor.',play:true},

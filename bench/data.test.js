@@ -62,14 +62,15 @@ test('tres skins y todas sin pasivas', async () => {
   assert.equal(Object.values(SKINS).filter(s => /Sin pasiva/.test(s.desc)).length, 4, 'las cuatro skins dicen "Sin pasiva"');
 });
 
-test('6 misiones de campana con mapa, objetivo y formato validos', async () => {
+test('109 misiones de campana con mapa, objetivo y formato validos', async () => {
   const { CAMPAIGN_MISSIONS, MAP_DEFS } = await loadData();
-  assert.equal(CAMPAIGN_MISSIONS.length, 6, 'deben ser 6 misiones');
+  assert.equal(CAMPAIGN_MISSIONS.length, 109, 'deben ser 109 misiones');
   const maps = new Set(Object.keys(MAP_DEFS));
   for (const m of CAMPAIGN_MISSIONS) {
     assert.ok(maps.has(m.map), 'mapa inexistente: ' + m.map);
     assert.ok(['eliminacion', 'baliza', 'dominacion', 'escolta'].includes(m.objective), 'objetivo invalido: ' + m.objective);
-    assert.ok([2, 4, 5].includes(Number(m.fmt)), 'formato invalido: ' + m.fmt);
+    assert.ok(Number(m.fmt) >= 2 && Number(m.fmt) <= 6, 'formato invalido: ' + m.fmt);
+    assert.ok(m.playerRoster.length >= m.enemyRoster.length, 'escuadras incoherentes: ' + m.id);
   }
 });
 
@@ -393,6 +394,50 @@ test('los originales del visor arrancan sin arma y pueden equipar las 23 armas o
   assert.match(viewer, /auWeaponFile\(file\)/);
   assert.doesNotMatch(viewer, /VIEWER_ROLE_WEAPONS/);
   assert.doesNotMatch(viewer, /MAP_PIECES/);
+});
+
+test('Tito Tesla y Tree Mendez usan cuerpo y textura propios del IPA', async () => {
+  const { ORIG_CAST, CAST_TEXTURE_FILE } = await loadData();
+  const pairs = ORIG_CAST.map(c => c.body + '|' + CAST_TEXTURE_FILE[c.name]);
+  assert.equal(new Set(pairs).size, ORIG_CAST.length);
+  const byName = Object.fromEntries(ORIG_CAST.map(c => [c.name, c]));
+  assert.deepEqual(
+    [byName['Tito Tesla'].body, CAST_TEXTURE_FILE['Tito Tesla'], byName['Tito Tesla'].defaultWeapon],
+    ['Agent_Light', 'Agent_light_Tesla_d.png', 'Electri-Fryer']
+  );
+  assert.deepEqual(
+    [byName['Tree Mendez'].body, CAST_TEXTURE_FILE['Tree Mendez'], byName['Tree Mendez'].defaultWeapon],
+    ['Soldier_Heavy', 'Soldier_Heavy_Lumberjack_d.png', 'Lumber Numberer']
+  );
+  for (const body of ['Agent_Light', 'Soldier_Heavy']) {
+    assert.ok(fs.existsSync(path.join(ROOT, 'assets', 'soldier', 'bodies', body + '_rig.json')));
+  }
+});
+
+test('las habilidades del reparto original salen de GameData.bytes', async () => {
+  const { CHARACTER_ABILITIES } = await loadData();
+  const esperado = {
+    'Hipster Dave': ['CharAbility_43_Support_Fire_alpha', 'CharAbility_14_Frag_Grenade_alpha'],
+    'Ivan Tkilya': ['CharAbility_43_Support_Fire_alpha', 'CharAbility_09_Concussion_Grenade_alpha'],
+    'Tree Mendez': ['CharAbility_43_Support_Fire_alpha', 'CharAbility_47_Vampire_alpha'],
+    'Sneaky Pete': ['CharAbility_17_Ghost_alpha', 'Rank_07_Gunnery_Sergeant_alpha'],
+    'Tito Tesla': ['CharAbility_17_Ghost_alpha', 'CharAbility_06_Teleport_Grenade_alpha'],
+    'Sister Florence': ['CharAbility_30_Medkit_alpha', 'CharAbility_20_Healing_Aura_alpha'],
+    'Big Time Taschmann': ['CharAbility_45_Toolkit_alpha', 'CharAbility_09_Concussion_Grenade_alpha'],
+    'Megan McNick': ['CharAbility_45_Toolkit_alpha', 'CharAbility_13_Detection_Aura_alpha'],
+    'Carlito Grosso': ['CharAbility_45_Toolkit_alpha', 'CharAbility_15_Gas_Grenade_alpha'],
+    'Riot Agent': ['CharAbility_17_Ghost_alpha', 'CharAbility_50_Molotov_alpha'],
+    'Riot Engineer': ['CharAbility_45_Toolkit_alpha', 'CharAbility_51_RiotShield_alpha'],
+    'Commander (M)': ['CharAbility_13_Detection_Aura_alpha']
+  };
+  for (const [name, icons] of Object.entries(esperado)) {
+    assert.deepEqual((CHARACTER_ABILITIES[name] || []).map(a => a.icon), icons, name);
+  }
+  for (const list of Object.values(CHARACTER_ABILITIES)) {
+    for (const a of list) {
+      assert.ok(fs.existsSync(path.join(ROOT, 'assets', 'ui', 'ability', a.icon + '.png')), 'falta icono ' + a.icon);
+    }
+  }
 });
 
 test('el visor funde clips y dispara desde eventos del clip', () => {

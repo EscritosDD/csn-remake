@@ -105,7 +105,7 @@ test('el inspector ampliado reúne skins, 23 armas, sonido y desplegables', asyn
   assert.match(inspector, /getWeaponFiles\(\)/);
   assert.match(inspector, /Sin arma \(solo personaje\)/);
   assert.match(inspector, /Elige un arma para probar disparo/);
-  assert.match(inspector, /insFire\.disabled=true/);
+  assert.match(inspector, /insFire\.disabled=false/);
   assert.match(inspector, /Inspeccionar desplegable/);
   assert.match(inspector, /auWeaponFile/);
   assert.match(inspector, /insFire\.textContent='▶ '\+\(profile&&profile\.actionLabel\|\|'Probar disparo'\)/);
@@ -221,9 +221,9 @@ test('las 23 armas originales se pueden equipar y disparar desde cualquier perso
   assert.match(weapons, /const cat=\(WEAPONS\[un\.weapon\]\|\|\{\}\)\.cat\|\|\(file&&String\(\(WEAPONS_ORIGINAL\[file\]\|\|\{\}\)\.cat\|\|''\)\.split\(' \/ '\)\[0\]\)\|\|'Fusiles de asalto'/);
 });
 
-test('Tropas arranca sin arma y el Inspector no hereda el gesto de inspección', () => {
-  assert.ok(troops.includes("{skinIndex:0,weapon:''}"));
-  assert.ok(troops.includes("const weapon=csn?'':(saved.weapon||'');"));
+test('Tropas arranca con el arma por defecto del personaje y el Inspector no hereda el gesto de inspección', () => {
+  assert.ok(troops.includes("{skinIndex:0,weapon:entry.defaultWeapon||''}"));
+  assert.ok(troops.includes("const weapon=csn?'':(saved.weapon||entry.defaultWeapon||'');"));
   assert.ok(inspector.includes('insCurrent={...spec,inspect:false};'));
   assert.ok(inspector.includes("kind:'roles',key:entry.key,skinIndex:0,weapon:'',"));
   assert.match(inspector, /insStage\.addEventListener\('pointerdown'/);

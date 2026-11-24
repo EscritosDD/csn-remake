@@ -6,7 +6,7 @@ export function skState(theme){return SKIRMISH_GEO[theme]||null;}
 
 export function loadSkirmishTop(theme){
   const st=skState(theme);
-  if(!st||st.topImg||st.topFailed)return;
+  if(!st||!st.top||st.topImg||st.topFailed)return;
   const im=new Image();
   im.onload=()=>{st.topImg=im;st.topReady=true;if(G)draw();};
   im.onerror=()=>{st.topFailed=true;};

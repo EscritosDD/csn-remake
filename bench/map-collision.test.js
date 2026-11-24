@@ -6,7 +6,7 @@ const path = require('node:path');
 
 const root = path.dirname(__dirname);
 const html = require('./source');
-const ids = ['03', '04', '05', '06', '08', '09', '10', '11'];
+const ids = ['03', '04', '05', '06', '08', '09', '10', '11', '13', 't2_01', 't2_02', 't2_03', 't2_04', 't2_05', 't2_06'];
 const grids = new Map(ids.map(id => [id, JSON.parse(fs.readFileSync(path.join(root, 'assets', 'maps', id + '_grid.json'), 'utf8'))]));
 
 function tile(grid, x, y) {
@@ -38,8 +38,8 @@ function connected(grid, from) {
   return seen.size;
 }
 
-test('las ocho rejillas IPA conservan su tamaño nativo', () => {
-  const expected = { '03': [32, 26], '04': [16, 24], '05': [16, 30], '06': [24, 32], '08': [16, 28], '09': [23, 17], '10': [11, 24], '11': [18, 16] };
+test('las quince rejillas IPA conservan su tamaño nativo', () => {
+  const expected = { '03': [32, 26], '04': [16, 24], '05': [16, 30], '06': [24, 32], '08': [16, 28], '09': [23, 17], '10': [11, 24], '11': [18, 16], '13': [18, 22], 't2_01': [14, 16], 't2_02': [22, 22], 't2_03': [18, 10], 't2_04': [24, 11], 't2_05': [19, 17], 't2_06': [18, 10] };
   for (const id of ids) {
     const grid = grids.get(id);
     assert.deepEqual(grid.size, expected[id]);

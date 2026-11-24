@@ -106,7 +106,7 @@ export function auVoice(un,ev,vol){
   auPlay('voice/'+folder+'/'+ev+'.mp3',vol==null?0.5:vol);
 }
 
-export const AMBIENT_FILE={astillero:'ambient/skirmish04/amb0.mp3',platform:'ambient/skirmish04/amb0.mp3',cruce:'ambient/rotonda/amb0.mp3',depot:'ambient/skirmish03/amb0.mp3',terminal:'ambient/skirmish03/amb0.mp3'};
+export const AMBIENT_FILE={astillero:'ambient/skirmish04/amb0.mp3',platform:'ambient/skirmish04/amb0.mp3',cruce:'ambient/rotonda/amb0.mp3',depot:'ambient/skirmish03/amb0.mp3',terminal:'ambient/skirmish03/amb0.mp3',skirmish13:'ambient/market/amb0.mp3',t2beach:'ambient/dock/amb0.mp3',t2favela:'ambient/yard/amb0.mp3',t2oldtown:'ambient/plaza/amb0.mp3',t2centro:'ambient/market/amb0.mp3',t2construction:'ambient/warehouse/amb0.mp3',t2lapa:'ambient/plaza/amb0.mp3'};
 
 export function auAmbient(theme){if(AU_AMBIENT){try{AU_AMBIENT.pause();}catch(e){}AU_AMBIENT=null;}const f=auPlay(AMBIENT_FILE[theme]||('ambient/'+theme+'/amb0.mp3'),0.20,true);AU_AMBIENT=f;}
 

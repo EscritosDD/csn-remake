@@ -7,6 +7,7 @@ export const ABILITY_CATALOG=[
   {f:'CharAbility_04_Armour_Piercing_alpha',n:'Armour Piercing'},
   {f:'CharAbility_05_Backlash_Aura_alpha',n:'Backlash Aura'},
   {f:'CharAbility_06_Backstab_alpha',n:'Backstab'},
+  {f:'CharAbility_06_Teleport_Grenade_alpha',n:'Teleport Grenade'},
   {f:'CharAbility_07_Caltrops_alpha',n:'Caltrops'},
   {f:'CharAbility_08_Charm_alpha',n:'Charm'},
   {f:'CharAbility_09_Concussion_Grenade_alpha',n:'Concussion Grenade'},
@@ -52,7 +53,8 @@ export const ABILITY_CATALOG=[
   {f:'CharAbility_49_crossbow_alpha',n:'crossbow'},
   {f:'CharAbility_50_Molotov_alpha',n:'Molotov'},
   {f:'CharAbility_51_RiotShield_alpha',n:'RiotShield'},
-  {f:'CharAbility_52_WaterCannon_alpha',n:'WaterCannon'}
+  {f:'CharAbility_52_WaterCannon_alpha',n:'WaterCannon'},
+  {f:'Rank_07_Gunnery_Sergeant_alpha',n:'Gunnery Sergeant'}
 ];
 
 export const ABILITY_IMPL={
@@ -78,5 +80,7 @@ export const ABILITY_IMPL={
   'CharAbility_16_Gatling_Turret_alpha':'Torreta M2',
   'CharAbility_38_Rush_Aura_alpha':'Teletransporte',
   'CharAbility_44_Swarm_Aura_alpha':'Bomba de abejas',
-  'CharAbility_31_Melee_Specialization_alpha':'Trunkquilizer'
+  'CharAbility_31_Melee_Specialization_alpha':'Trunkquilizer',
+  'CharAbility_06_Teleport_Grenade_alpha':'Teletransporte',
+  'Rank_07_Gunnery_Sergeant_alpha':'Puntería pesada'
 };

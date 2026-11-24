@@ -369,16 +369,16 @@ body{background-image:radial-gradient(1100px 500px at 50% -80px, rgba(242,178,52
 
 .result-card{max-width:680px;margin:0 auto;padding:22px;background:linear-gradient(180deg,var(--surface),var(--bg-elev));border:2px solid var(--line-strong);border-radius:18px;box-shadow:0 8px 0 rgba(0,0,0,.35)}
 .result-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
-.result-kicker{font-family:'Barlow Condensed';font-size:11px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-lime)}
+.result-kicker{font-family:'Barlow Condensed';font-size:11px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-caqui)}
 .result-round{font-family:'JetBrains Mono';font-weight:800;color:var(--ink-gold);border:1.5px solid var(--ink-gold);border-radius:999px;padding:2px 10px}
 .result-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px}
 .result-reason{color:var(--ink)}
 
 .endBanner{font-weight:800;letter-spacing:.08em;font-size:26px;padding:10px 0;border-radius:10px;margin-bottom:10px;color:#fff}
 
-.endWrap.win .endBanner{background:linear-gradient(90deg,var(--olive2),var(--ink-lime));color:#0d1117}
+.endWrap.win .endBanner{background:linear-gradient(90deg,var(--olive2),var(--ink-caqui));color:#0d1117}
 
-.endWrap.lose .endBanner{background:linear-gradient(90deg,#6b2f2f,var(--ink-coral))}
+.endWrap.lose .endBanner{background:linear-gradient(90deg,#6b2f2f,var(--ink-vino-bright))}
 
 .endWrap.draw .endBanner{background:linear-gradient(90deg,#6d5a1f,var(--ink-gold));color:#0d1117}
 
@@ -722,7 +722,7 @@ body.campaign-mode .arcade-hero{display:none}
 .arcade-hero-copy h1{font-size:clamp(36px,5vw,62px);margin:4px 0 8px}
 .arcade-hero-copy p{max-width:54ch;color:var(--muted)}
 .arcade-hero-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-.arcade-hero-chips span{border:1px solid var(--line-strong);border-radius:999px;padding:5px 12px;font:700 13px/1.2 'Barlow Condensed';text-transform:uppercase;color:var(--ink-cyan);background:color-mix(in srgb,var(--ink-cyan) 8%,transparent)}
+.arcade-hero-chips span{border:1px solid var(--line-strong);border-radius:999px;padding:5px 12px;font:700 13px/1.2 'Barlow Condensed';text-transform:uppercase;color:var(--ink-oliva);background:color-mix(in srgb,var(--ink-oliva) 8%,transparent)}
 .arcade-campaign-card{overflow:hidden;border:2px solid var(--line-accent);border-radius:14px;background:var(--surface);box-shadow:0 12px 0 rgba(0,0,0,.28)}
 .arcade-campaign-card>img{display:block;width:100%;height:148px;object-fit:cover}
 .arcade-campaign-body{padding:14px}
@@ -738,14 +738,14 @@ body.campaign-mode .arcade-hero{display:none}
 #origMenu,#demoSlotPlay,#menuExtras,[hidden]{display:none!important}
 .skirmish-grid{grid-template-columns:repeat(2,1fr)}
 .skirmish-grid .mode-card{min-height:210px}
-.guerra-banner{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;align-items:center;border-color:var(--ink-violet);background:linear-gradient(90deg,color-mix(in srgb,var(--ink-coral) 12%,var(--surface)),var(--surface))}
+.guerra-banner{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;align-items:center;border-color:var(--ink-vino);background:linear-gradient(90deg,color-mix(in srgb,var(--ink-vino-bright) 12%,var(--surface)),var(--surface))}
 .guerra-banner h3{font-size:28px;margin:4px 0}
 .guerra-actions{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
 .campaign-hub .hub-actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 .hub-tally{min-width:270px;flex:1}
 .tally-line{display:flex;gap:8px;align-items:baseline;font:800 22px/1 'Barlow Condensed';text-transform:uppercase}
 .tally-bar{height:8px;border-radius:999px;background:var(--bg-elev);overflow:hidden;margin:8px 0 4px}
-.tally-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--ink-cyan),var(--ink-lime),var(--ink-gold))}
+.tally-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--ink-oliva),var(--ink-caqui),var(--ink-gold))}
 .tally-reward{font:600 13px/1.2 'Barlow';color:var(--muted)}
 .dave-card{display:flex;gap:14px;align-items:center;margin:12px 0;padding:12px;border:1.5px solid var(--line-accent);border-radius:12px;background:var(--surface-2)}
 .dave-card img{width:64px;height:64px;object-fit:contain;flex:none}
@@ -757,7 +757,7 @@ body.campaign-mode .arcade-hero{display:none}
 .mission-thumb img{width:100%;height:100%;object-fit:cover}
 .mission-copy{min-width:0}
 .mission-copy b{font-size:17px;display:block}
-.mission-copy small{display:block;color:var(--ink-cyan);font:700 12px/1.2 'Barlow Condensed';text-transform:uppercase}
+.mission-copy small{display:block;color:var(--ink-oliva);font:700 12px/1.2 'Barlow Condensed';text-transform:uppercase}
 .mission-copy p{font-size:12.5px;margin:3px 0 0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .campaign-hub .mission-grid .mission-stars{color:var(--ink-gold);white-space:nowrap;font-size:15px}
 .setupAreaCompact .panel{padding:14px}
@@ -770,7 +770,7 @@ body.campaign-mode .arcade-hero{display:none}
 .brief-hero img{width:100%;height:170px;object-fit:cover;border-radius:10px;border:1px solid var(--line-strong)}
 .brief-hero h2{font-size:34px;margin:6px 0}
 .brief-badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
-.brief-badges span{border:1px solid var(--line-strong);border-radius:999px;padding:4px 10px;font:700 12px/1.2 'Barlow Condensed';text-transform:uppercase;color:var(--ink-cyan)}
+.brief-badges span{border:1px solid var(--line-strong);border-radius:999px;padding:4px 10px;font:700 12px/1.2 'Barlow Condensed';text-transform:uppercase;color:var(--ink-oliva)}
 .brief-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:10px 0}
 .brief-grid ul{margin:0;padding-left:18px;font-size:13.5px;color:var(--muted)}
 .brief-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;margin-top:14px}

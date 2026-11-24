@@ -21,6 +21,13 @@ export const SKIRMISH_GEO={
  rotonda:{bin:'assets/maps/skirmish09.bin',atlas:['assets/maps/skirmish_atlas0.png','assets/maps/skirmish_atlas1.png'],top:'assets/maps/skirmish09_top.jpg'},
  cruce:{bin:'assets/maps/skirmish10.bin',atlas:['assets/maps/skirmish_atlas0.png','assets/maps/skirmish_atlas1.png'],top:'assets/maps/skirmish10_top.jpg'},
  astillero:{bin:'assets/maps/skirmish11.bin',atlas:['assets/maps/skirmish_atlas0.png','assets/maps/skirmish_atlas1.png'],top:'assets/maps/skirmish11_top.jpg'},
+ skirmish13:{bin:'assets/maps/skirmish13.bin',atlas:['assets/maps/skirmish_atlas0.png','assets/maps/skirmish_atlas1.png'],top:''},
+ t2beach:{bin:'assets/maps/t2_skirmish01.bin',atlas:['assets/maps/theme02_atlas0.png','assets/maps/theme02_atlas0.png'],top:''},
+ t2favela:{bin:'assets/maps/t2_skirmish02.bin',atlas:['assets/maps/theme02_atlas0.png','assets/maps/theme02_atlas0.png'],top:''},
+ t2oldtown:{bin:'assets/maps/t2_skirmish03.bin',atlas:['assets/maps/theme02_atlas0.png','assets/maps/theme02_atlas0.png'],top:''},
+ t2centro:{bin:'assets/maps/t2_skirmish04.bin',atlas:['assets/maps/theme02_atlas0.png','assets/maps/theme02_atlas0.png'],top:''},
+ t2construction:{bin:'assets/maps/t2_skirmish05.bin',atlas:['assets/maps/theme02_atlas0.png','assets/maps/theme02_atlas0.png'],top:''},
+ t2lapa:{bin:'assets/maps/t2_skirmish06.bin',atlas:['assets/maps/theme02_atlas0.png','assets/maps/theme02_atlas0.png'],top:''},
 };
 
 export const MAPS_ORIGINAL=[
@@ -32,6 +39,13 @@ export const MAPS_ORIGINAL=[
   {id:'skirmish_09',name:'Skirmish_09',bundle:'Theme_01_Skirmish_09.assetbundle',board:'skirmish09',theme:'rotonda',verts:75576,pieces:36,floor:[60.5457,33.0602],floorTiles:[15.0,8.19],bounds:[60.59,11.6,33.16],boundsTiles:[15.01,2.87,8.21],scale:0.2477},
   {id:'skirmish_10',name:'Skirmish_10',bundle:'Theme_01_Skirmish_10.assetbundle',board:'skirmish10',theme:'cruce',verts:73683,pieces:24,floor:[27.0175,44.5],floorTiles:[15.0,24.71],bounds:[30.02,10.25,44.96],boundsTiles:[16.67,5.69,24.96],scale:0.5552},
   {id:'skirmish_11',name:'Skirmish_11',bundle:'Theme_01_Skirmish_11.assetbundle',board:'skirmish11',theme:'astillero',verts:74344,pieces:27,floor:[41.5721,34.625],floorTiles:[15.0,12.49],bounds:[41.58,11.43,35.62],boundsTiles:[15.0,4.12,12.85],scale:0.3608},
+  {id:'skirmish_13',name:'Skirmish_13',bundle:'Theme_01_Skirmish_13',board:'skirmish13',theme:'skirmish13',verts:28500,pieces:0,floor:[23.1781,28.0],floorTiles:[15.0,18.12],bounds:[23.18,3.54,28.0],boundsTiles:[15.0,2.29,18.12],scale:0.6472},
+  {id:'theme02_01',name:'Theme_02_Skirmish_01',bundle:'Theme_02_Skirmish_01',board:'t2beach',theme:'t2beach',verts:75028,pieces:0,floor:[37.0,40.0],floorTiles:[15.0,16.22],bounds:[37.0,8.46,40.01],boundsTiles:[15.0,3.43,16.22],scale:0.4054},
+  {id:'theme02_02',name:'Theme_02_Skirmish_02',bundle:'Theme_02_Skirmish_02',board:'t2favela',theme:'t2favela',verts:59341,pieces:0,floor:[26.125,24.375],floorTiles:[15.0,14.0],bounds:[27.15,8.33,27.5],boundsTiles:[15.58,4.78,15.79],scale:0.5742},
+  {id:'theme02_03',name:'Theme_02_Skirmish_03',bundle:'Theme_02_Skirmish_03',board:'t2oldtown',theme:'t2oldtown',verts:86407,pieces:0,floor:[34.0,35.0],floorTiles:[15.0,15.44],bounds:[37.06,7.62,35.0],boundsTiles:[16.35,3.36,15.44],scale:0.4412},
+  {id:'theme02_04',name:'Theme_02_Skirmish_04',bundle:'Theme_02_Skirmish_04',board:'t2centro',theme:'t2centro',verts:77635,pieces:0,floor:[36.0,37.0],floorTiles:[15.0,15.42],bounds:[37.32,8.62,37.0],boundsTiles:[15.55,3.59,15.42],scale:0.4167},
+  {id:'theme02_05',name:'Theme_02_Skirmish_05',bundle:'Theme_02_Skirmish_05',board:'t2construction',theme:'t2construction',verts:63649,pieces:0,floor:[32.0,37.0],floorTiles:[15.0,17.34],bounds:[33.0,7.74,43.0],boundsTiles:[15.47,3.63,20.16],scale:0.4688},
+  {id:'theme02_06',name:'Theme_02_Skirmish_06',bundle:'Theme_02_Skirmish_06',board:'t2lapa',theme:'t2lapa',verts:73612,pieces:0,floor:[34.5067,35.0],floorTiles:[15.0,15.21],bounds:[36.23,8.63,35.0],boundsTiles:[15.75,3.75,15.21],scale:0.4347},
 ];
 
 export const MAP_DEFS={
@@ -356,5 +370,12 @@ export const MAP_DEFS={
     shelves:[[5,2],[6,2],[5,9],[6,9]],
     crates:[[2,5],[9,5],[2,6],[9,6]],
     barrels:[[2,4],[9,4],[2,7],[9,7]],
-    medkits:[[4,2],[7,9]]}
+    medkits:[[4,2],[7,9]]},
+ skirmish13:{id:'skirmish13',theme:'skirmish13',name:'Skirmish_13 · Londres · Gran mercado',walls:[],shelves:[],crates:[],barrels:[],medkits:[]},
+ t2beach:{id:'t2beach',theme:'t2beach',name:'Río · Playa',walls:[],shelves:[],crates:[],barrels:[],medkits:[]},
+ t2favela:{id:'t2favela',theme:'t2favela',name:'Río · Favela',walls:[],shelves:[],crates:[],barrels:[],medkits:[]},
+ t2oldtown:{id:'t2oldtown',theme:'t2oldtown',name:'Río · Casco antiguo',walls:[],shelves:[],crates:[],barrels:[],medkits:[]},
+ t2centro:{id:'t2centro',theme:'t2centro',name:'Río · Centro',walls:[],shelves:[],crates:[],barrels:[],medkits:[]},
+ t2construction:{id:'t2construction',theme:'t2construction',name:'Río · Obras',walls:[],shelves:[],crates:[],barrels:[],medkits:[]},
+ t2lapa:{id:'t2lapa',theme:'t2lapa',name:'Río · Lapa',walls:[],shelves:[],crates:[],barrels:[],medkits:[]}
 };

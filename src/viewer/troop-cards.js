@@ -28,7 +28,7 @@ function tcTroopCardHTML(entry,index){
   const csn=!!entry.mesh;
   const saved=tcCardState(entry);
   const origin=csn?'CSN':'Juego original';
-  const weapon=csn?'':(saved.weapon||'');
+  const weapon=csn?'':(saved.weapon||entry.defaultWeapon||'');
   const profile=csn?null:originalWeaponProfile(weapon);
   const skinIndex=Math.min(saved.skinIndex||0,Math.max(0,(entry.skins||[]).length-1));
   const skin=entry.skins&&entry.skins[skinIndex];

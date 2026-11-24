@@ -4,7 +4,7 @@ import { cheb, facingVec } from '../core/geometry.js';
 
 export const GRID_CACHE={};
 
-export const NATIVE_MAP_IDS={skirmish:'03',skirmish04:'04',skirmish05:'05',skirmish06:'06',skirmish08:'08',skirmish09:'09',skirmish10:'10',skirmish11:'11'};
+export const NATIVE_MAP_IDS={skirmish:'03',skirmish04:'04',skirmish05:'05',skirmish06:'06',skirmish08:'08',skirmish09:'09',skirmish10:'10',skirmish11:'11',skirmish13:'13',t2beach:'t2_01',t2favela:'t2_02',t2oldtown:'t2_03',t2centro:'t2_04',t2construction:'t2_05',t2lapa:'t2_06'};
 
 export const DEBUG_GRID=typeof location!=='undefined'&&/(?:^|[?&])debugGrid(?:[=&]|$)/.test(location.search||'');
 

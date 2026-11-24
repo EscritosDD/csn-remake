@@ -96,17 +96,17 @@ test('los controles tienen foco visible y tamaño cómodo', () => {
   assert.match(css, /nav\.tabs button:hover/);
 });
 
-test('el tema arcade oscuro es la única fuente de color', () => {
+test('el tema militar y vino es la única fuente de color', () => {
   const theme = fs.readFileSync(path.join(root, 'styles', 'theme.css'), 'utf8');
   const cards = fs.readFileSync(path.join(root, 'styles', 'cards.css'), 'utf8');
   const viewer = fs.readFileSync(path.join(root, 'styles', 'viewer.css'), 'utf8');
   const layout = fs.readFileSync(path.join(root, 'styles', 'layout.css'), 'utf8');
   for (const token of [
-    '--bg:#0d1117;', '--bg-elev:#141a23;', '--surface:#19212c;', '--surface-2:#222d3b;',
-    '--stage:radial-gradient(circle at 50% 35%, #263447 0%, #141b25 68%, #0c1016 100%);',
-    '--ink-cyan:#00e5ff;', '--ink-coral:#ff3d71;', '--ink-lime:#b8ff2c;', '--ink-gold:#ffc933;', '--ink-violet:#9b6bff;',
-    '--ink:#f4f7fb;', '--muted:#9aa7b8;', '--faint:#677588;',
-    '--line:rgba(244,247,251,.12);', '--line-strong:rgba(244,247,251,.24);'
+    '--bg:#14160f;', '--bg-elev:#23261c;', '--surface:#2e3224;', '--surface-2:#3a3f2f;',
+    '--stage:radial-gradient(circle at 50% 35%, #3a3f2f 0%, #23261c 68%, #14160f 100%);',
+    '--ink-vino:#7a2230;', '--ink-vino-bright:#9c3040;', '--ink-oliva:#8a9a5b;', '--ink-caqui:#c2b280;', '--ink-gold:#c9a227;',
+    '--ink:#f2ede4;', '--muted:#a89d8a;', '--faint:#7a7263;',
+    '--line:rgba(242,237,228,.12);', '--line-strong:rgba(242,237,228,.24);'
   ]) assert.ok(theme.includes(token), token);
   assert.doesNotMatch(css, /prefers-color-scheme:\s*light/);
   assert.match(indexHtml, /name="color-scheme" content="dark"/);

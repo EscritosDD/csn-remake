@@ -7,7 +7,7 @@
   --amber:var(--ink-gold); --amber-dark:#8a6400; --olive:var(--ink-oliva); --teamA:var(--ink-oliva); --teamB:var(--ink-vino);
   --good:var(--ink-oliva); --danger:var(--ink-vino);
   --bg2:var(--bg-elev); --panel:var(--surface); --panel2:var(--surface-2);
-  --amber2:var(--amber-dark); --olive2:#5d7a00; --paper:var(--ink); --panelveil:rgba(20,22,15,.94);
+  --amber2:var(--amber-dark); --olive2:#5f6f3f; --paper:var(--ink); --panelveil:rgba(20,22,15,.94);
   --radius:10px; --pop:cubic-bezier(.22,1.28,.36,1);
 }
 
@@ -35,13 +35,13 @@ h1,h2,h3,.cond{font-family:'Barlow Condensed','Barlow',sans-serif;letter-spacing
 
 .btn.primary.big{font-size:19px}
 
-.btn.olive{background:linear-gradient(180deg,var(--ink-lime),#93d916);border-color:var(--ink-lime);color:#0d1117;box-shadow:0 4px 0 var(--olive2)}
+.btn.olive{background:linear-gradient(180deg,var(--ink-oliva),#a8b77a);border-color:var(--ink-oliva);color:#0d1117;box-shadow:0 4px 0 var(--olive2)}
 
 .btn.ghost{background:transparent;border-color:var(--line-strong);box-shadow:none}
 
-.btn.danger{border-color:var(--ink-coral);color:var(--ink-coral);background:transparent;box-shadow:none}
+.btn.danger{border-color:var(--ink-vino-bright);color:var(--ink-vino-bright);background:transparent;box-shadow:none}
 
-.btn.danger:hover{background:color-mix(in srgb,var(--ink-coral) 14%,transparent)}
+.btn.danger:hover{background:color-mix(in srgb,var(--ink-vino-bright) 14%,transparent)}
 
 .btn:disabled{opacity:.45;cursor:not-allowed}
 
@@ -61,6 +61,6 @@ h1,h2,h3,.cond{font-family:'Barlow Condensed','Barlow',sans-serif;letter-spacing
 
 select{border-width:2px}
 
-:where(button,a,select,input,summary,[role="button"]):focus-visible{outline:3px solid var(--ink-gold);outline-offset:2px;box-shadow:0 0 0 5px rgba(255,201,51,.22)}
+:where(button,a,select,input,summary,[role="button"]):focus-visible{outline:3px solid var(--ink-gold);outline-offset:2px;box-shadow:0 0 0 5px rgba(201,162,39,.28)}
 
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition-duration:.001ms!important;animation-duration:.001ms!important;animation-iteration-count:1!important}}

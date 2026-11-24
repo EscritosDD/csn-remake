@@ -221,9 +221,9 @@ canvas#board{border-radius:10px;box-shadow:0 0 0 2px rgba(0,0,0,.45), inset 0 0 
 
 .actions button small{color:var(--muted)}
 
-.actions button.on{background:linear-gradient(180deg,#f7c44b,#e6a322);border-color:#a8710b;color:#201402}
+.actions button.on{background:linear-gradient(180deg,var(--ink-vino-bright),var(--ink-vino));border-color:var(--ink-vino);color:#f2ede4}
 
-.actions button.on small{color:#4d3806}
+.actions button.on small{color:var(--ink-caqui)}
 
 .panel,.mode-card,.weapon,.unit-card,.skin-card,.modal-box,.howto>div,.nation-card{background-color:var(--panel)}
 

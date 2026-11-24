@@ -21,7 +21,7 @@ test('la campaña usa solo los 17 personajes del IPA en mapas 3D reales', async 
   const names = new Set(cast.ORIG_CAST.filter(c => c.play).map(c => c.name));
   const mapIds = new Set(Object.keys(maps.MAP_DEFS));
   const missions = [campaign.TUTORIAL_MISSION, ...campaign.CAMPAIGN_MISSIONS];
-  assert.equal(campaign.CAMPAIGN_MISSIONS.length, 6);
+  assert.equal(campaign.CAMPAIGN_MISSIONS.length, 109);
   for (const m of missions) {
     assert.ok(mapIds.has(m.map), 'mapa no disponible: ' + m.map);
     assert.ok(m.turnLimit > 0);
@@ -34,9 +34,9 @@ test('la campaña usa solo los 17 personajes del IPA en mapas 3D reales', async 
       }
     }
   }
-  assert.equal(campaign.CAMPAIGN_CHAPTERS.length, 3);
+  assert.equal(campaign.CAMPAIGN_CHAPTERS.length, 8);
   assert.equal(campaign.missionById('tutorial').id, 'tutorial');
-  assert.equal(campaign.missionById('london-6').id, 'london-6');
+  assert.equal(campaign.missionById('m-tryout-tommytesla').id, 'm-tryout-tommytesla');
   assert.equal(campaign.rosterKey('Hipster Dave'), 'original:Hipster Dave');
 });
 

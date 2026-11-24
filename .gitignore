@@ -13,6 +13,7 @@ __pycache__/
 
 # Archivos de trabajo local (no van al repo)
 _extract/
+rad-soldiers-unity3d-unpacked-quickbms/
 *.log
 *.zip
 auditoria_*.txt
