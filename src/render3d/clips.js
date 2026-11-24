@@ -47,9 +47,35 @@ export function fireWeaponFeedback(un,ud,full){
 }
 
 
+export function fireBulletFeedback(un,ud,e,ct,t){
+  const shooter=(un&&un.x!=null)?un:null;
+  if(!shooter||!shooter._shootT)return;
+  const shot=shooter._shootT;
+  if(shooter._bulletShot!==shot){shooter._bulletShot=shot;shooter._bulletSeen={};shooter._bulletCount=0;}
+  const et=(e&&e.t!=null?+e.t:ct).toFixed(4);
+  if(shooter._bulletSeen[et])return;
+  shooter._bulletSeen[et]=1;shooter._bulletCount++;
+  if(shooter._resolveShot){const resolve=shooter._resolveShot;shooter._resolveShot=null;resolve();}
+  releasePendingVisualHit(shooter,t);
+  auWeapon(shooter._shootCat,shooter._shootW);
+  if(shooter._voicedShotAt!==shot){shooter._voicedShotAt=shot;if(Math.random()<0.6)auVoice(shooter,'firing',0.42);}
+  if(ud){ud._firePulse=1;ud._flashPulse=1;}
+  if(shooter._shootAt){
+    if(shooter._bulletCount===1)fxBurst(shooter.x,shooter.y,3,'#ffe9a8');
+    if(typeof fx3Shot==='function')fx3Shot(shooter,shooter._shootAt,shooter._shootCat);
+    fxTracer(shooter,shooter._shootAt);
+  }
+}
+
 export function clipEventFeedback(un,ud,key,clip,e,ct,t){
   const f=e.f||'';let acted=false;
-  if(f==='PlayWeaponFire'||(f==='OnAnimEvent'&&e.i===10)||f==='PlayFiring'){
+  const bullets=!!(clip&&clip.events&&clip.events.some(ev=>ev.f==='OnAnimEvent'&&Number(ev.i)===10));
+  if(bullets&&f==='OnAnimEvent'&&Number(e.i)===10){
+    fireBulletFeedback(un,ud,e,ct,t);acted=true;
+  } else if(bullets&&f==='PlayWeaponFire'){
+    if(key!=='throw'&&key!=='deploy'&&key!=='interact'){ud._firePulse=Math.max(ud._firePulse||0,1);ud._flashPulse=1;}
+    acted=true;
+  } else if(f==='PlayWeaponFire'||(f==='OnAnimEvent'&&e.i===10)||f==='PlayFiring'){
     if(key==='throw'||key==='deploy'||key==='interact')ud._firePulse=Math.max(ud._firePulse||0,0.4);
     else if(f!=='PlayFiring')fireWeaponFeedback(un,ud,f==='PlayWeaponFire');
     else ud._firePulse=Math.max(ud._firePulse||0,0.35);
@@ -157,6 +183,7 @@ export function rootBonePositionForClip(rootBase,pelvisOffset,delta,rotatedPelvi
 export function driveClipSoldier(un,mesh,t,moving){
   if(window.__noClips)return; /* diagnostico: reposo puro */
   if(un._pendingHit&&t-un._pendingHit.t>1200)releasePendingVisualHit(un,t);
+  if(un._resolveShot&&un._shootT!=null&&t-un._shootT>3200)un._resolveShot();
   const ud=mesh.userData;if(ud&&ud.meshy)return;
   const pack=CLIPLIB.pack,clips=pack.clips,ts=t/1000;
   const wcat=WEAPONS[un.weapon]&&WEAPONS[un.weapon].cat;

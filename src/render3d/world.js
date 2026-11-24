@@ -127,7 +127,7 @@ export function build3DWorld(){
   const zoneDisc=(list,col)=>{list.forEach(s=>{
     const p=new THREE.Mesh(new THREE.PlaneGeometry(0.94,0.94),new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:0.13,depthWrite:false}));
     p.rotation.x=-Math.PI/2;p.position.set(w2cx(s.x),tileWorldY(s.x,s.y)+0.06,w2cz(s.y));world.add(p);});};
-  zoneDisc(spawnsFor('A'),TEAM_A_HEX);zoneDisc(spawnsFor('B'),TEAM_B_HEX);
+  zoneDisc((G&&G.spawnSlots&&G.spawnSlots.A)||spawnsFor('A'),TEAM_A_HEX);zoneDisc((G&&G.spawnSlots&&G.spawnSlots.B)||spawnsFor('B'),TEAM_B_HEX);
   /* baliza: zona ámbar que pulsa, solo en los modos que la usan */
   const mode3=effMode(G);
   const drawBeacon3=mode3==='baliza'||mode3==='dominacion';

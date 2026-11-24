@@ -46,3 +46,26 @@ test('la captura de combate registra clip, eventos y pulsos', () => {
   assert.match(capture, /e\.f==='PlayWeaponFire'/);
   assert.match(capture, /const combatOk = !combatMode/);
 });
+
+test('cada bala del clip lleva su sonido y trazadora, y el daño espera al evento', () => {
+  const combat = fs.readFileSync(path.join(root, 'src', 'game', 'combat.js'), 'utf8');
+  const clips = fs.readFileSync(path.join(root, 'src', 'render3d', 'clips.js'), 'utf8');
+  assert.match(combat, /export function applyShotDamage\(shooter\)/);
+  assert.match(combat, /shooter\._pendingShot=\{target:target/);
+  assert.match(combat, /shooter\._resolveShot=\(\)=>applyShotDamage\(shooter\)/);
+  assert.match(clips, /export function fireBulletFeedback\(un,ud,e,ct,t\)/);
+  assert.match(clips, /auWeapon\(shooter\._shootCat,shooter\._shootW\)/);
+  assert.match(clips, /fx3Shot\(shooter,shooter\._shootAt,shooter\._shootCat\)/);
+  assert.match(clips, /if\(shooter\._resolveShot\)\{const resolve=shooter\._resolveShot;/);
+});
+
+test('el despliegue reparte casillas lejanas y la explosion es volumetrica', () => {
+  const combat = fs.readFileSync(path.join(root, 'src', 'game', 'combat.js'), 'utf8');
+  const board = fs.readFileSync(path.join(root, 'src', 'game', 'board.js'), 'utf8');
+  const fx = fs.readFileSync(path.join(root, 'src', 'render3d', 'fx-arcade.js'), 'utf8');
+  assert.match(board, /export const SPAWN_MIN_CHEB=8/);
+  assert.match(combat, /G\.spawnSlots=spawnSlots/);
+  assert.match(board, /spreadSlots\(poolA,countA,seedB\)/);
+  assert.match(fx, /new THREE\.SphereGeometry\(0\.32,14,12\)/);
+  assert.match(fx, /shock\.scale\.setScalar\(1\+k\*2\*grow\)/);
+});

@@ -68,6 +68,55 @@ export function spawnsFor(team){
   return NATIVE_GRID&&NATIVE_GRID._spawnsByTeam?(NATIVE_GRID._spawnsByTeam[team]||[]):(team==='A'?SPAWNS_A:SPAWNS_B);
 }
 
+export const SPAWN_MIN_CHEB=8;
+
+function spawnReachablePool(team){
+  const seen=new Set(),q=[],out=[];
+  for(const s of spawnsFor(team)){
+    const k=s.x+','+s.y;
+    if(!seen.has(k)&&!blocked(s.x,s.y)){seen.add(k);q.push([s.x,s.y]);}
+  }
+  for(let head=0;head<q.length;head++){
+    const [x,y]=q[head];
+    if(!nativeBlocked(x,y)&&!inBeacon(x,y))out.push({x:x,y:y});
+    for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){
+      const nx=x+dx,ny=y+dy,k=nx+','+ny;
+      if(seen.has(k)||!canStep(x,y,nx,ny,true))continue;
+      seen.add(k);q.push([nx,ny]);
+    }
+  }
+  return out;
+}
+
+function spreadSlots(pool,count,avoid){
+  const slots=[];
+  let list=pool&&pool.length?pool:[{x:0,y:0}];
+  if(avoid&&avoid.length){
+    const far=list.filter(c=>avoid.every(a=>cheb(c,a)>=SPAWN_MIN_CHEB));
+    if(far.length)list=far;
+  }
+  for(let i=0;i<count;i++){
+    let best=null,bestScore=-Infinity;
+    for(const c of list){
+      if(slots.some(s=>s.x===c.x&&s.y===c.y))continue;
+      const sep=slots.length?Math.min(...slots.map(s=>cheb(c,s))):(avoid&&avoid.length?Math.min(...avoid.map(a=>cheb(c,a))):0);
+      const score=sep-(slots.length?0:cheb(c,{x:(W-1)/2,y:(H-1)/2})*0.001);
+      if(score>bestScore){bestScore=score;best=c;}
+    }
+    if(!best)break;
+    slots.push({x:best.x,y:best.y});
+  }
+  return slots;
+}
+
+export function planSpawns(countA,countB){
+  const seedA=spawnsFor('A'),seedB=spawnsFor('B');
+  const poolA=NATIVE_GRID?spawnReachablePool('A'):seedA;
+  const poolB=NATIVE_GRID?spawnReachablePool('B'):seedB;
+  const A=spreadSlots(poolA,countA,seedB);
+  return {A:A,B:spreadSlots(poolB,countB,A)};
+}
+
 export function boardCenter(){return {x:(W-1)/2,y:(H-1)/2};}
 
 let gridsReady=null;

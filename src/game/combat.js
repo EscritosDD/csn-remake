@@ -7,6 +7,7 @@ import { cheb, shortestArc } from '../core/geometry.js';
 import { sfx, auVoice } from '../core-and-audio.js';
 import { CLIPLIB } from '../render3d/clips.js';
 import { REAL, ensureSquadBodies } from '../render3d/assets-real.js';
+import { planSpawns } from './board.js';
 
 export const SPAWNS_A=[{x:0,y:3},{x:0,y:5},{x:1,y:6},{x:0,y:7},{x:0,y:6}];
 
@@ -64,8 +65,8 @@ export function charForKey(role,key){
   return opts.find(c=>characterKey(c)===key)||opts[0]||null;
 }
 
-export function makeUnit(team,def,i,nation,skin){
-  const list=spawnsFor(team);const sp=list[i%list.length]||(team==='A'?SPAWNS_A[0]:SPAWNS_B[0]);
+export function makeUnit(team,def,i,nation,skin,slots){
+  const list=spawnsFor(team);const sp=(slots&&slots[i])||list[i%list.length]||(team==='A'?SPAWNS_A[0]:SPAWNS_B[0]);
   const origOnly=setup.mode==='campana'||setup.mode==='tutorial'||!!setup.isTutorial;
   const ch=(def&&def.charKey?charForKey(def.role,def.charKey):null)||characterForRole(def.role,i,origOnly);
   const role=ROLES[def.role];
@@ -94,6 +95,8 @@ export function startGame(squadA,squadB){
      beacon:{A:0,B:0},dom:{A:0,B:0},stats:{A:{dmg:0,kills:0},B:{dmg:0,kills:0}},smoke:[],mines:[],drone:effSetupMode()==='escolta'?{isDrone:true,role:'Dron averiado',team:'A',x:escortStart().x,y:escortStart().y,dx:escortStart().x,dy:escortStart().y,hp:ESCORT_DRONE_HP,maxHp:ESCORT_DRONE_MAXHP,alive:true,invisible:false,weapon:null,facing:0,movesLeft:ESCORT_GUIDES_PER_ROUND,movedThisTurn:false,delivered:false}:null,difficulty:setup.opp==='ia'?setup.difficulty:'normal',isTutorial:setup.mode==='tutorial',campaignMission:setup.mode==='campana'?setup.campaignMission:(setup.mode==='tutorial'?0:null),campaignName:campMission?campMission.id:null,campaignTitle:campMission?campMission.title:null,campaignTurnLimit:campMission?campMission.turnLimit:null,campaignObjective:campMission?campMission.objective:null,
      selected:null,actionMode:'move',over:false,aiBusy:false,lastMoveUndo:null,rivalNation,
      names:{A:myNation.name+' (J1)',B:setup.mode==='guerra'?rivalNation.name+' (IA)':(setup.opp==='ia'?'Escuadra IA':'Jugador 2')}};
+  const spawnSlots=planSpawns(squadA.length,squadB.length);
+  G.spawnSlots=spawnSlots;
   document.body.dataset.state='playing';
   setStep('battle','Ronda 1 · '+G.names.A);
   /* Al jugar se retira la portada: el 3D ocupa la pantalla. */
@@ -101,8 +104,8 @@ export function startGame(squadA,squadB){
   try{auAmbient(G.map.theme);}catch(e){}
   try{auMusicStart();}catch(e){}
   setTurnSeed(1,'A');
-  squadA.forEach((d,i)=>G.units.push(makeUnit('A',d,i,myNation,setup.skinA)));
-  squadB.forEach((d,i)=>G.units.push(makeUnit('B',d,i,rivalNation,setup.opp==='local'?setup.skinB:'nacion')));
+  squadA.forEach((d,i)=>G.units.push(makeUnit('A',d,i,myNation,setup.skinA,spawnSlots.A)));
+  squadB.forEach((d,i)=>G.units.push(makeUnit('B',d,i,rivalNation,setup.opp==='local'?setup.skinB:'nacion',spawnSlots.B)));
   if(typeof THREE!=='undefined'&&REAL.ready)ensureSquadBodies(G.units).then(()=>{if(window.__build3D)window.__build3D();});
   const startTheme=(MAP_DEFS[setup.map]||{}).theme;
   if(startTheme&&skState(startTheme)){loadSkirmishTop(startTheme);loadSkirmishGeo(startTheme);}
@@ -193,6 +196,59 @@ export function explodeBarrel(b,srcLabel,srcTeam){
   checkWin();
 }
 
+export function applyShotDamage(shooter){
+  const shot=shooter&&shooter._pendingShot;
+  if(!shot)return false;
+  shooter._pendingShot=null;shooter._resolveShot=null;
+  const target=shot.target,w=shot.w,weaponName=shot.weaponName,dmg=shot.dmg,crit=shot.crit,label=shot.label,opts=shot.opts,p=shot.p;
+  if(G)G._dmgTeam=shooter.team;
+  if(shot.hit&&target&&target.alive){
+    damage(target,dmg,label,shooter.team);
+    /* Empujón del original (KnockbackDistance): las escopetas y los lanzadores
+       desplazan 1 casilla al objetivo vivo si la casilla está libre. */
+    if(w.kb&&target.alive&&!target.isDrone&&target.x!=null&&!opts.isReturn){
+      const ax=target.x-shooter.x,ay=target.y-shooter.y;
+      const dirs=Math.abs(ax)>=Math.abs(ay)?[[Math.sign(ax),0],[0,Math.sign(ay)]]:[[0,Math.sign(ay)],[Math.sign(ax),0]];
+      for(const [dx,dy] of dirs){
+        if(!dx&&!dy)continue;const nx=target.x+dx,ny=target.y+dy;
+        if(nx<0||ny<0||nx>=W||ny>=H)continue;
+        if(blocked(nx,ny)||G.units.some(o=>o!==target&&o.alive&&o.x===nx&&o.y===ny))continue;
+        target.x=nx;target.y=ny;target.dx=nx;target.dy=ny;log('💥 El empujón de '+weaponName+' desplaza a '+target.role+' a ('+(nx+1)+','+(ny+1)+').');checkMines(target);break;
+      }
+    }
+    if(crit&&target.x!=null)fxFloat(target.x,target.y-0.25,'¡CRÍTICO!','#ffd94d');
+    if(w.aoe&&target.x!=null&&typeof fx3Explosion==='function')fx3Explosion(target.x,target.y,'expl');
+    /* Impacto del cohete (RPG/AT4/M72): el lanzamiento ya sonó con
+       rocketlauncher_fire y el impacto lleva su propio sonido del
+       original. Los lanzagranadas no lo necesitan: su cluster_explode
+       ya suena al disparar. */
+    if(w.aoe&&w.cat==='Lanzacohetes'&&target.x!=null)try{auPlay('sfx/weapons/launcher_explode.mp3',0.55);}catch(e){}
+    if(w.aoe&&target.role){G.units.filter(u=>u.alive&&u!==target&&cheb(u,target)<=1).forEach(u=>damage(u,Math.round(dmg*0.45),shooter.role+' · salpicadura',shooter.team));if(G.drone&&G.drone.alive&&target!==G.drone&&cheb(G.drone,target)<=1)damage(G.drone,Math.round(dmg*0.45),shooter.role+' · salpicadura',shooter.team);explodeNear(target,shooter.team);}
+    if(w.supp&&target.alive&&!target.isDrone){target.suppressed=true;log(target.role+' queda suprimido: −2 de energía en su siguiente turno.');}
+  } else if(!shot.hit&&target&&target.x!=null){
+    fxFloat(target.x,target.y,'FALLO','#b8c2b0');
+    log(shooter.role+' ('+shooter.team+') dispara con '+weaponName+(opts.isReturn?' (respuesta)':'')+' y <b>falla</b> ('+p+'% de acierto).');
+  }
+  if(target&&target._visualDelayUntil!=null&&(!shot.hit||!target.alive))target._visualDelayUntil=null;
+  /* Fuego de respuesta: todas las armas lo llevan activado en el original.
+     Si el objetivo sobrevive, tiene al atacante en alcance y visión y aún
+     no ha respondido este turno, devuelve el fuego gratis, con −20 de
+     puntería y daño ×0,6. Su respuesta no provoca otra respuesta. */
+  if(!opts.isReturn&&!opts.noReturn&&target&&target.role&&target.weapon&&target.alive&&shooter.alive){
+    const key=G.round+'-'+G.turn+'-'+target.id;
+    if(target.returnKey!==key&&!target.invisible&&!target.stunned){
+      const tw=WEAPONS[target.weapon];
+      if(tw&&cheb(target,shooter)<=tw.rng&&hasLOS(target,shooter)&&hitChance(target,shooter,tw)>0){
+        target.returnKey=key;
+        log('↩ Fuego de respuesta de '+target.role+' ('+target.team+').');
+        tryShoot(target,shooter,target.weapon,0.6,{isReturn:true,freeCost:true,hitPenalty:20,noReturn:true,silent:true});
+      }
+    }
+  }
+  if(G)G._dmgTeam=null;
+  checkWin();updateUI();draw();return true;
+}
+
 export function tryShoot(shooter,target,weaponName,multiplier,opts){
   if(!shooter||!shooter.alive)return false;
   opts=opts||{};
@@ -219,62 +275,24 @@ export function tryShoot(shooter,target,weaponName,multiplier,opts){
   if(deferredFire&&shooter._shootTarget){shooter._shootTarget._visualDelayUntil=FX.t+1200;shooter._shootTarget._pendingHit=null;}
   if(!deferredFire){const m3=T3&&T3.units&&T3.units.get?T3.units.get(shooter.id):null;fireWeaponFeedback(shooter,m3&&m3.userData,true);}
   const roll=rng()*100;
-  let hit=false;
+  let hit=false,dmg=0,crit=false,label='';
   if(roll<p){
     hit=true;
-    let dmg=w.dmg;
+    dmg=w.dmg;
     if(weaponName==='Remington 870'||weaponName==='Benelli M4'){dmg=cheb(shooter,target)<=1?w.dmg:Math.round(w.dmg*0.45);}
     dmg=dmg*falloffFactor(shooter,target,w);
     dmg=dmg*(0.85+rng()*0.3);
-    let crit=false;
     if(rng()<0.15){dmg=dmg*1.5;crit=true;}
     if(multiplier)dmg=dmg*multiplier;
     if(G&&G.opp==='ia'&&shooter.team==='B'){if(G.difficulty==='recluta')dmg=dmg*0.85;else if(G.difficulty==='elite')dmg=dmg*1.15;}
     if(shooter.buffDmg)dmg=dmg*(1+shooter.buffDmg);
     dmg=Math.max(1,Math.round(dmg));
-    damage(target,dmg,shooter.role+' ('+shooter.team+') con '+weaponName+(crit?' · ¡CRÍTICO ×1,5!':'')+(opts.isReturn?' · fuego de respuesta':'')+(opts.isOverwatch?' · vigilancia':''),shooter.team);
-    /* Empujón del original (KnockbackDistance): las escopetas y los lanzadores
-       desplazan 1 casilla al objetivo vivo si la casilla está libre. */
-    if(w.kb&&target.alive&&!target.isDrone&&target.x!=null&&!opts.isReturn){
-      const ax=target.x-shooter.x,ay=target.y-shooter.y;
-      const dirs=Math.abs(ax)>=Math.abs(ay)?[[Math.sign(ax),0],[0,Math.sign(ay)]]:[[0,Math.sign(ay)],[Math.sign(ax),0]];
-      for(const [dx,dy] of dirs){
-        if(!dx&&!dy)continue;const nx=target.x+dx,ny=target.y+dy;
-        if(nx<0||ny<0||nx>=W||ny>=H)continue;
-        if(blocked(nx,ny)||G.units.some(o=>o!==target&&o.alive&&o.x===nx&&o.y===ny))continue;
-        target.x=nx;target.y=ny;target.dx=nx;target.dy=ny;log('💥 El empujón de '+weaponName+' desplaza a '+target.role+' a ('+(nx+1)+','+(ny+1)+').');checkMines(target);break;
-      }
-    }
-    if(crit&&target.x!=null)fxFloat(target.x,target.y-0.25,'¡CRÍTICO!','#ffd94d');
-    if(w.aoe&&target.x!=null&&typeof fx3Explosion==='function')fx3Explosion(target.x,target.y,'expl');
-    /* Impacto del cohete (RPG/AT4/M72): el lanzamiento ya sonó con
-       rocketlauncher_fire y el impacto lleva su propio sonido del
-       original. Los lanzagranadas no lo necesitan: su cluster_explode
-       ya suena al disparar. */
-    if(w.aoe&&w.cat==='Lanzacohetes'&&target.x!=null)try{auPlay('sfx/weapons/launcher_explode.mp3',0.55);}catch(e){}
-    if(w.aoe&&target.role){G.units.filter(u=>u.alive&&u!==target&&cheb(u,target)<=1).forEach(u=>damage(u,Math.round(dmg*0.45),shooter.role+' · salpicadura',shooter.team));if(G.drone&&G.drone.alive&&target!==G.drone&&cheb(G.drone,target)<=1)damage(G.drone,Math.round(dmg*0.45),shooter.role+' · salpicadura',shooter.team);explodeNear(target,shooter.team);}
-    if(w.supp&&target.alive&&!target.isDrone){target.suppressed=true;log(target.role+' queda suprimido: −2 de energía en su siguiente turno.');}
-  } else {
-    if(target.x!=null)fxFloat(target.x,target.y,'FALLO','#b8c2b0');
-    log(shooter.role+' ('+shooter.team+') dispara con '+weaponName+(opts.isReturn?' (respuesta)':'')+' y <b>falla</b> ('+p+'% de acierto).');
+    label=shooter.role+' ('+shooter.team+') con '+weaponName+(crit?' · ¡CRÍTICO ×1,5!':'')+(opts.isReturn?' · fuego de respuesta':'')+(opts.isOverwatch?' · vigilancia':'');
   }
-  /* Fuego de respuesta: todas las armas lo llevan activado en el original.
-     Si el objetivo sobrevive, tiene al atacante en alcance y visión y aún
-     no ha respondido este turno, devuelve el fuego gratis, con −20 de
-     puntería y daño ×0,6. Su respuesta no provoca otra respuesta. */
-  if(!opts.isReturn&&!opts.noReturn&&target&&target.role&&target.weapon&&target.alive&&shooter.alive){
-    const key=G.round+'-'+G.turn+'-'+target.id;
-    if(target.returnKey!==key&&!target.invisible&&!target.stunned){
-      const tw=WEAPONS[target.weapon];
-      if(tw&&cheb(target,shooter)<=tw.rng&&hasLOS(target,shooter)&&hitChance(target,shooter,tw)>0){
-        target.returnKey=key;
-        log('↩ Fuego de respuesta de '+target.role+' ('+target.team+').');
-        tryShoot(target,shooter,target.weapon,0.6,{isReturn:true,freeCost:true,hitPenalty:20,noReturn:true,silent:true});
-      }
-    }
-  }
-  G._dmgTeam=null;
-  checkWin();updateUI();draw();return true;
+  shooter._pendingShot={target:target,w:w,weaponName:weaponName,dmg:dmg,hit:hit,crit:crit,label:label,opts:opts,p:p};
+  if(deferredFire&&shooter._shootTarget)shooter._resolveShot=()=>applyShotDamage(shooter);
+  else applyShotDamage(shooter);
+  return true;
 }
 
 export function setOverwatch(u){

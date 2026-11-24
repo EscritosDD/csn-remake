@@ -71,7 +71,7 @@ export function draw(){
   ctx.fillStyle=light;ctx.fillRect(0,0,boardW,boardH);
   /* zonas de despliegue */
   const zone=(list,col)=>{list.forEach(s=>{rr(s.x*S+3,s.y*S+3,S-6,S-6,8);ctx.fillStyle=col;ctx.fill();});};
-  zone(spawnsFor('A'),'rgba(57,194,215,.13)');zone(spawnsFor('B'),'rgba(255,122,69,.13)');
+  zone((G&&G.spawnSlots&&G.spawnSlots.A)||spawnsFor('A'),'rgba(57,194,215,.13)');zone((G&&G.spawnSlots&&G.spawnSlots.B)||spawnsFor('B'),'rgba(255,122,69,.13)');
   /* baliza: zona ámbar con esquinas de mira */
   const beaconAlpha=REDUCED_MOTION?.16:(.13+.05*Math.sin(FX.t/520));
   BEACON.forEach(b=>{ctx.fillStyle='rgba(242,178,52,'+beaconAlpha.toFixed(3)+')';ctx.fillRect(b.x*S,b.y*S,S,S);});

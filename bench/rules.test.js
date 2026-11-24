@@ -13,7 +13,7 @@ function loadEngine() {
   const idx = code.indexOf(mark);
   assert.ok(idx > 0, 'INIT marker must exist');
   code = code.slice(0, idx);
-  code += '\n;globalThis.__api={startGame,endTurn,checkWin,coverLevel,isFlanked,hasLOS,smokeBlocksLOS,throwSmoke,placeMine,checkMines,throwFlash,damage,tryShoot,guideDrone,scoreDominationFor,domControl,screenStateFor,classicBoardMetrics,classicTileFromPoint,fitViewerDistance,viewerCenterOffset,gameplayModelPresentation,rootBonePositionForClip,validatedRigBoneInverses,sampleClipQuat,clipTrackAt,resetCamState,resetCam3D,setBoardSize,preloadNativeGrids,boardCenter,w2cx,w2cz,tileFromWorldPoint,camPanBounds,camDefaultDist,bodySpecForUnit,ensureSquadBodies,REAL,ROLES,WEAPONS,NATIONS,DOM_ZONES,DOM_TARGET,ESCORT_EXT,ESCORT_DRONE_HP,ESCORT_DRONE_MAXHP,get G(){return G;},get T3(){return T3;},set T3(v){setT3(v);},setBuild3D(fn){window.__build3D=fn;},dispatchClipEvents,get CLIP_EVENT_LOG(){return CLIP_EVENT_LOG;},fireClipFor,setTHREE(v){globalThis.THREE=v;},get setup(){return setup;},set myNation(v){myNation=v;},mkSquad(n){return DEFAULT_SQUADS[n].map(r=>({role:r,weapon:ROLES[r].weapons[0]}));}};';
+  code += '\n;globalThis.__api={startGame,endTurn,checkWin,coverLevel,isFlanked,hasLOS,smokeBlocksLOS,throwSmoke,placeMine,checkMines,throwFlash,damage,tryShoot,applyShotDamage,guideDrone,scoreDominationFor,domControl,screenStateFor,classicBoardMetrics,classicTileFromPoint,fitViewerDistance,viewerCenterOffset,gameplayModelPresentation,rootBonePositionForClip,validatedRigBoneInverses,sampleClipQuat,clipTrackAt,resetCamState,resetCam3D,setBoardSize,preloadNativeGrids,boardCenter,w2cx,w2cz,tileFromWorldPoint,camPanBounds,camDefaultDist,bodySpecForUnit,ensureSquadBodies,REAL,ROLES,WEAPONS,NATIONS,DOM_ZONES,DOM_TARGET,ESCORT_EXT,ESCORT_DRONE_HP,ESCORT_DRONE_MAXHP,get G(){return G;},get T3(){return T3;},set T3(v){setT3(v);},setBuild3D(fn){window.__build3D=fn;},dispatchClipEvents,get CLIP_EVENT_LOG(){return CLIP_EVENT_LOG;},fireClipFor,setTHREE(v){globalThis.THREE=v;},get setup(){return setup;},set myNation(v){myNation=v;},mkSquad(n){return DEFAULT_SQUADS[n].map(r=>({role:r,weapon:ROLES[r].weapons[0]}));}};';
 
   const magic = () => {
     const f = () => {};
@@ -445,6 +445,27 @@ test('clip events fire once per crossing and reset when the clip rewinds', () =>
   api.dispatchClipEvents(un, ud, clip, 'fire2h', 0.6, 1040);
   fired = api.CLIP_EVENT_LOG.slice(before).filter(e => e.f === 'PlayWeaponFire');
   assert.equal(fired.length, 2);
+});
+
+test('cada bala de una rafaga tiene feedback propio y el dano se aplica en su evento', () => {
+  const api = loadEngine();
+  api.myNation = api.NATIONS[0];
+  Object.assign(api.setup, { mode: 'eliminacion', fmt: 2, opp: 'local', map: 'almacen', difficulty: 'normal' });
+  api.startGame(api.mkSquad(2), api.mkSquad(2));
+  const un = api.G.units[0], foe = api.G.units.find(u => u.team === 'B'), ud = {};
+  const clip = { events: [0.1, 0.2, 0.3].map(t => ({ f: 'OnAnimEvent', i: 10, t })) };
+  un._shootT = 1000; un._shootW = 'MP5'; un._shootCat = 'Subfusiles';
+  un._shootAt = { x: foe.x, y: foe.y }; un._shootTarget = foe;
+  foe._visualDelayUntil = 9999; foe._pendingHit = null;
+  un._pendingShot = { target: foe, w: api.WEAPONS.MP5, weaponName: 'MP5', dmg: 20, hit: true, crit: false, label: 'MP5', opts: {}, p: 100 };
+  un._resolveShot = () => api.applyShotDamage(un);
+  const before = api.CLIP_EVENT_LOG.length, hp = foe.hp;
+  api.dispatchClipEvents(un, ud, clip, 'fireBurst', 0.15, 1100);
+  assert.equal(api.CLIP_EVENT_LOG.slice(before).filter(e => e.f === 'OnAnimEvent' && e.i === 10).length, 1);
+  assert.equal(foe.hp, hp - 20);
+  api.dispatchClipEvents(un, ud, clip, 'fireBurst', 0.35, 1200);
+  assert.equal(api.CLIP_EVENT_LOG.slice(before).filter(e => e.f === 'OnAnimEvent' && e.i === 10).length, 3);
+  assert.equal(foe.hp, hp - 20);
 });
 
 test('el look arcade 3D usa paleta pop, exposición 1.12 y FX agrupados sin renderer extra', () => {

@@ -22,13 +22,18 @@ function makeHit(){
 
 function makeBoom(){
   const grp=new THREE.Group();
-  const outer=new THREE.Mesh(new THREE.RingGeometry(0.2,0.31,28),new THREE.MeshBasicMaterial({color:0xff7b29,transparent:true,opacity:0.85,side:THREE.DoubleSide,depthWrite:false}));
-  outer.rotation.x=-Math.PI/2;grp.add(outer);
-  const inner=new THREE.Mesh(new THREE.RingGeometry(0.1,0.18,24),new THREE.MeshBasicMaterial({color:SELECT_GOLD_HEX,transparent:true,opacity:0.9,side:THREE.DoubleSide,depthWrite:false}));
-  inner.rotation.x=-Math.PI/2;inner.position.y=0.03;grp.add(inner);
-  const core=new THREE.Mesh(new THREE.SphereGeometry(0.22,12,10),new THREE.MeshBasicMaterial({color:0xff7b29,transparent:true,opacity:0.7,depthWrite:false}));
-  core.position.y=0.36;grp.add(core);
-  grp.userData={outer:outer,inner:inner,core:core};grp.visible=false;return grp;
+  const core=new THREE.Mesh(new THREE.SphereGeometry(0.32,14,12),new THREE.MeshBasicMaterial({color:SELECT_GOLD_HEX,transparent:true,opacity:0.85,depthWrite:false}));
+  core.position.y=0.46;grp.add(core);
+  const shell=new THREE.Mesh(new THREE.SphereGeometry(0.56,14,12),new THREE.MeshBasicMaterial({color:0xff7b29,transparent:true,opacity:0.35,side:THREE.BackSide,depthWrite:false}));
+  shell.position.y=0.5;grp.add(shell);
+  const shock=new THREE.Mesh(new THREE.TorusGeometry(0.52,0.045,6,28),new THREE.MeshBasicMaterial({color:0xff7b29,transparent:true,opacity:0.8,depthWrite:false}));
+  shock.rotation.x=-Math.PI/2;shock.position.y=0.06;grp.add(shock);
+  const puffs=[];
+  for(const d of [[1,0.9,0.2],[-0.8,1,0.4],[0.2,1.1,-1],[-0.3,0.8,1],[1,0.6,-0.7],[-1,0.5,-0.6],[0.7,1.2,0.7]]){
+    const p=new THREE.Mesh(new THREE.SphereGeometry(0.13,8,6),new THREE.MeshBasicMaterial({color:0xffa04a,transparent:true,opacity:0.6,depthWrite:false}));
+    p.userData.dir=new THREE.Vector3(d[0],d[1],d[2]).normalize();grp.add(p);puffs.push(p);
+  }
+  grp.userData={core:core,shell:shell,shock:shock,puffs:puffs};grp.visible=false;return grp;
 }
 
 function take(kind){
@@ -108,17 +113,26 @@ export function arcadeExplosion(x,y,kind,now,REDUCED_MOTION){
   const node=take('boom');if(!node)return;
   const cx=w2cx(x),cz=w2cz(y);
   const col=kind==='heal'?SELECT_LIME_HEX:(kind==='smoke'?0xd6dbe0:(kind==='flash'?SELECT_GOLD_HEX:0xff7b29));
-  const {outer,inner,core}=node.userData;
-  node.position.set(cx,tileWorldY(x,y)+0.08,cz);
-  outer.material.color.setHex(col);inner.material.color.setHex(kind==='heal'?SELECT_LIME_HEX:SELECT_GOLD_HEX);core.material.color.setHex(col);
-  push('boom',node,now,480,(it,k)=>{
-    outer.scale.setScalar(1+k*3.4);
-    inner.scale.setScalar(1+k*2.1);
-    core.scale.setScalar(1+k*1.9);
-    core.position.y=0.36+k*(kind==='heal'?0.9:0.2);
-    outer.material.opacity=Math.max(0,0.85*(1-k));
-    inner.material.opacity=Math.max(0,0.9*(1-k*0.8));
-    core.material.opacity=Math.max(0,0.7*(1-k));
+  const {core,shell,shock,puffs}=node.userData;
+  node.position.set(cx,tileWorldY(x,y)+0.12,cz);
+  core.material.color.setHex(col);shell.material.color.setHex(col);shock.material.color.setHex(col);
+  puffs.forEach(p=>p.material.color.setHex(col));
+  const grow=kind==='heal'?0.6:1;
+  push('boom',node,now,grow===1?620:480,(it,k)=>{
+    core.scale.setScalar(1+k*1.1*grow);
+    shell.scale.setScalar(0.6+k*1.7*grow);
+    shock.scale.setScalar(1+k*2*grow);
+    core.position.y=0.46+k*0.5*grow;
+    shell.position.y=0.5+k*0.8*grow;
+    core.material.opacity=Math.max(0,0.85*(1-k));
+    shell.material.opacity=Math.max(0,0.35*(1-k));
+    shock.material.opacity=Math.max(0,0.8*(1-k));
+    for(const p of puffs){
+      const d=p.userData.dir;
+      p.position.set(d.x*k*0.95*grow,0.46+d.y*k*1.05*grow,0.5+d.z*k*0.95*grow);
+      p.scale.setScalar(1+k*0.9*grow);
+      p.material.opacity=Math.max(0,0.6*(1-k));
+    }
   });
 }
 
