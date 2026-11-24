@@ -240,8 +240,8 @@
             <button data-skin="nacion" class="on">Nación · bandera y emblema</button>
           </div>
         </div>
-        <div class="setup-grid" style="margin-top:6px">
-          <div>
+        <div class="setup-grid squad-stage" style="margin-top:6px">
+          <div class="squad-stage-col">
             <label class="f" id="squadALabel">Tu escuadra</label>
             <div id="squadA"></div>
           </div>
@@ -250,9 +250,9 @@
             <div id="squadB"></div>
           </div>
         </div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px">
-          <button class="btn primary big" id="launchBtn">▶ Desplegar y jugar</button>
-          <button class="btn ghost" id="cancelSetup">Volver</button>
+        <div class="squad-band">
+          <div class="squad-band-copy"><span class="kicker">Crea tu super equipo</span><p>Rol, arma y personaje de cada soldado, listos para desplegar.</p></div>
+          <div class="squad-band-actions"><button class="btn primary big" id="launchBtn">▶ Jugar</button><button class="btn ghost" id="cancelSetup">Volver</button></div>
         </div>
       </div>
     </div>
@@ -334,28 +334,38 @@
 
   <!-- ============ ARSENAL ============ -->
   <section class="screen" id="scr-barracks">
-    <div class="panel">
-      <h2>Cuartel</h2>
-      <p class="sub" id="barrNation"></p>
-      <button class="btn secondary" id="barrBack" style="margin-top:8px">← Volver</button>
+    <div class="screen-head military-head">
+      <div><span class="kicker">Barracks</span><h1>Cuartel</h1><p class="sub" id="barrNation"></p></div>
+      <div class="head-side"><span class="coin-chip" id="barrCoins">🪙 500</span><button class="btn ghost" id="barrBack">← Volver</button></div>
     </div>
     <div id="barrContent"></div>
   </section>
 
   <section class="screen" id="scr-arsenal">
     <div class="back-row" hidden><button class="btn ghost" data-back>← Volver al menú</button></div>
-    <div class="hero">
-      <h1>Armería</h1>
-      <p>Catálogo compacto: armas originales, CSN y desplegables.</p>
+    <div class="screen-head military-head">
+      <div><span class="kicker">Tienda</span><h1>Armería</h1><p>Todo el equipo incluido. Elige y equipa sin monedas de más.</p></div>
+      <span class="coin-chip" id="arsCoins">🪙 500</span>
     </div>
-    <div class="seg" id="arsSectionSeg"><button type="button" data-arssec="weapons" class="on">Armas</button><button type="button" data-arssec="deployables">Desplegables y objetos (10)</button><button type="button" data-arssec="abilities">Habilidades del original (52)</button></div>
-    <div class="filters" id="arsFilters"></div>
-    <div class="arsenal-grid" id="arsenalGrid"></div>
-    <div id="deployablePanel" style="display:none"><div id="deployableGrid" class="deployable-grid"></div></div>
-    <div class="panel" id="abilityPanel" style="margin-top:14px;display:none">
-      <h2>Catálogo del original · 52 habilidades</h2>
-      <div id="abilityCatalog" class="ab-catalog"></div>
+    <div class="store-layout">
+      <nav class="store-cats" id="storeCats" aria-label="Categorías de la tienda">
+        <button type="button" data-store-cat="weapons" class="on">Armas</button>
+        <button type="button" data-store-cat="characters">Personajes</button>
+        <button type="button" data-store-cat="skins">Skins</button>
+      </nav>
+      <div class="store-grid" id="storeGrid"></div>
     </div>
+    <details class="store-legacy">
+      <summary>Catálogo completo · armas originales, desplegables y habilidades</summary>
+      <div class="seg" id="arsSectionSeg"><button type="button" data-arssec="weapons" class="on">Armas</button><button type="button" data-arssec="deployables">Desplegables y objetos (10)</button><button type="button" data-arssec="abilities">Habilidades del original (52)</button></div>
+      <div class="filters" id="arsFilters"></div>
+      <div class="arsenal-grid" id="arsenalGrid"></div>
+      <div id="deployablePanel" style="display:none"><div id="deployableGrid" class="deployable-grid"></div></div>
+      <div class="panel" id="abilityPanel" style="margin-top:14px;display:none">
+        <h2>Catálogo del original · 52 habilidades</h2>
+        <div id="abilityCatalog" class="ab-catalog"></div>
+      </div>
+    </details>
     <div class="panel" style="margin-top:16px">
       <h2>Granadas, torretas y equipo</h2>
       <div class="howto" style="margin-top:8px">
@@ -408,6 +418,7 @@
   <section class="screen" id="scr-viewer">
     <div class="back-row" hidden><button class="btn ghost" data-back>← Volver al menú</button></div>
     <div class="hero">
+      <span class="kicker">Grupo</span>
       <h1>Tropas</h1>
       <p>Arrastra para girar · rueda para acercar.</p>
     </div>

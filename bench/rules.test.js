@@ -474,9 +474,9 @@ test('el look arcade 3D usa paleta pop, exposición 1.12 y FX agrupados sin rend
   const cam = read('render3d/camera3d.js');
   const demo = read('game/demo.js');
   const arcade = read('render3d/fx-arcade.js');
-  assert.match(env, /TEAM_A_HEX=0x00e5ff/);
-  assert.match(env, /TEAM_B_HEX=0xff3d71/);
-  assert.match(env, /SELECT_LIME_HEX=0xb8ff2c/);
+  assert.match(env, /TEAM_A_HEX=0x8a9a5b/);
+  assert.match(env, /TEAM_B_HEX=0x9c3040/);
+  assert.match(env, /SELECT_LIME_HEX=0x8a9a5b/);
   assert.match(cam, /toneMappingExposure=1\.12/);
   assert.match(demo, /toneMappingExposure=1\.12/);
   assert.match(cam, /new THREE\.DirectionalLight\(0x9fe8ff,0\.85\)/);

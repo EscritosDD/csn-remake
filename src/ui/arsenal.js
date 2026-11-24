@@ -1,10 +1,14 @@
 import { BODIES, ROLES, ROLE_NAMES, roleLook } from '../data/roles.js';
 import { WEAPONS } from '../data/weapons.js';
-import { WEAPONS_ORIGINAL, WEAPON_MESH_FILE } from '../render3d/assets-weapons.js';
+import { WEAPONS_ORIGINAL, WEAPON_MESH_FILE, weaponCoverURL } from '../render3d/assets-weapons.js';
 import { auWeaponFile, auDeployable } from '../audio/sound.js';
 import { DEPLOYABLES } from '../data/deployables.js';
+import { ORIG_CAST, OWN_CAST } from '../data/cast.js';
+import { SKINS } from '../data/nations.js';
+import { lsGet, lsSet } from '../core-and-audio.js';
+import { loadChars, saveChars, setCHAR_PREFS } from '../game/chars.js';
 import { scanCardBoxes } from '../viewer/card-stage.js';
-import { $, rolePortraitURL } from './ui-shell.js';
+import { $, rolePortraitURL, toast } from './ui-shell.js';
 
 export const CATS=['Todas','Fusiles de asalto','Subfusiles','Ametralladoras','Francotirador','Escopetas','Lanzacohetes','Lanzagranadas','Pistolas','Cuerpo a cuerpo','Consumible'];
 export const ORIGINS=['Todas','Juego original','CSN'];
@@ -80,6 +84,66 @@ function arBuildFilters(originalCount,csnCount,cats){
   f.replaceChildren(origin,row);
 }
 
+const STORE_WEAPON_KEY='csn_store_weapon', STORE_SKIN_KEY='csn_store_skin';
+let storeSection='weapons';
+const arCoins=()=>typeof window!=='undefined'&&typeof window.coinsGet==='function'?window.coinsGet():500;
+
+function arStoreCard(opts){
+  const meta=(opts.meta||[]).map(item=>'<span>'+arEsc(item)+'</span>').join('');
+  const art=opts.art?'<img class="store-art" src="'+arEsc(opts.art)+'" alt=""/>':'';
+  const on=opts.equipped?' on':'';
+  return '<article class="store-card" data-store-kind="'+arEsc(opts.kind)+'" data-store-key="'+arEsc(opts.key)+'">'+art+
+    '<div class="store-info"><h3>'+arEsc(opts.title)+'</h3><p>'+arEsc(opts.sub||'')+'</p><div class="store-meta">'+meta+'</div></div>'+
+    '<div class="store-buy"><span class="store-price">Incluido · 🪙 '+arCoins()+'</span><button type="button" data-store-equip="'+arEsc(opts.kind)+'" data-store-key="'+arEsc(opts.key)+'" class="'+on.trim()+'">'+(opts.equipped?'Equipado':'Equipar')+'</button></div></article>';
+}
+
+function arStoreCards(){
+  if(storeSection==='characters'){
+    const prefs=loadChars();
+    return ORIG_CAST.concat(OWN_CAST).map(char=>{
+      const key=char.key||((char.own?'own:':'original:')+char.name);
+      const equipped=Object.keys(prefs).some(role=>prefs[role]===char.name||prefs[role]===key);
+      return arStoreCard({kind:'character',key,title:char.name,sub:(char.role||'Soldado')+' · '+(char.bio||''),meta:[char.own?'CSN':'Juego original',char.defaultWeapon||'Sin arma'],art:rolePortraitURL(char.role,char)||'assets/ui/icono_original.png',equipped});
+    }).join('');
+  }
+  if(storeSection==='skins'){
+    const equipped=lsGet(STORE_SKIN_KEY)||'nacion';
+    return Object.entries(SKINS).map(([key,skin])=>arStoreCard({kind:'skin',key,title:skin.name,sub:skin.desc,meta:['Sin pasiva',key==='nacion'?'Bandera y emblema':'Uniforme'],art:'assets/ui/icono_original.png',equipped:key===equipped})).join('');
+  }
+  const equipped=lsGet(STORE_WEAPON_KEY)||'';
+  return Object.entries(WEAPONS).map(([name,weapon])=>arStoreCard({kind:'weapon',key:name,title:name,sub:weapon.note||weapon.real||'',meta:[weapon.cat,weapon.dmg+' daño',weapon.rng+' casillas',weapon.cost+' ⚡'],art:weaponCoverURL(name)||'assets/ui/icono_original.png',equipped:name===equipped})).join('');
+}
+
+function arStoreEquip(button){
+  const kind=button.dataset.storeEquip,key=button.dataset.storeKey;
+  if(kind==='weapon')lsSet(STORE_WEAPON_KEY,key);
+  else if(kind==='skin'){
+    lsSet(STORE_SKIN_KEY,key);
+    if(typeof window!=='undefined'&&window.setup)window.setup.skinA=key;
+    if(typeof window!=='undefined'&&typeof window.syncSkinSegs==='function')window.syncSkinSegs();
+    if(typeof window!=='undefined'&&typeof window.buildSquads==='function')window.buildSquads();
+  } else {
+    const char=ORIG_CAST.concat(OWN_CAST).find(item=>(item.key||((item.own?'own:':'original:')+item.name))===key);
+    if(char&&char.role){const prefs=loadChars();prefs[char.role]=char.name;saveChars(prefs);setCHAR_PREFS(prefs);}
+  }
+  toast((kind==='weapon'?'Arma':kind==='skin'?'Skin':'Personaje')+' equipado: '+key+'.');
+  arRenderStore();
+}
+
+function arRenderStore(){
+  const cats=$('#storeCats');
+  if(cats&&!cats._bound){
+    cats._bound=true;
+    cats.querySelectorAll('button[data-store-cat]').forEach(button=>{button.onclick=()=>{storeSection=button.dataset.storeCat;arRenderStore();};});
+  }
+  if(cats)cats.querySelectorAll('button').forEach(button=>button.classList.toggle('on',button.dataset.storeCat===storeSection));
+  const coin=$('#arsCoins');if(coin)coin.textContent='🪙 '+arCoins();
+  const barrCoin=$('#barrCoins');if(barrCoin)barrCoin.textContent='🪙 '+arCoins();
+  const grid=$('#storeGrid');if(!grid)return;
+  grid.innerHTML=arStoreCards()||'<p class="store-empty">No hay artículos en esta categoría.</p>';
+  grid.querySelectorAll('[data-store-equip]').forEach(button=>{button.onclick=()=>arStoreEquip(button);});
+}
+
 export function buildDeployables(){
   const grid=$('#deployableGrid');if(!grid)return;
   grid.innerHTML=DEPLOYABLES.map(arDeployableCardHTML).join('');
@@ -97,6 +161,7 @@ function arSetSection(section){
 }
 
 export function buildArsenal(){
+  arRenderStore();
   const sectionSeg=$('#arsSectionSeg');
   if(sectionSeg&&!sectionSeg._bound){
     sectionSeg._bound=true;
