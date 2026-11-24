@@ -33,18 +33,25 @@ export function flagArtHTML(n,sm){
 
 export const PORTRAIT_CACHE={};
 
-export function rolePortraitURL(role,char,explicitSkin){
+export function portraitKey(role,char,skin,nation){
+  const id=(char&&(char.key||char.charKey||char.charName||char.name))||'';
+  const tex=(char&&(char.charTexture||char.texture))||'',mesh=(char&&(char.charMesh||char.mesh))||'';
+  return role+'|'+skin+'|'+(skin==='nacion'&&nation?nation.id:'std')+'|'+id+'|'+tex+'|'+mesh;
+}
+
+export function rolePortraitURL(role,char,explicitSkin,opts){
   try{
-    const identity=(char&&(char.key||char.charKey||char.charName||char.name))||'';
-    const skin=explicitSkin||(myNation?'nacion':'estandar');
-    const pkey=role+'|'+skin+'|'+identity;
+    const o=opts||{};
+    const skin=explicitSkin||o.skin||(myNation?'nacion':'estandar');
+    const nation=o.nation||myNation;
+    const pkey=portraitKey(role,char,skin,nation);
     if(PORTRAIT_CACHE[pkey])return PORTRAIT_CACHE[pkey];
     if(REAL.ready&&typeof realSpriteUnit==='function'&&typeof renderRealSprite==='function'){
       const r=ROLES[role];
       if(r){
-         const u=realSpriteUnit(role,r.weapons[0],skin,myNation,char);
+         const u=realSpriteUnit(role,r.weapons[0],skin,nation,char);
 
-        const e=renderRealSprite(u);
+        const e=renderRealSprite(u,{authored:!!o.authored});
         if(e&&e.url){
           /* Busto: recorte de la parte alta del render de cuerpo entero. */
           const im=new Image();
@@ -56,9 +63,12 @@ export function rolePortraitURL(role,char,explicitSkin){
               cx.drawImage(im, im.width*0.12, im.height*0.08, sw, sh, 0, 0, 128, 128);
               PORTRAIT_CACHE[pkey]=cv.toDataURL('image/png');
             }catch(err){PORTRAIT_CACHE[pkey]=e.url;}
+            try{document.querySelectorAll('[data-portrait-key]').forEach(el=>{if(el.dataset.portraitKey!==pkey)return;if(el.tagName==='IMG')el.src=PORTRAIT_CACHE[pkey];else el.style.backgroundImage='url('+PORTRAIT_CACHE[pkey]+')';});}catch(err){}
+            if(typeof o.onReady==='function')o.onReady(pkey,PORTRAIT_CACHE[pkey]);
           };
+          im.onerror=()=>{delete PORTRAIT_CACHE[pkey];};
           im.src=e.url;
-           PORTRAIT_CACHE[pkey]=e.url;
+          PORTRAIT_CACHE[pkey]=e.url;
 
           return e.url;
         }

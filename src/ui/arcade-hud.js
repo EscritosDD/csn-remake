@@ -1,3 +1,6 @@
+import { REAL } from '../render3d/assets-real.js';
+import { portraitKey, rolePortraitURL } from './ui-shell.js';
+
 const escapeHtml=value=>String(value==null?'':value).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const hpPercent=(hp,max)=>{const a=Number(hp),b=Number(max);return b>0&&Number.isFinite(a)&&Number.isFinite(b)?Math.max(0,Math.min(100,Math.round(a/b*100))):0;};
 
@@ -21,7 +24,9 @@ export function vitalsMarkup(units,turn,selected,roleColors){
     const state=unitStatus(u);
     const energy=alive&&Number.isFinite(Number(u.energy))?Number(u.energy)+' / '+Number(u.maxEnergy)+' ⚡':'— ⚡';
     const title=escapeHtml(u.role||'')+' · '+label+' · '+escapeHtml(state)+' · '+escapeHtml(energy)+' · '+escapeHtml(u.weapon||'');
-    return '<button type="button" class="'+cls+'" data-hud-unit="'+i+'" style="--vital:'+escapeHtml(color)+'" title="'+title+'"><span class="hud-vital-ico">'+escapeHtml((u.role||'?').slice(0,1))+'</span><span class="hud-vital-name"><b>'+escapeHtml(u.role||'')+'</b><small>'+escapeHtml(u.weapon||'')+'</small></span><span class="hud-vital-meta"><em>'+escapeHtml(state)+'</em><i>'+escapeHtml(energy)+'</i></span><span class="hud-vital-bar"><i style="width:'+hpPercent(u.hp,u.maxHp)+'%"></i></span><b class="hud-vital-hp">'+label+'</b></button>';
+    const face=REAL&&REAL.ready&&typeof rolePortraitURL==='function'?rolePortraitURL(u.role,u,u.skin,{nation:u.nation,authored:true}):null;
+    const faceStyle=face?' style="background-image:url('+escapeHtml(face)+');background-size:cover;background-position:center 15%;color:transparent;border-color:transparent"':'';
+    return '<button type="button" class="'+cls+'" data-hud-unit="'+i+'" style="--vital:'+escapeHtml(color)+'" title="'+title+'"><span class="hud-vital-ico" data-portrait-key="'+escapeHtml(face?portraitKey(u.role,u,u.skin,u.nation):'')+'"'+faceStyle+'>'+escapeHtml((u.role||'?').slice(0,1))+'</span><span class="hud-vital-name"><b>'+escapeHtml(u.role||'')+'</b></span><span class="hud-vital-meta"><em>'+escapeHtml(state)+'</em><i>'+escapeHtml(energy)+'</i></span><span class="hud-vital-bar"><i style="width:'+hpPercent(u.hp,u.maxHp)+'%"></i></span><b class="hud-vital-hp">'+label+'</b></button>';
   }).join('');
 }
 

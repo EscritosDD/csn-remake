@@ -11,12 +11,13 @@ export const REAL_SPRITES={renderer:null,scene:null,camera:null,failed:false,cac
 
 export const REAL_SPRITE_FEET=0.77;
 
-export function realSpriteKey(un){return un.role+'|'+un.weapon+'|'+un.skin+'|'+(un.skin==='nacion'&&un.nation?un.nation.id:'std')+'|'+(un.charKey||un.name||'');}
+export function realSpriteKey(un){return un.role+'|'+un.weapon+'|'+un.skin+'|'+(un.skin==='nacion'&&un.nation?un.nation.id:'std')+'|'+(un.charKey||un.name||'')+'|'+(un.charTexture||'')+'|'+(un.charMesh||'');}
 
 export function realSpriteUnit(role,weapon,skin,nation,char){
   const r=ROLES[role];if(!r)return null;
   const body=BODIES[r.body]||BODIES.medio;
-  return {id:700+ROLE_NAMES.indexOf(role),team:'A',role:role,weapon:weapon||r.weapons[0],skin:skin||'nacion',nation:nation||NATIONS[0],x:0,y:0,dx:0,dy:0,hp:body.hp,maxHp:body.hp,energy:body.energy,maxEnergy:body.energy,alive:true,invisible:false,body:r.body,facing:0,charKey:characterKey(char),charName:char?char.name:role,charTexture:char&&char.texture?char.texture:'',charMesh:char&&char.mesh?char.mesh:''};
+  const tex=(char&&(char.charTexture||char.texture))||'',mesh=(char&&(char.charMesh||char.mesh))||'';
+  return {id:700+ROLE_NAMES.indexOf(role),team:'A',role:role,weapon:weapon||r.weapons[0],skin:skin||'nacion',nation:nation||NATIONS[0],x:0,y:0,dx:0,dy:0,hp:body.hp,maxHp:body.hp,energy:body.energy,maxEnergy:body.energy,alive:true,invisible:false,body:r.body,facing:0,charKey:characterKey(char),charName:char?char.name:role,charTexture:tex,charMesh:mesh};
 }
 
 export function initRealSpriteRenderer(){
@@ -84,18 +85,19 @@ export function poseSpriteAim(un,grp){
   return poseSpriteClip(un,grp,clip,ct,key);
 }
 
-export function renderRealSprite(un){
+export function renderRealSprite(un,opts){
+  opts=opts||{};
   if(!un||!un.role||!WEAPONS[un.weapon])return null;
   const key=realSpriteKey(un);
   if(REAL_SPRITES.cache[key])return REAL_SPRITES.cache[key];
   if(!REAL.ready||!initRealSpriteRenderer())return null;
   let grp=null;
   try{
-    /* El retrato/sprite se sigue fotografiando con la malla base: su camara
-       y encuadre estan calibrados para ella y las mallas de clase tienen
-       proporciones distintas. */
-    const _fb=window.__forceBaseModel;window.__forceBaseModel=true;
-    try{grp=makeRealSoldier3(un);}finally{window.__forceBaseModel=_fb;}
+    if(opts.authored)grp=makeRealSoldier3(un);
+    else{
+      const _fb=window.__forceBaseModel;window.__forceBaseModel=true;
+      try{grp=makeRealSoldier3(un);}finally{window.__forceBaseModel=_fb;}
+    }
     /* Fuera el disco de bando, el anillo de energía y el anillo de
        selección: en la vista clásica los dibuja el propio tablero bajo
        los pies del sprite, igual que hacía con los de Argon. */
@@ -129,10 +131,20 @@ export function renderRealSprite(un){
       fitSpriteGun(un,grp);
     }
     hideDisc();
+    const cam=REAL_SPRITES.camera,oldPos=cam.position.clone();
+    if(opts.authored){
+      const box=new THREE.Box3().setFromObject(grp),size=box.getSize(new THREE.Vector3()),center=box.getCenter(new THREE.Vector3());
+      if(size.y>0.01){
+        const k=Math.max(0.55,Math.min(2.2,1.7/size.y));
+        cam.position.set(center.x+2.2*k,center.y+1.35*k,center.z+1.7*k);
+        cam.lookAt(center.x,center.y*0.62,center.z);
+      }
+    }
     REAL_SPRITES.scene.add(grp);
     REAL_SPRITES.renderer.render(REAL_SPRITES.scene,REAL_SPRITES.camera);
     const url=REAL_SPRITES.renderer.domElement.toDataURL('image/png');
     REAL_SPRITES.scene.remove(grp);
+    cam.position.copy(oldPos);cam.lookAt(0.1,0.52,0);
     const img=new Image();
     img.onload=()=>{if(G)draw();};
     img.src=url;

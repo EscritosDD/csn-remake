@@ -261,7 +261,8 @@ html[data-view="3d"] .legend{display:none!important}
 .log-drawer>summary::-webkit-details-marker{display:none}
 .log-drawer>summary::before{content:"▸ ";color:var(--amber)}
 .log-drawer[open]>summary::before{content:"▾ ";color:var(--amber)}
-.log-drawer .log{height:130px;border:0;border-radius:0;padding:8px 12px;font-size:12px}
+.log-drawer{margin-top:6px}
+.log-drawer .log{height:84px;border:0;border-radius:0;padding:6px 12px;font-size:11px}
 .weapon-drawer{border:1px solid var(--line);border-radius:10px;background:var(--bg-elev);overflow:hidden}
 .weapon-drawer>summary{cursor:pointer;padding:8px 12px;font-weight:700;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-gold);list-style:none;user-select:none}
 .weapon-drawer>summary::-webkit-details-marker{display:none}
@@ -275,5 +276,9 @@ html[data-view="3d"] .legend{display:none!important}
 .gl-controls button{min-height:44px;padding:3px 8px;background:rgba(10,12,8,.88);backdrop-filter:blur(4px)}
 .actionBar{align-items:center;padding:8px 14px;background:linear-gradient(180deg,var(--bg-elev),var(--panel))}
 .actionBar .actions button{display:flex;flex-direction:column;justify-content:center;gap:2px;min-height:52px;font-size:13px;line-height:1.15}
-.actionBar .actions button small{white-space:normal;max-height:2.6em;font-size:10.5px}
+.actionBar .actions button small{display:none;white-space:normal;max-height:2.6em;font-size:10.5px}
+body[data-first-game="1"] .actionBar .actions button small{display:block}
+body[data-first-game="1"] #roundLabel{color:var(--amber);font-weight:700}
+body[data-first-game="1"] #logBtn{border-color:var(--amber)}
+body[data-first-game="1"] .actionBar [data-act="gas"],body[data-first-game="1"] .actionBar [data-act="molotov"],body[data-first-game="1"] .actionBar [data-act="orbital"],body[data-first-game="1"] .actionBar [data-act="bees"]{display:none}
 @media(max-width:640px){.gl-controls{top:6px;right:6px;gap:3px}.gl-controls button{min-height:44px;padding:2px 6px;font-size:11px}.gl-badge{left:6px;bottom:6px;font-size:10px}}

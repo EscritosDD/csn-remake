@@ -1,20 +1,21 @@
 import { BODIES, ROLES } from '../data/roles.js';
 import { WEAPONS } from '../data/weapons.js';
-import { CAMPAIGN_MISSIONS } from '../data/maps.js';
 import { SKINS } from '../data/nations.js';
 import { cheb, dist } from '../core/geometry.js';
-import { ARGON_READY, ROLE_SVG_ID, spriteDataURI } from '../render2d/sprites.js';
 import { draw } from '../render2d/board.js';
-import { getRealSpriteURL } from '../render3d/real-sprites.js';
 import { WEAPON_MESH_FILE, WEAPON_COVER_BY_FILE, WEAPONS_ORIGINAL } from '../render3d/assets-weapons.js';
 import { inBeacon, obAt } from '../game/board.js';
 import { aliveCount, canHealSpecial, canReviveSpecial, canSnipeSpecial, selectUnit, setOverwatch, teamName, unitHasAction } from '../game/combat.js';
 import { MINE_COST, MINE_DMG, captureTurret, useSpecial } from '../game/missions.js';
 import { tutorialCheck, tutorialEvent } from '../game/tutorial.js';
 import { ARTY_COST, ARTY_DMG, ARTY_RANGE, BEES_COST, BEES_DMG, BEES_RANGE, BEES_TURNS, COVER_COST, CRATE_COST, GAS_COST, GAS_DMG, GAS_TURNS, MOLOTOV_COST, MOLOTOV_DMG, MOLOTOV_TURNS, ORB_COST, ORB_DMG, ORB_RANGE, SHIELD_COST, SWEEP_COST, SWEEP_RANGE, TELE_COST, TELE_RANGE, TOOL_COST, TOOL_HEAL, TOOL_RANGE, TRANQ_COST, TRANQ_RANGE, WATER_COST, WATER_PUSH, WATER_RANGE, useShield, useToolkit } from '../game/gadgets.js';
-import { $, DOM_MAX_ROUNDS, DOM_TARGET, ESCORT_GUIDES_PER_ROUND, ESCORT_MAX_ROUNDS, domControl, domZones, effMode, escortExt, flagHTML, emblemHTML, rolePortraitURL, setStep, syncPlayingViewport, toast } from './ui-shell.js';
+import { $, DOM_MAX_ROUNDS, DOM_TARGET, ESCORT_GUIDES_PER_ROUND, ESCORT_MAX_ROUNDS, domControl, domZones, effMode, escortExt, flagHTML, emblemHTML, portraitKey, rolePortraitURL, setStep, syncPlayingViewport, toast } from './ui-shell.js';
 import { vitalsMarkup } from './arcade-hud.js';
-import { ABILITY_IMPL } from './abilities.js';
+
+const MODE_LABELS={eliminacion:'Eliminación',dominacion:'Dominación',escolta:'Escolta del dron',guerra:'Guerra de Naciones',tutorial:'Instrucción de Dave',campana:'Campaña',baliza:'Baliza'};
+const roundLabelText=g=>{const m=effMode(g);return 'R'+g.round+(m==='dominacion'?'/'+DOM_MAX_ROUNDS:m==='escolta'?'/'+ESCORT_MAX_ROUNDS:'')+' · '+g.map.name+' · '+(MODE_LABELS[m]||m)+(g.mode==='campana'?' '+(g.campaignMission+1):'');};
+const hudAbility=u=>{const a=(u.charAbilities||[]).find(x=>x.implemented&&x.action==='special')||(u.charAbilities||[]).find(x=>x.implemented)||(u.charAbilities||[])[0];return a?{n:a.n,d:a.d,icon:a.icon}:{n:ROLES[u.role].special,d:ROLES[u.role].sdesc,icon:null};};
+const unitPortrait=u=>{const skin=u.skin||'estandar',nation=u.nation;return {key:portraitKey(u.role,u,skin,nation),url:rolePortraitURL(u.role,u,skin,{nation:nation,authored:true})};};
 
 export function updateUI(){
   if(!G)return;
@@ -22,7 +23,7 @@ export function updateUI(){
   const pill=$('#turnPill');
   pill.className='turn-pill '+G.turn;
   pill.textContent=G.over?'FIN':(G.turn==='A'?'J1':'RIVAL')+' · TURNO'+(G.aiBusy?' · IA':'');
-  $('#roundLabel').textContent='Ronda '+G.round+(effMode(G)==='dominacion'?(' / '+DOM_MAX_ROUNDS):effMode(G)==='escolta'?(' / '+ESCORT_MAX_ROUNDS):'')+' · '+G.map.name+' · '+(effMode(G)==='eliminacion'?'Eliminación':effMode(G)==='dominacion'?'Dominación':effMode(G)==='escolta'?'Escolta del dron':G.mode==='guerra'?'Guerra de Naciones':G.mode==='tutorial'||G.isTutorial?('Instrucción de Dave'):G.mode==='campana'?('Campaña · Misión '+(G.campaignMission+1)+' · '+CAMPAIGN_MISSIONS[G.campaignMission].title):'Captura de baliza')+(G.opp==='ia'?(' · IA '+G.difficulty):'')+' · Quedan '+aliveCount('A')+' contra '+aliveCount('B');
+  $('#roundLabel').textContent=roundLabelText(G);
   $('#hudScoreA').textContent='J1 · '+aliveCount('A');
   $('#hudScoreB').textContent='RIVAL · '+aliveCount('B');
   const squadTitle=$('#hudSquadTitle');if(squadTitle)squadTitle.textContent=teamName(G.turn);
@@ -46,15 +47,6 @@ export function updateUI(){
   if(em){if(effMode(G)!=='escolta'||!G.drone){em.style.display='none';}else{em.style.display='flex';const dd=Math.min.apply(null,escortExt().map(t2=>cheb(G.drone,t2)));em.innerHTML='<span>🤖 Escolta · la defensa aguanta '+ESCORT_MAX_ROUNDS+' rondas</span><span class="dom-zone '+(G.drone.hp>G.drone.maxHp*0.35?'A':'B')+'">Dron '+G.drone.hp+'/'+G.drone.maxHp+' PV</span>'+(G.drone.alive?('<span class="dom-zone N">⇪ a '+dd+' casillas de la extracción</span><span class="dom-zone N">Guiados esta ronda: '+(ESCORT_GUIDES_PER_ROUND-G.drone.movesLeft)+'/'+ESCORT_GUIDES_PER_ROUND+'</span>'):'<span class="dom-zone B">Dron destruido</span>');}}
   $('#endTurnBtn').disabled=G.aiBusy||G.over;
   const ub=$('#undoBtn');if(ub)ub.disabled=G.aiBusy||G.over||!G.lastMoveUndo||(G.opp==='ia'&&G.turn==='B');
-  /* roster (legado: el HUD compacto solo usa #squadVitals) */
-  const r=$('#roster');if(r)r.innerHTML='';
-  if(r)G.units.forEach(u=>{
-    const b=document.createElement('button');
-    b.className=(G.selected===u?'sel':'')+(u.alive?'':' dead');
-    b.innerHTML=(rolePortraitURL(u.role,u)?'<img class="roster-portrait" src="'+rolePortraitURL(u.role,u)+'" alt=""/>':'')+'<span class="role-dot" style="background:'+ROLES[u.role].color+'"></span><span style="flex:none"><b>'+u.role+'</b>'+(u.name&&u.name!==u.role?'<br><small style="color:var(--muted)">'+u.name+'</small>':'')+((u.alive?[u.stunned?'💫':(u.invisible?'👻':''),u.overwatch?'👁':'',u.suppressed?'⚡':'',((u.beesT||0)>0)?'🐝':'',((u.shieldT||0)>0)?'🛡':'',(u.hp<=u.maxHp*0.35?'🩹':'')]:[]).filter(Boolean).length?'<br><small title="estados">'+[u.stunned?'💫':(u.invisible?'👻':''),u.overwatch?'👁':'',u.suppressed?'⚡':'',((u.beesT||0)>0)?'🐝':'',((u.shieldT||0)>0)?'🛡':'',(u.hp<=u.maxHp*0.35?'🩹':'')].filter(Boolean).join('')+'</small>':'')+(u.vetLevel?'<span class="vet-badge">Vet. '+u.vetLevel+'</span>':'')+' <span style="color:'+(u.team==='A'?'var(--teamA)':'var(--teamB)')+'">●'+u.team+'</span><br><small style="color:var(--muted)">'+u.weapon+' · ⚡'+(u.alive?u.energy:0)+'</small></span><span class="mini-hp"><i style="width:'+Math.round(u.hp/u.maxHp*100)+'%"></i></span><b class="mono" style="font-size:13px">'+(u.alive?u.hp+' PV':'K.O.')+'</b>';
-    b.onclick=()=>{if(u.alive&&u.team===G.turn&&!G.aiBusy){selectUnit(u);tutorialEvent('select',{unit:u});}};
-    if(r)r.appendChild(b);
-  });
   /* unit card */
   const u=G.selected,card=$('#unitCard');
   if(!u){card.innerHTML='<h3>Sin selección</h3><p class="sub">Toca uno de tus soldados.</p>';$('#weaponInfo').textContent='—';return;}
@@ -64,9 +56,9 @@ export function updateUI(){
   /* HUD del original: icono de clase, vida, energía, habilidades y carátula del arma. */
   const ROLE_CLASS_ICON={Francotirador:'Soldier',Artillero:'Soldier',Espía:'Agent',Médico:'Medic',Ingeniero:'Engineer',Comando:'Soldier',Capitán:'Commander'};
   const classIco=ROLE_CLASS_ICON[u.role]||'Soldier';
-  const charAbs=u.charAbilities||[];
+  const ab=hudAbility(u);
   const abBg=u.team==='A'?'assets/ui/orig/CharAbility_background_blue.png':'assets/ui/orig/CharAbility_background_red.png';
-  const abChips=charAbs.map(a=>'<span class="ab-chip" style="background-image:url(\''+abBg+'\');'+(a.implemented?'':'opacity:.58')+'" title="'+a.n+' · '+a.d+(a.implemented?' · en juego · '+ABILITY_IMPL[a.icon]:' · solo informativo (aún no implementada)')+'"><img class="ab-ico" src="assets/ui/ability/'+a.icon+'.png" alt=""/>'+a.n+(a.implemented?'':' ℹ')+'</span>').join('');
+  const abChip='<span class="ab-chip" style="background-image:url(\''+abBg+'\')" title="'+ab.d+'">'+(ab.icon?'<img class="ab-ico" src="assets/ui/ability/'+ab.icon+'.png" alt=""/>':'')+ab.n+'</span>';
   const wpMesh=(typeof WEAPON_MESH_FILE!=='undefined'?WEAPON_MESH_FILE[u.weapon]:null);
   const wpCover=wpMesh&&typeof WEAPON_COVER_BY_FILE!=='undefined'&&WEAPON_COVER_BY_FILE[wpMesh]?'<img class="wp-cover" src="assets/weapons/covers/'+WEAPON_COVER_BY_FILE[wpMesh]+'.png" alt=""/>':'';
   const wpOrig=wpMesh&&typeof WEAPONS_ORIGINAL!=='undefined'&&WEAPONS_ORIGINAL[wpMesh]?WEAPONS_ORIGINAL[wpMesh].name:null;
@@ -82,11 +74,14 @@ export function updateUI(){
   if(unitHasAction(u,'smoke'))resBits.push('Humo M18: '+(u.smokes||0));
   if(unitHasAction(u,'toolkit'))resBits.push('Kits: '+(u.toolkits||0));
   if(unitHasAction(u,'arty'))resBits.push('Artillería: '+(u.arty||0));
-  card.innerHTML=(()=>{const pUrl=rolePortraitURL(u.role,u);if(pUrl)return '<img class="unit-sprite" src="'+pUrl+'" alt="Retrato del '+u.role+'"/>';const rsUrl=getRealSpriteURL(u);if(rsUrl)return '<img class="unit-sprite" src="'+rsUrl+'" alt="Sprite del '+u.role+' renderizado desde el modelo real, en el tablero"/>';return (ARGON_READY&&ROLE_SVG_ID[u.role]?'<img class="unit-sprite" src="'+spriteDataURI(ROLE_SVG_ID[u.role],u.skin,u.nation)+'" alt="Sprite del '+u.role+' en el tablero"/>':'');})()+'<h3><span class="role-dot" style="background:'+ROLES[u.role].color+';width:14px;height:14px"></span><img class="class-ico" src="assets/ui/orig/Class_'+classIco+'_alpha.png" alt=""/>'+u.role+' <span class="sub" style="font-size:12px">'+u.name+'</span> <span style="color:'+(u.team==='A'?'var(--teamA)':'var(--teamB)')+';font-size:15px">'+teamName(u.team)+'</span></h3>'+
-   '<div style="display:flex;align-items:center;gap:8px">'+(u.skin==='nacion'?flagHTML(u.nation)+emblemHTML(u.nation)+'<span class="sub">Skin Nación · '+u.nation.name+' · '+u.nation.emblemName+'</span>':'<span class="sub">Skin '+(SKINS[u.skin]?SKINS[u.skin].name:'Estándar')+' · '+(SKINS[u.skin]?SKINS[u.skin].desc:'soldado genérico')+'</span>')+(u.invisible?'<span class="sub">· 👁 invisible este turno</span>':'')+(u.stunned?'<span class="sub" style="color:#e8c84e">· 💫 aturdido por la M84</span>':'')+'</div>'+
-   '<div class="hpbar"><i class="'+(u.hp<=u.maxHp*0.3?'low':'')+'" style="width:'+Math.round(u.hp/u.maxHp*100)+'%"></i></div><div class="statline"><img class="hud-ico" src="assets/ui/orig/hud_icon_health.png" alt=""/>Vida <b class="mono">'+u.hp+'/'+u.maxHp+'</b> · Cuerpo '+(BODIES[u.body]?BODIES[u.body].name:u.body)+' · Posición ('+(u.x+1)+','+(u.y+1)+')'+(inBeacon(u.x,u.y)?' · <b style="color:var(--amber)">en la baliza</b>':'') +(u.overwatch?' · <b style="color:var(--amber)">en vigilancia</b>':'')+covTxt+'</div>'+
-   '<div class="epips">'+Array.from({length:u.maxEnergy},(_,i)=>'<i class="'+(i<u.energy?'':'off')+'"></i>').join('')+'</div><div class="statline"><img class="hud-ico" src="assets/ui/orig/AP_alpha.png" alt=""/>Energía <b class="mono">'+u.energy+'/'+u.maxEnergy+'</b> · Mover: '+u.moveCost+' ⚡/casilla · '+resBits.join(' · ')+'</div>'+
-   (abChips?'<div class="ab-row">'+abChips+'</div>':'')+
+  const portrait=unitPortrait(u);
+  const pTag=portrait.url?'<img class="unit-sprite" data-portrait-key="'+portrait.key.replace(/"/g,'&quot;')+'" src="'+portrait.url+'" alt="Retrato de '+u.role+'"/>':'';
+  const skinTag=u.skin==='nacion'?flagHTML(u.nation)+emblemHTML(u.nation)+u.nation.name:'Skin '+(SKINS[u.skin]?SKINS[u.skin].name:'Estándar');
+  card.innerHTML=pTag+'<h3><span class="role-dot" style="background:'+ROLES[u.role].color+';width:14px;height:14px"></span><img class="class-ico" src="assets/ui/orig/Class_'+classIco+'_alpha.png" alt=""/>'+u.role+' <span class="sub" style="font-size:12px">'+u.name+'</span> <span style="color:'+(u.team==='A'?'var(--teamA)':'var(--teamB)')+';font-size:15px">'+teamName(u.team)+'</span></h3>'+
+   '<div class="sub">'+skinTag+(u.stunned?' · 💫 aturdido':'')+(u.invisible?' · 👁 invisible':'')+'</div>'+
+   '<div class="hpbar"><i class="'+(u.hp<=u.maxHp*0.3?'low':'')+'" style="width:'+Math.round(u.hp/u.maxHp*100)+'%"></i></div><div class="statline">Vida <b class="mono">'+u.hp+'/'+u.maxHp+'</b></div>'+
+   '<div class="epips">'+Array.from({length:u.maxEnergy},(_,i)=>'<i class="'+(i<u.energy?'':'off')+'"></i>').join('')+'</div><div class="statline">Energía <b class="mono">'+u.energy+'/'+u.maxEnergy+'</b> · '+resBits.join(' · ')+'</div>'+
+   '<div class="ab-row">'+abChip+'</div>'+
    '<div class="actions">'+
    '<button data-act="shoot" class="'+(G.actionMode==='shoot'?'on':'')+'" '+(isTurn?'':'disabled')+' title="'+(w.real||'')+' — '+(w.note||'')+'">'+wpCover+'🎯 Disparar [1] · '+u.weapon+'<small>'+w.dmg+' daño · alcance '+w.rng+' · '+w.cost+' ⚡ — luego toca al enemigo</small></button>'+
    '<button data-act="pistol" class="'+(G.actionMode==='pistol'?'on':'')+'" '+(isTurn?'':'disabled')+'>🔫 Pistola M9 [2]<small>22 daño · alcance 3 · 1 ⚡</small></button>'+
@@ -94,7 +89,7 @@ export function updateUI(){
        (unitHasAction(u,'smoke')?'<button data-act="smoke" class="'+(G.actionMode==='smoke'?'on':'')+'" '+(isTurn&&(u.smokes||0)>0?'':'disabled')+'>💨 Humo M18<small>Sin daño · lanza a 4 · 2 ⚡ · quedan '+(u.smokes||0)+' · tapa la visión 2 rondas en cruz (radio 1), no el movimiento</small></button>':'')+
        (unitHasAction(u,'flash')?'<button data-act="flash" class="'+(G.actionMode==='flash'?'on':'')+'" '+(isTurn&&(u.flashes||0)>0?'':'disabled')+'><img class="ab-ico" src="assets/ui/ability/CharAbility_09_Concussion_Grenade_alpha.png" alt=""/>Aturdidora M84<small>Sin daño · lanza a 4 · 2 ⚡ · quedan '+(u.flashes||0)+' · aturde en radio 1 durante 1 turno: −6 ⚡ y −25 de puntería, sin fuego de respuesta ni vigilancia · también ciega a los tuyos</small></button>':'')+
    '<button data-act="overwatch" '+(isTurn&&!u.overwatch&&u.energy>=3?'':'disabled')+'>👁 Vigilancia [4]<small>3 ⚡ · dispara gratis al primer enemigo que se mueva a su alcance en el turno rival</small></button>'+
-    (unitHasAction(u,'special')?'<button data-act="special" class="'+(G.actionMode==='special'||G.actionMode==='deploy'?'on':'')+'" '+(isTurn?'':'disabled')+'>★ '+((charAbs.find(a=>a.implemented&&a.action==='special')||{}).n||ROLES[u.role].special)+' [5]<small>'+((charAbs.find(a=>a.implemented&&a.action==='special')||{}).d||ROLES[u.role].sdesc)+'</small></button>':'')+
+    (unitHasAction(u,'special')?'<button data-act="special" class="'+(G.actionMode==='special'||G.actionMode==='deploy'?'on':'')+'" '+(isTurn?'':'disabled')+'>★ Especial [5]<small>'+ab.d+'</small></button>':'')+
 
    (effMode(G)!=='dominacion'&&onTurret&&G.map.turret.owner!==u.team?'<button data-act="capture" '+(isTurn&&u.energy>=2?'':'disabled')+'>⚙ Capturar torreta central<small>2 ⚡ · disparará al final de tus turnos</small></button>':'')+
        (unitHasAction(u,'deploy')?'<button data-act="deploy" class="'+(G.actionMode==='deploy'?'on':'')+'" '+(isTurn?'':'disabled')+'>🛠 Torreta M2 (desplegar)<small>5 ⚡ · casilla adyacente · 120 PV</small></button>':'')+
@@ -156,5 +151,5 @@ export function updateUI(){
     if(act==='guide'){G.actionMode='drone';toast('Toca una casilla libre pegada al dron para moverlo ahí: cuesta 2 ⚡ de '+u.role+' y cuenta como uno de los '+ESCORT_GUIDES_PER_ROUND+' guiados de la ronda.');}
     updateUI();draw();
   });
-  $('#weaponInfo').innerHTML=(wpCover?'<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">'+wpCover+'<span><b style="color:var(--ink)">'+u.weapon+'</b>'+(wpOrig?' <span class="sub">· original: '+wpOrig+'</span>':'')+'</span></div>':'')+'<b style="color:var(--ink)">'+u.weapon+'</b> · '+w.cat+'<br>'+w.real+'<br><span style="color:var(--ink)">En el juego:</span> '+w.dmg+' daño · alcance '+w.rng+' casillas · '+w.cost+' ⚡. '+w.note+'<br><br><b style="color:var(--ink)">Especial · '+ROLES[u.role].special+':</b> '+ROLES[u.role].sdesc;
+  $('#weaponInfo').innerHTML=(wpCover?'<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">'+wpCover+'<span><b style="color:var(--ink)">'+u.weapon+'</b>'+(wpOrig?' <span class="sub">· original: '+wpOrig+'</span>':'')+'</span></div>':'')+'<b style="color:var(--ink)">'+u.weapon+'</b> · '+w.cat+'<br>'+w.real+'<br><span style="color:var(--ink)">En el juego:</span> '+w.dmg+' daño · alcance '+w.rng+' casillas · '+w.cost+' ⚡. '+w.note+'<br><br>'+(BODIES&&BODIES[u.body]?BODIES[u.body].name:u.body)+' · ('+(u.x+1)+','+(u.y+1)+')'+(inBeacon(u.x,u.y)?' · en la baliza':'')+(u.overwatch?' · en vigilancia':'')+covTxt;
 }

@@ -121,6 +121,7 @@ export function startGame(squadA,squadB){
   selectUnit(G.units.find(u=>u.team==='A'));
   updateUI();draw();
   if(window.__build3D)window.__build3D();
+  document.body.dataset.firstGame=lsGet('radsoldiers_tut')?'0':'1';
   if(!lsGet('radsoldiers_tut'))setTimeout(tutShow,900);
   window.scrollTo({top:0,behavior:'smooth'});
 }

@@ -321,7 +321,7 @@ const TUT_TEXTS={
   confirm:'Confirmar: «Terminar turno» cierra tu turno y deja actuar al rival. La vista 2D/3D se cambia sin tocar la partida.'
 };
 function tutShow(){const b=document.getElementById('tutBubble');if(b)b.style.display='block';}
-function tutHide(){const b=document.getElementById('tutBubble');if(b)b.style.display='none';lsSet('radsoldiers_tut','1');}
+function tutHide(){const b=document.getElementById('tutBubble');if(b)b.style.display='none';lsSet('radsoldiers_tut','1');document.body.dataset.firstGame='0';}
 window.quickSmoke=function(){ quickSmoke({myNation,setup,get G(){return G;}}); };
 window.quickFlash=function(){ quickFlash({myNation,setup,get G(){return G;}}); };
 wireUI({get G(){return G;},TUT_TEXTS,tutShow,tutHide});

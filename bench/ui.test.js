@@ -53,6 +53,35 @@ test('hay notas guía y el tutorial aparece en batalla', () => {
   assert.match(play, /id="tutBubble"/);
 });
 
+test('la primera partida usa un HUD guiado y el registro es compacto', () => {
+  assert.match(html, /document\.body\.dataset\.firstGame=lsGet\('radsoldiers_tut'\)\?'0':'1'/);
+  assert.match(html, /document\.body\.dataset\.firstGame='0'/);
+  assert.match(css, /body\[data-first-game="1"\] #roundLabel/);
+  assert.match(css, /body\[data-first-game="1"\] \.actionBar \[data-act="gas"\]/);
+  assert.match(css, /body\[data-first-game="1"\] \.actionBar \.actions button small\{display:block\}/);
+  assert.match(indexHtml, /<summary>Registro<\/summary>/);
+});
+
+test('el retrato usa la piel y el personaje reales, y se actualiza tras el recorte', () => {
+  assert.match(html, /export function portraitKey\(role,char,skin,nation\)/);
+  assert.match(html, /rolePortraitURL\(u\.role,u,skin,\{nation:nation,authored:true\}\)/);
+  assert.match(html, /renderRealSprite\(u,\{authored:!!o\.authored\}\)/);
+  assert.match(html, /charTexture\|\|char\.texture/);
+  assert.match(html, /charMesh\|\|char\.mesh/);
+  assert.match(html, /el\.dataset\.portraitKey!==pkey\)return/);
+  assert.match(html, /data-portrait-key=/);
+  assert.match(html, /im\.onerror=\(\)=>\{delete PORTRAIT_CACHE\[pkey\];\}/);
+});
+
+test('la tarjeta condensa el texto y muestra un solo nombre de habilidad', () => {
+  assert.match(html, /const roundLabelText=g=>/);
+  assert.match(html, /const hudAbility=u=>/);
+  assert.doesNotMatch(html, /ABILITY_IMPL\[a\.icon\]/);
+  assert.doesNotMatch(html, /Quedan '\+aliveCount/);
+  assert.doesNotMatch(html, /id="roster"/);
+  assert.match(html, /★ Especial \[5\]<small>'\+ab\.d/);
+});
+
 test('las vueltas contextuales siguen al jugador', () => {
   assert.match(html, /inBattle\?'← Volver a la partida':'← Volver al menú'/);
   for (const id of ['scr-arsenal', 'scr-how', 'scr-viewer']) {
