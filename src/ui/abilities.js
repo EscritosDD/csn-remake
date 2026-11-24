@@ -1,4 +1,4 @@
-export const CLASS_LABEL={'Soldier_Light':'Soldado ligero','Soldier_Heavy':'Soldado pesado','Soldier_Heavy_Tree':'Soldado pesado (Tree)','Agent_Light':'Agente ligero','Medic':'Médico','Engineer':'Ingeniero','Engineer_Light':'Ingeniero ligero','Agent_Heavy':'Agente pesado','Commander':'Comandante','Medic_therapist':'Médico (terapia)','Engineer_Heavy':'Ingeniero pesado','Engineer_Heavy_Tito':'Ingeniero pesado (Tito)','Engineer (RiotCop)':'Ingeniero antidisturbios','Commander_F':'Comandante (F)'};
+export const CLASS_LABEL={'Soldier_Light':'Soldado ligero','Soldier_Heavy':'Soldado pesado','SO_Lief':'Soldado pesado (Tree)','Agent_Light':'Agente ligero','TommyTesla':'Agente ligero (Tito)','Medic':'Médico','Engineer':'Ingeniero','Engineer_Light':'Ingeniero ligero','Agent_Heavy':'Agente pesado','Commander':'Comandante','Medic_therapist':'Médico (terapia)','Engineer_Heavy':'Ingeniero pesado','Engineer (RiotCop)':'Ingeniero antidisturbios','Commander_F':'Comandante (F)'};
 
 export const ABILITY_CATALOG=[
   {f:'CharAbility_00_walkshoot_alpha',n:'walkshoot'},

@@ -403,13 +403,13 @@ test('Tito Tesla y Tree Mendez usan cuerpo y textura propios del IPA', async () 
   const byName = Object.fromEntries(ORIG_CAST.map(c => [c.name, c]));
   assert.deepEqual(
     [byName['Tito Tesla'].body, CAST_TEXTURE_FILE['Tito Tesla'], byName['Tito Tesla'].defaultWeapon],
-    ['Engineer_Heavy_Tito', 'Engineer_Heavy2_d.png', 'Electri-Fryer']
+    ['TommyTesla', 'Agent_light_Tesla_d.png', 'Electri-Fryer']
   );
   assert.deepEqual(
     [byName['Tree Mendez'].body, CAST_TEXTURE_FILE['Tree Mendez'], byName['Tree Mendez'].defaultWeapon],
-    ['Soldier_Heavy_Tree', 'Soldier_Heavy_Lumberjack_d.png', 'Lumber Numberer']
+    ['SO_Lief', 'Soldier_Heavy_Lumberjack_d.png', 'Lumber Numberer']
   );
-  for (const body of ['Engineer_Heavy_Tito', 'Soldier_Heavy_Tree']) {
+  for (const body of ['TommyTesla', 'SO_Lief']) {
     assert.ok(fs.existsSync(path.join(ROOT, 'assets', 'soldier', 'bodies', body + '_rig.json')));
     assert.ok(fs.existsSync(path.join(ROOT, 'assets', 'soldier', 'bodies', body + '.obj')));
   }
