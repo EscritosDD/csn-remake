@@ -108,7 +108,7 @@ import { VIEWER_BODY_SKINS, VIEWER_ROLE_FALLBACK, VIEWER_BODY_FILE, VIEWER_BODY_
       const sculpted=!!entry.sculptedWeapon,noGrip=!entry.canGrip;
       const validWeapon=w=>!!w&&(viewerWeaponFiles.includes(w)||!!WEAPONS_ORIGINAL[w]||!!WEAPONS_ORIGINAL[weaponFileForRef(w)||'']);
       if(viewer.weapon&&!viewerWeaponFiles.includes(viewer.weapon))viewer.weapon=weaponFileForRef(viewer.weapon)||viewer.weapon;
-      if(!viewer.weaponTouched||viewer.weaponChar!==entry.key){const def=entry.defaultWeapon||'';viewer.weapon=viewerWeaponFiles.includes(def)?def:(weaponFileForRef(def)||def);}
+      if(!viewer.weaponTouched||viewer.weaponChar!==entry.key)viewer.weapon='';
       if(sculpted||noGrip||!validWeapon(viewer.weapon))viewer.weapon=''; viewer.weaponChar=entry.key;
       if(weaponSelect){weaponSelect.replaceChildren();const noneOption=document.createElement('option');noneOption.value='';noneOption.textContent=sculpted?'Sin acople (arma ya esculpida)':'Sin arma';weaponSelect.appendChild(noneOption);
         viewerWeaponFiles.forEach(weapon=>{const option=document.createElement('option');option.value=weapon;option.textContent=(WEAPONS_ORIGINAL[weapon]||{}).name||weapon;weaponSelect.appendChild(option);});weaponSelect.value=viewer.weapon||'';weaponSelect.disabled=sculpted||noGrip;}

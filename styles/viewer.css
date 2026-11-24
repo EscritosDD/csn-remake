@@ -16,7 +16,7 @@
 
 .viewer-list button{background:var(--panel2);border:1.5px solid var(--line);border-radius:8px;color:var(--ink);padding:9px 12px;text-align:left;font-weight:600}
 
-.viewer-list button.on{border-color:var(--ink-lime);background:color-mix(in srgb,var(--ink-lime) 14%,var(--panel2));box-shadow:inset 3px 0 0 var(--ink-lime)}
+.viewer-list button.on{border-color:var(--ink-cyan);background:color-mix(in srgb,var(--ink-cyan) 14%,var(--panel2));box-shadow:inset 3px 0 0 var(--ink-cyan)}
 
 .viewer-stage{min-width:0}
 

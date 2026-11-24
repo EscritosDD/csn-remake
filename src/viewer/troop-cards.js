@@ -9,7 +9,7 @@ const tcState={origin:'Todas',role:'Todas',cards:{}};
 const tcEsc=value=>String(value==null?'':value).replace(/[&<>"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[char]));
 const tcScan=()=>{if(typeof scanCardBoxes==='function')scanCardBoxes();};
 const tcSpecAttr=spec=>'data-card-spec=\''+JSON.stringify(spec).replace(/'/g,'&#39;')+'\'';
-const tcCardState=entry=>tcState.cards[entry.key]||(tcState.cards[entry.key]={skinIndex:0,weapon:entry.defaultWeapon||''});
+const tcCardState=entry=>tcState.cards[entry.key]||(tcState.cards[entry.key]={skinIndex:0,weapon:''});
 
 function tcCard3dBox(spec,label){
   return '<div class="card-3d-box" '+tcSpecAttr(spec)+' aria-label="Modelo 3D de '+tcEsc(label)+'"><img class="card-3d-thumb is-loading" alt="" hidden/><span class="card-3d-badge">3D</span></div>';

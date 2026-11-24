@@ -102,11 +102,11 @@ test('el tema arcade oscuro es la única fuente de color', () => {
   const viewer = fs.readFileSync(path.join(root, 'styles', 'viewer.css'), 'utf8');
   const layout = fs.readFileSync(path.join(root, 'styles', 'layout.css'), 'utf8');
   for (const token of [
-    '--bg:#14160f;', '--bg-elev:#1c1f16;', '--surface:#23261c;', '--surface-2:#2e3224;',
-    '--stage:radial-gradient(circle at 50% 35%, #343a28 0%, #23261c 68%, #14160f 100%);',
-    '--ink-cyan:#8a9a5b;', '--ink-coral:#9c3040;', '--ink-lime:#8a9a5b;', '--ink-gold:#c9a227;', '--ink-violet:#7a2230;',
-    '--ink:#f2ede4;', '--muted:#c2b280;', '--faint:#8a8f75;',
-    '--line:rgba(242,237,228,.12);', '--line-strong:rgba(242,237,228,.24);'
+    '--bg:#0d1117;', '--bg-elev:#141a23;', '--surface:#19212c;', '--surface-2:#222d3b;',
+    '--stage:radial-gradient(circle at 50% 35%, #263447 0%, #141b25 68%, #0c1016 100%);',
+    '--ink-cyan:#00e5ff;', '--ink-coral:#ff3d71;', '--ink-lime:#b8ff2c;', '--ink-gold:#ffc933;', '--ink-violet:#9b6bff;',
+    '--ink:#f4f7fb;', '--muted:#9aa7b8;', '--faint:#677588;',
+    '--line:rgba(244,247,251,.12);', '--line-strong:rgba(244,247,251,.24);'
   ]) assert.ok(theme.includes(token), token);
   assert.doesNotMatch(css, /prefers-color-scheme:\s*light/);
   assert.match(indexHtml, /name="color-scheme" content="dark"/);
@@ -118,7 +118,7 @@ test('el tema arcade oscuro es la única fuente de color', () => {
   assert.ok(cards.includes('border:2px solid var(--line);border-radius:12px;background:var(--surface)'));
   assert.ok(cards.includes('transform:translateY(-5px) rotate(-0.3deg)'));
   assert.ok(cards.includes('box-shadow:0 6px 0 rgba(0,0,0,.42)'));
-  assert.ok(theme.includes('color:#14160f;box-shadow:0 4px 0 var(--amber-dark)'));
+  assert.ok(theme.includes('color:#0d1117;box-shadow:0 4px 0 var(--amber-dark)'));
   assert.ok(theme.includes('transform:translateY(3px);box-shadow:none'));
   assert.ok(theme.includes('.tag,.kicker{transform:skewX(-6deg)'));
   assert.ok(theme.includes('@media(prefers-reduced-motion:reduce)'));
@@ -232,7 +232,7 @@ test('el HUD de batalla y el resultado usan tarjetas arcade reutilizables', asyn
   const { vitalsMarkup, resultMarkup } = await import('../src/ui/arcade-hud.js');
   const ally = { role: 'Comando', weapon: 'M4A1', hp: 75, maxHp: 100, alive: true, team: 'A', stunned: true, energy: 2, maxEnergy: 5 };
   const foe = { role: '<img>', weapon: 'RPG', hp: 0, maxHp: 90, alive: false, team: 'B' };
-  const cards = vitalsMarkup([ally, foe], 'A', ally, { Comando: '#c9a227' });
+  const cards = vitalsMarkup([ally, foe], 'A', ally, { Comando: '#00e5ff' });
   assert.match(cards, /class="hud-vital A ready sel"/);
   assert.match(cards, /data-hud-unit="0"/);
   assert.match(cards, /width:75%/);

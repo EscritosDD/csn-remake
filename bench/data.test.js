@@ -368,7 +368,7 @@ test('Configurar partida permite elegir personaje por ranura', () => {
   assert.match(html, /geometry\.deleteAttribute\('skinWeight'\)[\s\S]{0,400}side:THREE\.FrontSide/);
 });
 
-test('los originales del visor arrancan con su arma por defecto y pueden equipar las 23 armas originales', () => {
+test('los originales del visor arrancan sin arma y pueden equipar las 23 armas originales', () => {
   const viewer = fs.readFileSync(path.join(ROOT, 'src', 'viewer', 'main.js'), 'utf8');
   const troops = fs.readFileSync(path.join(ROOT, 'src', 'viewer', 'troop-cards.js'), 'utf8');
   const cast = fs.readFileSync(path.join(ROOT, 'src', 'data', 'cast.js'), 'utf8');
@@ -387,8 +387,8 @@ test('los originales del visor arrancan con su arma por defecto y pueden equipar
   const weapons = viewer.split('const viewerWeaponFiles=[')[1].split('];')[0];
   assert.equal((weapons.match(/'/g)||[]).length/2, 23);
   assert.match(troops, /getWeaponFiles:\(\)=>tcWeaponFiles/);
-  assert.ok(viewer.includes("if(!viewer.weaponTouched||viewer.weaponChar!==entry.key){const def=entry.defaultWeapon||'';viewer.weapon=viewerWeaponFiles.includes(def)?def:(weaponFileForRef(def)||def);}"));
-  assert.ok(troops.includes("{skinIndex:0,weapon:entry.defaultWeapon||''}"));
+  assert.ok(viewer.includes("if(!viewer.weaponTouched||viewer.weaponChar!==entry.key)viewer.weapon='';"));
+  assert.ok(!viewer.includes('entry.defaultWeapon&&'));
   assert.match(viewer, /originalWeaponProfile\(file\)/);
   assert.match(viewer, /auWeaponFile\(file\)/);
   assert.doesNotMatch(viewer, /VIEWER_ROLE_WEAPONS/);

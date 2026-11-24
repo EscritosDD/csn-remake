@@ -214,15 +214,15 @@ test('el Inspector navega personajes, armas y desplegables con flechas', () => {
 test('las 23 armas originales se pueden equipar y disparar desde cualquier personaje', () => {
   const weapons = read('src/render3d/assets-weapons.js');
   assert.match(viewer, /const validWeapon=w=>!!w&&\(viewerWeaponFiles\.includes\(w\)\|\|!!WEAPONS_ORIGINAL\[w\]\|\|!!WEAPONS_ORIGINAL\[weaponFileForRef\(w\)\|\|''\]\)/);
-  assert.match(viewer, /if\(!viewer\.weaponTouched\|\|viewer\.weaponChar!==entry\.key\)\{const def=entry\.defaultWeapon\|\|'';viewer\.weapon=viewerWeaponFiles\.includes\(def\)\?def:\(weaponFileForRef\(def\)\|\|def\);\}/);
+  assert.match(viewer, /if\(!viewer\.weaponTouched\|\|viewer\.weaponChar!==entry\.key\)viewer\.weapon=''/);
   assert.match(viewer, /viewer\.weapon=spec\.weapon\|\|'';viewer\.weaponTouched=true;viewer\.weaponChar=spec\.key;await selectModel\('roles',spec\.key\)/);
   assert.match(viewer, /const wanted=rawWanted\?\(weaponFileForRef\(rawWanted\)\|\|rawWanted\):''/);
   assert.match(viewer, /const idleForWeapon=w=>\{const file=weaponFileForRef\(w\)\|\|w;const profile=file&&originalWeaponProfile\(file\);return profile\?profile\.idleClip:'idle2h'/);
   assert.match(weapons, /const cat=\(WEAPONS\[un\.weapon\]\|\|\{\}\)\.cat\|\|\(file&&String\(\(WEAPONS_ORIGINAL\[file\]\|\|\{\}\)\.cat\|\|''\)\.split\(' \/ '\)\[0\]\)\|\|'Fusiles de asalto'/);
 });
 
-test('Tropas arranca con el arma por defecto y el Inspector no hereda el gesto de inspección', () => {
-  assert.ok(troops.includes("{skinIndex:0,weapon:entry.defaultWeapon||''}"));
+test('Tropas arranca sin arma y el Inspector no hereda el gesto de inspección', () => {
+  assert.ok(troops.includes("{skinIndex:0,weapon:''}"));
   assert.ok(troops.includes("const weapon=csn?'':(saved.weapon||'');"));
   assert.ok(inspector.includes('insCurrent={...spec,inspect:false};'));
   assert.ok(inspector.includes("kind:'roles',key:entry.key,skinIndex:0,weapon:'',"));

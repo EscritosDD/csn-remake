@@ -19,7 +19,7 @@ export function vitalsMarkup(units,turn,selected,roleColors){
   return units.map((u,i)=>{
     const alive=!!u.alive,ready=alive&&u.team===turn;
     const cls='hud-vital '+(u.team==='A'?'A':'B')+(ready?' ready':'')+(u===selected?' sel':'')+(alive?'':' dead');
-    const color=roleColors&&roleColors[u.role]?roleColors[u.role]:'var(--ink-lime)';
+    const color=roleColors&&roleColors[u.role]?roleColors[u.role]:'var(--ink-cyan)';
     const label=alive?escapeHtml(u.hp+' / '+u.maxHp):'K.O.';
     const state=unitStatus(u);
     const energy=alive&&Number.isFinite(Number(u.energy))?Number(u.energy)+' / '+Number(u.maxEnergy)+' ⚡':'— ⚡';
