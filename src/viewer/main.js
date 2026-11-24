@@ -156,6 +156,7 @@ import { VIEWER_BODY_SKINS, VIEWER_ROLE_FALLBACK, VIEWER_BODY_FILE, VIEWER_BODY_
         for(let i=0;i<ud.bones.length;i++)ud.bones[i].quaternion.copy(ud.targetLocalQ[i]); }; if(clip.root)sampleClipPos(clip.root,ct,rootT);else rootT.set(0,0,0);
       rootP.copy(ud.curDelta).lerp(rootT,0.45); pelvis.copy(ud.bindPos[1]);
       rootBonePositionForClip(ud.bindPos[0],pelvis,rootP,rootT.copy(pelvis).applyQuaternion(ud.bones[0].quaternion),ud.bones[0].position); }; ud._clipKey=clipKey;
+    if(ud.curQ)for(let i=0;i<ud.bones.length;i++)ud.curQ[i].copy(ud.bones[i].quaternion);
     model.updateMatrixWorld(true); return true; };
   const _vpQ=[],_vpPrevQ=[],_vpTmpQ=new THREE.Quaternion(),_vpRootA=new THREE.Vector3(),_vpRootB=new THREE.Vector3(),_vpPelvis=new THREE.Vector3(),_vpRootOut=new THREE.Vector3();
   for(let i=0;i<24;i++){_vpQ.push(new THREE.Quaternion());_vpPrevQ.push(new THREE.Quaternion());}
