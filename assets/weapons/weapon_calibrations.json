@@ -661,8 +661,8 @@
     "muzzleSource": "LightMachineGun/gunMuzzleBone"
   },
   "Molotov": {
-    "scale": 1.163916719,
-    "targetLength": 0.5,
+    "scale": 0.652,
+    "targetLength": 0.28,
     "meshPivot": [
       0.0,
       0.0,
@@ -1099,8 +1099,8 @@
     "muzzleSource": "bounds"
   },
   "FragGrenade": {
-    "scale": 2.577944141,
-    "targetLength": 0.5,
+    "scale": 0.928,
+    "targetLength": 0.18,
     "meshPivot": [
       0.0,
       0.0,
