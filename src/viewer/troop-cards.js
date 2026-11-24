@@ -1,4 +1,4 @@
-import { WEAPONS_ORIGINAL, originalWeaponProfile } from '../render3d/assets-weapons.js';
+import { WEAPONS_ORIGINAL, originalWeaponProfile, weaponFileForRef } from '../render3d/assets-weapons.js';
 import { prettySkinName } from '../data/skin-names.js';
 import { CHARACTER_ABILITIES, ABILITY_OBJECTS } from '../data/cast.js';
 import { scanCardBoxes } from './card-stage.js';
@@ -29,7 +29,8 @@ function tcTroopCardHTML(entry,index){
   const saved=tcCardState(entry);
   const origin=csn?'CSN':'Juego original';
   const weapon=csn?'':(saved.weapon||entry.defaultWeapon||'');
-  const profile=csn?null:originalWeaponProfile(weapon);
+  const weaponFile=csn?'':weaponFileForRef(weapon);
+  const profile=csn?null:originalWeaponProfile(weaponFile);
   const skinIndex=Math.min(saved.skinIndex||0,Math.max(0,(entry.skins||[]).length-1));
   const skin=entry.skins&&entry.skins[skinIndex];
   const spec={kind:'roles',key:entry.key,skinIndex,weapon,file:entry.file||entry.mesh||'',label:entry.label,inspect:true};
@@ -40,7 +41,7 @@ function tcTroopCardHTML(entry,index){
     '<div class="card-meta"><span class="tag">'+tcEsc(entry.role||'Sin rol')+'</span><span class="tag">'+(csn?'Prototipo 3D':tcEsc(prettySkinName(skin&&skin.key&&skin.key.indexOf('cast:')===0?skin.key.slice(5):skin&&skin.label,skinIndex)))+'</span></div>'+
     '<p class="note sub">'+tcEsc(entry.bio||'')+'</p>'+
     (csn?'<p class="note">Diseño propio CSN · malla '+tcEsc(entry.mesh)+'. Sin pose, clips ni retarget.</p>'
-      :'<p class="note sub">Arma: '+tcEsc((WEAPONS_ORIGINAL[weapon]||{}).name||'sin arma')+' · '+(profile&&profile.actionLabel||'Sin acción')+'.</p>')+
+      :'<p class="note sub">Arma: '+tcEsc((WEAPONS_ORIGINAL[weapon]||{}).name||weapon||'sin arma')+' · '+(profile&&profile.actionLabel||'Sin acción')+'.</p>')+
     tcAbilitiesHTML(entry)+
     '<button type="button" class="inspector-open" data-inspector-open>Ver ficha y 3D ampliado →</button></div></article>';
 }
