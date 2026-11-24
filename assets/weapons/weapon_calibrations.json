@@ -148,7 +148,7 @@
       0.036474,
       0.161484
     ],
-    "muzzleSource": "Pistol/gunMuzzleBone"
+    "muzzleSource": "Pistol/meshBoundsMaxX"
   },
   "SniperRifle_weapon": {
     "scale": 0.637383611,
@@ -502,7 +502,7 @@
       0.023568,
       0.142966
     ],
-    "muzzleSource": "Revolver/gunMuzzleBone"
+    "muzzleSource": "Revolver/meshBoundsMaxX"
   },
   "RiotShotgun": {
     "scale": 0.753646519,
@@ -617,12 +617,12 @@
       0.0
     ],
     "gripOffset": [
-      -0.275,
+      0.12,
       0.0,
       -0.06
     ],
     "supportOffset": [
-      0.28,
+      0.45,
       0.0,
       0.06
     ],
@@ -857,12 +857,12 @@
       0.0
     ],
     "gripOffset": [
-      -0.056,
+      0.15,
       0.0,
       -0.03
     ],
     "supportOffset": [
-      0.21,
+      0.25,
       0.0,
       0.03
     ],
