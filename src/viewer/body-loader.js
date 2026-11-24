@@ -5,10 +5,12 @@ export const VIEWER_BODY_SKINS={ 'Soldier_SAS':['Soldier_SAS_d.png','Soldier_SAS
   'Soldier_Light':['Soldier_Light_d.png','Soldier_Light_Decon_d.png','Soldier_Light_DeltaForce_d.png','Soldier_Light_Halloween_d.png','Soldier_Light_Spetsnaz_d.png','Soldier_Light_Veteran_d.png'],
   'Soldier_Light_Rambo':['Soldier_Light_Rambo_d.png','Soldier_Light_Rambo_Decon_d.png','Soldier_Light_Rambo_DeerHunter_d.png','Soldier_Light_Rambo_Veteran_d.png'],
   'Soldier_Heavy':['Soldier_heavy_d.png','Soldier_heavy_GermanSpecialForces_d.png','Soldier_Heavy_Decon_d.png','Soldier_Heavy_Veteran_d.png'],
+  'Agent':['Agent_d.png','Agent_Aviator_d.png','Agent_Decon_d.png','Agent_Halloween_d.png','Agent_Spetsnaz_d.png','Agent_Veteran_d.png'],
   'Agent_Light':['Agent_light_d.png','Agent_light_Decon_d.png','Agent_light_JewelThief_d.png','Agent_light_Veteran_d.png'],
   'Agent_Heavy':['Agent_Heavy_d.png','Agent_Heavy_Decon_d.png','Agent_Heavy_Skin1_d.png','Agent_Heavy_Veteran_d.png'],
   'Medic':['Medic_d.png','Medic_Decon_d.png','Medic_Halloween_d.png','Medic_Rescue_d.png','Medic_Spetsnaz_d.png','Medic_Veteran_d.png'],
   'Medic_therapist':['Medic_Therapist_d.png','Medic_Therapist_Decon_d.png','Medic_Therapist_Surgeon_d.png','Medic_Therapist_Veteran_d.png'],
+  'Medic_therapist_959v':['Medic_Heavy_d.png','Medic_Heavy_Decon_d.png','Medic_Heavy_Skin1_d.png','Medic_Heavy_Veteran_d.png'],
   'Engineer':['Engineer_d.png','Engineer_Decon_d.png','Engineer_Halloween_d.png','Engineer_Spetsnaz_d.png','Engineer_Veteran_d.png'],
   'Engineer_Light':['Engineer_Light_d.png','Engineer_Light_Decon_d.png','Engineer_Light_Trinity_d.png','Engineer_Light_Veteran_d.png'],
   'Engineer_Heavy':['Engineer_Heavy2_d.png','Engineer_Heavy_Decon_d.png','Engineer_Heavy_EOD_d.png','Engineer_Heavy_Veteran_d.png'],
@@ -18,7 +20,9 @@ export const VIEWER_BODY_SKINS={ 'Soldier_SAS':['Soldier_SAS_d.png','Soldier_SAS
   'Commander_F':['Commander_F_d.png','Commander_F_African_d.png','Commander_F_Asian_d.png','Commander_F_Latino_d.png'] };
 export const VIEWER_ROLE_FALLBACK={'Riot Medic':'Médico','Megan McNick':'Ingeniero','Carlito Grosso':'Ingeniero', 'Riot Engineer':'Ingeniero','Commander (F)':'Capitán'};
 export const VIEWER_BODY_FILE={ 'Soldier_SAS':'Soldier_SAS.obj', 'Soldier_Spud':'Soldier_Spud.obj', 'Soldier_Heavy':'Soldier_Heavy.obj', 'Soldier_Light_Rambo':'Soldier_Light_Rambo.obj',
-  'Agent_Light':'Agent_Light.obj', 'Medic_therapist':'Medic_therapist_1248v.obj', 'Engineer_Light':'Engineer_Light.obj', 'Engineer_Heavy':'Engineer_Heavy.obj',
+  'Soldier_Light':'Soldier_Light.obj', 'Agent':'Agent.obj', 'Agent_Light':'Agent_Light.obj', 'Agent_Heavy':'Agent_Heavy.obj',
+  'Medic':'Medic.obj', 'Medic_therapist':'Medic_therapist_1248v.obj', 'Medic_therapist_959v':'Medic_therapist_959v.obj',
+  'Engineer':'Engineer.obj', 'Engineer_Light':'Engineer_Light.obj', 'Engineer_Heavy':'Engineer_Heavy.obj',
   'Engineer (RiotCop)':'Engineer_RiotCop.obj', 'CommanderM':'CommanderM.obj', 'Commander_F':'CommanderF.obj' };
 export const VIEWER_BODY_OVERRIDE={'Archie Fletcher':'Soldier_Light_Rambo','Commander (M)':'CommanderM'};
 export const VIEWER_BODY_ROLE={'Medic':'Médico','Engineer':'Ingeniero','Agent_Heavy':'Comando','Commander':'Capitán'};
