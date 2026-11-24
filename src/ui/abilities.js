@@ -77,5 +77,6 @@ export const ABILITY_IMPL={
   'CharAbility_37_Rocket_Turret_alpha':'Torreta de cohetes',
   'CharAbility_16_Gatling_Turret_alpha':'Torreta M2',
   'CharAbility_38_Rush_Aura_alpha':'Teletransporte',
-  'CharAbility_44_Swarm_Aura_alpha':'Bomba de abejas'
+  'CharAbility_44_Swarm_Aura_alpha':'Bomba de abejas',
+  'CharAbility_31_Melee_Specialization_alpha':'Trunkquilizer'
 };

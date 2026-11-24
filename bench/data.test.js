@@ -44,12 +44,12 @@ test('12 naciones con personalidad propia', async () => {
   for (const n of NATIONS) assert.ok(n.pers.name.length > 2, 'personalidad vacia');
 });
 
-test('reparto: 17 personajes del original y 18 propios', async () => {
+test('reparto: 19 personajes del original y 18 propios', async () => {
   const { ORIG_CAST, OWN_CAST } = await loadData();
-  assert.equal(ORIG_CAST.length, 17, 'deben ser 17 personajes del IPA');
+  assert.equal(ORIG_CAST.length, 19, 'deben ser 19 personajes del IPA');
   assert.equal(OWN_CAST.length, 18, 'deben ser 18 personajes propios');
   assert.equal(OWN_CAST.filter(c => c.bio).length, 18, 'cada personaje propio debe tener bio');
-  assert.equal(ORIG_CAST.filter(c => c.bio).length, 17, 'cada personaje del original debe tener bio');
+  assert.equal(ORIG_CAST.filter(c => c.bio).length, 19, 'cada personaje del original debe tener bio');
   for (const c of OWN_CAST) {
     assert.ok(['Francotirador', 'Artillero', 'Espía', 'Médico', 'Ingeniero', 'Comando', 'Capitán'].includes(c.role), 'rol invalido: ' + c.role);
   }
@@ -76,7 +76,7 @@ test('6 misiones de campana con mapa, objetivo y formato validos', async () => {
 test('cada personaje tiene su voz extraida', async () => {
   const { CHAR_VOICE } = await loadData();
   const pairs = Object.entries(CHAR_VOICE);
-  assert.ok(pairs.length >= 35, 'deben estar los 17 del original y los 18 propios');
+  assert.ok(pairs.length >= 37, 'deben estar los 19 del original y los 18 propios');
   for (const [name, slug] of pairs) {
     for (const ev of ['select', 'confirm', 'pain', 'death', 'firing', 'thanks']) {
       const f = path.join(ROOT, 'assets', 'audio', 'voice', slug, ev + '.mp3');
@@ -373,13 +373,14 @@ test('los originales del visor arrancan sin arma y pueden equipar las 23 armas o
   const troops = fs.readFileSync(path.join(ROOT, 'src', 'viewer', 'troop-cards.js'), 'utf8');
   const cast = fs.readFileSync(path.join(ROOT, 'src', 'data', 'cast.js'), 'utf8');
   const defaults = Object.fromEntries([...cast.matchAll(/name:'([^']+)'[^\n]*?defaultWeapon:'([^']+)'/g)].map(m => [m[1], m[2]]));
-  assert.equal(Object.keys(defaults).length, 17);
+  assert.equal(Object.keys(defaults).length, 19);
   const esperado = {
     'Hipster Dave': 'M4A1', 'Archie Fletcher': 'M249 SAW', 'Soap': 'M240B', 'Spud': 'RPG-7',
     'Ivan Tkilya': 'M249 SAW', 'Mme La Hacque': 'MP7', 'Sneaky Pete': 'M40',
     'Sister Florence': 'M4A1', 'Riot Medic': 'M4A1', 'Textbook Kate': 'M4A1',
     'Big Time Taschmann': 'Remington 870', 'Megan McNick': 'Benelli M4', 'Carlito Grosso': 'M203',
-    'Riot Agent': 'MP5', 'Riot Engineer': 'M4A1', 'Commander (M)': 'M4A1', 'Commander (F)': 'Desert Eagle'
+    'Riot Agent': 'MP5', 'Riot Engineer': 'M4A1', 'Commander (M)': 'M4A1', 'Commander (F)': 'Desert Eagle',
+    'Tito Tesla': 'Electri-Fryer', 'Tree Mendez': 'Lumber Numberer'
   };
   assert.deepEqual(defaults, esperado);
   assert.match(viewer, /viewerWeaponFiles=\[/);

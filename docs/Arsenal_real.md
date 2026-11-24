@@ -183,6 +183,12 @@ Un solo disparo, mucho daño, mucho alcance. El Francotirador se mueve menos que
 
 **En el juego:** rol Francotirador · daño 72 · alcance 10 casillas · coste 4 de energía · precisión de banco: castiga la distancia larga.
 
+### Electri-Fryer
+
+**Datos reales:** arma de ficción del RAD Soldiers original (Splash Damage / WarChest, actualización Party in Rio, abril de 2013) · no existe en el mundo real · en el original: alcance 9, el más largo del juego, daño 54, coste 5 de energía, 5 puntos de escuadra, solo para Agente, precio 40.000 monedas, 2 cartuchos, recarga 6 de energía.
+
+**En el juego:** rol Francotirador · daño 54 · alcance 9 casillas · coste 5 de energía · en el original el daño varía con la distancia (62 a alcance óptimo, 24 cuerpo a cuerpo); en CSN usa el daño base 54. El fusil de Tito Tesla, con la malla Sniper Rifle 1 del original.
+
 ## 5. Escopetas y pistolas
 
 Las escopetas son armas de corta distancia con mucho daño concentrado: devastadoras a una casilla, casi inútiles a tres. Las pistolas son el arma secundaria de todos los soldados: poco daño, pero cuestan 1 de energía y salvan partidas cuando el arma principal se queda sin munición o sin energía para disparar.
@@ -492,6 +498,18 @@ No son armas de fuego, son herramientas que cambian cómo se juega una casilla o
 > **No es un arma del catálogo `WEAPONS` del código: accesorio, no un arma.**
 
 **En el juego:** rol Espía, Francotirador · **equipar el silenciador cuesta 1 de energía, reduce el daño del arma en 1 punto y hace que disparar no revele la posición del soldado en el mapa enemigo** · sin silenciador, cada disparo marca la casilla del tirador durante 1 turno; con silenciador, el enemigo solo sabe que le han disparado, no desde dónde. La combinación natural es Espía con MP7 silenciada: poco daño por disparo, posición desconocida, y el enemigo no sabe por dónde le vienen los tiros.
+
+---
+
+## 12. Armas cuerpo a cuerpo
+
+El original tenía varias armas cuerpo a cuerpo (cuchillo, katana, hacha, maza...), pero en CSN solo una está cableada como arma jugable: el hacha de Tree Mendez. Las demás existen como mallas del original sin equivalente en el arsenal de CSN.
+
+### Lumber Numberer
+
+**Datos reales:** arma de ficción del RAD Soldiers original (Splash Damage / WarChest, actualización Party in Rio, abril de 2013) · no existe en el mundo real · en el original: alcance 1 (cuerpo a cuerpo), daño 76, coste 4 de energía, 5 puntos de escuadra, para Soldado, Médico, Ingeniero y Agente, precio 40.000 monedas, 1 de empuje.
+
+**En el juego:** rol Artillero · daño 76 · alcance 1 casilla · coste 4 de energía · empuja al objetivo 1 casilla. El hacha de Tree Mendez, con la malla WoodAxe del original.
 
 ---
 

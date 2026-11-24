@@ -7,7 +7,7 @@ import { fxFloat } from '../render2d/fx.js';
 import { barrelAt, blocked, deployedAt, droneAt, drawMovePath, hasLOS, hitChance, obAt, reachable, smokeBlocksLOS, startDrawMove, unitAt } from './board.js';
 import { canHealSpecial, canSnipeSpecial, checkOverwatch, explodeBarrel, log, pickupLoot, playOnce, selectUnit, spendEnergy, throwGrenade, tryShoot } from './combat.js';
 import { checkMines, deployTurret, guideDrone, mineAt, throwFlash, useSpecial } from './missions.js';
-import { fireArtillery, fireOrbital, placeCover, placeHealthCrate, sweepDetect, teleportUnit, throwBees, throwGas, throwMolotov, throwSmoke, throwTranq, waterCannon } from './gadgets.js';
+import { fireArtillery, fireOrbital, placeCover, placeHealthCrate, sweepDetect, teleportUnit, throwBees, throwGas, throwMolotov, throwSmoke, throwTranq, throwTrunk, waterCannon } from './gadgets.js';
 import { tutorialEvent } from './tutorial.js';
 
 export let hoverTile=null;
@@ -39,6 +39,7 @@ export function boardTileClick(t){
   if(G.actionMode==='crate'&&u){placeHealthCrate(u,t.x,t.y);return;}
   if(G.actionMode==='teleport'&&u){teleportUnit(u,t.x,t.y);return;}
   if(G.actionMode==='arty'&&u){fireArtillery(u,t.x,t.y);return;}
+  if(G.actionMode==='trunk'&&u){throwTrunk(u,t.x,t.y);return;}
   if(G.actionMode==='deployRocket'&&u){deployTurret(u,t.x,t.y,'rocket');return;}
   if(G.actionMode==='orbital'&&u){fireOrbital(u,t.x,t.y);return;}
   if(G.actionMode==='drone'&&u){

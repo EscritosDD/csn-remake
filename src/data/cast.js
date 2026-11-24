@@ -26,12 +26,18 @@ export const CHARACTER_ABILITIES={
  'Ivan Tkilya':[
   {icon:'CharAbility_43_Support_Fire_alpha',n:'Fuego de apoyo',d:'Dispara contra el enemigo que se mueve para proteger a los compañeros.',obj:null},
   {icon:'CharAbility_09_Concussion_Grenade_alpha',n:'Granada de concusión',d:'Reduce la energía de enemigos y desplegables.',obj:null}],
+ 'Tree Mendez':[
+  {icon:'CharAbility_43_Support_Fire_alpha',n:'Fuego de apoyo',d:'Dispara contra el enemigo que se mueve para proteger a los compañeros.',obj:null},
+  {icon:'CharAbility_31_Melee_Specialization_alpha',n:'Trunkquilizer',d:'91 de daño a todas las unidades en una línea recta de 5 casillas.',obj:null}],
  'Mme La Hacque':[
   {icon:'CharAbility_17_Ghost_alpha',n:'Fantasma',d:'Invisible durante 3 turnos.',obj:null},
   {icon:'CharAbility_46_UAV_alpha',n:'UAV',d:'Dron explorador por control remoto que explota.',obj:'uav'}],
  'Sneaky Pete':[
   {icon:'CharAbility_17_Ghost_alpha',n:'Fantasma',d:'Invisible durante 3 turnos.',obj:null},
   {icon:'CharAbility_19_Headshot_alpha',n:'Tiro a la cabeza',d:'Crítico garantizado.',obj:null}],
+ 'Tito Tesla':[
+  {icon:'CharAbility_17_Ghost_alpha',n:'Fantasma',d:'Invisible durante 3 turnos.',obj:null},
+  {icon:'CharAbility_38_Rush_Aura_alpha',n:'Teletransporte',d:'Salto propio a 4 casillas. La Granada del original devolvía al enemigo a su zona de despliegue.',obj:null}],
  'Sister Florence':[
   {icon:'CharAbility_30_Medkit_alpha',n:'Botiquín',d:'Cura a un compañero.',obj:null},
   {icon:'CharAbility_20_Healing_Aura_alpha',n:'Aura curativa',d:'Cura a varios compañeros en un área.',obj:null}],
@@ -78,8 +84,10 @@ export const CAST_TEXTURE_FILE={
   'Soap':'Soldier_SAS_d.png',
   'Spud':'Soldier_d.png',
  'Ivan Tkilya':'Soldier_heavy_GermanSpecialForces_d.png',
+ 'Tree Mendez':'Soldier_Heavy_Veteran_d.png',
  'Mme La Hacque':'Agent_light_JewelThief_d.png',
  'Sneaky Pete':'Agent_light_d.png',
+ 'Tito Tesla':'Agent_light_Veteran_d.png',
  'Sister Florence':'Medic_Rescue_d.png',
  'Riot Medic':'Medic_Therapist_d.png',
  'Textbook Kate':'Medic_d.png',
@@ -112,6 +120,7 @@ export const CHAR_ABILITY_ACTIONS={
  'CharAbility_23_HMG_Specialization_alpha':'special',
  'CharAbility_07_Caltrops_alpha':'mine',
  'CharAbility_33_Nail_Mines_alpha':'mine',
+ 'CharAbility_31_Melee_Specialization_alpha':'trunk',
  'CharAbility_12_Deployable_Cover_alpha':'cover',
  'CharAbility_27_Landmines_alpha':'mine',
  'CharAbility_37_Rocket_Turret_alpha':'deployRocket',
@@ -120,7 +129,7 @@ export const CHAR_ABILITY_ACTIONS={
  'CharAbility_16_Gatling_Turret_alpha':'deploy'
 };
 
-export const CHAR_VOICE={'Hipster Dave':'Hipster_Dave','Archie Fletcher':'Archie_Fletcher','Soap':'Soap','Spud':'Spud','Ivan Tkilya':'Ivan_Tkilya','Mme La Hacque':'Mme_La_Hacque','Sneaky Pete':'Sneaky_Pete','Sister Florence':'Sister_Florence','Textbook Kate':'Textbook_Kate','Riot Medic':'Riot_Medic','Big Time Taschmann':'Big_Time_Taschmann','Megan McNick':'Megan_McNick','Carlito Grosso':'Carlito_Grosso','Riot Agent':'Riot_Agent','Riot Engineer':'Riot_Engineer','Commander (M)':'Commander_M','Commander (F)':'Commander_F','Lobo':'Generico_M','Mula':'Generico_M','Sombra':'Generico_M','Alfiler':'Generico_M','Tuerca':'Generico_M','Faro':'Generico_M','Brújula':'Generico_M','Yunque':'Generico_M','Gacela':'Generico_M','Bisturí':'Generico_M','Llave':'Generico_M','Trueno':'Generico_M','Ciclón':'Generico_M','Roca':'Generico_M','Víbora':'Generico_M','Venda':'Generico_M','Engranaje':'Generico_M','Centella':'Generico_M'};
+export const CHAR_VOICE={'Hipster Dave':'Hipster_Dave','Archie Fletcher':'Archie_Fletcher','Soap':'Soap','Spud':'Spud','Ivan Tkilya':'Ivan_Tkilya','Mme La Hacque':'Mme_La_Hacque','Sneaky Pete':'Sneaky_Pete','Sister Florence':'Sister_Florence','Textbook Kate':'Textbook_Kate','Riot Medic':'Riot_Medic','Big Time Taschmann':'Big_Time_Taschmann','Megan McNick':'Megan_McNick','Carlito Grosso':'Carlito_Grosso','Riot Agent':'Riot_Agent','Riot Engineer':'Riot_Engineer','Commander (M)':'Commander_M','Commander (F)':'Commander_F','Tito Tesla':'Francotirador','Tree Mendez':'Artillero','Lobo':'Generico_M','Mula':'Generico_M','Sombra':'Generico_M','Alfiler':'Generico_M','Tuerca':'Generico_M','Faro':'Generico_M','Brújula':'Generico_M','Yunque':'Generico_M','Gacela':'Generico_M','Bisturí':'Generico_M','Llave':'Generico_M','Trueno':'Generico_M','Ciclón':'Generico_M','Roca':'Generico_M','Víbora':'Generico_M','Venda':'Generico_M','Engranaje':'Generico_M','Centella':'Generico_M'};
 
 export const MESHY_CAST=[
  {key:'own:09',label:'Diseño Meshy 09',name:'Diseño Meshy 09',role:'Francotirador',mesh:'Francotirador',texture:'assets/personajes_propios/Francotirador_tex.png',bio:'Diseño propio de Dani.',play:true,sculptedWeapon:true},
@@ -157,8 +166,10 @@ export const ORIG_CAST=[
    {name:'Soap',body:'Soldier_SAS',outfit:'Soldier_SAS',role:'Artillero',defaultWeapon:'M240B',bio:'El nombre que todos recuerdan y nadie explica.',play:true},
    {name:'Spud',body:'Soldier_Spud',outfit:'Soldier_ForestCamo',role:'Artillero',defaultWeapon:'RPG-7',bio:'Patata de nombre, roca de aguante.',play:true},
   {name:'Ivan Tkilya',body:'Soldier_Heavy',outfit:'Soldier_heavy / GermanSpecialForces',role:'Artillero',defaultWeapon:'M249 SAW',bio:'Pesado de manual: donde se planta, hay que rodearlo.',play:true},
+  {name:'Tree Mendez',body:'Soldier_Heavy',outfit:'Soldier_Heavy / Veteran',role:'Artillero',defaultWeapon:'Lumber Numberer',bio:'Pega con árboles. Literalmente.',play:true},
    {name:'Mme La Hacque',body:'Agent_Light',outfit:'Agent_light / JewelThief',role:'Espía',defaultWeapon:'MP7',bio:'Elegancia francesa con un cuchillo en la bota.',play:true},
   {name:'Sneaky Pete',body:'Agent_Light',outfit:'Agent_light (base)',role:'Francotirador',defaultWeapon:'M40',bio:'Nadie le vio llegar; nadie le vio irse.',play:true},
+  {name:'Tito Tesla',body:'Agent_Light',outfit:'Agent_light / Veteran',role:'Francotirador',defaultWeapon:'Electri-Fryer',bio:'El maestro del teletransporte: devuelve al enemigo a su zona de despliegue.',play:true},
   {name:'Sister Florence',body:'Medic',outfit:'Medic / Medic_Rescue',role:'Médico',defaultWeapon:'M4A1',bio:'Reza por ti y luego te cose la herida.',play:true,rigPose:true},
    {name:'Riot Medic',body:'Medic_therapist',outfit:'Medic_therapist',role:'Médico',defaultWeapon:'M4A1',bio:'Casco antidisturbios y camilla blindada.',play:true},
    {name:'Textbook Kate',body:'Medic',outfit:'Medic (variante)',role:'Médico',defaultWeapon:'M4A1',bio:'Se sabe el manual de memoria; por eso cura mejor.',play:true},

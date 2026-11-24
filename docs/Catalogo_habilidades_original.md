@@ -35,7 +35,7 @@ Iconos extraídos en `assets/ui/ability/`.
 | 28 | Last Stand | sí | — | pendiente |
 | 29 | Last Stand Aura | sí | — | pendiente |
 | 30 | Medkit | sí | Curación del Médico | implementada |
-| 31 | Melee Specialization | sí | — | pendiente |
+| 31 | Melee Specialization | sí | Trunkquilizer (Tree Mendez) | implementada |
 | 32 | Metabolism | sí | — | pendiente |
 | 33 | Nail Mines | sí | Claymore M18A1 | implementada |
 | 34 | Pistol Specialization | sí | — | pendiente |
@@ -61,9 +61,9 @@ Iconos extraídos en `assets/ui/ability/`.
 ## Resumen
 
 - **Iconos**: 52 de 52 extraídos.
-- **Implementadas o con equivalente**: 22 (las 21 de la tabla + la 36 Revive, parcial).
+- **Implementadas o con equivalente**: 23 (las 22 de la tabla + la 36 Revive, parcial).
 - **Parcial**: 1 (36 Revive: la reanimación de CSN es adyacente, no a distancia).
-- **Pendientes**: 30.
+- **Pendientes**: 29.
 
 El juego marca 22 como «en juego» (ABILITY_IMPL): las 21 de la tabla más la 36 Revive. La 05 Backlash Aura no está implementada: el equivalente directo de la cobertura desplegable es la 12 Deployable Cover.
 

@@ -112,6 +112,7 @@ export function useToolkit(u){
 }
 
 export const SHIELD_COST=3, SHIELD_TURNS=1, SHIELD_MULT=0.55, ARTY_COST=4, ARTY_DMG=60, ARTY_RANGE=3, BEES_COST=2, BEES_DMG=8, BEES_TURNS=2, BEES_RANGE=4;
+export const TRUNK_COST=3, TRUNK_DMG=91, TRUNK_RANGE=5;
 
 export function useShield(u){
   if(u.role!=='Comando'&&!hasCharAction(u,'shield')){toast('El escudo antidisturbios no está disponible para este personaje.');return;}
@@ -139,6 +140,28 @@ export function fireArtillery(u,x,y){
   G.map.obstacles.filter(o=>cheb(o,{x,y})<=1).forEach(o=>{if(o.type==='crate')o.hp-=ARTY_DMG;});
   G.map.obstacles=G.map.obstacles.filter(o=>!(o.type==='crate'&&o.hp<=0));
   const b=barrelAt(x,y)||G.map.barrels.find(bb=>bb.alive&&cheb(bb,{x,y})<=1);if(b)explodeBarrel(b,'la artillería',u.team);
+  G.actionMode='move';checkWin();updateUI();draw();
+}
+
+export function throwTrunk(u,x,y){
+  try{auPlay('sfx/weapons/axe_swing_01.mp3',0.6);}catch(e){}
+  if(u.role!=='Artillero'&&!hasCharAction(u,'trunk')){toast('El Trunkquilizer no está disponible para este personaje.');return;}
+  if((u.trunks||0)<=0){toast('Sin cargas de Trunkquilizer: Tree Mendez lleva 1 por partida.');return;}
+  if(u.energy<TRUNK_COST){toast('El Trunkquilizer cuesta '+TRUNK_COST+' ⚡.');return;}
+  const dx=x-u.x,dy=y-u.y;
+  if(!dx&&!dy){toast('Apunta a una casilla para trazar la línea.');return;}
+  if(Math.max(Math.abs(dx),Math.abs(dy))>TRUNK_RANGE){toast('El Trunkquilizer alcanza '+TRUNK_RANGE+' casillas.');return;}
+  const sx=Math.abs(dx)>=Math.abs(dy)?Math.sign(dx):0, sy=Math.abs(dx)>=Math.abs(dy)?0:Math.sign(dy);
+  const cells=[];for(let i=1;i<=TRUNK_RANGE;i++){const cx=u.x+sx*i,cy=u.y+sy*i;if(cx>=0&&cy>=0&&cx<(G.W||99)&&cy<(G.H||99))cells.push({x:cx,y:cy});}
+  if(!cells.length){toast('La línea no cabe en el tablero desde ahí.');return;}
+  G.lastMoveUndo=null;spendEnergy(u,TRUNK_COST);u.trunks--;playOnce(u,'throw');sfx('boom');FX.shake=Math.max(FX.shake,10);
+  cells.forEach(c=>{if(typeof fx3Explosion==='function')fx3Explosion(c.x,c.y,'expl');fxBurst(c.x,c.y,14,'#b8d94e');});
+  log('🌳 '+u.role+' ('+u.team+') golpea con el Trunkquilizer en línea: '+TRUNK_DMG+' de daño en '+cells.length+' casillas.');
+  G.units.filter(t=>t.alive&&cells.some(c=>c.x===t.x&&c.y===t.y)).forEach(t=>damage(t,TRUNK_DMG,'El Trunkquilizer',u.team));
+  if(G.drone&&G.drone.alive&&cells.some(c=>c.x===G.drone.x&&c.y===G.drone.y))damage(G.drone,TRUNK_DMG,'El Trunkquilizer',u.team);
+  G.map.obstacles.filter(o=>cells.some(c=>c.x===o.x&&c.y===o.y)).forEach(o=>{if(o.type==='crate')o.hp-=TRUNK_DMG;});
+  G.map.obstacles=G.map.obstacles.filter(o=>!(o.type==='crate'&&o.hp<=0));
+  const b=G.map.barrels.find(bb=>bb.alive&&cells.some(c=>c.x===bb.x&&c.y===bb.y));if(b)explodeBarrel(b,'el Trunkquilizer',u.team);
   G.actionMode='move';checkWin();updateUI();draw();
 }
 

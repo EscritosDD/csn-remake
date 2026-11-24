@@ -5,11 +5,12 @@ export const WEAPON_MESH_FILE={
   'MP7':'Uzi','MP5':'MP5K','FN P90':'Uzi','UMP45':'MP5K','KRISS Vector':'MP5K',
   'M249 SAW':'LightMachineGun','M240B':'LightMachineGun','PKM':'LightMachineGun','MG3':'LightMachineGun','Browning M2':'LightMachineGun',
   'M40':'SniperRifle_weapon','M24 SWS':'SniperRifle_weapon','M110 SASS':'M95','SVD Dragunov':'SniperRifle_weapon',
-  'AW50':'M95','Barrett M82':'M95','Mk 14 EBR':'M95','PSG-1':'SniperRifle_weapon',
+  'AW50':'M95','Barrett M82':'M95','Mk 14 EBR':'M95','PSG-1':'SniperRifle_weapon','Electri-Fryer':'SniperRifle_weapon',
   'Remington 870':'Shotgun','Benelli M4':'RiotShotgun','Mossberg 500':'Shotgun',
   'RPG-7':'RPG','AT4':'RPG','M72 LAW':'RPG',
   'M203':'RPG','M32 MGL':'RPG','Mk 19':'RPG','M134 Minigun':'Minigun',
-  'M9':'Pistol','Glock 17':'Pistol','M1911':'Revolver','Desert Eagle':'Revolver'
+  'M9':'Pistol','Glock 17':'Pistol','M1911':'Revolver','Desert Eagle':'Revolver',
+  'Lumber Numberer':'WoodAxe'
 };
 
 export const WEAPON_LEN={'Fusiles de asalto':0.54,'Subfusiles':0.36,'Ametralladoras':0.64,'Francotirador':0.72,
@@ -32,7 +33,7 @@ export const WEAPONS_ORIGINAL={
    'AssaultRifle':{name:'Assault Rifle',tex:'AssaultRifle_d',texSize:[256,256],dims:[0.776,0.108,0.3],verts:201,cover:'item_weapon_14_Semi_Auto_Rifle_alpha',cat:'Fusiles de asalto',uses:['M4A1','HK416','G36C','FAMAS'],roles:'Comando, Capitán, Espía'},
  'Rifle':{name:'Semi Auto Rifle',tex:'Rifle_d',texSize:[256,256],dims:[0.945,0.085,0.229],verts:405,cover:'item_weapon_14_Semi_Auto_Rifle_alpha',cat:'Fusiles de asalto',uses:['AK-12','FN SCAR-L'],roles:'Comando',note:'Comparte la carátula 14 con AssaultRifle; la carátula 09 (M16A2) no está asignada a ninguna malla.'},
  'Pistol':{name:'M9',tex:'Pistol_d',texSize:[128,128],dims:[0.86,0.148,0.603],verts:196,cover:'item_weapon_06_M9_alpha',cat:'Pistolas',uses:['M9','Glock 17'],roles:'todos (secundaria)'},
- 'SniperRifle_weapon':{name:'Sniper Rifle 1',tex:'SniperRifle_d',texSize:[256,256],dims:[1.13,0.186,0.293],verts:583,cover:'item_weapon_12_Sniper_Rifle_1_alpha',cat:'Francotirador',uses:['M40','M24 SWS','SVD Dragunov','PSG-1'],roles:'Francotirador, Comando'},
+ 'SniperRifle_weapon':{name:'Sniper Rifle 1',tex:'SniperRifle_d',texSize:[256,256],dims:[1.13,0.186,0.293],verts:583,cover:'item_weapon_12_Sniper_Rifle_1_alpha',cat:'Francotirador',uses:['M40','M24 SWS','SVD Dragunov','PSG-1','Electri-Fryer'],roles:'Francotirador, Comando'},
  'Shotgun':{name:'Shotgun',tex:'Shotgun_d',texSize:[256,256],dims:[0.711,0.096,0.257],verts:210,cover:'item_weapon_10_shotgun_alpha',cat:'Escopetas',uses:['Remington 870','Mossberg 500'],roles:'Comando, Espía, Ingeniero'},
  'RPG':{name:'RPG',tex:'RPG_d',texSize:[256,256],dims:[0.752,0.385,0.259],verts:254,cover:null,cat:'Lanzacohetes / Lanzagranadas',uses:['RPG-7','AT4','M72 LAW','M203','M32 MGL','Mk 19'],roles:'Artillero, Comando, Ingeniero',note:'Sin carátula en el original.'},
  'Crossbow':{name:'Crossbow',tex:'Crossbow_d',texSize:[256,256],dims:[0.911,0.629,0.281],verts:696,cover:null,cat:'—',uses:[],roles:'sin asignar en el arsenal de CSN',note:'Sin carátula en el original; arma del original sin equivalente en CSN.'},
@@ -45,7 +46,7 @@ export const WEAPONS_ORIGINAL={
  'Molotov':{name:'Molotov',tex:'Molotov_d',texSize:[64,64],dims:[0.248,0.188,0.43],verts:51,cover:null,cat:'Consumible',uses:[],roles:'sin asignar en el arsenal de CSN',note:'Sin carátula en el original.'},
  'Knife':{name:'Knife',tex:'knife_d',texSize:[128,128],dims:[0.119,0.038,0.497],verts:114,cover:'item_weapon_05_knife_alpha',cat:'Cuerpo a cuerpo',uses:[],roles:'sin asignar en el arsenal de CSN'},
  'Katana':{name:'Katana',tex:'katana_d',texSize:[128,128],dims:[0.322,0.244,2.39],verts:142,cover:'item_weapon_03_Katana_alpha',cat:'Cuerpo a cuerpo',uses:[],roles:'sin asignar en el arsenal de CSN'},
- 'WoodAxe':{name:'Axe',tex:'WoodAxe_d',texSize:[128,128],dims:[0.313,0.068,0.854],verts:126,cover:'item_weapon_01_axe_alpha',cat:'Cuerpo a cuerpo',uses:[],roles:'sin asignar en el arsenal de CSN'},
+ 'WoodAxe':{name:'Axe',tex:'WoodAxe_d',texSize:[128,128],dims:[0.313,0.068,0.854],verts:126,cover:'item_weapon_01_axe_alpha',cat:'Cuerpo a cuerpo',uses:['Lumber Numberer'],roles:'Artillero'},
  'MP5K':{name:'MP5K',tex:'MP5K_d',texSize:[128,128],dims:[0.393,0.08,0.271],verts:204,cover:'item_weapon_18_mp5k_alpha',cat:'Subfusiles',uses:['MP5','UMP45','KRISS Vector'],roles:'Espía, Comando'},
  'Chainsaw':{name:'Chainsaw',tex:'Chainsaw_d',texSize:[256,256],dims:[0.311,0.286,0.877],verts:334,cover:'item_large_weapon_chainsaw_alpha',cat:'Cuerpo a cuerpo',uses:[],roles:'sin asignar en el arsenal de CSN'},
   'Minigun':{name:'Minigun',tex:'Minigun_d',texSize:[256,256],dims:[0.849,0.419,0.402],verts:527,cover:'item_weapon_16_minigun_alpha',cat:'Ametralladoras',uses:['M134 Minigun'],roles:'Ingeniero (torreta)'},

@@ -30,12 +30,14 @@ export const WEAPONS={
  'Desert Eagle':{dmg:40,rng:3,cost:2,cat:'Pistolas',real:'.50 AE / .44 Magnum · unos 2,0 kg · EE. UU./Israel, 1982–presente · uso civil, no militar estándar',note:'Daño de escopeta a distancia de pistola.'},
  'Mk 14 EBR':{dmg:74,rng:9,cost:4,cat:'Francotirador',real:'7,62x51 mm NATO · semiautomatico · 5,1 kg · EE. UU., 2004-presente',note:'DMR: mas rapido que el cerrojo, menos letal que un Barrett.'},
  'PSG-1':{dmg:72,rng:10,cost:4,cat:'Francotirador',real:'7,62x51 mm NATO · semiautomatico · 8,1 kg · Alemania, 1985',note:'Precision de banco: castiga la distancia larga.'},
+ 'Electri-Fryer':{dmg:54,rng:9,cost:5,cat:'Francotirador',real:'Arma de ficción del RAD Soldiers original (Party in Rio, 2013) · fusil de francotirador · alcance 9, el más largo del juego · 40.000 monedas · 2 cartuchos · recarga 6 de energía · solo para Agente',note:'En el original el daño varía con la distancia (62 a alcance óptimo, 24 cuerpo a cuerpo); aquí usa el daño base 54.'},
  'Browning M2':{dmg:38,rng:7,cost:3,cat:'Ametralladoras',real:'12,7x99 mm · 38 kg · EE. UU., 1933-presente',note:'Fuego pesado: borra coberturas ligeras.'},
  'Mk 19':{dmg:85,rng:5,cost:4,cat:'Lanzagranadas',real:'40 mm · 35 kg · EE. UU., 1968-presente',note:'Salvas de 40 mm: castigo en area.'},
  'KRISS Vector':{dmg:26,rng:4,cost:1,cat:'Subfusiles',real:'9x19 mm · 2,7 kg · EE. UU., 2006-presente',note:'Rafaga corta con muy poco retroceso.'},
  'G36C':{dmg:29,rng:6,cost:2,cat:'Fusiles de asalto',real:'5,56x45 mm NATO · 2,8 kg · Alemania, 1996',note:'Compacto y estable.'},
  'FAMAS':{dmg:27,rng:6,cost:2,cat:'Fusiles de asalto',real:'5,56x45 mm NATO · 3,6 kg · Francia, 1978',note:'Bullpup: corto de longitud, pegada seca.'},
  'Mossberg 500':{dmg:66,rng:2,cost:2,cat:'Escopetas',real:'12/70 · 3,2 kg · EE. UU., 1961-presente',note:'Bomba de corredera: castiga a bocajarro.'},
+ 'Lumber Numberer':{dmg:76,rng:1,cost:4,cat:'Cuerpo a cuerpo',kb:1,real:'Arma de ficción del RAD Soldiers original (Party in Rio, 2013) · hacha cuerpo a cuerpo · 40.000 monedas · para Soldado, Médico, Ingeniero y Agente',note:'Empuja al objetivo 1 casilla. El hacha de Tree Mendez.'},
 
 };
 
@@ -47,11 +49,12 @@ export const WEAPON_SFX_BY_WEAPON={
   'M4A1':'assaultrifle_fire','AK-12':'assaultrifle_fire','HK416':'assaultrifle_fire','FN SCAR-L':'assaultrifle_fire','G36C':'assaultrifle_fire','FAMAS':'assaultrifle_fire',
   'MP7':'submachinegun_fire','MP5':'mp5k_fire','FN P90':'submachinegun_fire','UMP45':'mp5k_fire','KRISS Vector':'submachinegun_fire',
   'M249 SAW':'lmg_fire','M240B':'lmg_fire','PKM':'lmg_fire','MG3':'lmg_fire','Browning M2':'m95_fire','M134 Minigun':'minigun_fire',
-  'M40':'sniperrifle_fire','M24 SWS':'sniperrifle_fire','M110 SASS':'semiautorifle_fire','SVD Dragunov':'semiautorifle_fire','AW50':'m95_fire','Barrett M82':'m95_fire','Mk 14 EBR':'semiautorifle_fire','PSG-1':'semiautorifle_fire',
+  'M40':'sniperrifle_fire','M24 SWS':'sniperrifle_fire','M110 SASS':'semiautorifle_fire','SVD Dragunov':'semiautorifle_fire','AW50':'m95_fire','Barrett M82':'m95_fire','Mk 14 EBR':'semiautorifle_fire','PSG-1':'semiautorifle_fire','Electri-Fryer':'sniperrifle_fire',
   'Remington 870':'shotgun_fire','Benelli M4':'riotshotgun_fire.wav','Mossberg 500':'shotgun_fire',
   'RPG-7':'rocketlauncher_fire','AT4':'rocketlauncher_fire','M72 LAW':'rocketlauncher_fire',
   'M203':'grenade_throw_02','M32 MGL':'grenade_throw_02','Mk 19':'grenade_throw_02',
-  'M9':'beretta_fire','Glock 17':'beretta_fire','M1911':'revolver_fire','Desert Eagle':'revolver_fire'
+  'M9':'beretta_fire','Glock 17':'beretta_fire','M1911':'revolver_fire','Desert Eagle':'revolver_fire',
+  'Lumber Numberer':'axe_swing_01'
 };
 
 export function weaponSfxFile(cat,weaponName){

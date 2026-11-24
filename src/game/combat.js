@@ -38,6 +38,7 @@ export function applyCharacterAbilities(u){
   if(hasCharAction(u,'gas'))ensure('gases',2);
   if(hasCharAction(u,'crate'))ensure('crates',2);
   if(hasCharAction(u,'teleport'))ensure('teleports',1);
+  if(hasCharAction(u,'trunk'))ensure('trunks',1);
   if(hasCharAction(u,'bees'))ensure('bees',1);
   if(hasCharAction(u,'sweep'))ensure('sweeps',1);
   if(hasCharAction(u,'orbital'))ensure('orbitals',1);
@@ -78,7 +79,7 @@ export function makeUnit(team,def,i,nation,skin,slots){
   if(team==='B'&&setup.opp==='ia'){if(setup.difficulty==='veterano'){maxEnergy+=1;energy=maxEnergy;}else if(setup.difficulty==='elite'){maxEnergy+=2;energy=maxEnergy;maxHp+=25;hp=maxHp;}}
   const u={id:++uid,team,role:def.role,name:ch?ch.name:def.role,charKey:characterKey(ch),charName:ch?ch.name:def.role,charBio:ch?ch.bio:'',charTexture:ch&&ch.texture?ch.texture:'',charMesh:ch&&ch.mesh?ch.mesh:'',charAbilities:charAbilitiesFor(ch),weapon:def.weapon,skin:skin||'nacion',x:sp.x,y:sp.y,dx:sp.x,dy:sp.y,hp:hp,maxHp:maxHp,
     energy:energy,maxEnergy:maxEnergy,alive:true,invisible:false,invisTurns:0,suppressed:false,stunned:false,stunFresh:false,vetLevel:vetLevel,slotIndex:i,
-    grenades:def.role==='Comando'?2:1,flashes:def.role==='Comando'?2:0,smokes:def.role==='Espía'?2:0,mines:def.role==='Ingeniero'?2:0,covers:def.role==='Ingeniero'?2:0,gases:def.role==='Artillero'?2:0,sweeps:def.role==='Espía'?1:0,molotovs:def.role==='Artillero'?2:0,crates:def.role==='Médico'?2:0,teleports:def.role==='Espía'?1:0,shields:def.role==='Comando'?1:0,arty:def.role==='Artillero'?2:0,bees:def.role==='Espía'?1:0,tranqs:def.role==='Espía'?1:0,water:def.role==='Comando'?2:0,toolkits:def.role==='Ingeniero'?2:0,orbitals:def.role==='Artillero'?1:0,heals:2,revives:1,captainUsed:false,movedThisTurn:false,
+    grenades:def.role==='Comando'?2:1,flashes:def.role==='Comando'?2:0,smokes:def.role==='Espía'?2:0,mines:def.role==='Ingeniero'?2:0,covers:def.role==='Ingeniero'?2:0,gases:def.role==='Artillero'?2:0,sweeps:def.role==='Espía'?1:0,molotovs:def.role==='Artillero'?2:0,crates:def.role==='Médico'?2:0,teleports:def.role==='Espía'?1:0,shields:def.role==='Comando'?1:0,arty:def.role==='Artillero'?2:0,trunks:0,bees:def.role==='Espía'?1:0,tranqs:def.role==='Espía'?1:0,water:def.role==='Comando'?2:0,toolkits:def.role==='Ingeniero'?2:0,orbitals:def.role==='Artillero'?1:0,heals:2,revives:1,captainUsed:false,movedThisTurn:false,
     specialUsedTurn:false,onceUsed:false,nation,hasShot:false,
     facing:team==='A'?0:2,overwatch:false,returnKey:'',body:role.body,moveCost:body.moveCost};
   applyCharacterAbilities(u);
