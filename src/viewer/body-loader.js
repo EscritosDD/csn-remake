@@ -19,10 +19,10 @@ export const VIEWER_BODY_SKINS={ 'Soldier_SAS':['Soldier_SAS_d.png','Soldier_SAS
   'CommanderM':['Commander_d.png','Commander_African_d.png','Commander_Asian_d.png','Commander_Latino_d.png'],
   'Commander_F':['Commander_F_d.png','Commander_F_African_d.png','Commander_F_Asian_d.png','Commander_F_Latino_d.png'] };
 export const VIEWER_ROLE_FALLBACK={'Riot Medic':'Médico','Megan McNick':'Ingeniero','Carlito Grosso':'Ingeniero', 'Riot Engineer':'Ingeniero','Commander (F)':'Capitán'};
-export const VIEWER_BODY_FILE={ 'Soldier_SAS':'Soldier_SAS.obj', 'Soldier_Spud':'Soldier_Spud.obj', 'Soldier_Heavy':'Soldier_Heavy.obj', 'Soldier_Light_Rambo':'Soldier_Light_Rambo.obj',
+export const VIEWER_BODY_FILE={ 'Soldier_SAS':'Soldier_SAS.obj', 'Soldier_Spud':'Soldier_Spud.obj', 'Soldier_Heavy':'Soldier_Heavy.obj', 'Soldier_Heavy_Tree':'Soldier_Heavy_Tree.obj', 'Soldier_Light_Rambo':'Soldier_Light_Rambo.obj',
   'Soldier_Light':'Soldier_Light.obj', 'Agent':'Agent.obj', 'Agent_Light':'Agent_Light.obj', 'Agent_Heavy':'Agent_Heavy.obj',
   'Medic':'Medic.obj', 'Medic_therapist':'Medic_therapist_1248v.obj', 'Medic_therapist_959v':'Medic_therapist_959v.obj',
-  'Engineer':'Engineer.obj', 'Engineer_Light':'Engineer_Light.obj', 'Engineer_Heavy':'Engineer_Heavy.obj',
+  'Engineer':'Engineer.obj', 'Engineer_Light':'Engineer_Light.obj', 'Engineer_Heavy':'Engineer_Heavy.obj', 'Engineer_Heavy_Tito':'Engineer_Heavy_Tito.obj',
   'Engineer (RiotCop)':'Engineer_RiotCop.obj', 'CommanderM':'CommanderM.obj', 'Commander_F':'CommanderF.obj' };
 export const VIEWER_BODY_OVERRIDE={'Archie Fletcher':'Soldier_Light_Rambo','Commander (M)':'CommanderM'};
 export const VIEWER_BODY_ROLE={'Medic':'Médico','Engineer':'Ingeniero','Agent_Heavy':'Comando','Commander':'Capitán'};
