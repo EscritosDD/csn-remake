@@ -1,9 +1,22 @@
-import { tileWorldY } from '../game/board.js';
+import { tileWorldY, falloffFactor } from '../game/board.js';
 import { cheb } from '../core-and-audio.js';
 import { WEAPONS, PISTOL } from '../data/weapons.js';
 import { VIEW_MODE, T3, w2cx, w2cz } from './scene.js';
 import { TEAM_A, TEAM_B } from './env.js';
 import { arcadeTracer, arcadeHit, arcadeExplosion, arcadeFloat, tickArcadeFx } from './fx-arcade.js';
+
+let _energyPrev=-1;
+export function setEnergyPreview(cost){
+  if(cost===_energyPrev)return;_energyPrev=cost;
+  const pips=document.querySelectorAll('#unitCard .epips i');
+  if(!pips||typeof pips.length!=='number')return;
+  for(let i=0;i<pips.length;i++)pips[i].classList.remove('prev');
+  if(cost>0){
+    const lit=[];for(let i=0;i<pips.length;i++)if(!pips[i].classList.contains('off'))lit.push(pips[i]);
+    const start=Math.max(0,lit.length-cost);
+    for(let i=start;i<lit.length;i++)lit[i].classList.add('prev');
+  }
+}
 
 export function fx3Spawn(mesh,life,onTick){
   if(!T3||!T3.fxGroup)return;
@@ -61,7 +74,7 @@ export function updateHover3D(w,h){
   const tip=document.getElementById('glTooltip');
   if(!T3||!G||!T3.aimGroup){if(tip)tip.style.display='none';return;}
   const sel=G.selected;
-  const sig=[hoverTile?(hoverTile.x+','+hoverTile.y):'-',sel?sel.id:'-',sel?sel.x+','+sel.y:'-',G.actionMode,G.turn,G.aiBusy?1:0].join('#');
+  const sig=[hoverTile?(hoverTile.x+','+hoverTile.y):'-',sel?sel.id:'-',sel?sel.x+','+sel.y:'-',sel?sel.energy:'-',G.actionMode,G.turn,G.aiBusy?1:0].join('#');
   if(sig!==T3.hoverSig){
     T3.hoverSig=sig;
     while(T3.aimGroup.children.length)T3.aimGroup.remove(T3.aimGroup.children[0]);
@@ -81,6 +94,12 @@ export function updateHover3D(w,h){
           p.rotation.x=-Math.PI/2;p.position.set(w2cx(tx),tileWorldY(tx,ty)+0.072,w2cz(ty));T3.aimGroup.add(p);}
       } else if(G.actionMode==='move'){
         const reach=reachable(sel,sel.energy);
+        reach.forEach((c,k)=>{const [cx,cy]=k.split(',').map(Number);if(cx===hx&&cy===hy)return;
+          if([[1,0],[-1,0],[0,1],[0,-1]].some(dd=>!!obAt(cx+dd[0],cy+dd[1]))){
+            const mk=new THREE.Mesh(new THREE.CircleGeometry(0.16,20),new THREE.MeshBasicMaterial({color:0x57c46a,transparent:true,opacity:0.55,side:THREE.DoubleSide}));
+            mk.rotation.x=-Math.PI/2;mk.position.set(w2cx(cx),tileWorldY(cx,cy)+0.075,w2cz(cy));T3.aimGroup.add(mk);
+          }
+        });
         if(reach.has(hx+','+hy)){
           [[1,0,0.44,0,0],[ -1,0,-0.44,0,0],[0,1,0,0.44,Math.PI/2],[0,-1,0,-0.44,Math.PI/2]].forEach(dd=>{
             const ob=obAt(hx+dd[0],hy+dd[1]);
@@ -107,7 +126,7 @@ export function updateHover3D(w,h){
     }
   }
   if(!tip)return;
-  let txt='',cls='',wx=0,wy=1.7,wz=0,show=false;
+  let txt='',cls='',wx=0,wy=1.7,wz=0,show=false,moveCost=0;
   if(hoverTile&&sel&&sel.alive&&sel.team===G.turn&&!G.aiBusy&&!G.over){
     const hx=hoverTile.x,hy=hoverTile.y;
     const foe=unitAt(hx,hy)||(effMode(G)==='escolta'&&sel.team==='B'?droneAt(hx,hy):null);
@@ -118,7 +137,8 @@ export function updateHover3D(w,h){
       const p=hitChance(sel,foe,w2);
       if(p>0){
         const flk=foe.role&&isFlanked(sel,foe),covLvl=coverLevel(foe,sel);
-        txt='Acierto '+p+'% · '+w2.dmg+' daño'+(flk?' · ⚡ Flanqueo':covLvl>0?' · 🛡️ Cobertura '+covLvl+' (−'+[0,12,25,40][covLvl]+'%)':'');
+        const fo=falloffFactor(sel,foe,w2),eff=Math.max(1,Math.round(w2.dmg*fo));
+        txt='Acierto '+p+'% · '+eff+' daño'+(fo<1?' · −'+Math.round((1-fo)*100)+'% distancia':'')+(flk?' · ⚡ Flanqueo':covLvl>0?' · 🛡️ Cobertura '+covLvl+' (−'+[0,12,25,40][covLvl]+'%)':'');
         cls=covLvl>0?'cov':'';
       } else {
         txt=foe.invisible?'Invisible':(smokeBlocksLOS(sel,foe)?'Sin tiro · humo M18':'Sin tiro · fuera de alcance/VDV');
@@ -140,19 +160,21 @@ export function updateHover3D(w,h){
     } else if(G.actionMode==='flash'&&cheb(sel,hoverTile)<=4){
       txt='✸ Aturdidora M84 · −6⚡ / −25%';wy=0.95;show=true;
     } else if(G.actionMode==='move'&&reachable(sel,sel.energy).has(hx+','+hy)){
+      const cost=reachable(sel,sel.energy).get(hx+','+hy);moveCost=cost;
       const hasC=[[1,0],[-1,0],[0,1],[0,-1]].some(dd=>!!obAt(hx+dd[0],hy+dd[1]));
-      if(hasC){txt='🛡️ Cobertura disponible aquí';cls='cov';wy=0.95;show=true;}
+      txt='−'+cost+' ⚡'+(hasC?' · 🛡️ Cobertura aquí':'');cls=hasC?'cov':'';wy=0.95;show=true;
     }
   }
-  if(!show){tip.style.display='none';return;}
+  if(!show){setEnergyPreview(0);tip.style.display='none';return;}
   const v=T3._projV||(T3._projV=new THREE.Vector3());
   v.set(wx,wy,wz).project(T3.camera);
-  if(v.z<-1||v.z>1){tip.style.display='none';return;}
+  if(v.z<-1||v.z>1){setEnergyPreview(0);tip.style.display='none';return;}
   tip.className='gl-tooltip'+(cls?' '+cls:'');
   tip.textContent=txt;
   tip.style.left=((v.x*0.5+0.5)*w).toFixed(1)+'px';
   tip.style.top=((-v.y*0.5+0.5)*h).toFixed(1)+'px';
   tip.style.display='block';
+  setEnergyPreview(moveCost);
 }
 
 export function updateUnitHuds3D(w,h){

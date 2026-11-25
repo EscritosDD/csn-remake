@@ -178,6 +178,17 @@ test('updateHover3D: cobertura sin ReferenceError', () => {
   assert.doesNotMatch(html, /cls=cov\?'cov':'';/);
 });
 
+test('el hover muestra el coste de energía, el daño con caída por distancia y las casillas con cobertura', () => {
+  assert.match(html, /falloffFactor\(sel,foe,w2\),eff=Math\.max\(1,Math\.round\(w2\.dmg\*fo\)\)/);
+  assert.match(html, /txt='Acierto '\+p\+'% · '\+eff\+' daño'\+\(fo<1\?' · −'\+Math\.round\(\(1-fo\)\*100\)\+'% distancia':''\)/);
+  assert.match(html, /txt='−'\+cost\+' ⚡'\+\(hasC\?' · 🛡️ Cobertura aquí':''\)/);
+  assert.match(html, /new THREE\.CircleGeometry\(0\.16,20\)/);
+  assert.match(html, /function setEnergyPreview\(cost\)/);
+  const css = fs.readFileSync(path.join(root, 'styles', 'game.css'), 'utf8');
+  assert.match(css, /\.epips i\.prev\{background:transparent;border:1px solid var\(--amber\)/);
+  assert.match(html, /const fo=falloffFactor\(u,t,w\),eff=Math\.max\(1,Math\.round\(w\.dmg\*fo\)\)/);
+});
+
 test('parseOBJStatic corrige winding negativo y recalcula normales', () => {
   const obj = [
     'v 0 0 0', 'v 1 0 0', 'v 0 1 0', 'v 0 0 1',
