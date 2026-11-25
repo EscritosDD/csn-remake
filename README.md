@@ -65,8 +65,6 @@ Depuración en el navegador: `?debugGrid=1` muestra rejillas 2D/3D y
 | `assets/maps/` | Geometría de los 8 Skirmish del IPA y sus atlas. |
 | `assets/ui/` | Retratos, naciones, modos, iconos de habilidad del original, logo y arte de la portada. |
 | `bench/` | Verificación: `bench/VERIFICAR.ps1`, `check-syntax.js`, `boards.js`, `rules.test.js`, `data.test.js`, `harness.js`. |
-| `docs/` | Diseño, arquitectura, equilibrio medido, catálogo de habilidades, capturas 3D e índice en `docs/README.md`. |
-| `_original/` | IPA, zip y código descompilado del original: referencia privada, no la carga el juego. |
 
 ## Herramientas de medida
 
@@ -78,15 +76,6 @@ Depuración en el navegador: `?debugGrid=1` muestra rejillas 2D/3D y
   `ui:hipster`, `ui:soap`, `ui:sneaky`, `ui:meshy09`, `ui:mp5k`, `ui:minigun`,
   `ui:setup`, `ui:campanhub` y `ui:brief` para revisar armas, diseños propios,
   selector de personaje, vista de campaña y briefing.
-
-## Documentos clave
-
-- [Índice de documentación](docs/README.md) — entrada limpia a toda la documentación vigente e histórica.
-- [Arquitectura](docs/ARQUITECTURA.md) — módulos, flujo de partida, visor 3D y reglas de edición.
-- [Auditoría global 3D](docs/auditoria_global_3d.md) — 338 OBJ, 0 sin caras, 0 NaN, 13 rigs.
-- [Catálogo de habilidades del original](docs/Catalogo_habilidades_original.md) — las 52 con su estado.
-- [Capturas 3D](docs/Capturas_3D.md) — los 13 mapas y las 6 misiones.
-- [Equilibrio medido](docs/Equilibrio_medido.md) — cifras por modo×mapa.
 
 ## Aviso sobre los assets del original
 
@@ -111,15 +100,8 @@ styles/               CSS estatico (theme, layout, game, viewer, cards)
 assets/               mallas, texturas, audio, iconos y geometria de mapas
 assets/competitive/   manifest y contenedores chars/, weapons/, anims/ para modelos .glb
 bench/                verificacion y pruebas (VERIFICAR.ps1, rules, datos, tableros, harness)
-docs/                 documentacion (indice en docs/README.md)
-docs/historico/       planes y auditorias de sesiones anteriores
-docs/capturas/        capturas locales generadas por _capture_all.mjs (ignoradas por Git)
 tools/                reparacion y auditoria de assets
 _capture_all.mjs      generador de capturas 3D
 ```
 
-El material de referencia del IPA está en `_original/` (el `.ipa`, el zip y el
-código descompilado). Los modelos, rigs, texturas, audio y mapas que usa el
-juego están en `assets/`. Si hay que tirar del original, se tira directamente
-del IPA y de `assets/`, no de una traducción descompilada intermedia. El
-material de `_original/` es solo de consulta: no lo carga el juego en ejecución.
+Los modelos, rigs, texturas, audio y mapas que usa el juego están en `assets/`. Todo el material del juego vive en el propio repositorio; no hay carpetas de referencia externas.

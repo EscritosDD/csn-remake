@@ -92,10 +92,9 @@ test('el servidor sirve GLB/GLTF con MIME correcto', () => {
   assert.match(server, /'\.gltf':\s*'model\/gltf\+json'/);
 });
 
-test('el servidor sirve styles/ y src/ sin abrir _original/ ni bench/', () => {
+test('el servidor sirve styles/ y src/ sin abrir bench/', () => {
   const server = fs.readFileSync(path.join(ROOT, 'server.js'), 'utf8');
   assert.match(server, /parts\[0\] === 'assets' \|\| parts\[0\] === 'styles' \|\| parts\[0\] === 'src'/);
-  assert.doesNotMatch(server, /parts\[0\] === '_original'/);
   assert.doesNotMatch(server, /parts\[0\] === 'bench'/);
   assert.ok(fs.existsSync(path.join(ROOT, 'src', 'package.json')));
   const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'src', 'package.json'), 'utf8'));

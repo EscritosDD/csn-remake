@@ -56,7 +56,6 @@
 
 ## Archivos generados
 - `docs/capturas/` contiene capturas locales generadas por `_capture_all.mjs`; está ignorado por `.gitignore`.
-- `_original/` contiene el IPA y artefactos de extracción; el servidor no debe servirlo.
 - `bench/` contiene tests y verificaciones; no abrir desde el servidor HTTP.
 - Los scripts temporales de refactorización viven fuera del repo, en `%TEMP%\opencode`, y no deben versionarse.
 
