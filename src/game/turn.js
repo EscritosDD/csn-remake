@@ -10,6 +10,16 @@ export function closeModal(){$('#modal').classList.remove('on');}
 
 export function backToMenu(){try{auStopAmbient();}catch(e){}try{auMusicStop();}catch(e){}try{const hp=document.querySelector('#scr-play .hero');if(hp)hp.style.display='';}catch(e){}$('#gameArea').style.display='none';$('#setupArea').style.display='none';$('#menuArea').style.display='block';G=null;document.body.dataset.state='menu';syncPlayingViewport();showScreen('scr-play');refreshGuerra();renderNationChip();if(typeof renderCampaignPanel==='function')renderCampaignPanel();}
 
+export function showTurnBanner(team,round){
+  const b=document.getElementById('turnBanner');
+  if(!b)return;
+  const mine=team==='A';
+  b.className='turn-flash on '+(mine?'A':'B');
+  b.innerHTML='<b>'+(mine?'Tu turno':'Turno rival')+'</b><span>Ronda '+round+' · '+(mine?'mueve y dispara':'la IA juega')+'</span>';
+  clearTimeout(b._t);
+  b._t=setTimeout(()=>{b.classList.remove('on');},1400);
+}
+
 export function endTurn(){
   if(!G||G.over||G.aiBusy)return;
   G.lastMoveUndo=null;
@@ -59,7 +69,7 @@ export function endTurn(){
      cegado por el fogonazo propio durante el turno de su bando no se
      libra sin pagarlo, y un enemigo cegado lo paga entero en el suyo. */
   G.units.filter(u=>u.team===G.turn&&u.stunned&&!u.stunFresh).forEach(u=>{u.stunned=false;log('💫 '+u.role+' ('+u.team+') se despeja del fogonazo de la M84: vuelve a ver y a oír con normalidad.');});
-  G.turn=next;G.selected=null;setTurnSeed(G.round,next);sfx('turn');
+  G.turn=next;G.selected=null;setTurnSeed(G.round,next);sfx('turn');showTurnBanner(next,G.round);
   G.units.filter(u=>u.team===next).forEach(u=>{
     let pen=(u.suppressed?2:0);
     if(u.stunned&&u.stunFresh){pen+=STUN_ENERGY_PEN;u.stunFresh=false;log('💫 '+u.role+' ('+next+') empieza su turno aturdido por la M84: −'+STUN_ENERGY_PEN+' ⚡ de salida y −'+STUN_AIM_PEN+' de puntería en cada tiro de este turno.');}

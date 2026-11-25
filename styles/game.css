@@ -1,4 +1,11 @@
 .board-wrap{background:#12160f;border:1px solid var(--line);border-radius:var(--radius);padding:10px;position:relative;animation:fade-in .3s ease}
+.turn-flash{position:absolute;inset:0;display:none;place-items:center;pointer-events:none;z-index:6;text-align:center}
+.turn-flash.on{display:grid;animation:turn-flash 1.4s ease both}
+.turn-flash b{display:block;font:800 44px/1 'Barlow Condensed';text-transform:uppercase;letter-spacing:.05em;text-shadow:0 3px 12px rgba(0,0,0,.7)}
+.turn-flash.A b{color:var(--ink-oliva)}
+.turn-flash.B b{color:var(--ink-vino-bright)}
+.turn-flash span{font:700 15px/1.4 'Barlow Condensed';text-transform:uppercase;letter-spacing:.08em;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.7)}
+@keyframes turn-flash{0%{opacity:0;transform:scale(.92)}12%{opacity:1;transform:scale(1)}78%{opacity:1}100%{opacity:0;transform:scale(1.02)}}
 
 canvas#board{width:100%;height:auto;display:block;border-radius:6px;touch-action:manipulation;cursor:pointer;background:#1b2115}
 
