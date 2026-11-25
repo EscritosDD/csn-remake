@@ -33,6 +33,26 @@ export function flagArtHTML(n,sm){
 
 export const PORTRAIT_CACHE={};
 
+/* Retratos 2D del original, recortados de la rejilla de la promo (assets/ui/portraits/).
+   Sin retrato aquí, la cara se renderiza desde el modelo 3D como antes. */
+export const CHAR_PORTRAIT={
+ 'Hipster Dave':'portraits/dave.png',
+ 'Archie Fletcher':'portraits/fletcher.png',
+ 'Soap':'portraits/soap.png',
+ 'Megan McNick':'portraits/megan.png',
+ 'Commander (F)':'portraits/commander_f.png',
+ 'Commander (M)':'original/portrait.png',
+ 'Sister Florence':'portraits/florence.png',
+ 'Sneaky Pete':'portraits/pete.png',
+ 'Spud':'portraits/spud.png',
+ 'Ivan Tkilya':'portraits/ivan.png',
+ 'Big Time Taschmann':'portraits/taschmann.png',
+ 'Riot Agent':'portraits/riot_agent.png',
+ 'Riot Medic':'portraits/riot_medic.png',
+ 'Tree Mendez':'portraits/tree.png',
+ 'Carlito Grosso':'portraits/grosso.png'
+};
+
 export function portraitKey(role,char,skin,nation){
   const id=(char&&(char.key||char.charKey||char.charName||char.name))||'';
   const tex=(char&&(char.charTexture||char.texture))||'',mesh=(char&&(char.charMesh||char.mesh))||'';
@@ -46,6 +66,12 @@ export function rolePortraitURL(role,char,explicitSkin,opts){
     const nation=o.nation||myNation;
     const pkey=portraitKey(role,char,skin,nation);
     if(PORTRAIT_CACHE[pkey])return PORTRAIT_CACHE[pkey];
+    const cname=typeof char==='string'?char:(char&&(char.charName||char.name));
+    if(cname&&CHAR_PORTRAIT[cname]){
+      const url='assets/ui/'+CHAR_PORTRAIT[cname];
+      PORTRAIT_CACHE[pkey]=url;
+      return url;
+    }
     if(REAL.ready&&typeof realSpriteUnit==='function'&&typeof renderRealSprite==='function'){
       const r=ROLES[role];
       if(r){

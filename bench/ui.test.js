@@ -289,3 +289,16 @@ test('el HUD de combate queda en una barra compacta con registro plegado', () =>
   assert.match(css, /\.hud-actions\{grid-column:1\/-1;grid-row:2/);
   assert.match(css, /\.hud-btn\{padding:6px 7px;font-size:11px\}/);
 });
+
+test('los retratos 2D del original están en assets/ui/portraits y se usan antes que el render 3D', () => {
+  const shell = fs.readFileSync(path.join(root, 'src', 'ui', 'ui-shell.js'), 'utf8');
+  const m = shell.match(/export const CHAR_PORTRAIT=\{([\s\S]*?)\};/);
+  assert.ok(m, 'CHAR_PORTRAIT no existe en ui-shell.js');
+  const entries = [...m[1].matchAll(/'([^']+)':'(portraits\/[^']+|original\/portrait\.png)'/g)];
+  assert.ok(entries.length >= 14, 'CHAR_PORTRAIT tiene menos de 14 retratos: ' + entries.length);
+  for (const [, name, file] of entries) {
+    assert.ok(fs.existsSync(path.join(root, 'assets', 'ui', file)), 'falta el retrato de ' + name + ': assets/ui/' + file);
+  }
+  assert.match(shell, /if\(cname&&CHAR_PORTRAIT\[cname\]\)/);
+  assert.ok(shell.indexOf('CHAR_PORTRAIT[cname]') < shell.indexOf('REAL.ready'), 'el retrato 2D debe comprobarse antes del render 3D');
+});
