@@ -1,6 +1,73 @@
-import { CAMPAIGN_MISSIONS, TUTORIAL_MISSION, MAP_DEFS, SKIRMISH_GEO, radioLines, rosterKey } from '../data/maps.js';
+import { CAMPAIGN_MISSIONS, CAMPAIGN_CHAPTERS, TUTORIAL_MISSION, MAP_DEFS, SKIRMISH_GEO, radioLines, rosterKey } from '../data/maps.js';
 import { mapPreviewURL } from './setup-preview.js';
 import { tallyStars, campaignObjectiveLabel, nextMissionIndex } from './campaign-tally.js';
+
+const CAMPAIGN_CITIES=[
+  {id:'london',name:'Londres',sub:'Capítulos 1–4 · Operación Londres',from:0,to:55,chapters:[0,1,2,3]},
+  {id:'rio',name:'Río',sub:'Capítulos 5–7 · Operación Río',from:56,to:91,chapters:[4,5,6]},
+  {id:'final',name:'Pruebas individuales',sub:'Capítulo 8',from:92,to:108,chapters:[7]},
+];
+let campaignMapView='world';
+let campaignMapProgress={next:0,done:false,medals:[]};
+
+export function setCampaignMapView(view){
+  campaignMapView=CAMPAIGN_CITIES.some(c=>c.id===view)?view:'world';
+  renderCampaignMap(campaignMapProgress);
+}
+
+function missionState(c,i){
+  if(c.done||i<c.next)return 'done';
+  if(i===c.next)return 'current';
+  return 'locked';
+}
+
+function cityProgress(c,city){
+  let done=0;
+  for(let i=city.from;i<=city.to;i++)if(c.done||i<c.next)done++;
+  return done+'/'+(city.to-city.from+1);
+}
+
+function campaignMapWorldMarkup(c){
+  const cities=CAMPAIGN_CITIES.map(city=>{
+    const done=cityProgress(c,city);
+    const locked=!c.done&&c.next<city.from;
+    return '<button class="cmap-city'+(locked?' locked':'')+'" type="button" data-cmap-city="'+city.id+'"'+(locked?' disabled':'')+'>'+
+      '<span class="cmap-city-pin">●</span><b>'+esc(city.name)+'</b><small>'+esc(city.sub)+'</small><span class="cmap-city-prog">'+done+' superadas</span>'+(locked?'<span class="ch-lock" aria-hidden="true">🔒</span>':'')+'</button>';
+  }).join('');
+  return '<div class="campaign-map world"><div class="cmap-globe"><img src="assets/ui/original/GeoEarth_01.png" alt="Mapa del mundo"/><p class="cmap-globe-cap">TOMA MISIONES POR TODO EL MUNDO</p></div><div class="cmap-cities">'+cities+'</div><p class="sub cmap-hint">Elige una ciudad para ver sus misiones. La siguiente misión está marcada en vino.</p></div>';
+}
+
+function campaignMapCityMarkup(c,city){
+  const nodes=city.chapters.map(ci=>{
+    const ch=CAMPAIGN_CHAPTERS[ci];
+    if(!ch)return '';
+    let out='<h4 class="cmap-chapter">'+esc(ch.name)+'</h4><div class="cmap-path">';
+    for(let i=ch.from;i<=ch.to;i++){
+      const m=CAMPAIGN_MISSIONS[i];
+      const state=missionState(c,i);
+      const stars=c.medals&&c.medals[i]||0;
+      out+='<button class="cmap-node '+state+'" type="button" data-campaign-brief="'+i+'"'+(state==='locked'?' disabled':'')+' title="Misión '+(i+1)+' · '+esc(m?m.title:'')+'">'+
+        '<span class="cmap-node-num">'+(state==='done'?'✓':(i+1))+'</span>'+
+        '<span class="cmap-node-stars">'+tallyStars(stars)+'</span>'+
+        (state==='locked'?'<span class="ch-lock" aria-hidden="true">🔒</span>':'')+'</button>';
+    }
+    return out+'</div>';
+  }).join('');
+  return '<div class="campaign-map city"><div class="cmap-city-head"><button class="btn ghost" type="button" data-cmap-city="world">← Mapa del mundo</button><h3>'+esc(city.name)+'</h3><span class="sub">'+esc(city.sub)+' · '+cityProgress(c,city)+' superadas</span></div>'+nodes+'</div>';
+}
+
+export function renderCampaignMap(progress){
+  const list=document.getElementById('campaignList');
+  if(!list)return;
+  const c=progress||campaignMapProgress;
+  campaignMapProgress=c;
+  const city=CAMPAIGN_CITIES.find(x=>x.id===campaignMapView);
+  list.className='campaign-map-wrap';
+  list.innerHTML=city?campaignMapCityMarkup(c,city):campaignMapWorldMarkup(c);
+  list.querySelectorAll('[data-cmap-city]').forEach(b=>{
+    b.onclick=()=>{setCampaignMapView(b.dataset.cmapCity);};
+  });
+}
 
 let radioMissionId=TUTORIAL_MISSION.id;
 let radioIndex=0;
