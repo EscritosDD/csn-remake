@@ -160,14 +160,14 @@ export function updateUnitHuds3D(w,h){
   if(!T3.hudPool)T3.hudPool=new Map();
   const v=T3._projV||(T3._projV=new THREE.Vector3());
   const seen=new Set();
-  const syncEntity=(key,rx,ry,hp,maxHp,team,tag,vet)=>{
+  const syncEntity=(key,rx,ry,hp,maxHp,team,tag,vet,energy,maxEnergy,selected)=>{
     seen.add(key);
     let rec=T3.hudPool.get(key);
     if(!rec){
       const el=document.createElement('div');el.className='gl-unit-hud';
-      el.innerHTML='<div class="gl-hp-pill"><span class="gl-hp-dot"></span><div class="gl-hp-track"><div class="gl-hp-fill"></div></div><span class="gl-hp-num"></span></div><div class="gl-unit-tag" style="display:none"></div>';
+      el.innerHTML='<div class="gl-hp-pill"><span class="gl-hp-dot"></span><div class="gl-hp-track"><div class="gl-hp-fill"></div></div><span class="gl-hp-num"></span><span class="gl-en-num" style="display:none"></span></div><div class="gl-unit-tag" style="display:none"></div>';
       host.appendChild(el);
-      rec={el:el,dot:el.querySelector('.gl-hp-dot'),fill:el.querySelector('.gl-hp-fill'),num:el.querySelector('.gl-hp-num'),tagEl:el.querySelector('.gl-unit-tag'),lastSig:''};
+      rec={el:el,dot:el.querySelector('.gl-hp-dot'),fill:el.querySelector('.gl-hp-fill'),num:el.querySelector('.gl-hp-num'),en:el.querySelector('.gl-en-num'),tagEl:el.querySelector('.gl-unit-tag'),lastSig:''};
       T3.hudPool.set(key,rec);
     }
     v.set(w2cx(rx),tileWorldY(rx,ry)+1.55,w2cz(ry)).project(T3.camera);
@@ -177,13 +177,14 @@ export function updateUnitHuds3D(w,h){
     rec.el.style.display='flex';
     rec.el.style.left=sx.toFixed(1)+'px';rec.el.style.top=sy.toFixed(1)+'px';
     const pct=Math.max(0,Math.min(100,Math.round((hp/(maxHp||1))*100)));
-    const sig=pct+'|'+hp+'/'+maxHp+'|'+team+'|'+tag+'|'+(vet||0);
+    const sig=pct+'|'+hp+'/'+maxHp+'|'+team+'|'+tag+'|'+(vet||0)+'|'+(selected?energy+'/'+maxEnergy:'');
     if(sig!==rec.lastSig){
       rec.lastSig=sig;
       rec.dot.style.background=team==='A'?TEAM_A:TEAM_B;
       rec.fill.style.width=pct+'%';
       rec.fill.className='gl-hp-fill'+(pct<=30?' low':pct<=55?' med':'');
       if(rec.num)rec.num.textContent=hp+'/'+maxHp;
+      if(rec.en){if(selected&&Number.isFinite(Number(energy))){rec.en.textContent='⚡'+energy+'/'+maxEnergy;rec.en.style.display='';}else rec.en.style.display='none';}
       if(tag||vet){rec.tagEl.textContent=(vet?'★'+vet+' ':'')+tag;rec.tagEl.style.display='block';}
       else rec.tagEl.style.display='none';
     }
@@ -196,7 +197,7 @@ export function updateUnitHuds3D(w,h){
     if(un.stunned)tags.push('💫');
     if(un.invisible)tags.push('👻');
     if(un.suppressed)tags.push('−2⚡');
-    syncEntity('u:'+un.id,rx,ry,un.hp,un.maxHp,un.team,tags.join(' '),un.vetLevel);
+    syncEntity('u:'+un.id,rx,ry,un.hp,un.maxHp,un.team,tags.join(' '),un.vetLevel,un.energy,un.maxEnergy,G.selected===un);
   });
   if(G.drone&&G.drone.alive){
     const d=G.drone,rx=d.dx!=null?d.dx:d.x,ry=d.dy!=null?d.dy:d.y;

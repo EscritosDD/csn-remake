@@ -86,7 +86,16 @@ sandbox.clearTimeout = clearTimeout;
 sandbox.setInterval = (fn, ms) => setInterval(fn, 1000000); // no debe usarse en lógica
 sandbox.clearInterval = clearInterval;
 sandbox.performance = { now: () => Date.now() };
-sandbox.fetch = () => Promise.resolve({ ok: true, text: async () => '', json: async () => ({}), arrayBuffer: async () => new ArrayBuffer(0) });
+sandbox.fetch = (url) => {
+  const clean = String(url || '').split('?')[0].split('#')[0];
+  const root = path.resolve(__dirname, '..');
+  const file = path.resolve(root, clean);
+  if (file.startsWith(root + path.sep) && fs.existsSync(file) && fs.statSync(file).isFile()) {
+    const buf = fs.readFileSync(file);
+    return Promise.resolve({ ok: true, status: 200, text: async () => buf.toString('utf8'), json: async () => JSON.parse(buf.toString('utf8')), arrayBuffer: async () => buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength) });
+  }
+  return Promise.resolve({ ok: true, text: async () => '', json: async () => ({}), arrayBuffer: async () => new ArrayBuffer(0) });
+};
 sandbox.Image = function () { return magic(); };
 sandbox.AudioContext = undefined; sandbox.webkitAudioContext = undefined;
 // Métodos de window que el motor puede llamar en caliente

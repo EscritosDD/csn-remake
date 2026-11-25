@@ -2,8 +2,8 @@ import { NATIONS, NATION_ART } from '../data/nations.js';
 import { ROLES, ROLE_NAMES, BODIES, DEFAULT_SQUADS, ROLE_PORTRAIT } from '../data/roles.js';
 import { WEAPONS } from '../data/weapons.js';
 import { CAMPAIGN_MISSIONS, TUTORIAL_MISSION, SKIRMISH_GEO, MAP_DEFS, rosterKey } from '../data/maps.js';
-import { renderCampaignRadio, showMissionBriefing } from './campaign-ui.js';
-import { campaignProgressLabel, campaignTallyMarkup, campaignDaveLine, campaignMissionCardMarkup } from './campaign-tally.js';
+import { renderCampaignRadio, showMissionBriefing, renderCampaignMap } from './campaign-ui.js';
+import { campaignProgressLabel, campaignTallyMarkup, campaignDaveLine } from './campaign-tally.js';
 import { mapPreviewURL, squadCardMarkup, fillSquadSelects, updateSquadCard } from './setup-preview.js';
 import { charsForRole, characterKey } from '../game/chars.js';
 import { STEP_META, AUX_LABELS, AUX_HINTS } from '../data/ui-copy.js';
@@ -280,12 +280,7 @@ export function renderCampaignPanel(){
   const radioMission=CAMPAIGN_MISSIONS[Math.min(c.next,CAMPAIGN_MISSIONS.length-1)]||CAMPAIGN_MISSIONS[0];
   renderCampaignRadio('campaignRadio',radioMission);
   const list=document.getElementById('campaignList');if(!list)return;
-  list.className='mission-grid';
-  list.innerHTML=CAMPAIGN_MISSIONS.map((m,i)=>{
-    const state=c.done||i<c.next?'done':(i===c.next?'current':'locked');
-    return campaignMissionCardMarkup(m,i,state,c.medals[i]||0,mapPreviewURL(m.map,MAP_DEFS,SKIRMISH_GEO));
-  }).join('');
-  list.querySelectorAll('[data-campaign-index]').forEach((b,i)=>{const state=c.done||i<c.next?'done':(i===c.next?'current':'locked');b.onclick=()=>{if(state!=='locked')showMissionBriefing(i);};});
+  renderCampaignMap(c);
 }
 
 function menuSiblings(){return Array.prototype.slice.call(document.querySelectorAll('#menuArea > .grid3, #menuArea > .panel, #menuArea > .menu-dossier, #origMenu, #demoSlotPlay'));}

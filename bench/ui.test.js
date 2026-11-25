@@ -185,7 +185,8 @@ test('la campaña tiene vista propia y el briefing no usa handlers inline', () =
   assert.match(html,/function deployCampaignMission\(idx\)\{const index=Math\.max\(0,Math\.min\(CAMPAIGN_MISSIONS\.length-1,idx\|\|0\)\)/);
   assert.match(html,/deployMissionData\(CAMPAIGN_MISSIONS\[index\],'campana',index\)/);
   assert.doesNotMatch(html,/function deployCampaignMission\(idx\)\{openSetup\('campana'/);
-  assert.match(html,/b\.onclick=\(\)=>\{if\(state!=='locked'\)showMissionBriefing\(i\);\}/);
+  assert.match(html,/data-campaign-brief/);
+  assert.match(html,/closest\('\[data-campaign-brief\]'\)/);
   assert.match(html,/campaignBtn'\);if\(cb\)cb\.onclick=openView/);
   assert.match(html,/mnuChallenges'\);if\(ch\)ch\.onclick=openView/);
   assert.match(capture,/campanhub: "showScreen\('scr-play'\);showCampaignView\(\)"/);
