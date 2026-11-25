@@ -73,3 +73,7 @@
 - `node _capture_all.mjs move:skirmish MOVE 8000`: movimiento 3D.
 - `node _capture_all.mjs combat:skirmish COMBAT 8000`: eventos de clip en combate.
 - `node _capture_all.mjs mobile:sw:game MOBILE_SW 8000`: móvil y SwiftShader.
+
+## Bloqueo de la armería (orden de Dani, 25/11/2026)
+
+La armería original está PERFECTA y NO se toca. Tampoco se tocan los desplegables ni los objetos. El bloqueo lo hace cumplir `bench/armoury-lock.test.js` contra los hashes de `bench/armoury-lock.json` (153 ficheros); si un fichero protegido cambia o se borra, el gate falla. Las armas que Dani desarrolle en el futuro van en ficheros NUEVOS, sin modificar estos. Un cambio legítimo en un fichero protegido exige actualizar su hash en el manifiesto y la aprobación expresa de Dani antes. Ficheros cubiertos: `assets/weapons/` (23 mallas, texturas y JSONs), `assets/audio/sfx/weapons/`, `assets/props/` (desplegables y objetos), los sonidos de despliegue de `assets/audio/sfx/abilities/`, `src/data/weapons.js`, `src/data/deployables.js`, `src/render3d/assets-weapons.js` (visor) y `src/render3d/gun-pose.js` (postura). La calibración de Mendez y Tesla (rigs aproximados, hacha vertical, palo de Tito) se trabaja sobre los RIGS de esos dos personajes y sobre offsets nuevos por personaje, NO sobre las armas bloqueadas.
