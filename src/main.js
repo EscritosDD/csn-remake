@@ -107,7 +107,7 @@ let NATIVE_GRID=null;
 preloadNativeGrids();
 let uid=0;
 try{document.addEventListener('click',function(e){try{if(e.target&&e.target.closest&&e.target.closest('button'))auClick();}catch(err){}});}catch(e){}
-$('#quitBtn').onclick=()=>{showModal('<h2>¿Abandonar la partida?</h2><p>Se perderá el progreso de esta partida. Tu nación y tu marcador de Guerra de Naciones no se tocan.</p><div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px"><button class="btn danger big" onclick="closeModal();backToMenu()">Sí, abandonar</button><button class="btn big" onclick="closeModal()">Seguir jugando</button></div>');};
+$('#quitBtn').onclick=()=>{showModal('<h2>¿Abandonar la partida?</h2><p>Se perderá el progreso de esta partida. Tu nación y tu marcador de Guerra de Naciones no se tocan.</p><div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px"><button class="btn danger big" id="quitYes" type="button">Sí, abandonar</button><button class="btn big" id="quitNo" type="button">Seguir jugando</button></div>');const qy=document.getElementById('quitYes');if(qy)qy.onclick=()=>{closeModal();backToMenu();};const qn=document.getElementById('quitNo');if(qn)qn.onclick=()=>closeModal();};
 $('#endTurnBtn').onclick=()=>{tutorialEvent('endTurn');endTurn();};
 $('#soundBtn').onclick=()=>{soundOn=!soundOn;try{lsSet(LS_SOUND,soundOn?'1':'0');}catch(e){}renderSoundBtn();if(soundOn)sfx('turn');try{if(!soundOn){auMusicStop();auStopAmbient();}else if(G&&G.units&&G.units.length){auMusicStart();auAmbient(G.map.theme);}}catch(e){}toast(soundOn?'Sonido activado: disparos, ambiente y música del original.':'Sonido desactivado.');};
 renderSoundBtn();

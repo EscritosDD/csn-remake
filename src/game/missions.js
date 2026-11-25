@@ -313,11 +313,11 @@ export function endGame(winner,reason){
       saveCampaign(Object.assign({},c,{next:isLast?CAMPAIGN_MISSIONS.length:Math.max(c.next,idx+1),vet:vet,done:isLast?true:c.done,medals:medals}));
       const gained=G.units.filter(u=>u.team==='A'&&u.alive).map(u=>u.name).join(', ')||'ninguno';
       extra='<div class="score-big">'+'★'.repeat(stars)+'☆'.repeat(3-stars)+'</div><p><b>Misión '+(idx+1)+' superada.</b> Bajas aliadas: '+casualties+' · rondas: '+G.round+'/'+(mission&&mission.turnLimit)+'. Veterania ganada por sobrevivir: '+gained+'. Esos soldados empiezan la siguiente misión con +25 PV y +1 ⚡ más por cada nivel.</p>'+(radioLines(mission.id)[0]?'<p class="sub">📻 '+radioLines(mission.id)[0]+'</p>':'')+(isLast?'<div class="score-big">OPERACIÓN COMPLETADA</div><p>Has cerrado las '+CAMPAIGN_MISSIONS.length+' misiones de Operación Londres.</p>':'<p>Siguiente misión: <b>'+CAMPAIGN_MISSIONS[idx+1].title+'</b> · '+CAMPAIGN_MISSIONS[idx+1].brief+'</p>');
-      campaignButtons=isLast?'':'<button class="btn primary big" onclick="closeModal();deployMission('+(idx+1)+')">Siguiente misión ▶</button>';
+      campaignButtons=isLast?'':'<button class="btn primary big" id="resNext" type="button">Siguiente misión ▶</button>';
     } else {
       saveCampaign(Object.assign({},c,{medals:medals}));
       extra='<p><b>Misión '+(idx+1)+' no superada.</b> No pierdes veterania ni progreso: repite esta misión con otra escuadra o con las mismas armas.</p>';
-      campaignButtons='<button class="btn primary big" onclick="closeModal();deployMission('+idx+')">Reintentar misión ↻</button>';
+      campaignButtons='<button class="btn primary big" id="resRetry" type="button">Reintentar misión ↻</button>';
     }
     if(typeof renderCampaignPanel==='function')renderCampaignPanel();
   }
@@ -327,10 +327,10 @@ export function endGame(winner,reason){
     saveCampaign(Object.assign({},c,{tutorialDone:true}));
     if(winner==='A'){
       extra='<div class="score-big">INSTRUCCIÓN COMPLETADA</div><p>Has seleccionado, te has movido a cobertura, disparado, lanzado una granada, cerrado un turno y eliminado a un rival. Dave ya no hace falta en el campo de instrucción.</p>'+(radioLines(TUTORIAL_MISSION.id).slice(-1)[0]?'<p class="sub">📻 '+radioLines(TUTORIAL_MISSION.id).slice(-1)[0]+'</p>':'');
-      campaignButtons='<button class="btn primary big" onclick="closeModal();deployMission(0)">Empezar Operación Londres ▶</button>';
+      campaignButtons='<button class="btn primary big" id="resStart" type="button">Empezar Operación Londres ▶</button>';
     } else {
       extra='<p><b>Instrucción interrumpida.</b> Puedes repetirla cuando quieras desde el panel de campaña.</p>';
-      campaignButtons='<button class="btn primary big" onclick="closeModal();openSetup(\'tutorial\')">Repetir instrucción ↻</button>';
+      campaignButtons='<button class="btn primary big" id="resRepeat" type="button">Repetir instrucción ↻</button>';
     }
     if(typeof renderCampaignPanel==='function')renderCampaignPanel();
   }
@@ -344,6 +344,14 @@ export function endGame(winner,reason){
   const won=(winner==='A');
   const modeArt=effMode(G)==='dominacion'?'modo_dominacion':effMode(G)==='escolta'?'modo_escolta':effMode(G)==='baliza'?'modo_baliza':'modo_eliminacion';
   const modeLabel=effMode(G)==='dominacion'?'DOMINACIÓN':effMode(G)==='escolta'?'ESCOLTA':effMode(G)==='baliza'?'BALIZA':'ELIMINACIÓN';
-  const endButtons=campaignButtons+'<button class="btn primary big" onclick="closeModal();backToMenu()">Volver al menú</button>'+(G.mode==='campana'||G.mode==='tutorial'?'':'<button class="btn big" onclick="closeModal();openSetup(G.mode)">Revancha</button>');
+  const endButtons=campaignButtons+'<button class="btn primary big" id="resMenu" type="button">Volver al menú</button>'+(G.mode==='campana'||G.mode==='tutorial'?'':'<button class="btn big" id="resRematch" type="button">Revancha</button>');
   showModal(resultMarkup({winner:winner,round:G.round,modeLabel:modeLabel,art:'assets/ui/'+modeArt+'.png',title:title,reason:reason,extra:extra,survivors:survivors,table:resTable,squadLine:squadLine,buttons:endButtons}));
+  const wire=(id,fn)=>{const b=document.getElementById(id);if(b)b.onclick=fn;};
+  const idx=G.mode==='campana'?G.campaignMission:0;
+  wire('resNext',()=>{closeModal();deployMission(idx+1);});
+  wire('resRetry',()=>{closeModal();deployMission(idx);});
+  wire('resStart',()=>{closeModal();deployMission(0);});
+  wire('resRepeat',()=>{closeModal();openSetup('tutorial');});
+  wire('resMenu',()=>{closeModal();backToMenu();});
+  wire('resRematch',()=>{closeModal();openSetup(G.mode);});
 }

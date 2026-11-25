@@ -82,7 +82,8 @@ export function endTurn(){
   const first=G.units.find(u=>u.team===next&&u.alive);if(first)G.selected=first;
   updateUI();draw();
   if(G.opp==='local'){
-    showModal('<h2>Turno del '+(next==='A'?'Jugador 1':'Jugador 2')+'</h2><p>Pasa el dispositivo. Tu escuadra: <b>'+teamName(next)+'</b>.</p><button class="btn primary big" onclick="closeModal()">Estoy listo · Jugar</button>');
+    showModal('<h2>Turno del '+(next==='A'?'Jugador 1':'Jugador 2')+'</h2><p>Pasa el dispositivo. Tu escuadra: <b>'+teamName(next)+'</b>.</p><button class="btn primary big" id="turnReady" type="button">Estoy listo · Jugar</button>');
+    const rb=document.getElementById('turnReady');if(rb)rb.onclick=()=>closeModal();
   } else if(next==='B'){
     runAI().catch(err=>{if(G)G.aiBusy=false;console.error(err);});
   }

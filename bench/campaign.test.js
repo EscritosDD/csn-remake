@@ -87,9 +87,12 @@ test('la campaña despliega la misión directamente sin abrir el configurador', 
   assert.match(main, /function startTutorial\(\)\{deployMissionData\(TUTORIAL_MISSION,'tutorial',0\);\}/);
   assert.match(main, /startTutorialFlow\(\);/);
   assert.doesNotMatch(missions, /openSetup\('campana'/);
-  assert.match(missions, /closeModal\(\);deployMission\('\+\(idx\+1\)\+'\)/);
-  assert.match(missions, /closeModal\(\);deployMission\('\+idx\+'\)/);
-  assert.match(missions, /closeModal\(\);deployMission\(0\)/);
+  assert.match(missions, /id="resNext"[^>]*>Siguiente misión/);
+  assert.match(missions, /wire\('resNext',\(\)=>\{closeModal\(\);deployMission\(idx\+1\);/);
+  assert.match(missions, /id="resRetry"[^>]*>Reintentar misión/);
+  assert.match(missions, /wire\('resRetry',\(\)=>\{closeModal\(\);deployMission\(idx\);/);
+  assert.match(missions, /id="resStart"[^>]*>Empezar Operación Londres/);
+  assert.match(missions, /wire\('resStart',\(\)=>\{closeModal\(\);deployMission\(0\);/);
   assert.match(bridge, /d\('deployMission',\(\)=>r\.deployMission\)/);
   assert.match(bridge, /d\('startTutorial',\(\)=>r\.startTutorial\)/);
 });

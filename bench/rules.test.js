@@ -157,6 +157,22 @@ test('screen state preserves a live game when returning to Play', () => {
   assert.equal(api.screenStateFor('scr-nation', { over: false }), 'nation');
 });
 
+test('ningún modal ni resultado usa handlers inline (onclick=")', () => {
+  const bad = [];
+  const walk = (dir) => {
+    for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+      const p = path.join(dir, e.name);
+      if (e.isDirectory()) walk(p);
+      else if (e.name.endsWith('.js')) {
+        const s = fs.readFileSync(p, 'utf8');
+        if (/onclick="/.test(s)) bad.push(path.relative(path.join(__dirname, '..'), p));
+      }
+    }
+  };
+  walk(path.join(__dirname, '..', 'src'));
+  assert.deepEqual(bad, [], 'handlers inline en: ' + bad.join(', '));
+});
+
 test('new matches reset tactical camera state', () => {
   const api = loadEngine();
   api.myNation = api.NATIONS[0];
