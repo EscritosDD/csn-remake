@@ -203,6 +203,7 @@ select{width:100%;background:var(--panel2);color:var(--ink);border:1px solid var
 .modal.on{display:grid}
 
 .modal-box{background:var(--panel);border:1.5px solid var(--amber);border-radius:14px;max-width:520px;width:100%;padding:26px;text-align:center}
+.modal.on .modal-box{animation:pop-in .22s var(--pop)}
 
 .modal-box h2{font-size:34px;margin:0 0 8px;text-transform:uppercase}
 
@@ -764,12 +765,13 @@ body.campaign-mode .arcade-hero{display:none}
 .dave-card p{margin:0 0 8px}
 .campaign-hub .mission-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 .campaign-map-wrap{margin-top:6px}
-.campaign-map{background:var(--stage);border:1px solid var(--line);border-radius:14px;padding:16px}
+.campaign-map{background:var(--stage);border:1px solid var(--line);border-radius:14px;padding:16px;animation:fade-in .25s ease}
 .cmap-globe{position:relative;border-radius:10px;overflow:hidden;border:1px solid var(--line-strong)}
 .cmap-globe img{width:100%;height:300px;object-fit:cover;display:block}
 .cmap-globe-cap{position:absolute;left:12px;bottom:10px;margin:0;font:700 22px/1 'Barlow Condensed';letter-spacing:.06em;text-transform:uppercase;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.7)}
 .cmap-cities{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:12px}
-.cmap-city{position:relative;display:flex;flex-direction:column;gap:2px;align-items:flex-start;text-align:left;padding:14px;min-height:110px;border:1px solid var(--line-strong);border-radius:12px;background:var(--surface);color:var(--ink);cursor:pointer}
+.cmap-city{position:relative;display:flex;flex-direction:column;gap:2px;align-items:flex-start;text-align:left;padding:14px;min-height:110px;border:1px solid var(--line-strong);border-radius:12px;background:var(--surface);color:var(--ink);cursor:pointer;transition:transform .16s var(--pop),border-color .16s,box-shadow .16s}
+.cmap-city:hover:not(.locked){transform:translateY(-2px);border-color:var(--ink-gold)}
 .cmap-city b{font:700 24px/1 'Barlow Condensed';text-transform:uppercase;letter-spacing:.04em}
 .cmap-city small{color:var(--muted);font-size:12.5px}
 .cmap-city-prog{margin-top:auto;color:var(--ink-gold);font:700 13px/1.2 'JetBrains Mono'}
@@ -779,7 +781,8 @@ body.campaign-mode .arcade-hero{display:none}
 .cmap-city-head h3{margin:0;font:700 28px/1 'Barlow Condensed';text-transform:uppercase}
 .cmap-chapter{margin:16px 0 8px;font:700 15px/1.2 'Barlow Condensed';text-transform:uppercase;letter-spacing:.05em;color:var(--ink-oliva)}
 .cmap-path{display:flex;flex-wrap:wrap;gap:8px}
-.cmap-node{position:relative;width:52px;height:52px;border-radius:50%;border:2px solid var(--line-strong);background:var(--surface);color:var(--ink);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0}
+.cmap-node{position:relative;width:52px;height:52px;border-radius:50%;border:2px solid var(--line-strong);background:var(--surface);color:var(--ink);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0;transition:transform .14s var(--pop),border-color .14s,box-shadow .14s}
+.cmap-node:hover:not(.locked){transform:scale(1.12);border-color:var(--ink-gold)}
 .cmap-node-num{font:700 17px/1 'Barlow Condensed'}
 .cmap-node-stars{font-size:8px;color:var(--ink-gold);line-height:1}
 .cmap-node.done{border-color:var(--ink-oliva);color:var(--ink-oliva)}
