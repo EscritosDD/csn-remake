@@ -475,7 +475,7 @@ body[data-state="setup"] #scr-play .hero{display:none}
 
 .barrack-card{display:flex;gap:10px;align-items:center;padding:10px}
 
-.barrack-portrait{width:92px;height:92px;border-radius:12px;background:#1d221c;object-fit:cover;flex:0 0 auto}
+.barrack-portrait{width:92px;height:92px;border-radius:12px;background:#1d221c url(../assets/ui/original/char-bg_blue.png) center/cover;object-fit:cover;flex:0 0 auto}
 
 .barrack-info{min-width:0;flex:1}
 
@@ -484,7 +484,7 @@ body[data-state="setup"] #scr-play .hero{display:none}
 .barrack-hero{margin-top:12px;padding:18px 16px 16px;text-align:center;background:var(--stage);border:1px solid var(--line);border-radius:14px}
 .barrack-hero-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
 .barrack-hero-coins{font-family:'JetBrains Mono',monospace;color:var(--ink-gold);font-weight:700}
-.barrack-hero-portrait{width:min(220px,60vw);height:min(220px,60vw);border-radius:14px;background:#1d221c;object-fit:cover;border:2px solid var(--line-accent)}
+.barrack-hero-portrait{width:min(220px,60vw);height:min(220px,60vw);border-radius:14px;background:#1d221c url(../assets/ui/original/char-bg_blue_selected.png) center/cover;object-fit:cover;border:2px solid var(--line-accent)}
 .barrack-hero-name{margin:10px 0 2px;font-family:'Barlow Condensed','Barlow',sans-serif;font-size:30px;text-transform:uppercase;letter-spacing:.04em}
 .barrack-hero-role{margin:0}
 .barrack-hero-special{margin:6px 0 0}
